@@ -10,7 +10,7 @@ public class main {
         JFrame window = new JFrame() ;
         window.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE) ;
         window.setResizable(true) ;
-        window.setTitle("Montelago Celitc Festival THE GAME") ;
+        window.setTitle("New Game") ;
 
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
