@@ -10,7 +10,8 @@ public class main {
         JFrame window = new JFrame() ;
         window.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE) ;
         window.setResizable(true) ;
-        window.setTitle("New GG") ; 
+        window.setTitle("My game") ; 
+        System.out.prinln("Fiore");
 
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
