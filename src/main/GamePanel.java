@@ -3,6 +3,9 @@ package main;
 import tile.TileManager;
 
 import javax.swing.*;
+
+import entity.Player;
+
 import java.awt.*;
 
 
@@ -40,7 +43,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     // ENTITY AND OBJECT
     //-----------------------------------------------------------------------
-
+    Player player = new Player(this, keyH);
     //-----------------------------------------------------------------------
 
     public GamePanel() {
@@ -100,7 +103,7 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void update(){
-        // TO-DO
+        player.update();
     }
 
     public void paintComponent(Graphics g){
@@ -130,15 +133,16 @@ public class GamePanel extends JPanel implements Runnable{
                 obj[i].draw(g2, this);
             }
         }
+*/
         //---------------------------------
         // PLAYER
+        player.draw(g2);
         //---------------------------------
 
-        player.draw(g2);
 
         // UI
-        ui.draw(g2);
-*/
+        //ui.draw(g2);
+
         // DEBUG
         if (keyH.checkDrawTime){
             long drawEnd = System.nanoTime();
