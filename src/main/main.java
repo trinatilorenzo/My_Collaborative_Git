@@ -1,10 +1,9 @@
 package main;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
-public class main {
-    // This is the main calas of MONTELAGO GAME
-
+public class main extends JFrame{
+    
     public static void main (String[] args) {
 
         JFrame window = new JFrame() ;
@@ -26,4 +25,4 @@ public class main {
         gamePanel.startGameThread();
     }
 
-}
+}//end class main

@@ -2,11 +2,15 @@ package main;
 
 import tile.TileManager;
 
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
+import javax.swing.JPanel;
 
 import entity.Player;
 
-import java.awt.*;
 
 
 public class GamePanel extends JPanel implements Runnable{

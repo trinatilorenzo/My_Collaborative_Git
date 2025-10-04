@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
 
-    public boolean upPressed, downPressed, leftPressed, rightPressed;
+    public boolean upPressed, downPressed, leftPressed, rightPressed, attackPressed;
 
     // DEBUG
     boolean checkDrawTime = false;
@@ -29,6 +29,9 @@ public class KeyHandler implements KeyListener {
         }
         if(code==KeyEvent.VK_A){
             leftPressed = true;
+        }
+        if(code==KeyEvent.VK_SPACE){
+            attackPressed = true;
         }
 
         // DEBUG
@@ -57,5 +60,6 @@ public class KeyHandler implements KeyListener {
         if(code==KeyEvent.VK_A){
             leftPressed = false;
         }
+        
     }
 }
