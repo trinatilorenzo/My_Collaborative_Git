@@ -1,8 +1,8 @@
-package main;
+package MAIN.old;
 
 import javax.swing.JFrame;
 
-public class main extends JFrame{
+public class main2 extends JFrame{
     
     public static void main (String[] args) {
 

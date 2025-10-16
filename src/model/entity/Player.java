@@ -1,23 +1,19 @@
-package entity;
+package model.entity;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+
+
+import controller.KeyHandler;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
-import main.GamePanel;
-import main.KeyHandler;
-
-public class Player extends Entity{
-
-    GamePanel gp;
-    KeyHandler keyH;
+public class Player extends Entity {
     private AnimationType currentAnimation;
-    
     final int spriteWidth = 192;
     final int spriteHeight = 192;
+
 
     private int gameFrame = 0;
     final int straggerFrames = 5;
@@ -35,14 +31,10 @@ public class Player extends Entity{
             this.row = row;
         }
     }
-    
-    public Player(GamePanel gp, KeyHandler keyH){
-        this.gp = gp;
-        this.keyH = keyH;
 
+    public Player(){
         setDefaultValues();
         getPlayerSpriteSheet();
-
         currentAnimation = AnimationType.idle;
     }
 
@@ -56,56 +48,66 @@ public class Player extends Entity{
     public void getPlayerSpriteSheet(){
         try {
             warrior = ImageIO.read(getClass().getResourceAsStream("/res/player/Warrior_blue.png"));
-        
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void update(){
-
-        if(keyH.upPressed == true){
+    public void update(KeyHandler keyH){
+        if(keyH.isUp()){
             direction = "up";
             currentAnimation = AnimationType.walk;
             y -= speed;
         }
-        else if(keyH.downPressed == true){
+        else if(keyH.isDown()){
             direction = "down";
             currentAnimation = AnimationType.walk;
             y += speed;
         }
-        else if(keyH.leftPressed == true){
+        else if(keyH.isLeft()){
             direction = "left";
             currentAnimation = AnimationType.walk;
             x -= speed;
             facingRight = 1;
         }
-        else if(keyH.rightPressed == true){
+        else if(keyH.isRight()){
             direction = "right";
             currentAnimation = AnimationType.walk;
             x += speed;
             facingRight = 0;
-        }else if (keyH.attackPressed == true){
+        }/*else if (keyH.attackPressed == true){
             if (direction == "right" || direction == "left")
                 currentAnimation = AnimationType.attack_right;
             else if (direction == "down")
                 currentAnimation = AnimationType.attack_down;
             else if (direction == "up")
                 currentAnimation = AnimationType.attack_up;
-        }else{
+        }*/else{
             currentAnimation = AnimationType.idle;
         }
+    }
+
+
+    public void attack(){
+        // to do
+        if (direction == "right" || direction == "left")
+            currentAnimation = AnimationType.attack_right;
+        else if (direction == "down")
+            currentAnimation = AnimationType.attack_down;
+        else if (direction == "up")
+            currentAnimation = AnimationType.attack_up;
     }
 
     public void draw(Graphics2D g2){
 
         BufferedImage image = warrior;
-        
+
         /*if (gameFrame % straggerFrames == 0){
             if (frameX < 5){
                 frameX++;
                 System.out.println(frameX);
-            }else 
+            }else
                 frameX = 0;
         }*/
         int position = (int)Math.floor(gameFrame/straggerFrames) % 6;
@@ -113,36 +115,34 @@ public class Player extends Entity{
         int frameY = spriteHeight * currentAnimation.row;
 
         //Check attacco finito
-        
+
 
         if (facingRight == 1){
-            g2.drawImage(   image, 
-                            x+spriteWidth, //dx1
-                            y, //dy1
-                            x, //dx2
-                            y+spriteHeight, //dx2
-                            frameX, //sx1
-                            frameY, //sy1
-                            frameX+spriteWidth, //sx2
-                            frameY+spriteHeight, //sy2
-                            null); //observer
-         
+            g2.drawImage(   image,
+                    x+spriteWidth, //dx1
+                    y, //dy1
+                    x, //dx2
+                    y+spriteHeight, //dx2
+                    frameX, //sx1
+                    frameY, //sy1
+                    frameX+spriteWidth, //sx2
+                    frameY+spriteHeight, //sy2
+                    null); //observer
+
         }else{
-            g2.drawImage(   image, 
-                            x, //dx1
-                            y, //dy1
-                            x+spriteWidth, //dx2
-                            y+spriteHeight, //dx2
-                            frameX, //sx1
-                            frameY, //sy1
-                            frameX+spriteWidth, //sx2
-                            frameY+spriteHeight, //sy2
-                            null); //observer
+            g2.drawImage(   image,
+                    x, //dx1
+                    y, //dy1
+                    x+spriteWidth, //dx2
+                    y+spriteHeight, //dx2
+                    frameX, //sx1
+                    frameY, //sy1
+                    frameX+spriteWidth, //sx2
+                    frameY+spriteHeight, //sy2
+                    null); //observer
         }
 
         gameFrame++;
-        
+
     }
 }
-    
-

@@ -1,4 +1,4 @@
-package main;
+package MAIN.old;
 
 import tile.TileManager;
 
@@ -176,4 +176,5 @@ public class GamePanel extends JPanel implements Runnable{
         sound.setFile(i);
         sound.play();
     }*/
+
 }
