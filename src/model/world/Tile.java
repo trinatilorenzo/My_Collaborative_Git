@@ -1,10 +1,12 @@
 package model.world;
 
-import java.awt.image.BufferedImage;
-
 public class Tile {
+    public int id, x,y;
 
-    public BufferedImage image;
-    public boolean collision = false;
+    public Tile(int id, int x, int y){
+        this.id = id;
+        this.x = x;
+        this.y = y;
+    }
 
 }

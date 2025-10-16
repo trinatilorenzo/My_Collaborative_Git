@@ -14,12 +14,11 @@ public class Main {
 
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
-        GameSetting gs = new GameSetting();
 
-        GameModel model = new GameModel(gs);
-        GameView view = new GameView(model, gs);
+        GameModel model = new GameModel();
+        GameView view = new GameView(model);
 
-        GameController controller = new GameController(model, view, gs);
+        GameController controller = new GameController(model, view);
         // ------------------------------------------------------------------------------------------------------------
 
         // main application window: contains the whole game

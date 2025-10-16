@@ -1,15 +1,19 @@
 package main;
 
+import java.awt.*;
+
 public class GameSetting {
 
     // SCREEN SETTINGS
     //-----------------------------------------------------------------------
-    public static final int ORIGINAL_TILE_SIZE = 16;
-    public static final int SCALE = 3;
-    public static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;
 
-    public static final int MAX_SCREEN_COL = 12;
-    public static final int MAX_SCREEN_ROW = 16;
+    /*public static final int ORIGINAL_TILE_SIZE = 64;
+    public static final int SCALE = 1;
+    public static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;*/
+    public static final int TILE_SIZE = 64;
+
+    public static final int MAX_SCREEN_COL = 20;
+    public static final int MAX_SCREEN_ROW = 25;
 
     public static final int SCREEN_WIDTH = TILE_SIZE * MAX_SCREEN_COL;
     public static final int SCREEN_HEIGHT = TILE_SIZE * MAX_SCREEN_ROW;
@@ -17,15 +21,23 @@ public class GameSetting {
 
     // WORLD SETTINGS
     //-----------------------------------------------------------------------
-    public static final int MAX_WORLD_COL = 12;
-    public static final int MAX_WORLD_ROW = 16;
+    public static final int MAX_WORLD_COL = 20;
+    public static final int MAX_WORLD_ROW = 25;
+    public static final int MAP_LAYER_NUM = 5;
+    public static final Color GAME_BG_COLOR = new Color(71,171,169);
+    //-----------------------------------------------------------------------
 
-    public static final int TILESNUM = 50;
+    //TLESET
+
+    public static final int MAX_TILESET_RAW = 40;
+    public static final int MAX_TILESET_COL = 20;
+    public static final int TILESNUM = MAX_TILESET_COL*MAX_TILESET_RAW ;
     //-----------------------------------------------------------------------
 
     // ASSETT LOCATION
     //-----------------------------------------------------------------------
-    public static final String MAP_PATH = "/res/maps/map.txt";
+    public static final String MAP_PATH = "/res/maps/mappa_test_"; // no number and .csv
+    public static final String TILESET_PATH = "/res/tiles/tilesetv1.png";
 
     //-----------------------------------------------------------------------
 

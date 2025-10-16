@@ -1,94 +1,97 @@
 package model.world;
 
-import main.GameSetting;
-
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.ListIterator;
+
+import static main.GameSetting.*;
+
+
 
 public class WordTileManager {
 
+    // load map
+    private Map gameMap = new Map();
 
-    private Tile[] tileSet;
-    private int[][] mapTileNum;
-    private GameSetting gs;
+    // load tileset
+    private TileSet tileSet = new TileSet(TILESET_PATH);
 
-    public WordTileManager(GameSetting setting) {
-        this.gs = setting;
+    public void DrawMap(Graphics2D g2){
+        /*-----------------------------------------------
+        draw single later for debug
+        System.out.println("layer"+ 0);
+        drawLayer(gameMap.getLayer(0).getLayerMap(), g2);
+        System.out.println("layer"+ 1);
+        drawLayer(gameMap.getLayer(1).getLayerMap(), g2);
+        -----------------------------------------------*/
+        drawLayer(gameMap.getLayer(0).getLayerMap(), g2);
+        drawLayer(gameMap.getLayer(1).getLayerMap(), g2);
+        drawLayer(gameMap.getLayer(2).getLayerMap(), g2);
+        drawLayer(gameMap.getLayer(3).getLayerMap(), g2);
+        drawLayer(gameMap.getLayer(4).getLayerMap(), g2);
 
-        this.tileSet = new Tile[gs.TILESNUM];
-        mapTileNum = new int[gs.MAX_WORLD_ROW][gs.MAX_WORLD_COL];
-        getTileImage();
+        /*ListIterator<MapLayer> it = gameMap.getMap().listIterator();
+        while (it.hasNext()){
+            drawLayer(it.next().getLayerMap(), g2);
+        }*/
+
+
+
     }
+    void drawLayer(int[][] layer, Graphics2D g2){
+        for (int i = 0; i < MAX_WORLD_ROW; i++) {
+            for (int j = 0; j < MAX_WORLD_COL; j++) {
 
-    public void getTileImage(){
-        try {
-            tileSet[0] = new Tile();
-            tileSet[0].image = ImageIO.read(getClass().getResourceAsStream("/res/tiles/001.png"));
-            tileSet[0].collision = false;
+                // draw tile [i][j]
 
-            tileSet[1] = new Tile();
-            tileSet[1].image = ImageIO.read(getClass().getResourceAsStream("/res/tiles/003.png"));
-            tileSet[1].collision = false;
+                if(layer[i][j] != -1){
+                    Tile tile = tileSet.getTileById(layer[i][j]);
 
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
-    public void loadMap(String pathFile) {
-        try {
-            InputStream is = getClass().getResourceAsStream(pathFile);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-            for (int i = 0; i < gs.MAX_WORLD_ROW ;i++) {
-                String line = br.readLine();
-                String numbers[] = line.split(" ");
-                for (int j = 0; j < gs.MAX_WORLD_COL; j++) {
-                    int num = Integer.parseInt(numbers[j]);
-                    mapTileNum[i][j] = num;
+                    drawTile(g2,tileSet.getTileSetImg(), tile, i, j );
                 }
-            }
-            br.close();
 
-        }catch (Exception e){
-            // to do
-            e.printStackTrace();
+
+            }
         }
     }
 
-    // TO-DO : put in view part
+    void drawTile(Graphics2D g2, BufferedImage tileset, Tile tile, int i, int j) {
 
-    public void draw(Graphics2D g2){
+        int screenX = j * TILE_SIZE;
+        int screenY = i * TILE_SIZE;
 
-        for (int i = 0; i < gs.MAX_WORLD_ROW; i++) {
-            for (int j = 0; j < gs.MAX_WORLD_COL; j++) {
+        int sx1 = tile.x ;
+        int sy1 = tile.y ;
+        int sx2 = sx1 + TILE_SIZE;
+        int sy2 = sy1 + TILE_SIZE;
 
-                int worldX = j * gs.TILE_SIZE;
-                int worldY = i * gs.TILE_SIZE;
+        int dx1 = screenX;
+        int dy1 = screenY;
+        int dx2 = screenX + TILE_SIZE;
+        int dy2 = screenY + TILE_SIZE;
 
-
-                int screenX = worldX;  //- gp.player.worldX + gp.player.screenX;
-                int screenY= worldY ; //- gp. player.worldY + gp.player.screenY;
-
-                // render only near tiles (buffered buy only an extra old.VIEW.tile // to do add rendere distance )
-               /*if(worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-                   worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-                   worldY + gp.tileSize > gp. player.worldY - gp.player.screenY &&
-                   worldY - gp.tileSize < gp. player.worldY + gp.player.screenY){
-
-                    g2.drawImage(old.VIEW.tile[mapTileNum[i][j]].image, screenX,screenY, null);
-                }*/
-                //--------- RENDER ALL ---------------
-
-                g2.drawImage(tileSet[mapTileNum[i][j]].image, screenX,screenY,gs.TILE_SIZE,gs.TILE_SIZE, null);
-                //------------------------------------
-
-            }
-
-        }
+        g2.drawImage(tileset, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
     }
+
+
+    /*
+    public void testLoadMap(){
+        ListIterator<MapLayer> it = gameMap.getMap().listIterator();
+
+        while (it.hasNext()){
+            int[][] mLayer = it.next().getLayerMap();
+            System.out.println("new layer"+ it.previousIndex());
+            for (int i = 0; i < MAX_WORLD_ROW; i++) {
+                for (int j = 0; j < MAX_WORLD_COL; j++) {
+                    System.out.print(mLayer[i][j] + " ");
+                }
+                System.out.println("");
+            }
+        }
+
+    }*/
+
+    // draw
+
 }

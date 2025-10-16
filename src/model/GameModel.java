@@ -6,18 +6,19 @@ import model.entity.Player;
 import model.world.Tile;
 import model.world.WordTileManager;
 
+import static main.GameSetting.*;
+
 public class GameModel {
     // ALL THE GAME MODEL STAFF HERE
     // world map , entity, combat, ai, events ...
 
-    private GameSetting gs;
+
     private WordTileManager world;
     private Player player;
 
-    public GameModel(GameSetting settings) {
-        this.gs = settings;
-        world = new WordTileManager(gs);
-        world.loadMap(gs.MAP_PATH);
+    public GameModel() {
+        world = new WordTileManager();
+
 
         player = new Player();
 

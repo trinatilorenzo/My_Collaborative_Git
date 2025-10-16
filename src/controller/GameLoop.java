@@ -4,23 +4,21 @@ package controller;
 // every n FPS
 
 import main.GameSetting;
+import static main.GameSetting.*;
 
 public class GameLoop extends Thread {
-    private static final int FPS = 60;
     private final GameController controller;
     private boolean running = true;
-    private GameSetting gs;
 
-    public GameLoop(GameController controller, GameSetting settings) {
+    public GameLoop(GameController controller) {
         this.controller = controller;
-        this.gs = settings;
     }
 
     @Override
     public void run() {
         long currentTime;
         long lastTime = System.nanoTime();
-        double drawInterval = 1e9/gs.FPS; // 0.01666 seconds;
+        double drawInterval = 1e9/FPS; // 0.01666 seconds;
 
         // debug
         int drawCount = 0;

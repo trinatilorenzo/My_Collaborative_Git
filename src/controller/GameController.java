@@ -4,6 +4,8 @@ import main.GameSetting;
 import model.GameModel;
 import view.GameView;
 
+import static main.GameSetting.*;
+
 public class GameController {
     // ALL THE CONTROLLER STAFF HERE
     // input, game loop , system ...
@@ -12,14 +14,14 @@ public class GameController {
     private GameView view;
     private KeyHandler keyHandler;
     private GameLoop loop;
-    private GameSetting gs;
 
-    public GameController(GameModel model, GameView view, GameSetting setting) {
+
+    public GameController(GameModel model, GameView view) {
         this.model = model;
         this.view = view;
-        this.gs = setting;
+
         this.keyHandler = new KeyHandler();
-        this.loop = new GameLoop(this, gs);
+        this.loop = new GameLoop(this);
         view.addKeyListener(keyHandler);
         view.setFocusable(true);
     }
