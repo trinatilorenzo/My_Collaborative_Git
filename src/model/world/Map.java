@@ -7,21 +7,24 @@ import java.util.ArrayList;
 
 import static main.GameSetting.*;
 
+// - Map Layer Class
+//   single layer of the map
+//-------------------------------------------------------------------------------------------------------------------
 class MapLayer{
 
-    private int layer[][];
+    private int layer[][]; // the layer is a 2-dimensional int array each int is a tile id
     private int level;
     private String pathFile;
 
-
-    public MapLayer(int level, String pathFile){
-        this.layer = new int[MAX_WORLD_ROW][MAX_WORLD_COL];
+    public MapLayer(int level, int maxMapRow, int maxMapCol, String pathFile){
+        this.layer = new int[maxMapRow][maxMapCol];
         this.level = level;
         this.pathFile = pathFile;
 
-        loadMapLayer(pathFile);
+        loadMapLayer(pathFile); // load the map when a layer is created
     }
 
+    // load the tile id into the array by reading the csv map file
     public void loadMapLayer(String pathFile){
         try {
             InputStream is = getClass().getResourceAsStream(pathFile);
@@ -29,7 +32,7 @@ class MapLayer{
 
             for (int i = 0; i < MAX_WORLD_ROW ;i++) {
                 String line = br.readLine();
-                String numbers[] = line.split(",");
+                String numbers[] = line.split(","); // csv
                 for (int j = 0; j < MAX_WORLD_COL; j++) {
                     int num = Integer.parseInt(numbers[j]);
                     layer[i][j] = num;
@@ -38,44 +41,92 @@ class MapLayer{
             br.close();
 
         }catch (Exception e){
-            // to do
+            //  // TO_DO: bettter error
             e.printStackTrace();
         }
 
     }
+    //-------------------------------------------------------------
 
-    public int[][] getLayerMap(){
-        return layer;
+    // GETTER ----------------------
+    public int getLayerTileId(int mapX, int mapY){
+        return layer[mapX][mapY];
     }
+    //---------------------------------
 
+    // SETTER ----------------------
+    public void setLayerTile(int tileId, int tileX, int tileY){
+        this.layer[tileX][tileY] = tileId;
+    }
+    //---------------------------------
 }
+//-------------------------------------------------------------------------------------------------------------------
+
+
+// - MAP CLASS <-- all the map layer
+//-------------------------------------------------------------------------------------------------------------------
 public class Map {
 
-    private ArrayList <MapLayer> map = new ArrayList<>();
+    private int maxMapRow, maxMapCol, layerNum;
 
-    public Map(){
-        loadMap();
+    private ArrayList <MapLayer> map = new ArrayList<>(); // use an ArrayLyst to manage all the layer
+
+    public Map(String mapPath,  int maxMapRow ,int maxMapdCol, int layerNum){
+        this.maxMapCol = maxMapdCol;
+        this.maxMapRow = maxMapRow;
+        this.layerNum = layerNum;
+
+        loadMap(mapPath);
     }
 
-    public void loadMap(){
-        for (int i = 0; i < MAP_LAYER_NUM; i++) {
+    // ALTERNATIVE CONSTRUCTOR
+    // if layer num not provided --> layer num = 1
+    //-------------------------------------------------------------
+    public Map(String mapPath,  int maxMapRow ,int maxMapdCol){
+        this.maxMapCol = maxMapdCol;
+        this.maxMapRow = maxMapRow;
+        this.layerNum = 1;
 
+        loadMap(mapPath);
+    }
+    //-------------------------------------------------------------
+
+    // load the layer into the arrayLyst by calling the MapLayer Constructor
+    public void loadMap(String mapPath){
+        for (int i = 0; i < layerNum; i++) {
             try{
-                map.add(new MapLayer(i,MAP_PATH+i+".csv"));
-                System.out.println(MAP_PATH+i+".csv");
+                map.add(new MapLayer(i,this.maxMapRow, this.maxMapCol, mapPath+i+".csv"));
+                // System.out.println(mapPath+i+".csv");
             }catch (Exception e){
+                // TO_DO: bettter error
                 System.out.println(e);
             }
 
         }
     }
+    //-------------------------------------------------------------
 
-    public MapLayer getLayer(int layer){
-        return map.get(layer);
-
+    // GETTER ----------------------
+    public int getMapTile(int layer, int mapX, int mapY){
+        return map.get(layer).getLayerTileId(mapX,mapY);
     }
 
-    public ArrayList <MapLayer> getMap(){
-        return map;
+    public int getMaxMapCol() {
+        return maxMapCol;
     }
+    public int getMaxMapRow(){
+        return maxMapRow;
+    }
+    public int getLayerNum() {
+        return layerNum;
+    }
+    //---------------------------------
+
+    // SETETR ----------------------
+    public void setMapTile(int layer, int mapX, int mapY, int newId){
+        map.get(layer).setLayerTile(newId, mapX, mapY);
+    }
+    //---------------------------------
+
 }
+//-------------------------------------------------------------------------------------------------------------------

@@ -1,11 +1,10 @@
 package controller;
 
-// this class is a Thread that control the game update
-// every n FPS
-
-import main.GameSetting;
 import static main.GameSetting.*;
 
+// GAME LOOP CLAS
+// This class is a Thread that control the game update every n FPS
+//-------------------------------------------------------------------------------------------------------------------
 public class GameLoop extends Thread {
     private final GameController controller;
     private boolean running = true;
@@ -14,6 +13,8 @@ public class GameLoop extends Thread {
         this.controller = controller;
     }
 
+    // GAME LOOP CORE --> START()
+    //-------------------------------------------------------------
     @Override
     public void run() {
         long currentTime;
@@ -55,9 +56,13 @@ public class GameLoop extends Thread {
 
         }
     }
+    //-------------------------------------------------------------
 
+    // STOP GameLoop()
     public void stopGameLoop() {
         // stop Thread
         running = false;
     }
+    //-------------------------------------------------------------
 }
+//-------------------------------------------------------------------------------------------------------------------

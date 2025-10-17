@@ -1,36 +1,34 @@
 package model;
 
 import controller.KeyHandler;
-import main.GameSetting;
 import model.entity.Player;
-import model.world.Tile;
-import model.world.WordTileManager;
+import model.world.Map;
 
 import static main.GameSetting.*;
 
+// ALL THE GAME MODEL STAFF HERE
+// world map , entity, combat, ai, events ...
+//-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
-    // ALL THE GAME MODEL STAFF HERE
-    // world map , entity, combat, ai, events ...
 
-
-    private WordTileManager world;
+    private Map worldMap;
     private Player player;
 
     public GameModel() {
-        world = new WordTileManager();
-
-
+        worldMap = new Map(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, MAP_LAYER_NUM);
         player = new Player();
-
-       // player = new Player(world);
     }
 
+    // update the model status
     public void update(KeyHandler keyH) {
-
         player.update(keyH);
         // altri update: nemici, oggetti, eventi
     }
+    //-------------------------------------------------------------
 
-    public WordTileManager getWorld() { return world; }
+    // GETTER ----------------------
     public Player getPlayer() { return player; }
+    public Map getWorldMap() { return worldMap; }
+    //---------------------------------
 }
+//-------------------------------------------------------------------------------------------------------------------

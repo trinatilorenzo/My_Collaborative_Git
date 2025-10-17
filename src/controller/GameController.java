@@ -1,14 +1,12 @@
 package controller;
 
-import main.GameSetting;
 import model.GameModel;
 import view.GameView;
 
-import static main.GameSetting.*;
-
+// ALL THE CONTROLLER STAFF HERE
+// input, game loop , system ...
+//-------------------------------------------------------------------------------------------------------------------
 public class GameController {
-    // ALL THE CONTROLLER STAFF HERE
-    // input, game loop , system ...
 
     private GameModel model;
     private GameView view;
@@ -26,18 +24,26 @@ public class GameController {
         view.setFocusable(true);
     }
 
+    // START the game-loop thread
     public void startGame() {
         loop.start();
     }
+    //-------------------------------------------------------------
+    // STOP the game-loop thread
     public void stopGame(){
         loop.stopGameLoop();
     }
+    //-------------------------------------------------------------
 
+    // CONTROLL GAME MODEL
     public void update() {
         model.update(keyHandler);
     }
-
+    //-------------------------------------------------------------
+    // CONTROLL GAME VIEW
     public void render() {
         view.repaint();
     }
+    //-------------------------------------------------------------
 }
+//-------------------------------------------------------------------------------------------------------------------

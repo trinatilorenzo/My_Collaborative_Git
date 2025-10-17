@@ -1,46 +1,57 @@
 package view;
 
-import main.GameSetting;
 import model.GameModel;
-
+import view.renderMap.MapRender;
+import view.renderMap.TileSet;
 import javax.swing.*;
 import java.awt.*;
-
 import static main.GameSetting.*;
 
+// ALL THE RENDERING STAFF HERE
+// render, camera, asset( img animation, texture), sfx ...
+//-------------------------------------------------------------------------------------------------------------------
 public class GameView extends JPanel {
-    // ALL THE RENDERING STAFF HERE
-    // render, camera, asset( img animation, texture), sfx ...
-
 
     private GameModel model;
+    private MapRender mapRender;
+    private TileSet tileSet;
 
     public GameView(GameModel model) {
-        this.model = model;
+        this.model = model;;
+        this.mapRender = new MapRender();
 
         this.setPreferredSize (new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT)) ;
         this.setBackground (Color.black) ;
         this.setDoubleBuffered (true) ;
         this.setFocusable(true);
 
+        //  import the tileset Asset
+        this.tileSet = new TileSet(TILESET_PATH, ORIGINAL_TILE_SIZE, MAX_TILESET_RAW, MAX_TILESET_COL);
+
     }
 
+    // where everything will be drawn
+    //-------------------------------------------------------------
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-        // Draw the world
+        // DRAW THE WORLD
         g2.setColor(GAME_BG_COLOR);
         g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
-       model.getWorld().DrawMap(g2);
 
-        // Draw the player
+        mapRender.DrawMap(model.getWorldMap(), tileSet, g2);
+
+        // DRAW THE PLAYER
         model.getPlayer().draw(g2);
 
 
         g2.dispose();
     }
-}
 
+    //-------------------------------------------------------------
+
+}
+//-------------------------------------------------------------------------------------------------------------------
 

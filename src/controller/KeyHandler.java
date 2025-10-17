@@ -3,6 +3,9 @@ package controller;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+
+//  Manage input from keyboard
+//-------------------------------------------------------------------------------------------------------------------
 public class KeyHandler implements KeyListener {
     private boolean up, down, left, right;
 
@@ -36,3 +39,4 @@ public class KeyHandler implements KeyListener {
 
     }
 }
+//-------------------------------------------------------------------------------------------------------------------
