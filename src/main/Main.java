@@ -15,7 +15,7 @@ public class Main {
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
 
-        GameModel model = new GameModel()
+        GameModel model = new GameModel();
         GameView view = new GameView(model);
 
         GameController controller = new GameController(model, view);
