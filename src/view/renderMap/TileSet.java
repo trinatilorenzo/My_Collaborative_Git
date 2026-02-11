@@ -3,6 +3,7 @@ package view.renderMap;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 // - Tile Region Class
@@ -27,7 +28,7 @@ class TileRegion {
 public class TileSet {
     private BufferedImage tileSetImg; // <-- the image with all the texture
     private ArrayList<TileRegion> tiles = new ArrayList<>(); // <-- all the tile order by Id
-
+    
     public TileSet(String tileImagePath, int tileSize, int maxTilesetRaw, int maxTilesetCol){
         // read the tileset image
         try {

@@ -5,19 +5,17 @@ import controller.GameController;
 import model.GameModel;
 import view.GameView;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
 public class Main {
 
     public static void main(String[] args) {
-        // MVC structute
+        // MVC structure
 
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
-
         GameModel model = new GameModel();
         GameView view = new GameView(model);
-
         GameController controller = new GameController(model, view);
         // ------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +37,7 @@ public class Main {
         // start the game-loop in a separated thread
         controller.startGame();
 
-        // --- end of main method ---
-    }
+        
+    }// end of main method
 
-}
+}//end of main class

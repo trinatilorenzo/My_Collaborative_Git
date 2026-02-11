@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 import static main.GameSetting.*;
 
-// - MAP RENDER CLASS <-- this class wil draw the world map
+// - MAP RENDER CLASS <-- this class will draw the world map
 //-------------------------------------------------------------------------------------------------------------------
 public class MapRender {
 

@@ -1,0 +1,44 @@
+@startuml Schema Logico Base
+
+package main{
+    class Main
+    class GameSetting
+}
+package model{
+    class GameModel
+    package entity{
+        class Entity
+        class Player
+    }
+    package world{
+        class Map
+    }
+    
+}
+
+package controller{
+    class GameController
+}
+
+package view{
+    class GameView
+    package renderMap{
+        class MapRender
+        class TileSet
+    }
+}
+
+' RELATIONSHIP
+Main-->GameModel : creates 
+Main-->GameController : creates
+Main-->GameView : creates
+GameView ..> GameSetting : reads information
+
+GameModel *-- Player : contains 
+GameModel *-- Map: uses
+
+GameController ..> GameModel : uses 
+GameController ..> GameView : refreshes
+
+GameView ..> MapRender : uses
+MapRender ..> TileSet : uses 

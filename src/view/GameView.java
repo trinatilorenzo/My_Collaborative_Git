@@ -17,7 +17,7 @@ public class GameView extends JPanel {
     private TileSet tileSet;
 
     public GameView(GameModel model) {
-        this.model = model;;
+        this.model = model;
         this.mapRender = new MapRender();
 
         this.setPreferredSize (new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT)) ;
@@ -44,7 +44,8 @@ public class GameView extends JPanel {
         mapRender.DrawMap(model.getWorldMap(), tileSet, g2);
 
         // DRAW THE PLAYER
-        model.getPlayer().draw(g2);
+        PlayerRender playerRender = new PlayerRender();
+        playerRender.draw(g2, model.getPlayer());
 
 
         g2.dispose();

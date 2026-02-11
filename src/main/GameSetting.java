@@ -1,12 +1,11 @@
 package main;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class GameSetting {
 
     // SCREEN SETTINGS
     //-----------------------------------------------------------------------
-
     public static final int ORIGINAL_TILE_SIZE = 64;
     public static final int SCALE = 1;
     public static final int TILE_SIZE = ORIGINAL_TILE_SIZE * SCALE;
@@ -26,8 +25,8 @@ public class GameSetting {
     public static final Color GAME_BG_COLOR = new Color(71,171,169);
     //-----------------------------------------------------------------------
 
-    //TLESET
-
+    //TILESET
+    //-----------------------------------------------------------------------
     public static final int MAX_TILESET_RAW = 40;
     public static final int MAX_TILESET_COL = 20;
     public static final int TILESNUM = MAX_TILESET_COL*MAX_TILESET_RAW ;
@@ -37,7 +36,6 @@ public class GameSetting {
     //-----------------------------------------------------------------------
     public static final String MAP_PATH = "/res/maps/mappa_test_"; // no number and .csv
     public static final String TILESET_PATH = "/res/tiles/tilesetv1.png";
-
     //-----------------------------------------------------------------------
 
     // FPS
