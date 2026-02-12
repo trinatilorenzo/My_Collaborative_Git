@@ -17,10 +17,11 @@ public class Player extends Entity{
     private AnimationManager animationManager;
     private Spritesheet spriteSheet;
 
+    private boolean isAttacking = false;
+
     public Player(){
         setDefaultValues();
         loadSpriteSheet();
-
     }
 
     private void setDefaultValues(){
@@ -36,26 +37,44 @@ public class Player extends Entity{
             spriteSheet = new Spritesheet(sheetImage, spriteWidth, spriteHeight);
 
             animationManager = new AnimationManager();
-            animationManager.addAnimation("idle", createAnimation(0, 6, 6));
-            animationManager.addAnimation("walk", createAnimation(1, 6, 5));
-            animationManager.addAnimation("attack_right", createAnimation(2, 6, 4));
-            animationManager.addAnimation("attack_down", createAnimation(4, 6, 4));
-            animationManager.addAnimation("attack_up", createAnimation(6, 6, 4));
+            animationManager.addAnimation("idle", createAnimation(0, 1, 6, 6, true));
+            animationManager.addAnimation("walk", createAnimation(1, 1, 6, 5, true));
+            animationManager.addAnimation("attack_right", createAnimation(2, 2, 6 , 4, false));
+            animationManager.addAnimation("attack_down", createAnimation(4, 2,  6, 4, false));
+            animationManager.addAnimation("attack_up", createAnimation(6,2, 6, 4, false));
         
         } catch (IOException e) {
             e.printStackTrace();
         }
     }// end loadSpriteSheet method
 
-    private Animation createAnimation(int row, int frameCount, int frameDuration){
-        BufferedImage[] frames = new BufferedImage[frameCount]; // array to hold the frames of the animation
-        for(int i = 0; i < frameCount; i++){
-            frames[i] = spriteSheet.getSprite(i * spriteWidth, row * spriteHeight, spriteWidth, spriteHeight);
+    private Animation createAnimation(int startRow, int rows, int cols, int frameDuration, boolean loop){
+        BufferedImage[] frames = new BufferedImage[rows*cols]; // array to hold the frames of the animation
+        int index = 0;
+        for(int i = 0; i < rows; i++){
+            for (int j = 0; j<cols; j++){
+                frames[index++] = spriteSheet.getSprite(
+                    j * spriteWidth, 
+                    (startRow+i) * spriteHeight, 
+                    spriteWidth, 
+                    spriteHeight);
+            }
         }
-        return new Animation(frames, frameDuration);
+        return new Animation(frames, frameDuration, loop);
     }
 
     public void update(KeyHandler keyH){
+
+        if (isAttacking){
+            animationManager.update();
+
+            if (animationManager.getCurrent().isFinished()){
+                isAttacking = false;
+                animationManager.playAnimation("idle");
+            }
+            return;
+        }
+
         boolean isMoving = false;
         // Movement logic
         if (keyH.isUp()){
@@ -81,7 +100,8 @@ public class Player extends Entity{
             isMoving = true;
         }
         //Attack animation
-        if (keyH.isAttack()){
+        if (keyH.isAttack() && !isAttacking){
+            isAttacking = true;
             if (direction.equals("right")|| direction.equals("left")){
                 animationManager.playAnimation("attack_right");
             } else if (direction.equals("down")){ 

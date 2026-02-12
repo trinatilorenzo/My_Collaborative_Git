@@ -21,7 +21,7 @@ public class Main {
 
         // main application window: contains the whole game
         // ------------------------------------------------------------------------------------------------------------
-        JFrame window = new JFrame("Nome Del Gioco (Da decidere)");
+        JFrame window = new JFrame("Tiny Swords");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
 

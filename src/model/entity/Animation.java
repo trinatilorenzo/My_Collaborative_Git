@@ -13,28 +13,25 @@ public class Animation {
     private boolean loop = true; //to distinguish between repeated animations and one-time animations
     private boolean finished = false; // to check if a one-time animation has finished
 
-    public Animation(BufferedImage[] frames, int frameDelay){
+    public Animation(BufferedImage[] frames, int frameDelay, boolean loop){
         this.frames = frames;
         this.frameDelay = frameDelay;
-    }// end of constructor
-
-    public void setLoop(boolean loop){
         this.loop = loop;
-    }
-
+    }// end of constructor
+    
     public void update(){
-        if (!finished) {
-            frameCounter++;
-            if (frameCounter >= frameDelay) {
-                currentFrame++;
-                frameCounter = 0;
-                if (currentFrame >= frames.length) { // reached the end of the animation
-                    if (loop) {
-                        currentFrame = 0;
-                    } else {
-                        currentFrame = frames.length - 1; // stay on the last frame
-                        finished = true;
-                    }
+        if (finished) return;
+        
+        frameCounter++;
+        if (frameCounter >= frameDelay) {
+            currentFrame++;
+            frameCounter = 0;
+            if (currentFrame >= frames.length) { // reached the end of the animation
+                if (loop) {
+                    currentFrame = 0;
+                } else {
+                    currentFrame = frames.length - 1; // stay on the last frame
+                    finished = true;
                 }
             }
         }

@@ -7,6 +7,7 @@ import java.util.Map;
 // manages multiple animations for an entity
 //-------------------------------------------------------------------------------------------------------------------
 public class AnimationManager {
+
     private final Map<String, Animation> animations = new HashMap<>();
     private Animation currentAnimation;
 
@@ -21,6 +22,7 @@ public class AnimationManager {
     public void playAnimation(String name){
         Animation animation = animations.get(name);
         if (animation != null && animation != currentAnimation){
+            animation.reset();
             currentAnimation = animation;
         }
     }//end play method
