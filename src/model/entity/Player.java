@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import controller.KeyHandler;
+import static main.GameSetting.*;
 
 // - PLAYER CLASS
 // represent the player entity in the game
@@ -19,14 +20,20 @@ public class Player extends Entity{
 
     private boolean isAttacking = false;
 
+    public final int screenX;
+    public final int screenY;
+
     public Player(){
+        
+        screenX = SCREEN_WIDTH / 2 - spriteWidth / 2;
+        screenY = SCREEN_HEIGHT / 2 - spriteHeight / 2;
         setDefaultValues();
         loadSpriteSheet();
     }
 
     private void setDefaultValues(){
-        x = 100;
-        y = 100;
+        worldX = 25; //player's position on the world map
+        worldY = 25; //DOPO DOVRO METTERE TILE_SIZE * un certo numero in base a dove voglio farlo partire
         speed = 4;
         direction = "right";
     }
@@ -79,23 +86,23 @@ public class Player extends Entity{
         // Movement logic
         if (keyH.isUp()){
             direction = "up";
-            y -= speed;
+            worldY -= speed;
             isMoving = true;
         }
         else if (keyH.isDown()){
             direction = "down";
-            y += speed;
+            worldY += speed;
             isMoving = true;
         }
         else if (keyH.isLeft()){
             direction = "left";
-            x -= speed;
+            worldX -= speed;
             facingRight = -1;
             isMoving = true;
         }
         else if (keyH.isRight()){
             direction = "right";
-            x += speed;
+            worldX += speed;
             facingRight = 1;
             isMoving = true;
         }
@@ -129,13 +136,22 @@ public class Player extends Entity{
         return spriteHeight;
     }
 
-    public int getX(){
-        return x;
+    public int getWorldX(){
+        return worldX;
     }
 
-    public int getY(){
-        return y;
+    public int getWorldY(){
+        return worldY;
     }
+
+    public int getScreenX(){
+        return screenX;
+    }
+
+    public int getScreenY(){
+        return screenY;
+    }
+
     public int getFacingRight(){
         return facingRight;
     }

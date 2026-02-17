@@ -13,8 +13,8 @@ public class PlayerRender {
     public void draw(Graphics2D g2, Player player){
         BufferedImage frame = player.getCurrentFrame();
         
-        int x = player.getX();
-        int y = player.getY();
+        int x = player.getScreenX();
+        int y = player.getScreenY();
         int width = player.getSpriteWidth();
         int height = player.getSpriteHeight();
 

@@ -41,7 +41,7 @@ public class GameView extends JPanel {
         g2.setColor(GAME_BG_COLOR);
         g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        mapRender.DrawMap(model.getWorldMap(), tileSet, g2);
+        mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
 
         // DRAW THE PLAYER
         PlayerRender playerRender = new PlayerRender();
