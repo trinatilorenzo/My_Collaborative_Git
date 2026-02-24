@@ -1,4 +1,4 @@
-@startuml Schema Logico Base
+@startuml "Schema Logico Base"
 
 package main{
     class Main
@@ -11,9 +11,8 @@ package model{
         class Player
     }
     package world{
-        class Map
+        class GameMap
     }
-    
 }
 
 package controller{
@@ -29,16 +28,18 @@ package view{
 }
 
 ' RELATIONSHIP
-Main-->GameModel : creates 
-Main-->GameController : creates
-Main-->GameView : creates
+Main --> GameModel : creates
+Main --> GameController : creates
+Main --> GameView : creates
 GameView ..> GameSetting : reads information
 
-GameModel *-- Player : contains 
-GameModel *-- Map: uses
+GameModel *-- Player : contains
+GameModel *-- GameMap : uses
 
-GameController ..> GameModel : uses 
+GameController ..> GameModel : uses
 GameController ..> GameView : refreshes
 
 GameView ..> MapRender : uses
-MapRender ..> TileSet : uses 
+MapRender ..> TileSet : uses
+
+@enduml
