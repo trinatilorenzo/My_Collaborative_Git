@@ -19,7 +19,7 @@ public class PlayerRender {
     }
 
     private void loadAnimations(){
-        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
+        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_red.png");
 
         BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, spriteWidth, spriteHeight);
         BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, spriteWidth, spriteHeight);
