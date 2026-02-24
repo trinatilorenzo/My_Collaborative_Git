@@ -38,6 +38,7 @@ public class GameController {
     // CONTROLL GAME MODEL
     public void update() {
         model.update(keyHandler);
+
     }
     //-------------------------------------------------------------
     // CONTROLL GAME VIEW

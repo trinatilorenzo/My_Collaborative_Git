@@ -1,0 +1,209 @@
+@startuml "Schema Logico Completo"
+
+package main{
+    class main.Main {
+    + {static} void main(String[])
+    }
+    class main.GameSetting {
+    }
+}
+
+
+package model{
+    class GameModel {
+    - Map worldMap
+    - Player player
+    + <<Create>> GameModel()
+    + void update(KeyHandler)
+    + Player getPlayer()
+    + Map getWorldMap()
+    }
+    package world{
+        class Map{
+        - int maxMapRow
+        - ArrayList<MapLayer> map
+        + <<Create>> Map(String,int,int,int)
+        + <<Create>> Map(String,int,int)
+        + void loadMap(String)
+        + int getMapTile(int,int,int)
+        + int getMaxMapCol()
+        + int getMaxMapRow()
+        + int getLayerNum()
+        + void setMapTile(int,int,int,int)
+        }
+        class MapLayer {
+        - int[][] layer
+        - int level
+        - String pathFile
+        + <<Create>> MapLayer(int,int,int,String)
+        + void loadMapLayer(String)
+        + int getLayerTileId(int,int)
+        + void setLayerTile(int,int,int)
+        }
+    }
+package entity{
+    class Player{
+       - int spriteWidth
+       - int spriteHeight
+       - int facingRight
+       - AnimationManager animationManager
+       - Spritesheet spriteSheet
+       - boolean isAttacking
+       + int screenX
+       + int screenY
+       + <<Create>> Player()
+       - void setDefaultValues()
+       - void loadSpriteSheet()
+       - Animation createAnimation(int,int,int,int,boolean)
+       + void update(KeyHandler)
+       + int getSpriteWidth()
+       + int getSpriteHeight()
+       + int getWorldX()
+       + int getWorldY()
+       + int getScreenX()
+       + int getScreenY()
+       + int getFacingRight()
+       + BufferedImage getCurrentFrame()
+    }
+
+    class Entity{
+    + int worldX
+    + int speed
+    + String direction
+    + BufferedImage warrior
+    }
+
+    class Animation{
+    - BufferedImage[] frames
+    - int frameDelay
+    - int currentFrame
+    - int frameCounter
+    - boolean loop
+    - boolean finished
+    + <<Create>> Animation(BufferedImage[],int,boolean)
+    + void update()
+    + BufferedImage getCurrentFrame()
+    + boolean isFinished()
+    + void reset()
+    }
+
+    class AnimationManager{
+    - Map<String,Animation> animations
+    - Animation currentAnimation
+    + void addAnimation(String,Animation)
+    + void playAnimation(String)
+    + void update()
+    + Animation getCurrent()
+    }
+
+    class Spritesheet{
+    - BufferedImage spriteSheet
+    - int spriteWidth
+    - int spriteHeight
+    + <<Create>> Spritesheet(BufferedImage,int,int)
+    + BufferedImage getSprite(int,int,int,int)
+    }
+}
+
+}
+package view{
+    class GameView {
+    - GameModel model
+    - MapRender mapRender
+    - TileSet tileSet
+    - PlayerRender playerRender
+    + <<Create>> GameView(GameModel)
+    # void paintComponent(Graphics)
+    }
+
+    class PlayerRender{
+    + void draw(Graphics2D,Player)
+    }
+
+    package renderMap{
+        class MapRender{
+        + <<Create>> MapRender()
+        + void DrawMap(Map,TileSet,Player,Graphics2D)
+        ~ void drawLayer(int,Map,TileSet,Player,Graphics2D)
+        ~ void drawTile(int,int,int,TileSet,Player,Graphics2D)
+        }
+
+        class TileSet{
+        - BufferedImage tileSetImg
+        - ArrayList<TileRegion> tiles
+        + <<Create>> TileSet(String,int,int,int)
+        + void loadTileSet(int,int,int)
+        + BufferedImage getTileSetImg()
+        + int getTileX(int)
+        + int getTileY(int)
+        + void setTileSetImg(BufferedImage)
+        }
+
+        class TileRegion{
+        + int id
+        + <<Create>> TileRegion(int,int,int)
+        }
+    }
+
+}
+package controller{
+    class GameController {
+    - GameModel model
+    - GameView view
+    - KeyHandler keyHandler
+    - GameLoop loop
+    + <<Create>> GameController(GameModel,GameView)
+    + void startGame()
+    + void stopGame()
+    + void update()
+    + void render()
+    }
+
+    class GameLoop{
+    - GameController controller
+    - boolean running
+    + <<Create>> GameLoop(GameController)
+    + void run()
+    + void stopGameLoop()
+    }
+
+    class KeyHandler{
+    - boolean up
+    - boolean attack
+    + void keyPressed(KeyEvent)
+    + void keyReleased(KeyEvent)
+    + boolean isAttack()
+    + boolean isUp()
+    + boolean isDown()
+    + boolean isLeft()
+    + boolean isRight()
+    + void keyTyped(KeyEvent)
+    }
+}
+
+Main *-- GameModel
+Main *-- GameView
+Main *-- GameController
+
+GameModel *-- Map
+Map *-- MapLayer
+
+GameModel *-- Player
+Player --|> Entity
+
+Player *-- Spritesheet
+Player *-- AnimationManager
+Animation *-- AnimationManager
+
+TileSet *-- TileRegion
+GameView *-- MapRender
+GameView *-- TileSet
+GameView *-- PlayerRender
+
+GameController *-- KeyHandler
+GameController *-- GameLoop
+
+java.awt.event.KeyListener <|.. controller.KeyHandler
+controller.Thread <|-- controller.GameLoop
+
+@enduml

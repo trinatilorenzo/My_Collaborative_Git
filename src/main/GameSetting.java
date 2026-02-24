@@ -20,7 +20,7 @@ public class GameSetting {
     // WORLD SETTINGS
     //-----------------------------------------------------------------------
     public static final int MAX_WORLD_COL = 20;
-    public static final int MAX_WORLD_ROW = 25;
+    public static final int MAX_WORLD_ROW = 20;
     public static final int MAP_LAYER_NUM = 5;
     public static final Color GAME_BG_COLOR = new Color(71,171,169);
     //-----------------------------------------------------------------------
@@ -34,8 +34,8 @@ public class GameSetting {
 
     // ASSETT LOCATION
     //-----------------------------------------------------------------------
-    public static final String MAP_PATH = "/res/maps/mappa_test_"; // no number and .csv
-    public static final String TILESET_PATH = "/res/tiles/tilesetv1.png";
+    public static final String MAP_PATH = "/res/maps/test_map2__"; // no number and .csv
+    public static final String TILESET_PATH = "/res/tiles/tileSet1.png";
     //-----------------------------------------------------------------------
 
     // FPS
