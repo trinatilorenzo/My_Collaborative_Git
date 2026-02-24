@@ -2,7 +2,7 @@ package model;
 
 import controller.KeyHandler;
 import model.entity.Player;
-import model.world.Map;
+import model.world.GameMap;
 
 import static main.GameSetting.*;
 
@@ -11,24 +11,25 @@ import static main.GameSetting.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
 
-    private Map worldMap;
+    private GameMap worldGameMap;
     private Player player;
 
     public GameModel() {
-        worldMap = new Map(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, MAP_LAYER_NUM);
+        worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, MAP_LAYER_NUM);
         player = new Player();
     }
 
     // update the model status
     public void update(KeyHandler keyH) {
         player.update(keyH);
+
         // altri update: nemici, oggetti, eventi
     }
     //-------------------------------------------------------------
 
     // GETTER ----------------------
     public Player getPlayer() { return player; }
-    public Map getWorldMap() { return worldMap; }
+    public GameMap getWorldMap() { return worldGameMap; }
     //---------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------

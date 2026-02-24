@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import static main.GameSetting.*;
 
-// - Map Layer Class
+// - GameMap Layer Class
 //   single layer of the map
 //-------------------------------------------------------------------------------------------------------------------
 class MapLayer{
@@ -65,13 +65,13 @@ class MapLayer{
 
 // - MAP CLASS <-- all the map layer
 //-------------------------------------------------------------------------------------------------------------------
-public class Map {
+public class GameMap {
 
     private int maxMapRow, maxMapCol, layerNum;
 
     private ArrayList <MapLayer> map = new ArrayList<>(); // use an ArrayLyst to manage all the layer
 
-    public Map(String mapPath,  int maxMapRow ,int maxMapdCol, int layerNum){
+    public GameMap(String mapPath, int maxMapRow , int maxMapdCol, int layerNum){
         this.maxMapCol = maxMapdCol;
         this.maxMapRow = maxMapRow;
         this.layerNum = layerNum;
@@ -82,7 +82,7 @@ public class Map {
     // ALTERNATIVE CONSTRUCTOR
     // if layer num not provided --> layer num = 1
     //-------------------------------------------------------------
-    public Map(String mapPath,  int maxMapRow ,int maxMapdCol){
+    public GameMap(String mapPath, int maxMapRow , int maxMapdCol){
         this.maxMapCol = maxMapdCol;
         this.maxMapRow = maxMapRow;
         this.layerNum = 1;

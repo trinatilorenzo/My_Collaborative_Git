@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 // - Tile Region Class
 //   represent the upper left coordinate of a single tile
@@ -28,6 +30,7 @@ class TileRegion {
 public class TileSet {
     private BufferedImage tileSetImg; // <-- the image with all the texture
     private ArrayList<TileRegion> tiles = new ArrayList<>(); // <-- all the tile order by Id
+    private Map<Integer, AnimatedTile> animatedTiles = new HashMap<>();
     
     public TileSet(String tileImagePath, int tileSize, int maxTilesetRaw, int maxTilesetCol){
         // read the tileset image
@@ -38,6 +41,8 @@ public class TileSet {
         }
         // create all the frame
         loadTileSet(tileSize, maxTilesetRaw, maxTilesetCol);
+
+        loadAnimatedTiles();
     }
 
     public void loadTileSet(int tileSize, int maxTilesetRaw, int maxTilesetCol){
@@ -53,6 +58,29 @@ public class TileSet {
             y += tileSize;
         }
 
+    }
+
+    private void loadAnimatedTiles() {
+        // ESEMPIO 1: tile acqua (ID base 10, frame 10-13, velocità media)
+        animatedTiles.put(5, new AnimatedTile(new int[]{5, 6, 7, 8, 9,10,11}, 100));
+
+        // AGGIUNGI QUI LE TUE TILE ANIMATE
+        // animatedTiles.put(ID_BASE, new AnimatedTile(new int[]{frame1, frame2, frame3, ...}, delay));
+    }
+
+    public void updateAnimTile() {
+        // Update alle the animated tile to the current frame
+        for (AnimatedTile anim : animatedTiles.values()) {
+            anim.update();
+        }
+    }
+
+    public int getTileIdToDraw(int originalId) {
+        AnimatedTile anim = animatedTiles.get(originalId);
+        if (anim != null) {
+            return anim.getCurrentFrameId();
+        }
+        return originalId; // tile statica
     }
 
     // GETTER ----------------------

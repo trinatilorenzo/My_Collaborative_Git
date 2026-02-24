@@ -42,6 +42,7 @@ public class GameView extends JPanel {
         g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
+        tileSet.updateAnimTile();
 
         // DRAW THE PLAYER
         PlayerRender playerRender = new PlayerRender();

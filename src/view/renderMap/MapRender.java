@@ -1,10 +1,9 @@
 package view.renderMap;
 
-import model.world.Map;
+import model.world.GameMap;
 import model.entity.Player;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 import static main.GameSetting.*;
 
@@ -15,26 +14,26 @@ public class MapRender {
     public MapRender(){
     }
 
-    // Draw all the layers of the map, only the visible part around the player
+    // Draw all the layers of the gameMap, only the visible part around the player
     // -----------------------------------------------------
-    public void DrawMap(Map map, TileSet tileSet, Player player, Graphics2D g2){
+    public void DrawMap(GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
         /*-----------------------------------------------
         DEBUG : draw a single layer
-        drawLayer(0, map, tileSet, g2);
-        drawLayer(1, map, tileSet, g2);
-        drawLayer(2, map, tileSet, g2);
-        drawLayer(3, map, tileSet, g2);
-        drawLayer(4, map, tileSet, g2);
+        drawLayer(0, gameMap, tileSet, g2);
+        drawLayer(1, gameMap, tileSet, g2);
+        drawLayer(2, gameMap, tileSet, g2);
+        drawLayer(3, gameMap, tileSet, g2);
+        drawLayer(4, gameMap, tileSet, g2);
         -----------------------------------------------*/
-        for (int i = 0; i < map.getLayerNum(); i++) {
-            drawLayer(i, map, tileSet, player, g2);
+        for (int i = 0; i < gameMap.getLayerNum(); i++) {
+            drawLayer(i, gameMap, tileSet, player, g2);
         }
     }
     //-----------------------------------------------------
 
     // Draw the single layer of the map
     // -----------------------------------------------------
-    void drawLayer(int layer, Map gameMap, TileSet tileSet, Player player, Graphics2D g2){
+    void drawLayer(int layer, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
 
         int leftCol = Math.max(0, (player.getWorldX() - player.getScreenX())/ TILE_SIZE);
         int rightCol = Math.min(gameMap.getMaxMapCol()-1, player.getWorldX() + (SCREEN_WIDTH - player.getScreenX()) / TILE_SIZE );
@@ -47,7 +46,7 @@ public class MapRender {
                 int tileID = gameMap.getMapTile(layer, i, j);// get the tile id to know witch tile to render
 
                 if (tileID != -1){//-1 = trasparente
-                    drawTile(tileID, i, j, tileSet, player, g2);
+                    drawTile(tileSet.getTileIdToDraw(tileID), i, j, tileSet, player, g2);
                 }
             }
         }
