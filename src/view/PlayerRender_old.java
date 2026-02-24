@@ -1,0 +1,30 @@
+package view;
+
+import model.entity.Player_old;
+
+import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+// - PLAYER RENDER CLASS
+//  responsible for rendering the player on the screen
+//-------------------------------------------------------------------------------------------------------------------   
+
+public class PlayerRender_old {
+
+    public void draw(Graphics2D g2, Player_old player){
+        BufferedImage frame = player.getCurrentFrame();
+        
+        int x = player.getScreenX();
+        int y = player.getScreenY();
+        int width = player.getSpriteWidth();
+        int height = player.getSpriteHeight();
+
+        if (player.getFacingRight() == 1) {
+            // Draw normally
+            g2.drawImage(frame, x, y, width,  height, null);
+        } else {
+            // Draw flipped
+            g2.drawImage(frame, x + width, y, -width, height, null);
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------------------------

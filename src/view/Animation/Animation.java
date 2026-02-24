@@ -1,4 +1,4 @@
-package model.entity;
+package view.Animation;
 
 import java.awt.image.BufferedImage;
 

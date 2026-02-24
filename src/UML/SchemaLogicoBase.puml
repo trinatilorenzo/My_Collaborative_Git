@@ -9,6 +9,9 @@ package model{
     package entity{
         class Entity
         class Player
+        class AnimationManager
+        class Animation
+        class Spritesheet
     }
     package world{
         class Map

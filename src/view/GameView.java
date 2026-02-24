@@ -15,6 +15,7 @@ public class GameView extends JPanel {
     private GameModel model;
     private MapRender mapRender;
     private TileSet tileSet;
+    private PlayerRender playerRender;
 
     public GameView(GameModel model) {
         this.model = model;
@@ -28,6 +29,8 @@ public class GameView extends JPanel {
         //  import the tileset Asset
         this.tileSet = new TileSet(TILESET_PATH, ORIGINAL_TILE_SIZE, MAX_TILESET_RAW, MAX_TILESET_COL);
 
+        // import the player Render
+        this.playerRender = new PlayerRender();
     }
 
     // where everything will be drawn
@@ -44,11 +47,10 @@ public class GameView extends JPanel {
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
 
         // DRAW THE PLAYER
-        PlayerRender playerRender = new PlayerRender();
         playerRender.draw(g2, model.getPlayer());
 
 
-        g2.dispose();
+        //g2.dispose(); // not necessary
     }
 
     //-------------------------------------------------------------
