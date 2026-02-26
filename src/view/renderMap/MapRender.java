@@ -14,7 +14,7 @@ public class MapRender {
     public MapRender(){
     }
 
-    // Draw all the layers of the gameMap, only the visible part around the player
+    // Draw all the layers of the gameMap, only the visible part around the playe
     // -----------------------------------------------------
     public void DrawMap(GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
         /*-----------------------------------------------
