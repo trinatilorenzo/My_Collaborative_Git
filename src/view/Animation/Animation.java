@@ -8,8 +8,8 @@ import java.awt.image.BufferedImage;
 public class Animation {
     private final BufferedImage[] frames;
     private final int frameDelay; // number of time in game frames to wait before switching to the next animation frame
-    private int currentFrame = 0; 
-    private int frameCounter = 0;
+    private int currentFrame = 0; // index of the current animation frame
+    private int frameCounter = 0; // counts how many game frames have passed since the last animation frame change
     private boolean loop = true; //to distinguish between repeated animations and one-time animations
     private boolean finished = false; // to check if a one-time animation has finished
 

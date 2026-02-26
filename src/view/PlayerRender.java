@@ -8,18 +8,20 @@ import model.enums.Direction;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 
+import static main.GameSetting.*;
+
 public class PlayerRender {
 
     private AnimationManager animationManager;
-    private final int spriteWidth = 192;
-    private final int spriteHeight = 192;
+    private final int spriteWidth = SPRITE_FRAME_WIDTH;
+    private final int spriteHeight = SPRITE_FRAME_HEIGHT;
 
     public PlayerRender(){
         loadAnimations();
     }
 
     private void loadAnimations(){
-        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_red.png");
+        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
 
         BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, spriteWidth, spriteHeight);
         BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, spriteWidth, spriteHeight);
@@ -41,10 +43,19 @@ public class PlayerRender {
 
         if (player.getFacingRight() == -1) {
             // Flip the image horizontally for left direction
-            g2.drawImage(frame, player.getScreenX() + spriteWidth, player.getScreenY(), -spriteWidth, spriteHeight, null);
+            g2.drawImage(frame,
+                         player.getScreenX() + PLAYER_RENDER_WIDTH, 
+                         player.getScreenY(), -PLAYER_RENDER_WIDTH, 
+                         PLAYER_RENDER_HEIGHT, 
+                         null);
         } else {
             // Draw normally for right direction
-            g2.drawImage(frame, player.getScreenX(), player.getScreenY(), spriteWidth, spriteHeight, null);
+            g2.drawImage(frame, 
+                         player.getScreenX(), 
+                         player.getScreenY(), 
+                         PLAYER_RENDER_WIDTH, 
+                         PLAYER_RENDER_HEIGHT, 
+                         null);
         }
     }
 

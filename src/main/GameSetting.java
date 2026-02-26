@@ -38,6 +38,18 @@ public class GameSetting {
     public static final String TILESET_PATH = "/res/tiles/tileSet1.png";
     //-----------------------------------------------------------------------
 
+
+    // PLAYER SETTINGS
+    //-----------------------------------------------------------------------
+    public static final int PLAYER_SPEED = 4;
+    public static final int START_WORLD_X = 10 * TILE_SIZE;
+    public static final int START_WORLD_Y = 10 * TILE_SIZE;
+    public static final int SPRITE_FRAME_WIDTH =  192;
+    public static final int SPRITE_FRAME_HEIGHT =  192;
+    public static final int PLAYER_RENDER_WIDTH = (int)(SPRITE_FRAME_WIDTH * 1.0); 
+    public static final int PLAYER_RENDER_HEIGHT = (int)(SPRITE_FRAME_HEIGHT * 1.0);
+    //-----------------------------------------------------------------------
+
     // FPS
     public static final int FPS = 60;
 

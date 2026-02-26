@@ -6,6 +6,8 @@ import model.enums.PlayerState;
 
 import static main.GameSetting.*;
 
+import java.awt.Rectangle;
+
 public class Player extends Entity {
 
     private Direction direction;
@@ -24,20 +26,26 @@ public class Player extends Entity {
     public Player(){
         screenX = SCREEN_WIDTH / 2 - TILE_SIZE / 2;
         screenY = SCREEN_HEIGHT / 2 - TILE_SIZE / 2;
+        
+        solidArea = new Rectangle();
+        solidArea.x = 8;
+        solidArea.y = 15;
+        solidArea.width = TILE_SIZE;
+        solidArea.height = TILE_SIZE;
         setDefaultValues();
     }
 
     private void setDefaultValues(){
-        worldX = 10 * TILE_SIZE; //player's position on the world map
-        worldY = 10 * TILE_SIZE;
-        speed = 4;
+        worldX = START_WORLD_X; //player's position on the world map
+        worldY = START_WORLD_Y;
+        speed = PLAYER_SPEED;
         direction = Direction.RIGHT;
         state = PlayerState.IDLE;
         facingRight = 1;
     }
 
     public void update(KeyHandler keyH){
-        boolean isMoving = false;
+        boolean isMoving = false; // to check if the player is moving, used to set the correct animation state
 
         if (attacking){
             state = PlayerState.ATTACKING;
