@@ -3,126 +3,56 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="$PROJECT_DIR$/../../mappa_test_0.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_0.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../mappa_test_1.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_1.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../mappa_test_2.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../mappa_test_3.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_3.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../mappa_test_4.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_4.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../mappa_test_5.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_5.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../mappa_test_c.csv">
+        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_6.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mapLayer0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mapLayer1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mapLayer2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mappa_test_0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mappa_test_1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mappa_test_2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mappa_test_3.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/._mappa_test_4.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="#1e#" />
             </Attribute>
           </value>
         </entry>
         <entry key="/src/res/maps/mapLayer0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/mappa_test_0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/mappa_test_1.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
