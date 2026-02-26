@@ -1,6 +1,7 @@
 package model;
 
 import controller.KeyHandler;
+import model.collision.CollisionChecker;
 import model.entity.Player;
 import model.world.GameMap;
 
@@ -14,9 +15,12 @@ public class GameModel {
     private GameMap worldGameMap;
     private Player player;
 
+    private CollisionChecker collisionChecker;
+
     public GameModel() {
         worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, MAP_LAYER_NUM);
         player = new Player();
+        collisionChecker = new CollisionChecker(this);
     }
 
     // update the model status
@@ -30,6 +34,7 @@ public class GameModel {
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
+    public CollisionChecker getCollisionChecker() { return collisionChecker;}
     //---------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------

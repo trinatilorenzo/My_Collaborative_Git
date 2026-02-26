@@ -22,16 +22,18 @@ public class Player extends Entity {
     private int worldY;
     private int speed;
     private int facingRight; //1 for right, -1 for left
+    public boolean collisionOn = false;
+    public Rectangle solidArea;
 
     public Player(){
         screenX = SCREEN_WIDTH / 2 - TILE_SIZE / 2;
         screenY = SCREEN_HEIGHT / 2 - TILE_SIZE / 2;
         
         solidArea = new Rectangle();
-        solidArea.x = 8;
-        solidArea.y = 15;
-        solidArea.width = TILE_SIZE;
-        solidArea.height = TILE_SIZE;
+        solidArea.x = 76;
+        solidArea.y = 88;
+        solidArea.width = 40;
+        solidArea.height = 40;
         setDefaultValues();
     }
 
@@ -71,6 +73,8 @@ public class Player extends Entity {
             isMoving = true;
             facingRight = 1;
         }
+
+        collisionOn = false;
 
         if (keyH.isAttack() && !attacking) {
             attacking = true;
