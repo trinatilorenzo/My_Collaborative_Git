@@ -51,20 +51,6 @@ public class MapRender {
             }
         }
 
-
-        //SENZA INTERAZIONE PLAYER
-        //for (int i = 0; i < gameMap.getMaxMapRow(); i++) {
-            //for (int j = 0; j < gameMap.getMaxMapCol(); j++) {
-
-                //tileID = gameMap.getMapTile(layer, i,j); // get the tile id to know witch tile to render
-
-                //if( tileID != -1){
-                    // -1 == TRANSPARENT
-                    // draw only if is not transparent
-                    //drawTile(tileID, i, j, tileSet, g2);
-                //}
-            //}
-        //}
     }
     //-----------------------------------------------------
 
