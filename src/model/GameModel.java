@@ -29,7 +29,7 @@ public class GameModel {
         
         collisionChecker.checkTile(player); // check collision with tiles
 
-        if (!player.isCollisionOn()){
+        if (!player.isCollisionOn() && player.getState() == Player.PlayerState.WALKING) {
             player.move();
         }
         System.out.println("Collision: " + player.isCollisionOn());

@@ -39,7 +39,7 @@ public class Player extends Entity {
         direction = Direction.RIGHT;
         state = PlayerState.IDLE;
         facingRight = 1;
-        currentLayer = 3;
+        currentLayer = 2; // start layer
     }
 
     public void update(KeyHandler keyH){

@@ -28,8 +28,8 @@ public class CollisionChecker {
 
         int row1, row2, col1, col2;
         int layer = entity.getCurrentLayer();
-
         switch (entity.getDirection()) {
+            
             case UP:
                 // Proietta i bordi TOP nella direzione del movimento
                 row1 = (entityTopWorldY - entity.getSpeed()) / TILE_SIZE;
