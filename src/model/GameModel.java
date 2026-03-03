@@ -18,7 +18,7 @@ public class GameModel {
     private CollisionChecker collisionChecker;
 
     public GameModel() {
-        worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, MAP_LAYER_NUM);
+        worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, GRAPHIC_LAYER_NUM, GAME_LAYER_NUM);
         player = new Player();
         collisionChecker = new CollisionChecker(this);
     }

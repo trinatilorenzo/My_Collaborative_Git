@@ -21,7 +21,8 @@ public class GameSetting {
     //-----------------------------------------------------------------------
     public static final int MAX_WORLD_COL = 100;
     public static final int MAX_WORLD_ROW = 80;
-    public static final int MAP_LAYER_NUM = 6;
+    public static final int GRAPHIC_LAYER_NUM = 7;
+    public static final int GAME_LAYER_NUM = 3;
     public static final Color GAME_BG_COLOR = new Color(71,171,169);
     //-----------------------------------------------------------------------
 
