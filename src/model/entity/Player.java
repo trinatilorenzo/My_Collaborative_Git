@@ -1,24 +1,27 @@
 package model.entity;
 
 import controller.KeyHandler;
-import model.enums.Direction;
-import model.enums.PlayerState;
 
 import static main.GameSetting.*;
 
 import java.awt.Rectangle;
 
+// - PLAYER CLASS <-- the player entity, with all the player related status and methods
+//-------------------------------------------------------------------------------------------------------------------
 public class Player extends Entity {
-
-    private Direction direction;
-    private PlayerState state;
-
-    private boolean attacking = false;
 
     public final int screenX;
     public final int screenY;
 
     private int facingRight; //1 for right, -1 for left
+    private boolean attacking = false;
+
+    private PlayerState state; // to manage the animation state of the player
+    public enum PlayerState {
+        IDLE, 
+        WALKING, 
+        ATTACKING
+    }
 
     public Player(){
         screenX = SCREEN_WIDTH / 2 - TILE_SIZE / 2;
@@ -41,7 +44,7 @@ public class Player extends Entity {
 
     public void update(KeyHandler keyH){
         boolean isMoving = false; // to check if the player is moving, used to set the correct animation state
-
+        super.update(); // reset collision and movement logic
         if (attacking){
             state = PlayerState.ATTACKING;
             return;
@@ -79,13 +82,11 @@ public class Player extends Entity {
     }
 
     // GETTER ----------------------
-    public Direction getDirection() { return direction; }
     public PlayerState getState() { return state; }
     public int getFacingRight() { return facingRight; }
     public int getScreenX(){return screenX;}
     public int getScreenY(){return screenY;}
-    public int getWorldX() { return worldX; }
-    public int getWorldY() { return worldY; }
     //---------------------------------
 
 }
+//-------------------------------------------------------------------------------------------------

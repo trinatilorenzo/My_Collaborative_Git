@@ -30,7 +30,6 @@ public class MapRender {
         }
     }
     //-----------------------------------------------------
-
     // Draw the single layer of the map
     // -----------------------------------------------------
     void drawLayer(int layer, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){

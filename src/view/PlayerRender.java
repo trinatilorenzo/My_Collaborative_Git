@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
 
 import model.entity.Player;
-import model.enums.Direction;
+import model.entity.Entity.Direction;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 
