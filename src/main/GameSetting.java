@@ -19,9 +19,10 @@ public class GameSetting {
 
     // WORLD SETTINGS
     //-----------------------------------------------------------------------
-    public static final int MAX_WORLD_COL = 70;
-    public static final int MAX_WORLD_ROW = 50;
-    public static final int MAP_LAYER_NUM = 7;
+    public static final int MAX_WORLD_COL = 100;
+    public static final int MAX_WORLD_ROW = 80;
+    public static final int GRAPHIC_LAYER_NUM = 7;
+    public static final int GAME_LAYER_NUM = 3;
     public static final Color GAME_BG_COLOR = new Color(71,171,169);
     //-----------------------------------------------------------------------
 
@@ -42,8 +43,8 @@ public class GameSetting {
     // PLAYER SETTINGS
     //-----------------------------------------------------------------------
     public static final int PLAYER_SPEED = 4;
-    public static final int START_WORLD_X = 24 * TILE_SIZE;
-    public static final int START_WORLD_Y = 10 * TILE_SIZE;
+    public static final int START_WORLD_X = 50 * TILE_SIZE;
+    public static final int START_WORLD_Y = 20 * TILE_SIZE;
     public static final int SPRITE_FRAME_WIDTH =  192;
     public static final int SPRITE_FRAME_HEIGHT =  192;
     public static final int PLAYER_RENDER_WIDTH = (int)(SPRITE_FRAME_WIDTH * 1.0); 

@@ -3,105 +3,56 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_0.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_0.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_1.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_1.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_2.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_3.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_3.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_4.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_4.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_5.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_5.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/../../MappaGiocoV0_6.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_6.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/src/res/maps/mapLayer0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__1.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__2.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__3.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__4.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__5.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/src/res/maps/test_map2__6.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_COLLISION.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

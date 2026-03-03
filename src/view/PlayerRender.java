@@ -40,6 +40,7 @@ public class PlayerRender {
     public void draw(Graphics2D g2, Player player){
         updateAnimation(player);
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
+        //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
 
         if (player.getFacingRight() == -1) {
             // Flip the image horizontally for left direction
