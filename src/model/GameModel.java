@@ -25,7 +25,12 @@ public class GameModel {
 
     // update the model status
     public void update(KeyHandler keyH) {
-        player.update(keyH);
+        player.update(keyH); // update player status
+        collisionChecker.checkTile(player); // check collision with tiles
+
+        if (!player.isCollisionOn()){
+            player.move();
+        }
 
         // altri update: nemici, oggetti, eventi
     }

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SpriteLoader {
-    // A simple sprite loader that loads and caches spritesheets to avoid redundant loading
+    // A sprite loader that loads and caches spritesheets to avoid redundant loading
     private static final Map<String, BufferedImage> spriteSheets = new HashMap<>();
 
     public static BufferedImage loadSpriteSheet(String path){
@@ -23,6 +23,7 @@ public class SpriteLoader {
         }
     }
 
+    // Extracts individual frames from a sprite sheet based on the specified parameters
     public static BufferedImage[] getAnimationFrames(BufferedImage sheet, int startRow, int rows, int cols, int spriteWidth, int spriteHeight){
         BufferedImage[] frames = new BufferedImage[rows * cols];
         int index = 0;

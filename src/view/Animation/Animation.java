@@ -20,7 +20,7 @@ public class Animation {
     }// end of constructor
     
     public void update(){
-        if (finished) return;
+        if (finished) return;// if the animation is finished and it's a one-time animation, do not update anymore
         
         frameCounter++;
         if (frameCounter >= frameDelay) {

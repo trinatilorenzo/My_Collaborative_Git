@@ -42,7 +42,7 @@ public class GameSetting {
     // PLAYER SETTINGS
     //-----------------------------------------------------------------------
     public static final int PLAYER_SPEED = 4;
-    public static final int START_WORLD_X = 10 * TILE_SIZE;
+    public static final int START_WORLD_X = 24 * TILE_SIZE;
     public static final int START_WORLD_Y = 10 * TILE_SIZE;
     public static final int SPRITE_FRAME_WIDTH =  192;
     public static final int SPRITE_FRAME_HEIGHT =  192;

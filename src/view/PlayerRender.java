@@ -32,9 +32,9 @@ public class PlayerRender {
         animationManager = new AnimationManager();
         animationManager.addAnimation("idle", new Animation(idleFrames, 6, true));
         animationManager.addAnimation("walk", new Animation(walkFrames, 5, true));
-        animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 4, false));
-        animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 4, false));
-        animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 4, false));
+        animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 3, false));
+        animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 3, false));
+        animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 3, false));
     }// end loadSpriteSheet method
 
     public void draw(Graphics2D g2, Player player){

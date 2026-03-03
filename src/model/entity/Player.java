@@ -18,22 +18,14 @@ public class Player extends Entity {
     public final int screenX;
     public final int screenY;
 
-    private int worldX;
-    private int worldY;
-    private int speed;
     private int facingRight; //1 for right, -1 for left
-    public boolean collisionOn = false;
-    public Rectangle solidArea;
 
     public Player(){
         screenX = SCREEN_WIDTH / 2 - TILE_SIZE / 2;
         screenY = SCREEN_HEIGHT / 2 - TILE_SIZE / 2;
         
-        solidArea = new Rectangle();
-        solidArea.x = 76;
-        solidArea.y = 88;
-        solidArea.width = 40;
-        solidArea.height = 40;
+        solidArea = new Rectangle(76, 88, 40, 40);
+
         setDefaultValues();
     }
 
@@ -44,6 +36,7 @@ public class Player extends Entity {
         direction = Direction.RIGHT;
         state = PlayerState.IDLE;
         facingRight = 1;
+        currentLayer = 3;
     }
 
     public void update(KeyHandler keyH){
@@ -56,25 +49,19 @@ public class Player extends Entity {
 
         if (keyH.isUp()) {
             direction = Direction.UP;
-            worldY -= speed;
             isMoving = true;
         } else if (keyH.isDown()) {
             direction = Direction.DOWN;
-            worldY += speed;
             isMoving = true;
         } else if (keyH.isLeft()) {
             direction = Direction.LEFT;
-            worldX -= speed;
             isMoving = true;
             facingRight = -1;
         } else if (keyH.isRight()) {
             direction = Direction.RIGHT;
-            worldX += speed;
             isMoving = true;
             facingRight = 1;
         }
-
-        collisionOn = false;
 
         if (keyH.isAttack() && !attacking) {
             attacking = true;
