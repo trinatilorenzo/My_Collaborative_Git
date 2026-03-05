@@ -10,6 +10,8 @@ import view.Animation.AnimationManager;
 
 import static main.GameSetting.*;
 
+// - PLAYER RENDER CLASS <-- this class will draw the player on the screen, managing the animation and the direction
+//-------------------------------------------------------------------------------------------------------------------
 public class PlayerRender {
 
     private AnimationManager animationManager;
@@ -87,3 +89,4 @@ public class PlayerRender {
         animationManager.update();
     }
 }
+// ----------------------------------------------------------------------------------------------------------------

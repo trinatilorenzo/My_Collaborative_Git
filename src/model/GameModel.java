@@ -32,8 +32,6 @@ public class GameModel {
         if (!player.isCollisionOn() && player.getState() == Player.PlayerState.WALKING) {
             player.move();
         }
-        System.out.println("Collision: " + player.isCollisionOn());
-        System.out.println("WorldX: " + player.getWorldX());
         // altri update: nemici, oggetti, eventi
     }
     //-------------------------------------------------------------

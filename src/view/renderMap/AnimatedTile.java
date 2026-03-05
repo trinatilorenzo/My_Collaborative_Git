@@ -1,6 +1,8 @@
 package view.renderMap;
 
-
+// ANIMATED TILE CLASS
+// This class manages the animation of tiles that have multiple frames (like water, etc.)
+//-------------------------------------------------------------------------------------------------------------------
 public class AnimatedTile {
     private int[] frameIds;          // array degli ID dei frame (es. [10, 11, 12, 13])
     private int currentFrameIndex;   // indice del frame corrente nell'array
@@ -36,3 +38,4 @@ public class AnimatedTile {
         return frameIds[0];
     }
 }
+//-------------------------------------------------------------------------------------------------------------------

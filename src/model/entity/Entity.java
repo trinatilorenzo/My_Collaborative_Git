@@ -1,9 +1,9 @@
 package model.entity;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
-
+// ENTITY CLASS <-- Base class for all entities in the game (player, NPCs, enemies, etc.)
+//-------------------------------------------------------------------------------------------------------------------
 public class Entity {
 
     //Position and movement
@@ -40,7 +40,6 @@ public class Entity {
         return collisionOn;
     }
 
-
     // GETTER AND SETTER
     public int getWorldX() { return worldX; }
     public int getWorldY() { return worldY; }
@@ -52,3 +51,4 @@ public class Entity {
     public Rectangle getSolidArea() { return solidArea; }
     public void setSolidArea(Rectangle solidArea) { this.solidArea = solidArea; }
 }
+//-------------------------------------------------------------------------------------------------------------------

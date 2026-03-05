@@ -8,8 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // - Tile Region Class
-//   represent the upper left coordinate of a single tile
-//      a tile is just a crop of the whole tileset image
+// This class represents a single tile in the tileset, with its ID and position in the tileset image
 //-------------------------------------------------------------------------------------------------------------------
 class TileRegion {
     public int id, x,y;
@@ -23,7 +22,7 @@ class TileRegion {
 }
 //-------------------------------------------------------------------------------------------------------------------
 
-// - TILESET CLASS <-- all tile of the game
+// - TILESET CLASS <-- this class will manage the tileset image, the tile regions and the animated tile
 //-------------------------------------------------------------------------------------------------------------------
 
 public class TileSet {
