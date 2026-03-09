@@ -3,7 +3,10 @@ package model.collision;
 import model.entity.Entity;
 import model.GameModel;
 
+import javax.swing.*;
+
 import static main.GameSetting.*;
+import static main.GameSetting.Direction.*;
 
 /**
  * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
@@ -69,8 +72,12 @@ public class CollisionChecker {
         }
 
         if (isCollision(bounds.layer, rowTop, checkCol) || isCollision(bounds.layer, rowBottom, checkCol)) {
-            entity.setCollisionX(true);
+                entity.setCollisionX(true);
         }
+
+
+
+
     }
 
     private void checkAxisY(Entity entity, EntityBounds bounds) {
@@ -94,10 +101,28 @@ public class CollisionChecker {
         }
 
         if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
+
+            updateEntityLayer(entity, bounds, checkRow, colLeft);
+
             entity.setCollisionY(true);
+
+
         }
     }
 
+    //-------------------------------------------------------------
+    public void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
+
+        if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {
+            // move level down
+            entity.setLayer(entity.getCurrentLayer() - 1);
+
+        }
+        if (!isCollision(bounds.layer + 1, checkRow, colLeft)&& entity.getDirection() != DOWN) {
+            // move level up
+            entity.setLayer(entity.getCurrentLayer() + 1);
+        }
+    }
     //-------------------------------------------------------------
 
     /**
