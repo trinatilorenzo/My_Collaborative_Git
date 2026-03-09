@@ -3,17 +3,20 @@ package controller;
 import model.GameModel;
 import view.GameView;
 
-// ALL THE CONTROLLER STAFF HERE
-// input, game loop , system ...
+/**
+ * ALL THE CONTROLLER STAFF HERE
+ * input, game loop , system ...
+ */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {
 
-    private GameModel model;
-    private GameView view;
-    private KeyHandler keyHandler;
-    private GameLoop loop;
+    private final GameModel model;
+    private final GameView view;
+    private final KeyHandler keyHandler;
+    private final GameLoop loop;
 
-
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public GameController(GameModel model, GameView view) {
         this.model = model;
         this.view = view;
@@ -23,6 +26,7 @@ public class GameController {
         view.addKeyListener(keyHandler);
         view.setFocusable(true);
     }
+    //-------------------------------------------------------------
 
     // START the game-loop thread
     public void startGame() {
@@ -46,5 +50,8 @@ public class GameController {
         view.repaint();
     }
     //-------------------------------------------------------------
+
+
 }
+
 //-------------------------------------------------------------------------------------------------------------------

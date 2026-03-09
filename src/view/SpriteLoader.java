@@ -6,10 +6,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * SPRITE LOADER CLASS
+ * A sprite loader that loads and caches spritesheets to avoid redundant loading
+ */
+
+//-------------------------------------------------------------------------------------------------------------------
 public class SpriteLoader {
-    // A sprite loader that loads and caches spritesheets to avoid redundant loading
+
     private static final Map<String, BufferedImage> spriteSheets = new HashMap<>();
 
+    //-------------------------------------------------------------
     public static BufferedImage loadSpriteSheet(String path){
         if (spriteSheets.containsKey(path)){
             return spriteSheets.get(path);
@@ -22,9 +29,14 @@ public class SpriteLoader {
             throw new RuntimeException("Failed to load sprite sheet: " + path, e);
         }
     }
+    //-------------------------------------------------------------
 
-    // Extracts individual frames from a sprite sheet based on the specified parameters
-    public static BufferedImage[] getAnimationFrames(BufferedImage sheet, int startRow, int rows, int cols, int spriteWidth, int spriteHeight){
+    /**
+     * 1. Extracts individual frames from a sprite sheet based on the specified parameters
+      */
+    //-------------------------------------------------------------
+    public static BufferedImage[] getAnimationFrames(BufferedImage sheet, int startRow, int rows, int cols,
+                                                     int spriteWidth, int spriteHeight){
         BufferedImage[] frames = new BufferedImage[rows * cols];
         int index = 0;
         for (int i = 0; i < rows; i++){
@@ -39,4 +51,6 @@ public class SpriteLoader {
         }
         return frames;
     }
+    //-------------------------------------------------------------
 }
+//-------------------------------------------------------------------------------------------------------------------

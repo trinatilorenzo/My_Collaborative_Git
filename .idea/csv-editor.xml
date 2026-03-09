@@ -52,7 +52,21 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/src/res/maps/MappaGiocoV0_COLLISION.csv">
+        <entry key="/src/res/maps/MappaGiocoV0_COLLISION0.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/src/res/maps/MappaGiocoV0_COLLISION1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/src/res/maps/MappaGiocoV0_COLLISION2.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

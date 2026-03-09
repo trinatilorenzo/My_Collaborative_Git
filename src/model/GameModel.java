@@ -7,34 +7,39 @@ import model.world.GameMap;
 
 import static main.GameSetting.*;
 
-// ALL THE GAME MODEL STAFF HERE
-// world map , entity, combat, ai, events ...
+/**
+ * ALL THE GAME MODEL STAFF HERE
+ * world map, entity, combat, AI, events ...
+*/
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
 
     private GameMap worldGameMap;
     private Player player;
-
     private CollisionChecker collisionChecker;
 
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public GameModel() {
         worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, GRAPHIC_LAYER_NUM, GAME_LAYER_NUM);
         player = new Player();
         collisionChecker = new CollisionChecker(this);
     }
+    //-------------------------------------------------------------
 
-    // update the model status
+    /**
+     * Update the model status
+     */
+    //-------------------------------------------------------------
     public void update(KeyHandler keyH) {
         player.update(keyH); // update player status
-        
         collisionChecker.checkTile(player); // check collision with tiles
 
-        if (!player.isCollisionOn() && player.getState() == Player.PlayerState.WALKING) {
+        //move player
+        if (!player.isCollisionOn() && player.getState() == PlayerState.WALKING) {
             player.move();
         }
-        System.out.println("Collision: " + player.isCollisionOn());
-        System.out.println("WorldX: " + player.getWorldX());
-        // altri update: nemici, oggetti, eventi
+
     }
     //-------------------------------------------------------------
 
@@ -43,5 +48,10 @@ public class GameModel {
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
     //---------------------------------
+
+    // SETTER ----------------------
+
+    //---------------------------------
+
 }
 //-------------------------------------------------------------------------------------------------------------------

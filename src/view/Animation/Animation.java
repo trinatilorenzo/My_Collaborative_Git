@@ -2,8 +2,11 @@ package view.Animation;
 
 import java.awt.image.BufferedImage;
 
-// - ANIMATION CLASS
-// represent an animation made by multiple frames from a spritesheet
+/**
+ * ANIMATION CLASS
+ * represent an animation made by multiple frames from a spritesheet
+ */
+
 //-------------------------------------------------------------------------------------------------------------------
 public class Animation {
     private final BufferedImage[] frames;
@@ -13,12 +16,16 @@ public class Animation {
     private boolean loop = true; //to distinguish between repeated animations and one-time animations
     private boolean finished = false; // to check if a one-time animation has finished
 
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public Animation(BufferedImage[] frames, int frameDelay, boolean loop){
         this.frames = frames;
         this.frameDelay = frameDelay;
         this.loop = loop;
-    }// end of constructor
-    
+    }
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
     public void update(){
         if (finished) return;// if the animation is finished and it's a one-time animation, do not update anymore
         
@@ -35,20 +42,27 @@ public class Animation {
                 }
             }
         }
-    }// end of update method
+    }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     public BufferedImage getCurrentFrame(){
         return frames[currentFrame];
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     public boolean isFinished(){
         return finished;
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     public void reset(){
         currentFrame = 0;
         frameCounter = 0;
         finished = false;
     }
-}// end ANIMATION CLASS
+    //-------------------------------------------------------------
+}
 //-------------------------------------------------------------------------------------------------------------------

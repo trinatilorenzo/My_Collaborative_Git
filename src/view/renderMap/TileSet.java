@@ -7,30 +7,93 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-// - Tile Region Class
-//   represent the upper left coordinate of a single tile
-//      a tile is just a crop of the whole tileset image
+/**
+ * TILE REGION CLASS
+ * Represent the upper left coordinate of a single tile
+ * a tile is just a crop of the whole tileset image
+ */
+
 //-------------------------------------------------------------------------------------------------------------------
 class TileRegion {
     public int id, x,y;
 
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public TileRegion(int id, int x, int y){
         this.id = id;
         this.x = x;
         this.y = y;
     }
+    //-------------------------------------------------------------
 
 }
 //-------------------------------------------------------------------------------------------------------------------
 
-// - TILESET CLASS <-- all tile of the game
+/**
+ * Represents an animated tile
+ * An animated tile cycles through a series of frames over time.
+ */
+//-------------------------------------------------------------------------------------------------------------------
+class AnimatedTile {
+    private int[] frameIds;
+    private int currentFrameIndex;
+    private double frameDurationMs;
+    private long lastUpdateTime;
+
+    // COSTRUCTOR
+    //-------------------------------------------------------------
+    public AnimatedTile(int[] frameIds, double frameDurationMs) {
+        this.frameIds = frameIds;
+        this.frameDurationMs = frameDurationMs;
+        this.currentFrameIndex = 0;
+        this.lastUpdateTime = System.currentTimeMillis();
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Aggiorna l'animazione: incrementa il contatore e avanza al frame successivo se necessario
+     */
+    //-------------------------------------------------------------
+    public void update() {
+        long now = System.currentTimeMillis();
+        if (now - lastUpdateTime >= frameDurationMs) {
+            lastUpdateTime += frameDurationMs;
+            currentFrameIndex++;
+            if (currentFrameIndex >= frameIds.length) {
+                currentFrameIndex = 0;
+            }
+        }
+    }
+    //-------------------------------------------------------------
+
+    // GETTER ----------------------
+    public int getCurrentFrameId() {
+        return frameIds[currentFrameIndex];
+    }
+    public int getBaseId() {
+        return frameIds[0];
+    }
+    //---------------------------------
+
+    // SETTER ----------------------
+
+    //---------------------------------
+}
+//-------------------------------------------------------------------------------------------------------------------
+
+/**
+ * TILESET CLASS
+ * all tile of the game
+ */
 //-------------------------------------------------------------------------------------------------------------------
 
 public class TileSet {
     private BufferedImage tileSetImg; // <-- the image with all the texture
     private ArrayList<TileRegion> tiles = new ArrayList<>(); // <-- all the tile order by Id
     private Map<Integer, AnimatedTile> animatedTiles = new HashMap<>();
-    
+
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public TileSet(String tileImagePath, int tileSize, int maxTilesetRaw, int maxTilesetCol){
         // read the tileset image
         try {
@@ -38,12 +101,14 @@ public class TileSet {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        // create all the frame
+        // split the tileset image in tiles
         loadTileSet(tileSize, maxTilesetRaw, maxTilesetCol);
-
+        // load the animated tiles
         loadAnimatedTiles();
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     public void loadTileSet(int tileSize, int maxTilesetRaw, int maxTilesetCol){
         int x = 0, y = 0, id = 0;
 
@@ -58,7 +123,9 @@ public class TileSet {
         }
 
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     private void loadAnimatedTiles() {
         // ESEMPIO 1: tile acqua (ID base 10, frame 10-13, velocità media)
         animatedTiles.put(5, new AnimatedTile(new int[]{5, 6, 7, 8, 9,10,11}, 100));
@@ -66,21 +133,18 @@ public class TileSet {
         // AGGIUNGI QUI LE TUE TILE ANIMATE
         // animatedTiles.put(ID_BASE, new AnimatedTile(new int[]{frame1, frame2, frame3, ...}, delay));
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     public void updateAnimTile() {
         // Update alle the animated tile to the current frame
         for (AnimatedTile anim : animatedTiles.values()) {
             anim.update();
         }
     }
+    //-------------------------------------------------------------
 
-    public int getTileIdToDraw(int originalId) {
-        AnimatedTile anim = animatedTiles.get(originalId);
-        if (anim != null) {
-            return anim.getCurrentFrameId();
-        }
-        return originalId; // tile statica
-    }
+
 
     // GETTER ----------------------
     public BufferedImage getTileSetImg() {
@@ -94,6 +158,13 @@ public class TileSet {
         return tiles.get(id).y;
     }
 
+    public int getTileIdToDraw(int originalId) {
+        AnimatedTile anim = animatedTiles.get(originalId);
+        if (anim != null) {
+            return anim.getCurrentFrameId();
+        }
+        return originalId; // tile statica
+    }
     //---------------------------------
 
 

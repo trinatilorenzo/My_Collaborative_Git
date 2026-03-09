@@ -1,110 +1,125 @@
 package model.world;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
-import static main.GameSetting.*;
-// - MAP CLASS <-- all the map layer
+/**
+ * MAP CLASS <-- all the map layer
+ * It supports graphical layers for visual
+ * representation and game layers for collision and gameplay logic.
+ */
+
 //-------------------------------------------------------------------------------------------------------------------
 public class GameMap {
 
-    private int maxMapRow, maxMapCol;
-    private int graphicLayerNum, gameLayerNum;
+    private final int maxMapRow;
+    private final int maxMapCol;
+    private final int graphicLayerNum;
+    private final int gameLayerNum;
 
-    private ArrayList <MapLayer> map = new ArrayList<>(); // use an ArrayLyst to manage all the layer
-    private boolean[][][] collisionMap; // [collisionLayer][row][col]
+    private final List<MapLayer> graphicLayers = new ArrayList<>();
+    private final boolean[][][] collisionMap; // [layer][row][col]
 
-    public GameMap(String mapPath, int maxMapRow , int maxMapCol, int graphicLayerNum, int gameLayerNum){
+    // COSTRUCTOR
+    //-------------------------------------------------------------
+    public GameMap(String mapPath, int maxMapRow, int maxMapCol, int graphicLayerNum, int gameLayerNum) {
         this.maxMapCol = maxMapCol;
         this.maxMapRow = maxMapRow;
         this.graphicLayerNum = graphicLayerNum;
         this.gameLayerNum = gameLayerNum;
 
-        this.collisionMap = new boolean [gameLayerNum][maxMapRow][maxMapCol];
+        this.collisionMap = new boolean[gameLayerNum][maxMapRow][maxMapCol];
         loadMap(mapPath);
     }
+    //-------------------------------------------------------------
 
     // ALTERNATIVE CONSTRUCTOR
     // if layer num not provided --> layer num = 1
     //-------------------------------------------------------------
-    public GameMap(String mapPath, int maxMapRow , int maxMapCol){
+    public GameMap(String mapPath, int maxMapRow, int maxMapCol) {
         this(mapPath, maxMapRow, maxMapCol, 1, 1);
     }
     //-------------------------------------------------------------
 
-    // load the layer into the arrayLyst by calling the MapLayer Constructor
-    public void loadMap(String mapPath){
-
-        // load graphic layers
+    /**
+     * Loads the game map by initializing graphic and collision layers
+     * from the provided map files.
+     */
+    //-------------------------------------------------------------
+    private void loadMap(String mapPath) {
         for (int i = 0; i < graphicLayerNum; i++) {
-            try{
-                map.add(new MapLayer(i,this.maxMapRow, this.maxMapCol, mapPath+i+".csv"));
-                // System.out.println(mapPath+i+".csv");
-            }catch (Exception e){
-                // TO_DO: bettter error
-                System.out.println(e);
+            try {
+                graphicLayers.add(new MapLayer(i, maxMapRow, maxMapCol, mapPath + i + ".csv"));
+            } catch (Exception e) {
+                System.err.println("Failed to load graphic layer " + i + ": " + e.getMessage());
             }
         }
-
-        // load collison map
         for (int i = 0; i < gameLayerNum; i++) {
-            loadCollisionLayers(mapPath + "COLLISION" + i + ".csv", i);
+            loadCollisionLayer(mapPath + "COLLISION" + i + ".csv", i);
         }
     }
     //-------------------------------------------------------------
-    private void loadCollisionLayers(String pathFile, int layer) {
-        try {
-            InputStream is = getClass().getResourceAsStream(pathFile);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-            for (int i = 0; i < MAX_WORLD_ROW ;i++) {
+    //-------------------------------------------------------------
+    private void loadCollisionLayer(String pathFile, int layer) {
+        try (InputStream is = getClass().getResourceAsStream(pathFile);
+             BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+
+            for (int row = 0; row < maxMapRow; row++) {
                 String line = br.readLine();
-                String numbers[] = line.split(","); // csv
-
-                for (int j = 0; j < MAX_WORLD_COL; j++) {
-                    int num = Integer.parseInt(numbers[j]);
-                    if (num == 1){
-                        collisionMap[layer][i][j] = true;// num = 1 --> collison
-                    }else{
-                        // non collison
-                        collisionMap[layer][i][j] = false;
-                    }
+                String[] numbers = line.split(",");
+                for (int col = 0; col < maxMapCol; col++) {
+                    collisionMap[layer][row][col] = Integer.parseInt(numbers[col]) == 1;
                 }
             }
-            br.close();
-
-        }catch (Exception e){
-            //  // TO_DO: bettter error
+        } catch (IOException e) {
+            System.err.println("Failed to load collision layer " + layer + " from " + pathFile);
             e.printStackTrace();
         }
     }
-    //----------------------------------------------------------------------------------------
+    //-------------------------------------------------------------
 
-    public boolean hasCollision(int layer,int row, int col) {
-        if (layer < 0 || layer >= gameLayerNum) { 
-            return true; // invalid layer = collision
+    /**
+     * Determines whether a collision occurs at the specified layer, row, and column
+     * in the game map.
+     */
+    //-------------------------------------------------------------
+    public boolean hasCollision(int layer, int row, int col) {
+        if (layer < 0 || layer >= gameLayerNum) {
+            // out of layer bounds
+            return true;
         }
         if (row < 0 || col < 0 || row >= maxMapRow || col >= maxMapCol) {
-            return true; // out of bounds = collision
+            // out of map bounds
+            return true;
         }
         return collisionMap[layer][row][col];
     }
+    //-------------------------------------------------------------
 
     // GETTER ----------------------
-    public int getMapTile(int layer, int mapX, int mapY){
-        return map.get(layer).getLayerTileId(mapX,mapY);
+    public int getMapTile(int layer, int row, int col) {
+        return graphicLayers.get(layer).getLayerTileId(row, col);
     }
-    public int getMaxMapCol() { return maxMapCol;}    
-    public int getMaxMapRow() { return maxMapRow;}
-    public int getLayerNum() { return graphicLayerNum;}
+    public int getMaxMapCol() {
+        return maxMapCol;
+    }
+    public int getMaxMapRow() {
+        return maxMapRow;
+    }
+    public int getGraphicLayerNum() {
+        return graphicLayerNum;
+    }
     //---------------------------------
 
-    // SETETR ----------------------
-    public void setMapTile(int layer, int mapX, int mapY, int newId){
-        map.get(layer).setLayerTile(newId, mapX, mapY);
+    // SETTER ----------------------
+    public void setMapTile(int layer, int row, int col, int newId) {
+        graphicLayers.get(layer).setLayerTile(newId, row, col);
     }
     //---------------------------------
-
 }
 //-------------------------------------------------------------------------------------------------------------------

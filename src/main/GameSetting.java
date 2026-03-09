@@ -15,6 +15,9 @@ public class GameSetting {
 
     public static final int SCREEN_WIDTH = TILE_SIZE * MAX_SCREEN_COL;
     public static final int SCREEN_HEIGHT = TILE_SIZE * MAX_SCREEN_ROW;
+
+
+
     //-----------------------------------------------------------------------
 
     // WORLD SETTINGS
@@ -42,17 +45,28 @@ public class GameSetting {
 
     // PLAYER SETTINGS
     //-----------------------------------------------------------------------
-    public static final int PLAYER_SPEED = 4;
+    public static final int START_PLAYER_SPEED = 4;
     public static final int START_WORLD_X = 50 * TILE_SIZE;
     public static final int START_WORLD_Y = 20 * TILE_SIZE;
+    public static final int START_WORLD_LAYER = 2;
     public static final int SPRITE_FRAME_WIDTH =  192;
     public static final int SPRITE_FRAME_HEIGHT =  192;
     public static final int PLAYER_RENDER_WIDTH = (int)(SPRITE_FRAME_WIDTH * 1.0); 
     public static final int PLAYER_RENDER_HEIGHT = (int)(SPRITE_FRAME_HEIGHT * 1.0);
+    public static final int FACING_RIGHT = 1;
+    public static final int FACING_LEFT = -1;
     //-----------------------------------------------------------------------
 
     // FPS
     public static final int FPS = 60;
+
+    public enum Direction {
+        UP, DOWN, LEFT, RIGHT
+    }
+
+    public enum PlayerState {
+        IDLE, WALKING, ATTACKING
+    }
 
 
 }

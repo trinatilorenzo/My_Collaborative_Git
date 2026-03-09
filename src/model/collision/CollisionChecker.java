@@ -1,84 +1,128 @@
 package model.collision;
+
 import model.entity.Entity;
 import model.GameModel;
+
 import static main.GameSetting.*;
 
+/**
+ * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
+ * within the game world collides with the game's tilemap, objects, or other entities.
+ */
+//-------------------------------------------------------------------------------------------------------------------
 public class CollisionChecker {
 
-    private GameModel model;
+    private final GameModel gameModel;
+    private record EntityBounds(int leftX, int rightX, int topY, int bottomY, int layer) {
 
+        static EntityBounds of(Entity entity) {
+            // LEFT BORDER of entity hitbox in the world coordinates
+            int leftX = entity.getWorldX() + entity.getSolidArea().x;
+            // RIGTH BORDER of entity hitbox in the world coordinates
+            int rightX = leftX + entity.getSolidArea().width - 1;
+            // UPPER BORDER of entity hitbox in the world coordinates
+            int topY = entity.getWorldY() + entity.getSolidArea().y;
+            // BOTTOM BORDER of entity hitbox in the world coordinates
+            int bottomY = topY + entity.getSolidArea().height - 1;
+            return new EntityBounds(leftX, rightX, topY, bottomY, entity.getCurrentLayer());
+        }
+    }
+
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public CollisionChecker(GameModel model) {
-        this.model = model;
+        this.gameModel = model;
     }
+    //-------------------------------------------------------------
 
+
+    /**
+     * Checks for potential collisions between the given entity and the game world tiles
+     */
+    //-------------------------------------------------------------
     public void checkTile(Entity entity) {
-        entity.collisionOn = false;
 
-        // Calculate the entity's solid area position in the world
-        int entityLeftWorldX   = entity.getWorldX() + entity.getSolidArea().x;
-        int entityRightWorldX  = entity.getWorldX() + entity.getSolidArea().x + entity.getSolidArea().width - 1;
-        int entityTopWorldY    = entity.getWorldY() + entity.getSolidArea().y;
-        int entityBottomWorldY = entity.getWorldY() + entity.getSolidArea().y + entity.getSolidArea().height - 1;
+        EntityBounds bounds = EntityBounds.of(entity);
 
-        // Calcola le tile corrispondenti ai bordi ATTUALI (senza movimento)
-        int entityLeftCol  = entityLeftWorldX  / TILE_SIZE;
-        int entityRightCol = entityRightWorldX / TILE_SIZE;
-        int entityTopRow   = entityTopWorldY   / TILE_SIZE;
-        int entityBottomRow= entityBottomWorldY/ TILE_SIZE;
+        checkAxisX(entity, bounds);
+        checkAxisY(entity, bounds);
+    }
+    //-------------------------------------------------------------
 
-        int row1, row2, col1, col2;
-        int layer = entity.getCurrentLayer();
-        switch (entity.getDirection()) {
-            
-            case UP:
-                // Proietta i bordi TOP nella direzione del movimento
-                row1 = (entityTopWorldY - entity.getSpeed()) / TILE_SIZE;
-                col1 = entityLeftCol;
-                col2 = entityRightCol;
-                if (isCollision(layer, row1, col1) || isCollision(layer, row1, col2)) {
-                    entity.collisionOn = true;
-                }
-                break;
+    private void checkAxisX(Entity entity, EntityBounds bounds) {
+        int dx = entity.getDx();
+        if (dx == 0) return; // not moving
 
-            case DOWN:
-                row1 = (entityBottomWorldY + entity.getSpeed()) / TILE_SIZE;
-                col1 = entityLeftCol;
-                col2 = entityRightCol;
-                if (isCollision(layer, row1, col1) || isCollision(layer, row1, col2)) {
-                    entity.collisionOn = true;
-                }
-                break;
+        //anticipate the entity movement (move left or right)
+        int projectedLeftCol = (bounds.leftX + dx) / TILE_SIZE;
+        int projectedRightCol = (bounds.rightX + dx) / TILE_SIZE;
+        int rowTop = bounds.topY / TILE_SIZE;
+        int rowBottom = bounds.bottomY / TILE_SIZE;
 
-            case LEFT:
-                col1 = (entityLeftWorldX - entity.getSpeed()) / TILE_SIZE;
-                row1 = entityTopRow;
-                row2 = entityBottomRow;
-                if (isCollision(layer, row1, col1) || isCollision(layer, row2, col1)) {
-                    entity.collisionOn = true;
-                }
-                break;
+        int checkCol;
+        if (dx < 0) {
+            //moving left --> check left column
+            checkCol = projectedLeftCol;
+        } else {
+            //moving right --> check right column
+            checkCol = projectedRightCol;
+        }
 
-            case RIGHT:
-                col1 = (entityRightWorldX + entity.getSpeed()) / TILE_SIZE;
-                row1 = entityTopRow;
-                row2 = entityBottomRow;
-                if (isCollision(layer, row1, col1) || isCollision(layer, row2, col1)) {
-                    entity.collisionOn = true;
-                }
-                break;
+        if (isCollision(bounds.layer, rowTop, checkCol) || isCollision(bounds.layer, rowBottom, checkCol)) {
+            entity.setCollisionX(true);
         }
     }
 
-    // Metodo helper: controlla bounds + collisione sul boolean[][][]
+    private void checkAxisY(Entity entity, EntityBounds bounds) {
+        int dy = entity.getDy();
+        if (dy == 0) return; // not moving
+
+        //anticipate the entity movement (move up or down)
+        int colLeft = bounds.leftX / TILE_SIZE;
+        int colRight = bounds.rightX / TILE_SIZE;
+        int projectedTopRow = (bounds.topY + dy) / TILE_SIZE;
+        int projectedBottomRow = (bounds.bottomY + dy) / TILE_SIZE;
+
+
+        int checkRow;
+        if (dy < 0) {
+            //moving up --> check the top row
+            checkRow = projectedTopRow;
+        }else{
+            //moving down --> check the bottom row
+            checkRow = projectedBottomRow;
+        }
+
+        if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
+            entity.setCollisionY(true);
+        }
+    }
+
+    //-------------------------------------------------------------
+
+    /**
+     * Checks if a collision occurs at the specified layer, row, and column
+     * within the game world.
+     */
+    //-------------------------------------------------------------
     private boolean isCollision(int layer, int row, int col) {
-        if (row < 0 || col < 0 ||
-                row >= model.getWorldMap().getMaxMapRow() ||
-                col >= model.getWorldMap().getMaxMapCol()) {
-            return true; // out of bounds = collision
+        if (isOutOfBounds(row, col)) {
+            return true;
         }
-        return model.getWorldMap().hasCollision(layer, row, col);
+        return gameModel.getWorldMap().hasCollision(layer, row, col);
     }
+    //-------------------------------------------------------------
 
+    /**
+     * check if the entity is out of the map
+     */
 
-
+    //-------------------------------------------------------------
+    private boolean isOutOfBounds(int row, int col) {
+        return row < 0 || col < 0
+                || row >= gameModel.getWorldMap().getMaxMapRow()
+                || col >= gameModel.getWorldMap().getMaxMapCol();
+    }
+    //-------------------------------------------------------------
 }
+//-------------------------------------------------------------------------------------------------------------------

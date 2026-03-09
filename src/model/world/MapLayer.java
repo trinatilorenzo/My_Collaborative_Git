@@ -5,15 +5,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 
-// - GameMap Layer Class
-//   single layer of the map
-//-------------------------------------------------------------------------------------------------------------------
+/**
+ * GameMap Layer Class
+ * single layer of the map
+ */
+//---------------------------------------------------------------------------------------------------------------
 class MapLayer{
 
     private int layer[][]; // the layer is a 2-dimensional int array each int is a tile id
     private int level;
     private String pathFile;
 
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public MapLayer(int level, int maxMapRow, int maxMapCol, String pathFile){
         this.layer = new int[maxMapRow][maxMapCol];
         this.level = level;
@@ -21,8 +25,10 @@ class MapLayer{
 
         loadMapLayer(pathFile); // load the map when a layer is created
     }
+    //-------------------------------------------------------------
 
     // load the tile id into the array by reading the csv map file
+    //-------------------------------------------------------------
     public void loadMapLayer(String pathFile){
         try {
             InputStream is = getClass().getResourceAsStream(pathFile); // read the file as stream
@@ -51,12 +57,16 @@ class MapLayer{
     public int getLayerTileId(int row, int col){
         return layer[row][col];
     }
+    public int getLevel() { return level;}
+    public String getPathFile() { return pathFile;}
     //---------------------------------
 
     // SETTER ----------------------
     public void setLayerTile(int tileId, int row, int col){
         this.layer[row][col] = tileId;
     }
+    public void setLevel(int level) { this.level = level;}
+    public void setPathFile(String pathFile) { this.pathFile = pathFile;}
     //---------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------

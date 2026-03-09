@@ -7,8 +7,13 @@ import javax.swing.*;
 import java.awt.*;
 import static main.GameSetting.*;
 
-// ALL THE RENDERING STAFF HERE
-// render, camera, asset( img animation, texture), sfx ...
+/**
+ * ALL THE RENDERING STAFF HERE
+ * render, camera, asset( img animation, texture), sfx ..
+ * GameView is responsible for rendering the game to the screen. This class extends JPanel
+ * and contains methods and assets required for drawing the game world, player, and other
+ * visual elements.
+ */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameView extends JPanel {
 
@@ -17,6 +22,8 @@ public class GameView extends JPanel {
     private TileSet tileSet;
     private PlayerRender playerRender;
 
+    // COSTRUCTOR
+    //-------------------------------------------------------------
     public GameView(GameModel model) {
         this.model = model;
         this.mapRender = new MapRender();
@@ -32,6 +39,8 @@ public class GameView extends JPanel {
         // import the player Render
         this.playerRender = new PlayerRender();
     }
+    //-------------------------------------------------------------
+
 
     // where everything will be drawn
     //-------------------------------------------------------------

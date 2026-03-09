@@ -7,14 +7,16 @@ import java.awt.*;
 
 import static main.GameSetting.*;
 
-// - MAP RENDER CLASS <-- this class will draw the world map
+/**
+ * The MAP RENDER CLASS is responsible for rendering the visual representation of the game world.
+ */
+
 //-------------------------------------------------------------------------------------------------------------------
 public class MapRender {
 
-    public MapRender(){
-    }
-
-    // Draw all the layers of the gameMap, only the visible part around the playe
+    /**
+     * Draw all the layers of the gameMap
+     */
     // -----------------------------------------------------
     public void DrawMap(GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
         /*-----------------------------------------------
@@ -25,12 +27,15 @@ public class MapRender {
         drawLayer(3, gameMap, tileSet, g2);
         drawLayer(4, gameMap, tileSet, g2);
         -----------------------------------------------*/
-        for (int i = 0; i < gameMap.getLayerNum(); i++) {
+        for (int i = 0; i < gameMap.getGraphicLayerNum(); i++) {
             drawLayer(i, gameMap, tileSet, player, g2);
         }
     }
     //-----------------------------------------------------
-    // Draw the single layer of the map
+
+    /**
+     * Draw the single layer of the map
+     */
     // -----------------------------------------------------
     void drawLayer(int layer, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
 
@@ -53,7 +58,10 @@ public class MapRender {
     }
     //-----------------------------------------------------
 
-    // Draw a single tile
+
+    /**
+     * Draw a single tile
+     */
     // -----------------------------------------------------
     void drawTile(int tileId, int row, int col, TileSet tileSet, Player player, Graphics2D g2) {
 
