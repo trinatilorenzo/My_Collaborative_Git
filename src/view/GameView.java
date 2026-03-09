@@ -22,6 +22,13 @@ public class GameView extends JPanel {
     private TileSet tileSet;
     private PlayerRender playerRender;
 
+    private boolean debugMode = false;
+
+    // FPS counter (updated once per second)
+    private long fpsTimer = System.nanoTime();
+    private int frames = 0;
+    private int fps = 0;
+
     // COSTRUCTOR
     //-------------------------------------------------------------
     public GameView(GameModel model) {
@@ -59,12 +66,45 @@ public class GameView extends JPanel {
         // DRAW THE PLAYER
         playerRender.draw(g2, model.getPlayer());
 
+        //debug mod
+        if (debugMode) {
+            playerRender.drawSolidArea(g2, model.getPlayer());
+            mapRender.drawAllGameLayers(model.getWorldMap(), model.getPlayer(), g2);
+
+            // FPS overlay (updates every second)
+            frames++;
+            long now = System.nanoTime();
+            if (now - fpsTimer >= 1_000_000_000L) {
+                fps = frames;
+                frames = 0;
+                fpsTimer = now;
+            }
+
+            g2.setColor(Color.YELLOW);
+            g2.setFont(new Font("Monospaced", Font.BOLD, 18));
+            g2.drawString("FPS: " + fps, 10, 18);
+        }
+
 
         //g2.dispose(); // not necessary
     }
 
     //-------------------------------------------------------------
 
+    // GETTER ----------------------
+    public PlayerRender getPlayerRender() {return playerRender;}
+    //---------------------------------
+
+    //DEBUG MODE
+    //-------------------------------------------------------------
+
+    public void setDebugModeON() {
+        this.debugMode = true;
+    }
+    public void setDebugModeOFF() {
+        this.debugMode = false;
+    }
+    //-------------------------------------------------------------
+
 }
 //-------------------------------------------------------------------------------------------------------------------
-

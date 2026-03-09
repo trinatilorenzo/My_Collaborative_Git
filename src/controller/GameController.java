@@ -41,6 +41,15 @@ public class GameController {
 
     // CONTROLL GAME MODEL
     public void update() {
+
+        // debug mode controll
+        if (keyHandler.isDebugToggle()) {
+            view.setDebugModeON();
+        }else {
+            view.setDebugModeOFF();
+        }
+        //-------------------------
+
         model.update(keyHandler);
 
     }

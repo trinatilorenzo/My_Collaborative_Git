@@ -21,6 +21,8 @@ public class PlayerRender {
     private final int spriteHeight = SPRITE_FRAME_HEIGHT;
     private AnimationManager animationManager;
 
+
+
     // COSTRUCTOR
     //-------------------------------------------------------------
     public PlayerRender() {
@@ -102,5 +104,22 @@ public class PlayerRender {
     }
     //-------------------------------------------------------------
 
+
+    //DEBUG METOD
+    //-------------------------------------------------------------
+    public void drawSolidArea(Graphics2D g2, Player player) {
+        Rectangle solid = player.getSolidArea();
+        int drawX = player.getScreenX() + solid.x;
+        int drawY = player.getScreenY() + solid.y;
+
+        // Semi-transparent red fill
+        g2.setColor(new Color(255, 0, 0, 80));
+        g2.fillRect(drawX, drawY, solid.width, solid.height);
+
+        // Solid red border
+        g2.setColor(Color.RED);
+        g2.drawRect(drawX, drawY, solid.width, solid.height);
+    }
+    //-------------------------------------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------

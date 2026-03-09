@@ -85,5 +85,65 @@ public class MapRender {
                      sx1, sy1, sx2, sy2, null);
     }
     //-----------------------------------------------------
+
+    //DEBUG MODE
+    //-------------------------------------------------------------
+
+    /**
+     * Draws a semi-transparent overlay on all collision tiles across all game layers.
+     * The player is needed only to compute the camera offset (world → screen conversion).
+     */
+    public void drawAllGameLayers(GameMap gameMap, Player player, Graphics2D g2) {
+
+        Color[] layerColors = {
+                new Color(255, 0, 0, 80),   // rosso  - layer 0
+                new Color(0, 0, 255, 80),   // blu    - layer 1
+                new Color(0, 255, 0, 80),   // verde  - layer 2
+        };
+
+        // camera offset
+        int camOffsetX = -player.getWorldX() + player.getScreenX();
+        int camOffsetY = -player.getWorldY() + player.getScreenY();
+
+        Stroke originalStroke = g2.getStroke();
+        Font originalFont = g2.getFont();
+        g2.setStroke(new BasicStroke(1));
+        g2.setFont(new Font("Arial", Font.BOLD, 10));
+
+        for (int layer = GAME_LAYER_NUM -1; layer >= 0 ; layer--) {
+            Color fill = layer < layerColors.length
+                    ? layerColors[layer]
+                    : new Color(255, 255, 0, 80);
+            Color border = new Color(fill.getRed(), fill.getGreen(), fill.getBlue(), 160);
+
+            for (int row = 0; row < gameMap.getMaxMapRow(); row++) {
+                for (int col = 0; col < gameMap.getMaxMapCol(); col++) {
+
+                    if (gameMap.hasCollision(layer, row, col) ) continue;
+
+                    int screenX = col * TILE_SIZE + camOffsetX;
+                    int screenY = row * TILE_SIZE + camOffsetY;
+
+
+                    if (screenX + TILE_SIZE < 0 || screenX > SCREEN_WIDTH ||
+                            screenY + TILE_SIZE < 0 || screenY > SCREEN_HEIGHT) continue;
+
+                    g2.setColor(fill);
+                    g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+                    g2.setColor(border);
+                    g2.drawRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+                    g2.setColor(Color.WHITE);
+                    g2.drawString("L" + layer, screenX + 2, screenY + 12);
+                }
+            }
+        }
+
+        g2.setStroke(originalStroke);
+        g2.setFont(originalFont);
+    }
+
+    //-------------------------------------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------

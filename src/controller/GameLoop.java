@@ -41,7 +41,7 @@ public class GameLoop extends Thread {
             }
             // debug
             if (currentTime - lastFpsTime >= 1e9) {
-                System.out.println("FPS: " + drawCount);
+                //System.out.println("FPS: " + drawCount);
                 drawCount = 0;
                 lastFpsTime = currentTime;
             }
@@ -49,7 +49,8 @@ public class GameLoop extends Thread {
 
 
             try {
-                Thread.sleep(1); // alternative Thread.yield(); TO DO
+                //TODO alternative Thread.yield()
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
