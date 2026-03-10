@@ -21,13 +21,8 @@ public class GameView extends JPanel {
     private MapRender mapRender;
     private TileSet tileSet;
     private PlayerRender playerRender;
+    private UI ui_render;
 
-    private boolean debugMode = false;
-
-    // FPS counter (updated once per second)
-    private long fpsTimer = System.nanoTime();
-    private int frames = 0;
-    private int fps = 0;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -45,6 +40,9 @@ public class GameView extends JPanel {
 
         // import the player Render
         this.playerRender = new PlayerRender();
+
+        //import the UI
+        this.ui_render = new UI(model, playerRender, mapRender);
     }
     //-------------------------------------------------------------
 
@@ -56,34 +54,19 @@ public class GameView extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-        // DRAW THE WORLD
+        // Always clear background
         g2.setColor(GAME_BG_COLOR);
         g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+        // DRAW THE WORLD
+        
+        // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
-
         // DRAW THE PLAYER
         playerRender.draw(g2, model.getPlayer());
 
-        //debug mod
-        if (debugMode) {
-            playerRender.drawSolidArea(g2, model.getPlayer());
-            mapRender.drawAllGameLayers(model.getWorldMap(), model.getPlayer(), g2);
-
-            // FPS overlay (updates every second)
-            frames++;
-            long now = System.nanoTime();
-            if (now - fpsTimer >= 1_000_000_000L) {
-                fps = frames;
-                frames = 0;
-                fpsTimer = now;
-            }
-
-            g2.setColor(Color.YELLOW);
-            g2.setFont(new Font("Monospaced", Font.BOLD, 18));
-            g2.drawString("FPS: " + fps, 10, 18);
-        }
-
+        // DRAW THE UI
+        ui_render.draw(g2);
 
         //g2.dispose(); // not necessary
     }
@@ -100,17 +83,6 @@ public class GameView extends JPanel {
     // GETTER ----------------------
     public PlayerRender getPlayerRender() {return playerRender;}
     //---------------------------------
-
-    //DEBUG MODE
-    //-------------------------------------------------------------
-
-    public void setDebugModeON() {
-        this.debugMode = true;
-    }
-    public void setDebugModeOFF() {
-        this.debugMode = false;
-    }
-    //-------------------------------------------------------------
 
 }
 //-------------------------------------------------------------------------------------------------------------------

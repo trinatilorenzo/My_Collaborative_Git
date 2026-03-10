@@ -7,10 +7,11 @@ import java.awt.event.KeyListener;
 //  Manage input from keyboard
 //-------------------------------------------------------------------------------------------------------------------
 public class KeyHandler implements KeyListener {
-    private boolean up, down, left, right;
+    private boolean up, down, left, right ;
     private boolean attack;
 
     private boolean debugToggle = false;
+    private boolean pauseToggle = false;
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -20,6 +21,7 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_A -> left = true;
             case KeyEvent.VK_D -> right = true;
             case KeyEvent.VK_SPACE -> attack = true;
+            case KeyEvent.VK_P -> pauseToggle = !pauseToggle;
             case KeyEvent.VK_F3 -> debugToggle = !debugToggle;
         }
     }
@@ -42,6 +44,7 @@ public class KeyHandler implements KeyListener {
     public boolean isLeft() { return left; }
     public boolean isRight() { return right; }
     public boolean isDebugToggle() { return debugToggle; }
+    public boolean isPauseToggle() { return pauseToggle; }
 
     @Override
     public void keyTyped(KeyEvent e) {

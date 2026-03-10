@@ -1,10 +1,10 @@
 package model.object;
 
-public class Tree extends GameObject {
+public class OBJ_Tree extends GameObject {
 
-    public Tree() {
+    public OBJ_Tree() {
 
-        name = "Tree";
+        name = "OBJ_Tree";
         try {
             image = javax.imageio.ImageIO.read(getClass().getResourceAsStream("/objects/tree.png"));
         } catch (Exception e) {

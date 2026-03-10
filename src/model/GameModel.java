@@ -18,12 +18,16 @@ public class GameModel {
     private Player player;
     private CollisionChecker collisionChecker;
 
+    private GameState gameState;
+    private boolean debugMode = false;
+
     // COSTRUCTOR
     //-------------------------------------------------------------
     public GameModel() {
         worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, GRAPHIC_LAYER_NUM, GAME_LAYER_NUM);
         player = new Player();
         collisionChecker = new CollisionChecker(this);
+        gameState = GameState.PLAYING;
     }
     //-------------------------------------------------------------
 
@@ -32,12 +36,15 @@ public class GameModel {
      */
     //-------------------------------------------------------------
     public void update(KeyHandler keyH, double deltaMs) {
-        player.update(keyH, deltaMs); // update player status time-based
-        collisionChecker.checkTile(player); // check collision with tiles
 
-        //move player
-        if (!player.isCollisionOn() && player.getState() == PlayerState.WALKING) {
-            player.move();
+        if (gameState == GameState.PLAYING) {
+            player.update(keyH, deltaMs); // update player status time-based
+            collisionChecker.checkTile(player); // check collision with tiles
+
+            //move player
+            if (!player.isCollisionOn() && player.getState() == PlayerState.WALKING) {
+                player.move();
+            }
         }
 
     }
@@ -47,9 +54,13 @@ public class GameModel {
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
+    public GameState getGameState() { return gameState; }
+    public boolean isDebugMode() { return debugMode; }
     //---------------------------------
 
     // SETTER ----------------------
+    public void setGameState(GameState gameState) { this.gameState = gameState; }
+    public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
 
     //---------------------------------
 

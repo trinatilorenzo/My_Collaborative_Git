@@ -37,9 +37,11 @@ public class Player extends Entity {
         worldX = START_WORLD_X;
         worldY = START_WORLD_Y;
         currentLayer = START_WORLD_LAYER;
+
         // Screen position
-        screenX = SCREEN_WIDTH / 2 - TILE_SIZE / 2;
-        screenY = SCREEN_HEIGHT / 2 - TILE_SIZE / 2;
+        screenX = SCREEN_WIDTH / 2 - PLAYER_RENDER_WIDTH/ 2;
+        screenY = SCREEN_HEIGHT / 2 - PLAYER_RENDER_HEIGHT / 2;
+
         // Initialize movement values
         speed = START_PLAYER_SPEED;
         direction = Direction.RIGHT;

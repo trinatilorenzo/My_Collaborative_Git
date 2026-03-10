@@ -2,6 +2,7 @@ package controller;
 
 import model.GameModel;
 import view.GameView;
+import main.GameSetting.GameState;
 
 /**
  * ALL THE CONTROLLER STAFF HERE
@@ -14,6 +15,7 @@ public class GameController {
     private final GameView view;
     private final KeyHandler keyHandler;
     private final GameLoop loop;
+    private boolean renderOnceOnPause = true;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -42,22 +44,34 @@ public class GameController {
     // CONTROLL GAME MODEL
     public void update(double deltaMs) {
 
-        // debug mode controll
-        if (keyHandler.isDebugToggle()) {
-            view.setDebugModeON();
-        }else {
-            view.setDebugModeOFF();
+        // pause toggle edge-triggered
+        if (keyHandler.isPauseToggle()) {
+            model.setGameState(GameState.PAUSED);
+        } else {
+            model.setGameState(GameState.PLAYING);
+            renderOnceOnPause = true;
         }
-        //-------------------------
+
+        // debug flag stored in model
+        model.setDebugMode(keyHandler.isDebugToggle());
 
         model.update(keyHandler, deltaMs);
-        view.updateAnimations(deltaMs);
+
+        if (model.getGameState() == GameState.PLAYING) {
+            view.updateAnimations(deltaMs);
+        }
 
     }
     //-------------------------------------------------------------
     // CONTROLL GAME VIEW
     public void render() {
-        view.repaint();
+        if (model.getGameState() == GameState.PLAYING) {
+            view.repaint();
+        } else if (renderOnceOnPause) {
+            view.repaint();
+            renderOnceOnPause = false;
+
+        }
     }
     //-------------------------------------------------------------
 
