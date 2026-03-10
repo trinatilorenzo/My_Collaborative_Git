@@ -27,7 +27,7 @@ public class GameLoop extends Thread {
     @Override
     public void run() {
         long drawInterval = (long)(1e9 / FPS); // ideal duration of a frame
-        double fixedDeltaMs = drawInterval / 1e7;
+        double fixedDeltaMs = drawInterval / 1_000_000.0; // ns -> ms (es. 120 FPS = 8.33 ms)
         long lastTime = System.nanoTime(); // when the last frame was drawn
 
         long lastFpsTime = lastTime; // when the last FPS was printed
