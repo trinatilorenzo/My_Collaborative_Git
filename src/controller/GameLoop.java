@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.concurrent.locks.LockSupport;
 import static main.GameSetting.*;
 
 // GAME LOOP CLAS
@@ -11,54 +12,66 @@ public class GameLoop extends Thread {
 
     public GameLoop(GameController controller) {
         this.controller = controller;
+        this.setPriority(Thread.MAX_PRIORITY);
     }
+
 
     // GAME LOOP CORE --> START()
+
+    /**
+     * Il loop è progettato per far sì che la logica di gioco avanzi sempre a passi fissi e regolari,
+     * mentre il render si adatta a quanti frame "reali" sono passati.
+     */
     //-------------------------------------------------------------
+    //TODO capire bene come funziona
     @Override
     public void run() {
-        long lastTime = System.nanoTime();
-        double drawInterval = 1e9 / FPS; // 0.01666 seconds;
+        long drawInterval = (long)(1e9 / FPS); // ideal duration of a frame
+        double fixedDeltaMs = drawInterval / 1e7;
+        long lastTime = System.nanoTime(); // when the last frame was drawn
 
-        // debug
-        int drawCount = 0;
-        long lastFpsTime = lastTime;
-        //------------------------------------------------
+        long lastFpsTime = lastTime; // when the last FPS was printed
+        int drawCount = 0; // count frames drawn for debug
 
         while (running) {
-            long currentTime = System.nanoTime();
-            double deltaNs = currentTime - lastTime;
+            // CORE CICLING LOOP (COLOCK TICK)
+            long currentTime = System.nanoTime(); // current time
+            long deltaNs = currentTime - lastTime; // time since last frame
+            int catchUp = 0;
 
-            if (deltaNs >= drawInterval) {
-                double deltaMs = deltaNs / 1_000_000.0; // nanoseconds to milliseconds
+            while (deltaNs >= drawInterval && catchUp < MAX_FRAME_SKIP) {
+                // INNER LOOP (Delay catch up)
+                controller.update(fixedDeltaMs);
 
-                controller.update(deltaMs);
-                controller.render();
-
-                lastTime = currentTime;
-
-                // debug
-                drawCount++;
-                //------------------------------------------------
+                lastTime += drawInterval;
+                deltaNs = currentTime - lastTime;
+                catchUp++;
             }
-            // debug
-            if (currentTime - lastFpsTime >= 1e9) {
-                //System.out.println("FPS: " + drawCount);
+            controller.render();
+
+            // debug console
+            drawCount++;
+            if (currentTime - lastFpsTime >= 1_000_000_000L) {
+                System.out.println("FPS: " + drawCount);
                 drawCount = 0;
-                lastFpsTime = currentTime;
+                lastFpsTime += 1_000_000_000L;
             }
-            //------------------------------------------------
+            //-----------------
 
-
-            try {
-                //TODO alternative Thread.yield()
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            long sleepNs = drawInterval - (System.nanoTime() - lastTime);
+            if (sleepNs > 300_000) {
+                LockSupport.parkNanos(sleepNs - 200_000);
+                long spinUntil = System.nanoTime() + 200_000;
+                while (System.nanoTime() < spinUntil) Thread.onSpinWait();
+            } else if (sleepNs > 0) {
+                long spinUntil = System.nanoTime() + sleepNs;
+                while (System.nanoTime() < spinUntil) Thread.onSpinWait();
+            } else {
+                Thread.yield();
             }
-
         }
     }
+
     //-------------------------------------------------------------
 
     // STOP GameLoop()

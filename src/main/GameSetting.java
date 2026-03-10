@@ -45,7 +45,7 @@ public class GameSetting {
 
     // PLAYER SETTINGS
     //-----------------------------------------------------------------------
-    public static final int START_PLAYER_SPEED = 4;
+    public static final int START_PLAYER_SPEED = 6;
     //position
     public static final int START_WORLD_X = 50 * TILE_SIZE;
     public static final int START_WORLD_Y = 30 * TILE_SIZE;
@@ -65,6 +65,7 @@ public class GameSetting {
 
     // FPS
     public static final int FPS = 120;
+    public static final int MAX_FRAME_SKIP = 10;
 
     public enum Direction {
         UP, DOWN, LEFT, RIGHT
