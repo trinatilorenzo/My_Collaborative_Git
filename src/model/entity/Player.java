@@ -22,7 +22,11 @@ public class Player extends Entity {
     public Player() {
         // TODO: Make it parametric
 
-        solidArea = new Rectangle(79, 88, 40, 40);
+        solidArea = new Rectangle((SPRITE_FRAME_WIDTH / 2) - (PLAYER_HITBOX_WIDTH/2),
+                (SPRITE_FRAME_HEIGHT/ 2) ,
+                PLAYER_HITBOX_WIDTH,
+                PLAYER_HITBOX_HEIGHT);
+
         initializeDefaultValues();
     }
     //-------------------------------------------------------------
