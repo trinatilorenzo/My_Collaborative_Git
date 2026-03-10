@@ -54,10 +54,10 @@ public class Player extends Entity {
      */
 
     //-------------------------------------------------------------
-    public void update(KeyHandler keyH) {
+    public void update(KeyHandler keyH, double deltaMs) {
         super.update(); // reset dx, dy, collisions
 
-        boolean isMoving = updateMovement(keyH);
+        boolean isMoving = updateMovement(keyH, deltaMs);
         updateState(keyH, isMoving);
     }
     //-------------------------------------------------------------
@@ -68,41 +68,29 @@ public class Player extends Entity {
      */
 
     //-------------------------------------------------------------
-    private boolean updateMovement(KeyHandler keyH) {
-        boolean isMoving = false;
 
-        if (keyH.isUp()) {
-            dy -= speed;
-            direction = Direction.UP;
-            isMoving = true;
-        }
-        if (keyH.isDown()) {
-            dy += speed;
-            direction = Direction.DOWN;
-            isMoving = true;
-        }
-        if (keyH.isLeft()) {
-            dx -= speed;
-            direction = Direction.LEFT;
-            facingDirection = FACING_LEFT;
-            isMoving = true;
-        }
-        if (keyH.isRight()) {
-            dx += speed;
-            direction = Direction.RIGHT;
-            facingDirection = FACING_RIGHT;
-            isMoving = true;
+    private boolean updateMovement(KeyHandler keyH, double deltaMs) {
+        double distance = speed * (deltaMs / 1000.0);
+        double moveX = 0;
+        double moveY = 0;
+
+        if (keyH.isUp())    { moveY -= distance; direction = Direction.UP; }
+        if (keyH.isDown())  { moveY += distance; direction = Direction.DOWN; }
+        if (keyH.isLeft())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = FACING_LEFT; }
+        if (keyH.isRight()) { moveX += distance; direction = Direction.RIGHT; facingDirection = FACING_RIGHT; }
+
+        // Normalizza per mantenere la stessa velocità anche in diagonale (fattore 1/sqrt(2))
+        if (moveX != 0 && moveY != 0) {
+            moveX *= DIAGONAL_FACTOR;
+            moveY *= DIAGONAL_FACTOR;
         }
 
-        // Normalize diagonal movement to keep constant speed
-        if (dx != 0 && dy != 0) {
-            dx = (int) Math.round(dx * DIAGONAL_FACTOR);
-            dy = (int) Math.round(dy * DIAGONAL_FACTOR);
-        }
+        dx = (int) Math.round(moveX);
+        dy = (int) Math.round(moveY);
 
-        return isMoving;
+        return moveX != 0 || moveY != 0;
     }
-    //-------------------------------------------------------------
+
 
     /**
      * Updates the player's current state based on input from the {@link KeyHandler}

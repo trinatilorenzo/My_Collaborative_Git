@@ -14,7 +14,7 @@ public class Entity {
     // Position and movement
     protected int worldX, worldY;
     protected int screenX, screenY;
-    protected int speed;
+    protected int speed; // PIXELS PER SECOND
     protected int dx, dy; // movement deltas per frame
     protected GameSetting.Direction direction;
     protected int currentLayer;
