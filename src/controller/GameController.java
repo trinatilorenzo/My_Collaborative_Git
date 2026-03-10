@@ -40,7 +40,7 @@ public class GameController {
     //-------------------------------------------------------------
 
     // CONTROLL GAME MODEL
-    public void update() {
+    public void update(double deltaMs) {
 
         // debug mode controll
         if (keyHandler.isDebugToggle()) {
@@ -50,7 +50,8 @@ public class GameController {
         }
         //-------------------------
 
-        model.update(keyHandler);
+        model.update(keyHandler, deltaMs);
+        view.updateAnimations(deltaMs);
 
     }
     //-------------------------------------------------------------

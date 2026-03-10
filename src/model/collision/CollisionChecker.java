@@ -111,6 +111,8 @@ public class CollisionChecker {
     }
 
     //-------------------------------------------------------------
+    // TODO: c'è un bug quando mi muovo in orizontale non vanno le collisoni come dovrebbero (cambia di livello )
+
     public void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
 
         if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {

@@ -64,7 +64,7 @@ public class GameSetting {
     //-----------------------------------------------------------------------
 
     // FPS
-    public static final int FPS = 60;
+    public static final int FPS = 120;
 
     public enum Direction {
         UP, DOWN, LEFT, RIGHT

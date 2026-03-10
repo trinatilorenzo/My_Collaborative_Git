@@ -32,6 +32,9 @@ public class PlayerRender {
 
     //-------------------------------------------------------------
     private void loadAnimations() {
+
+        //TODO: make the loading form diffferent source
+
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
 
         BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, spriteWidth, spriteHeight);
@@ -41,17 +44,17 @@ public class PlayerRender {
         BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, spriteWidth, spriteHeight);
 
         animationManager = new AnimationManager();
-        animationManager.addAnimation("idle", new Animation(idleFrames, 6, true));
-        animationManager.addAnimation("walk", new Animation(walkFrames, 5, true));
-        animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 3, false));
-        animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 3, false));
-        animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 3, false));
+        // frame duration in milliseconds
+        animationManager.addAnimation("idle", new Animation(idleFrames, 120, true));
+        animationManager.addAnimation("walk", new Animation(walkFrames, 90, true));
+        animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 60, false));
+        animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
+        animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
     }
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, Player player) {
-        updateAnimation(player);
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
         //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
 
@@ -76,7 +79,7 @@ public class PlayerRender {
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
-    private void updateAnimation(Player player) {
+    public void updateAnimations(Player player, double deltaMs) {
         switch (player.getState()) {
             case IDLE:
                 animationManager.playAnimation("idle");
@@ -100,7 +103,7 @@ public class PlayerRender {
                 }
                 break;
         }
-        animationManager.update();
+        animationManager.update(deltaMs);
     }
     //-------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 package view.renderMap;
 
 import javax.imageio.ImageIO;
+import view.Animation.FrameTimeline;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,17 +37,13 @@ class TileRegion {
 //-------------------------------------------------------------------------------------------------------------------
 class AnimatedTile {
     private int[] frameIds;
-    private int currentFrameIndex;
-    private double frameDurationMs;
-    private long lastUpdateTime;
+    private FrameTimeline timeline;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
     public AnimatedTile(int[] frameIds, double frameDurationMs) {
         this.frameIds = frameIds;
-        this.frameDurationMs = frameDurationMs;
-        this.currentFrameIndex = 0;
-        this.lastUpdateTime = System.currentTimeMillis();
+        this.timeline = new FrameTimeline(frameIds.length, frameDurationMs, true);
     }
     //-------------------------------------------------------------
 
@@ -54,21 +51,14 @@ class AnimatedTile {
      * Aggiorna l'animazione: incrementa il contatore e avanza al frame successivo se necessario
      */
     //-------------------------------------------------------------
-    public void update() {
-        long now = System.currentTimeMillis();
-        if (now - lastUpdateTime >= frameDurationMs) {
-            lastUpdateTime += frameDurationMs;
-            currentFrameIndex++;
-            if (currentFrameIndex >= frameIds.length) {
-                currentFrameIndex = 0;
-            }
-        }
+    public void update(double deltaMs) {
+        timeline.update(deltaMs);
     }
     //-------------------------------------------------------------
 
     // GETTER ----------------------
     public int getCurrentFrameId() {
-        return frameIds[currentFrameIndex];
+        return frameIds[timeline.getCurrentFrame()];
     }
     public int getBaseId() {
         return frameIds[0];
@@ -136,10 +126,10 @@ public class TileSet {
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
-    public void updateAnimTile() {
+    public void updateAnimTile(double deltaMs) {
         // Update alle the animated tile to the current frame
         for (AnimatedTile anim : animatedTiles.values()) {
-            anim.update();
+            anim.update(deltaMs);
         }
     }
     //-------------------------------------------------------------

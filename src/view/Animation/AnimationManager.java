@@ -34,9 +34,9 @@ public class AnimationManager {
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
-    public void update(){
+    public void update(double deltaMs){
         if (currentAnimation != null){
-            currentAnimation.update();
+            currentAnimation.update(deltaMs);
         }
     }
     //-------------------------------------------------------------

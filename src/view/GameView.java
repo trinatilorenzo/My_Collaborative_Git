@@ -61,7 +61,6 @@ public class GameView extends JPanel {
         g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
-        tileSet.updateAnimTile();
 
         // DRAW THE PLAYER
         playerRender.draw(g2, model.getPlayer());
@@ -88,6 +87,13 @@ public class GameView extends JPanel {
 
         //g2.dispose(); // not necessary
     }
+
+    //-------------------------------------------------------------
+    public void updateAnimations(double deltaMs) {
+        tileSet.updateAnimTile(deltaMs);
+        playerRender.updateAnimations(model.getPlayer(), deltaMs);
+    }
+    //-------------------------------------------------------------
 
     //-------------------------------------------------------------
 

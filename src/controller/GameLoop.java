@@ -17,20 +17,22 @@ public class GameLoop extends Thread {
     //-------------------------------------------------------------
     @Override
     public void run() {
-        long currentTime;
         long lastTime = System.nanoTime();
-        double drawInterval = 1e9/FPS; // 0.01666 seconds;
+        double drawInterval = 1e9 / FPS; // 0.01666 seconds;
 
         // debug
         int drawCount = 0;
-        long lastFpsTime = System.nanoTime();
+        long lastFpsTime = lastTime;
         //------------------------------------------------
 
         while (running) {
-            currentTime = System.nanoTime();
-            if (currentTime - lastTime >= drawInterval) {
+            long currentTime = System.nanoTime();
+            double deltaNs = currentTime - lastTime;
 
-                controller.update();
+            if (deltaNs >= drawInterval) {
+                double deltaMs = deltaNs / 1_000_000.0; // nanoseconds to milliseconds
+
+                controller.update(deltaMs);
                 controller.render();
 
                 lastTime = currentTime;

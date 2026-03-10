@@ -31,8 +31,8 @@ public class GameModel {
      * Update the model status
      */
     //-------------------------------------------------------------
-    public void update(KeyHandler keyH) {
-        player.update(keyH); // update player status
+    public void update(KeyHandler keyH, double deltaMs) {
+        player.update(keyH); // update player status (speed currently frame-based)
         collisionChecker.checkTile(player); // check collision with tiles
 
         //move player
