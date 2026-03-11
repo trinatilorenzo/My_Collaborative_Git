@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>/Users/lorenzotrinati/Desktop/IDE/My_Collaborative_Git/src</OriginalElement>
+  <nodes>
+    <node x="-250.0" y="75.0">controller.GameLoop</node>
+    <node x="1413.5" y="1335.0">view.SpriteLoader</node>
+    <node x="1208.5" y="1002.0">view.renderMap.TileSet</node>
+    <node x="1012.0" y="1854.0">model.world.GameMap</node>
+    <node x="-190.0" y="-209.0">controller.GameController</node>
+    <node x="-70.0" y="1794.0">controller.KeyHandler</node>
+    <node x="1963.5" y="1050.5">view.Animation.AnimationManager</node>
+    <node x="1304.5" y="2526.0">view.Animation.FrameTimeline</node>
+    <node x="1794.5" y="631.0">view.PlayerRender</node>
+    <node x="1199.5" y="50.0">view.GameView</node>
+    <node x="1028.0" y="2514.0">model.world.MapLayer</node>
+    <node x="367.0" y="2599.5">main.GameSetting</node>
+    <node x="1856.5" y="1950.5">view.Animation.Animation</node>
+    <node x="191.0" y="1002.0">model.entity.Player</node>
+    <node x="80.0" y="-393.0">main.Main</node>
+    <node x="322.5" y="1638.0">model.entity.Entity</node>
+    <node x="1489.0" y="-160.5">model.object.GameObject</node>
+    <node x="574.5" y="558.0">model.GameModel</node>
+    <node x="1499.5" y="-380.5">model.object.OBJ_Tree</node>
+    <node x="1155.5" y="631.0">view.renderMap.MapRender</node>
+    <node x="1364.5" y="323.0">view.UI</node>
+    <node x="576.5" y="1287.0">model.collision.CollisionChecker</node>
+    <node x="1608.0" y="1999.5">view.renderMap.TileRegion</node>
+    <node x="1333.0" y="1962.5">view.renderMap.AnimatedTile</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="view.PlayerRender" target="view.Animation.AnimationManager" relationship="TO_ONE">
+      <point x="0.0" y="80.0" />
+      <point x="1943.0" y="1251.0" />
+      <point x="2103.0" y="1251.0" />
+      <point x="0.0" y="80.5" />
+    </edge>
+    <edge source="controller.GameController" target="view.GameView" relationship="TO_ONE">
+      <point x="76.5" y="80.0" />
+      <point x="39.5" y="-29.0" />
+      <point x="43.0" y="-29.0" />
+      <point x="43.0" y="31.0" />
+      <point x="203.0" y="31.0" />
+      <point x="203.0" y="251.0" />
+      <point x="1261.25" y="251.0" />
+      <point x="-61.75" y="81.0" />
+    </edge>
+    <edge source="view.renderMap.TileSet" target="view.renderMap.AnimatedTile" relationship="CREATE">
+      <point x="-57.25" y="129.0" />
+      <point x="1265.75" y="1291.0" />
+      <point x="1303.0" y="1291.0" />
+      <point x="1303.0" y="2131.0" />
+      <point x="1388.0" y="2131.0" />
+      <point x="-55.0" y="68.5" />
+    </edge>
+    <edge source="model.collision.CollisionChecker" target="model.entity.Entity" relationship="DEPENDENCY">
+      <point x="0.0" y="104.0" />
+      <point x="763.0" y="1531.0" />
+      <point x="943.0" y="1531.0" />
+      <point x="943.0" y="2451.0" />
+      <point x="443.0" y="2451.0" />
+      <point x="0.0" y="393.0" />
+    </edge>
+    <edge source="model.GameModel" target="model.collision.CollisionChecker" relationship="TO_ONE">
+      <point x="85.66666666666666" y="153.0" />
+      <point x="788.6666666666667" y="891.0" />
+      <point x="863.0" y="891.0" />
+      <point x="863.0" y="971.0" />
+      <point x="856.25" y="971.0" />
+      <point x="93.25" y="-104.0" />
+    </edge>
+    <edge source="model.collision.CollisionChecker" target="model.GameModel" relationship="TO_ONE">
+      <point x="93.25" y="-104.0" />
+      <point x="856.25" y="931.0" />
+      <point x="788.6666666666667" y="931.0" />
+      <point x="85.66666666666666" y="153.0" />
+    </edge>
+    <edge source="model.entity.Entity" target="main.GameSetting" relationship="DEPENDENCY">
+      <point x="0.0" y="393.0" />
+      <point x="0.0" y="-31.5" />
+    </edge>
+    <edge source="view.Animation.Animation" target="view.Animation.FrameTimeline" relationship="TO_ONE">
+      <point x="83.25" y="80.5" />
+      <point x="2106.25" y="2191.0" />
+      <point x="1503.0" y="2191.0" />
+      <point x="1503.0" y="2491.0" />
+      <point x="1512.25" y="2491.0" />
+      <point x="69.25" y="-105.0" />
+    </edge>
+    <edge source="view.PlayerRender" target="view.Animation.Animation" relationship="CREATE">
+      <point x="99.0" y="80.0" />
+      <point x="2042.0" y="811.0" />
+      <point x="2103.0" y="811.0" />
+      <point x="2103.0" y="851.0" />
+      <point x="2303.0" y="851.0" />
+      <point x="2303.0" y="1151.0" />
+      <point x="2283.0" y="1151.0" />
+      <point x="2283.0" y="2171.0" />
+      <point x="1939.75" y="2171.0" />
+      <point x="-83.25" y="80.5" />
+    </edge>
+    <edge source="model.entity.Player" target="model.entity.Entity" relationship="GENERALIZATION">
+      <point x="86.0" y="129.0" />
+      <point x="449.0" y="1611.0" />
+      <point x="443.0" y="1611.0" />
+      <point x="0.0" y="-393.0" />
+    </edge>
+    <edge source="view.Animation.AnimationManager" target="view.Animation.Animation" relationship="TO_MANY">
+      <point x="0.0" y="80.5" />
+      <point x="2103.0" y="1531.0" />
+      <point x="1823.0" y="1531.0" />
+      <point x="1823.0" y="2151.0" />
+      <point x="2106.25" y="2151.0" />
+      <point x="83.25" y="80.5" />
+    </edge>
+    <edge source="view.GameView" target="view.renderMap.MapRender" relationship="TO_ONE">
+      <point x="-61.75" y="81.0" />
+      <point x="1261.25" y="271.0" />
+      <point x="1263.0" y="271.0" />
+      <point x="1263.0" y="611.0" />
+      <point x="1259.25" y="611.0" />
+      <point x="-103.75" y="-80.0" />
+    </edge>
+    <edge source="model.GameModel" target="model.world.GameMap" relationship="TO_ONE">
+      <point x="85.66666666666666" y="153.0" />
+      <point x="788.6666666666667" y="891.0" />
+      <point x="863.0" y="891.0" />
+      <point x="863.0" y="971.0" />
+      <point x="1103.0" y="971.0" />
+      <point x="1103.0" y="1611.0" />
+      <point x="983.0" y="1611.0" />
+      <point x="983.0" y="2231.0" />
+      <point x="1077.5" y="2231.0" />
+      <point x="-65.5" y="177.0" />
+    </edge>
+    <edge source="view.GameView" target="view.PlayerRender" relationship="TO_ONE">
+      <point x="-61.75" y="81.0" />
+      <point x="1261.25" y="271.0" />
+      <point x="1263.0" y="271.0" />
+      <point x="1263.0" y="371.0" />
+      <point x="1303.0" y="371.0" />
+      <point x="1303.0" y="571.0" />
+      <point x="1563.0" y="571.0" />
+      <point x="1563.0" y="611.0" />
+      <point x="1603.0" y="611.0" />
+      <point x="1603.0" y="831.0" />
+      <point x="1943.0" y="831.0" />
+      <point x="0.0" y="80.0" />
+    </edge>
+    <edge source="model.GameModel" target="controller.KeyHandler" relationship="DEPENDENCY">
+      <point x="-85.66666666666666" y="153.0" />
+      <point x="617.3333333333334" y="891.0" />
+      <point x="123.0" y="891.0" />
+      <point x="123.0" y="911.0" />
+      <point x="83.0" y="911.0" />
+      <point x="83.0" y="1571.0" />
+      <point x="123.0" y="1571.0" />
+      <point x="123.0" y="1771.0" />
+      <point x="118.33333333333337" y="1771.0" />
+      <point x="75.33333333333334" y="-237.0" />
+    </edge>
+    <edge source="view.UI" target="model.GameModel" relationship="TO_ONE">
+      <point x="0.0" y="68.0" />
+      <point x="1523.0" y="511.0" />
+      <point x="1023.0" y="511.0" />
+      <point x="1023.0" y="911.0" />
+      <point x="788.6666666666667" y="911.0" />
+      <point x="85.66666666666666" y="153.0" />
+    </edge>
+    <edge source="view.GameView" target="view.UI" relationship="CREATE">
+      <point x="61.75" y="81.0" />
+      <point x="1384.75" y="271.0" />
+      <point x="1523.0" y="271.0" />
+      <point x="0.0" y="-68.0" />
+    </edge>
+    <edge source="view.GameView" target="view.renderMap.TileSet" relationship="CREATE">
+      <point x="61.75" y="81.0" />
+      <point x="1384.75" y="271.0" />
+      <point x="1523.0" y="271.0" />
+      <point x="1523.0" y="291.0" />
+      <point x="2263.0" y="291.0" />
+      <point x="2263.0" y="1511.0" />
+      <point x="1265.75" y="1511.0" />
+      <point x="-57.25" y="129.0" />
+    </edge>
+    <edge source="controller.GameController" target="model.GameModel" relationship="TO_ONE">
+      <point x="76.5" y="80.0" />
+      <point x="39.5" y="-29.0" />
+      <point x="43.0" y="-29.0" />
+      <point x="43.0" y="31.0" />
+      <point x="83.0" y="31.0" />
+      <point x="83.0" y="411.0" />
+      <point x="1023.0" y="411.0" />
+      <point x="1023.0" y="911.0" />
+      <point x="788.6666666666667" y="911.0" />
+      <point x="85.66666666666666" y="153.0" />
+    </edge>
+    <edge source="view.renderMap.TileSet" target="view.renderMap.AnimatedTile" relationship="TO_MANY">
+      <point x="57.25" y="129.0" />
+      <point x="1380.25" y="1471.0" />
+      <point x="1583.0" y="1471.0" />
+      <point x="1583.0" y="2131.0" />
+      <point x="1498.0" y="2131.0" />
+      <point x="55.0" y="68.5" />
+    </edge>
+    <edge source="model.collision.CollisionChecker" target="model.world.GameMap" relationship="DEPENDENCY">
+      <point x="0.0" y="104.0" />
+      <point x="763.0" y="1531.0" />
+      <point x="943.0" y="1531.0" />
+      <point x="943.0" y="1831.0" />
+      <point x="1143.0" y="1831.0" />
+      <point x="0.0" y="-177.0" />
+    </edge>
+    <edge source="view.GameView" target="view.UI" relationship="TO_ONE">
+      <point x="-61.75" y="81.0" />
+      <point x="1261.25" y="271.0" />
+      <point x="1263.0" y="271.0" />
+      <point x="1263.0" y="371.0" />
+      <point x="1343.0" y="371.0" />
+      <point x="1343.0" y="491.0" />
+      <point x="1523.0" y="491.0" />
+      <point x="0.0" y="68.0" />
+    </edge>
+    <edge source="model.GameModel" target="model.collision.CollisionChecker" relationship="CREATE">
+      <point x="0.0" y="153.0" />
+      <point x="703.0" y="891.0" />
+      <point x="663.0" y="891.0" />
+      <point x="663.0" y="951.0" />
+      <point x="669.75" y="951.0" />
+      <point x="-93.25" y="-104.0" />
+    </edge>
+    <edge source="view.GameView" target="view.renderMap.TileSet" relationship="TO_ONE">
+      <point x="-61.75" y="81.0" />
+      <point x="1261.25" y="271.0" />
+      <point x="1263.0" y="271.0" />
+      <point x="1263.0" y="371.0" />
+      <point x="1063.0" y="371.0" />
+      <point x="1063.0" y="811.0" />
+      <point x="1183.0" y="811.0" />
+      <point x="1183.0" y="1491.0" />
+      <point x="1380.25" y="1491.0" />
+      <point x="57.25" y="129.0" />
+    </edge>
+    <edge source="main.Main" target="controller.GameController" relationship="CREATE">
+      <point x="0.0" y="44.0" />
+      <point x="163.0" y="-229.0" />
+      <point x="-217.0" y="-229.0" />
+      <point x="-217.0" y="-9.0" />
+      <point x="-113.5" y="-9.0" />
+      <point x="-76.5" y="80.0" />
+    </edge>
+    <edge source="view.renderMap.MapRender" target="model.entity.Entity" relationship="DEPENDENCY">
+      <point x="0.0" y="80.0" />
+      <point x="1363.0" y="931.0" />
+      <point x="1023.0" y="931.0" />
+      <point x="1023.0" y="1591.0" />
+      <point x="943.0" y="1591.0" />
+      <point x="943.0" y="2451.0" />
+      <point x="443.0" y="2451.0" />
+      <point x="0.0" y="393.0" />
+    </edge>
+    <edge source="view.renderMap.MapRender" target="view.renderMap.TileSet" relationship="DEPENDENCY">
+      <point x="0.0" y="80.0" />
+      <point x="1363.0" y="931.0" />
+      <point x="1323.0" y="931.0" />
+      <point x="0.0" y="-129.0" />
+    </edge>
+    <edge source="model.GameModel" target="model.entity.Player" relationship="TO_ONE">
+      <point x="85.66666666666666" y="153.0" />
+      <point x="788.6666666666667" y="891.0" />
+      <point x="863.0" y="891.0" />
+      <point x="863.0" y="971.0" />
+      <point x="449.0" y="971.0" />
+      <point x="86.0" y="-129.0" />
+    </edge>
+    <edge source="view.GameView" target="view.PlayerRender" relationship="CREATE">
+      <point x="61.75" y="81.0" />
+      <point x="1384.75" y="271.0" />
+      <point x="1523.0" y="271.0" />
+      <point x="1523.0" y="291.0" />
+      <point x="2123.0" y="291.0" />
+      <point x="2123.0" y="831.0" />
+      <point x="2042.0" y="831.0" />
+      <point x="99.0" y="80.0" />
+    </edge>
+    <edge source="controller.GameController" target="controller.KeyHandler" relationship="CREATE">
+      <point x="-76.5" y="80.0" />
+      <point x="-113.5" y="-29.0" />
+      <point x="-117.0" y="-29.0" />
+      <point x="-117.0" y="51.0" />
+      <point x="3.0" y="51.0" />
+      <point x="3.0" y="1151.0" />
+      <point x="-32.33333333333337" y="1151.0" />
+      <point x="-75.33333333333334" y="-237.0" />
+    </edge>
+    <edge source="view.PlayerRender" target="model.entity.Entity" relationship="DEPENDENCY">
+      <point x="-99.0" y="80.0" />
+      <point x="1844.0" y="811.0" />
+      <point x="1663.0" y="811.0" />
+      <point x="1663.0" y="951.0" />
+      <point x="1063.0" y="951.0" />
+      <point x="1063.0" y="1591.0" />
+      <point x="943.0" y="1591.0" />
+      <point x="943.0" y="2451.0" />
+      <point x="443.0" y="2451.0" />
+      <point x="0.0" y="393.0" />
+    </edge>
+    <edge source="controller.GameLoop" target="controller.GameController" relationship="TO_ONE">
+      <point x="56.5" y="-56.0" />
+      <point x="-80.5" y="-9.0" />
+      <point x="39.5" y="-9.0" />
+      <point x="76.5" y="80.0" />
+    </edge>
+    <edge source="controller.GameController" target="controller.GameLoop" relationship="TO_ONE">
+      <point x="76.5" y="80.0" />
+      <point x="39.5" y="-29.0" />
+      <point x="43.0" y="-29.0" />
+      <point x="43.0" y="31.0" />
+      <point x="-80.5" y="31.0" />
+      <point x="56.5" y="-56.0" />
+    </edge>
+    <edge source="view.GameView" target="view.renderMap.MapRender" relationship="CREATE">
+      <point x="61.75" y="81.0" />
+      <point x="1384.75" y="271.0" />
+      <point x="1523.0" y="271.0" />
+      <point x="1523.0" y="291.0" />
+      <point x="1703.0" y="291.0" />
+      <point x="1703.0" y="591.0" />
+      <point x="1466.75" y="591.0" />
+      <point x="103.75" y="-80.0" />
+    </edge>
+    <edge source="view.renderMap.AnimatedTile" target="view.Animation.FrameTimeline" relationship="TO_ONE">
+      <point x="55.0" y="68.5" />
+      <point x="1498.0" y="2191.0" />
+      <point x="1503.0" y="2191.0" />
+      <point x="1503.0" y="2491.0" />
+      <point x="1512.25" y="2491.0" />
+      <point x="69.25" y="-105.0" />
+    </edge>
+    <edge source="view.UI" target="view.renderMap.MapRender" relationship="TO_ONE">
+      <point x="0.0" y="68.0" />
+      <point x="1523.0" y="551.0" />
+      <point x="1263.0" y="551.0" />
+      <point x="1263.0" y="611.0" />
+      <point x="1259.25" y="611.0" />
+      <point x="-103.75" y="-80.0" />
+    </edge>
+    <edge source="view.renderMap.TileSet" target="view.renderMap.TileRegion" relationship="CREATE">
+      <point x="-57.25" y="129.0" />
+      <point x="1265.75" y="1291.0" />
+      <point x="1303.0" y="1291.0" />
+      <point x="1303.0" y="1551.0" />
+      <point x="1655.5" y="1551.0" />
+      <point x="-47.5" y="-31.5" />
+    </edge>
+    <edge source="model.GameModel" target="model.entity.Entity" relationship="DEPENDENCY">
+      <point x="-85.66666666666666" y="153.0" />
+      <point x="617.3333333333334" y="891.0" />
+      <point x="123.0" y="891.0" />
+      <point x="123.0" y="1591.0" />
+      <point x="943.0" y="1591.0" />
+      <point x="943.0" y="2451.0" />
+      <point x="443.0" y="2451.0" />
+      <point x="0.0" y="393.0" />
+    </edge>
+    <edge source="view.PlayerRender" target="view.Animation.AnimationManager" relationship="CREATE">
+      <point x="99.0" y="80.0" />
+      <point x="2042.0" y="811.0" />
+      <point x="2103.0" y="811.0" />
+      <point x="0.0" y="-80.5" />
+    </edge>
+    <edge source="view.UI" target="view.PlayerRender" relationship="TO_ONE">
+      <point x="0.0" y="68.0" />
+      <point x="1523.0" y="531.0" />
+      <point x="1563.0" y="531.0" />
+      <point x="1563.0" y="611.0" />
+      <point x="1603.0" y="611.0" />
+      <point x="1603.0" y="831.0" />
+      <point x="1943.0" y="831.0" />
+      <point x="0.0" y="80.0" />
+    </edge>
+    <edge source="controller.GameController" target="controller.GameLoop" relationship="CREATE">
+      <point x="-76.5" y="80.0" />
+      <point x="-113.5" y="-29.0" />
+      <point x="-117.0" y="-29.0" />
+      <point x="-117.0" y="51.0" />
+      <point x="-193.5" y="51.0" />
+      <point x="-56.5" y="-56.0" />
+    </edge>
+    <edge source="view.renderMap.MapRender" target="model.entity.Player" relationship="DEPENDENCY">
+      <point x="0.0" y="80.0" />
+      <point x="1363.0" y="991.0" />
+      <point x="983.0" y="991.0" />
+      <point x="983.0" y="1551.0" />
+      <point x="277.0" y="1551.0" />
+      <point x="-86.0" y="129.0" />
+    </edge>
+    <edge source="controller.GameController" target="controller.KeyHandler" relationship="TO_ONE">
+      <point x="76.5" y="80.0" />
+      <point x="39.5" y="-29.0" />
+      <point x="43.0" y="-29.0" />
+      <point x="0.0" y="-237.0" />
+    </edge>
+    <edge source="model.world.GameMap" target="model.world.MapLayer" relationship="TO_MANY">
+      <point x="-65.5" y="177.0" />
+      <point x="1077.5" y="2491.0" />
+      <point x="1085.5" y="2491.0" />
+      <point x="-57.5" y="-117.0" />
+    </edge>
+    <edge source="model.object.OBJ_Tree" target="model.object.GameObject" relationship="GENERALIZATION">
+      <point x="0.0" y="31.5" />
+      <point x="0.0" y="-31.5" />
+    </edge>
+    <edge source="view.GameView" target="model.GameModel" relationship="TO_ONE">
+      <point x="-61.75" y="81.0" />
+      <point x="1261.25" y="271.0" />
+      <point x="1263.0" y="271.0" />
+      <point x="1263.0" y="371.0" />
+      <point x="1023.0" y="371.0" />
+      <point x="1023.0" y="911.0" />
+      <point x="788.6666666666667" y="911.0" />
+      <point x="85.66666666666666" y="153.0" />
+    </edge>
+    <edge source="view.PlayerRender" target="view.SpriteLoader" relationship="DEPENDENCY">
+      <point x="-99.0" y="80.0" />
+      <point x="1844.0" y="811.0" />
+      <point x="1663.0" y="811.0" />
+      <point x="0.0" y="-56.0" />
+    </edge>
+    <edge source="model.GameModel" target="model.entity.Player" relationship="CREATE">
+      <point x="0.0" y="153.0" />
+      <point x="703.0" y="891.0" />
+      <point x="663.0" y="891.0" />
+      <point x="663.0" y="951.0" />
+      <point x="277.0" y="951.0" />
+      <point x="-86.0" y="-129.0" />
+    </edge>
+    <edge source="view.PlayerRender" target="model.entity.Player" relationship="DEPENDENCY">
+      <point x="-99.0" y="80.0" />
+      <point x="1844.0" y="811.0" />
+      <point x="1663.0" y="811.0" />
+      <point x="1663.0" y="971.0" />
+      <point x="1363.0" y="971.0" />
+      <point x="1363.0" y="991.0" />
+      <point x="983.0" y="991.0" />
+      <point x="983.0" y="1551.0" />
+      <point x="277.0" y="1551.0" />
+      <point x="-86.0" y="129.0" />
+    </edge>
+    <edge source="view.Animation.Animation" target="view.Animation.FrameTimeline" relationship="CREATE">
+      <point x="-83.25" y="80.5" />
+      <point x="1939.75" y="2211.0" />
+      <point x="1383.0" y="2211.0" />
+      <point x="1383.0" y="2491.0" />
+      <point x="1373.75" y="2491.0" />
+      <point x="-69.25" y="-105.0" />
+    </edge>
+    <edge source="model.world.GameMap" target="model.world.MapLayer" relationship="CREATE">
+      <point x="65.5" y="177.0" />
+      <point x="1208.5" y="2491.0" />
+      <point x="1200.5" y="2491.0" />
+      <point x="57.5" y="-117.0" />
+    </edge>
+    <edge source="model.GameModel" target="model.world.GameMap" relationship="CREATE">
+      <point x="0.0" y="153.0" />
+      <point x="703.0" y="891.0" />
+      <point x="663.0" y="891.0" />
+      <point x="663.0" y="951.0" />
+      <point x="163.0" y="951.0" />
+      <point x="163.0" y="1771.0" />
+      <point x="183.0" y="1771.0" />
+      <point x="183.0" y="2471.0" />
+      <point x="1208.5" y="2471.0" />
+      <point x="65.5" y="177.0" />
+    </edge>
+    <edge source="view.renderMap.MapRender" target="model.world.GameMap" relationship="DEPENDENCY">
+      <point x="0.0" y="80.0" />
+      <point x="1363.0" y="931.0" />
+      <point x="1143.0" y="931.0" />
+      <point x="0.0" y="-177.0" />
+    </edge>
+    <edge source="view.renderMap.TileSet" target="view.renderMap.TileRegion" relationship="TO_MANY">
+      <point x="57.25" y="129.0" />
+      <point x="1380.25" y="1471.0" />
+      <point x="1583.0" y="1471.0" />
+      <point x="1583.0" y="1531.0" />
+      <point x="1750.5" y="1531.0" />
+      <point x="47.5" y="-31.5" />
+    </edge>
+    <edge source="main.Main" target="model.GameModel" relationship="CREATE">
+      <point x="0.0" y="44.0" />
+      <point x="163.0" y="911.0" />
+      <point x="703.0" y="911.0" />
+      <point x="0.0" y="153.0" />
+    </edge>
+    <edge source="model.entity.Player" target="controller.KeyHandler" relationship="DEPENDENCY">
+      <point x="-86.0" y="129.0" />
+      <point x="277.0" y="1571.0" />
+      <point x="123.0" y="1571.0" />
+      <point x="123.0" y="1771.0" />
+      <point x="118.33333333333337" y="1771.0" />
+      <point x="75.33333333333334" y="-237.0" />
+    </edge>
+    <edge source="main.Main" target="view.GameView" relationship="CREATE">
+      <point x="0.0" y="44.0" />
+      <point x="163.0" y="-229.0" />
+      <point x="1463.0" y="-229.0" />
+      <point x="1463.0" y="251.0" />
+      <point x="1384.75" y="251.0" />
+      <point x="61.75" y="81.0" />
+    </edge>
+    <edge source="view.renderMap.AnimatedTile" target="view.Animation.FrameTimeline" relationship="CREATE">
+      <point x="-55.0" y="68.5" />
+      <point x="1388.0" y="2211.0" />
+      <point x="1383.0" y="2211.0" />
+      <point x="1383.0" y="2491.0" />
+      <point x="1373.75" y="2491.0" />
+      <point x="-69.25" y="-105.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Compact" zoom="0.32064546166750724" showDependencies="true" x="945.6120796082439" y="485.4476228561846" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

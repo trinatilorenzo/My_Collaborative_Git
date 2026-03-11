@@ -20,7 +20,6 @@ public class Player extends Entity {
     // COSTRUCTOR
     //-------------------------------------------------------------
     public Player() {
-        // TODO: Make it parametric
 
         solidArea = new Rectangle((SPRITE_FRAME_WIDTH / 2) - (PLAYER_HITBOX_WIDTH/2),
                 (SPRITE_FRAME_HEIGHT/ 2) ,
@@ -59,7 +58,11 @@ public class Player extends Entity {
     public void update(KeyHandler keyH, double deltaMs) {
         super.update(); // reset dx, dy, collisions
 
-        boolean isMoving = updateMovement(keyH, deltaMs);
+        boolean isMoving = false;
+        // Durante l'attacco non aggiorniamo il movimento: resta fermo finché l'animazione non termina
+        if (state != PlayerState.ATTACKING) {
+            isMoving = updateMovement(keyH, deltaMs);
+        }
         updateState(keyH, isMoving);
     }
     //-------------------------------------------------------------
@@ -101,6 +104,11 @@ public class Player extends Entity {
 
     //-------------------------------------------------------------
     private void updateState(KeyHandler keyH, boolean isMoving) {
+        // se sto già attaccando, resto in ATTACKING finché l'animazione non chiama stopAttack()
+        if (state == PlayerState.ATTACKING) {
+            return;
+        }
+
         if (keyH.isAttack()) {
             state = PlayerState.ATTACKING;
         } else if (isMoving) {
