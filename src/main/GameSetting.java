@@ -75,7 +75,7 @@ public class GameSetting {
     public static final int TREE_HEALTH = 3;
 
     // FPS
-    //-----------------------------------------------------------------------
+    //----------------------------------------------------------------------
     public static final int FPS = 120;
     public static final int MAX_FRAME_SKIP = 10;
     //-----------------------------------------------------------------------
