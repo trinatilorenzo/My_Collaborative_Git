@@ -53,7 +53,7 @@ public class GameModel {
             player.update(input, deltaMs);
 
             collisionChecker.checkTile(player);
-            collisionChecker.checkObjects(player);
+            //collisionChecker.checkObjects(player);
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
