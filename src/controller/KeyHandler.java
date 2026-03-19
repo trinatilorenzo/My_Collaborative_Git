@@ -3,12 +3,15 @@ package controller;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import input.InputState;
+
 // - KEY HANDLER CLASS
 //  Manage input from keyboard
 //-------------------------------------------------------------------------------------------------------------------
 public class KeyHandler implements KeyListener {
     private boolean up, down, left, right ;
     private boolean attack;
+    private boolean interact = false; // reserved for future use
 
     private boolean debugToggle = false;
     private boolean pauseToggle = false;
@@ -37,18 +40,13 @@ public class KeyHandler implements KeyListener {
         }
     }
 
-    // Getters for key states
-    public boolean isAttack() { return attack; }
-    public boolean isUp() { return up; }
-    public boolean isDown() { return down; }
-    public boolean isLeft() { return left; }
-    public boolean isRight() { return right; }
-    public boolean isDebugToggle() { return debugToggle; }
-    public boolean isPauseToggle() { return pauseToggle; }
-
     @Override
     public void keyTyped(KeyEvent e) {
 
+    }
+
+    public InputState getInputState() { // translates the keyboard state into the game's input state, it's a bridge between controller and model
+        return new InputState(up, down, left, right, attack, interact, pauseToggle, debugToggle);
     }
 }
 //-------------------------------------------------------------------------------------------------------------------

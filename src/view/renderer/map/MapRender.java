@@ -1,4 +1,4 @@
-package view.renderMap;
+package view.renderer.map;
 
 import model.world.GameMap;
 import model.entity.Player;

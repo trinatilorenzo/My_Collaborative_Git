@@ -1,10 +1,19 @@
 package view;
 
 import model.GameModel;
-import view.renderMap.MapRender;
-import view.renderMap.TileSet;
+import model.object.GameObject;
+import view.renderer.entity.PlayerRender;
+import view.renderer.map.MapRender;
+import view.renderer.map.TileSet;
+
+import view.renderer.object.TreeRenderer;
+
+
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+
 import static main.GameSetting.*;
 
 /**
@@ -22,7 +31,6 @@ public class GameView extends JPanel {
     private TileSet tileSet;
     private PlayerRender playerRender;
     private UI ui_render;
-
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -43,6 +51,13 @@ public class GameView extends JPanel {
 
         //import the UI
         this.ui_render = new UI(model, playerRender, mapRender);
+
+        //this.rendererRegistry = new ObjectRendererRegistry();
+        //rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
+        // Aggiungi altri: rendererRegistry.register(OBJ_Rock.class, new RockRenderer());
+        
+        //TODO: import other asset (object, npc, monster)
+          
     }
     //-------------------------------------------------------------
 
@@ -58,10 +73,11 @@ public class GameView extends JPanel {
         g2.setColor(GAME_BG_COLOR);
         g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        // DRAW THE WORLD
-        
         // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
+        
+        //DRAW OBJECTS
+
         // DRAW THE PLAYER
         playerRender.draw(g2, model.getPlayer());
 
@@ -75,8 +91,8 @@ public class GameView extends JPanel {
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
+
     }
-    //-------------------------------------------------------------
 
     //-------------------------------------------------------------
 

@@ -61,6 +61,14 @@ public class GameSetting {
 
     //-----------------------------------------------------------------------
 
+    // UI SETTINGS
+    //-----------------------------------------------------------------------
+    public static final int TREE_SPRITE_WIDTH = 48;
+    public static final int TREE_SPRITE_HEIGHT = 48;
+    public static final int TREE_HITBOX_WIDTH = 30;
+    public static final int TREE_HITBOX_HEIGHT = 30;
+    public static final int TREE_HEALTH = 3;
+    //-----------------------------------------------------------------------
     // FPS
     //-----------------------------------------------------------------------
     public static final int FPS = 120;

@@ -1,7 +1,8 @@
 package view;
 
 import model.GameModel;
-import view.renderMap.MapRender;
+import view.renderer.entity.PlayerRender;
+import view.renderer.map.MapRender;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

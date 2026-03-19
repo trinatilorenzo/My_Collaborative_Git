@@ -1,11 +1,44 @@
 package model.object;
-import java.awt.image.BufferedImage;
 
+import java.awt.Rectangle;
+
+/**
+ * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world, providing common properties such as position, collision handling, and rendering information.
+ */
 public class GameObject {
 
-    public BufferedImage image;
-    public String name;
-    public int worldX, worldY;
-    public boolean collision = false;
+    protected int worldX, worldY;
+    
+    protected Rectangle solidArea;
+    
+    protected boolean solid;
+    protected boolean removed;
+
+    protected String name;
+
+    public void interact() {
+        // Default interaction behavior (can be overridden by subclasses)
+    }
+
+    public void update(double deltaMs){
+        // Default update behavior (can be overridden by subclasses)
+    }
+
+    // GETTER
+    public boolean isSolid() {
+        return solid;
+    }
+    public boolean isRemoved() {
+        return removed;
+    }
+    public String getName() {
+        return name;
+    }
+    public int getWorldX() {
+        return worldX;
+    }
+    public int getWorldY() {
+        return worldY;
+    }
 
 }

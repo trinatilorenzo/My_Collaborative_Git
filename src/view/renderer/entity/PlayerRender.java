@@ -1,6 +1,7 @@
-package view;
+package view.renderer.entity;
 
 import model.entity.Player;
+import view.SpriteLoader;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 

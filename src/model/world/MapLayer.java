@@ -29,7 +29,7 @@ class MapLayer{
 
     // load the tile id into the array by reading the csv map file
     //-------------------------------------------------------------
-    public void loadMapLayer(String pathFile){
+    public void loadMapLayer(String pathFile){ 
         try {
             InputStream is = getClass().getResourceAsStream(pathFile); // read the file as stream
             BufferedReader br = new BufferedReader(new InputStreamReader(is)); // read the stream with a buffer reader

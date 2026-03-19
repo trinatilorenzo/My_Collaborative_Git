@@ -1,4 +1,4 @@
-package view.renderMap;
+package view.renderer.map;
 
 import javax.imageio.ImageIO;
 import view.Animation.FrameTimeline;

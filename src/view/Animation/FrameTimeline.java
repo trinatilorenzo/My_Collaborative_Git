@@ -4,6 +4,7 @@ package view.Animation;
  * Time-based frame cursor shared by animations.
  * Keeps track of the current frame index using elapsed milliseconds.
  */
+//-------------------------------------------------------------------------------------------------------------------
 public class FrameTimeline {
     private final int frameCount;
     private final double frameDurationMs;

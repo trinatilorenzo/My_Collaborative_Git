@@ -1,6 +1,8 @@
 package model.entity;
 
-import controller.KeyHandler;
+import input.InputState;
+import main.GameSetting.Direction;
+import main.GameSetting.PlayerState;
 
 import java.awt.Rectangle;
 
@@ -12,6 +14,8 @@ import static main.GameSetting.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class Player extends Entity {
 
+    protected int screenX, screenY;
+
     private static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
 
     private PlayerState state;
@@ -20,8 +24,7 @@ public class Player extends Entity {
     // COSTRUCTOR
     //-------------------------------------------------------------
     public Player() {
-        // TODO: Make it parametric
-
+        // Initialize the player's solid area for collision detection
         solidArea = new Rectangle((SPRITE_FRAME_WIDTH / 2) - (PLAYER_HITBOX_WIDTH/2),
                 (SPRITE_FRAME_HEIGHT/ 2) ,
                 PLAYER_HITBOX_WIDTH,
@@ -52,15 +55,14 @@ public class Player extends Entity {
 
     /**
      * Updates the player's state and movement each frame based on input
-     * received from the {@link KeyHandler}.
      */
 
     //-------------------------------------------------------------
-    public void update(KeyHandler keyH, double deltaMs) {
+    public void update(InputState input, double deltaMs) {
         super.update(); // reset dx, dy, collisions
 
-        boolean isMoving = updateMovement(keyH, deltaMs);
-        updateState(keyH, isMoving);
+        boolean isMoving = updateMovement(input, deltaMs);
+        updateState(input, isMoving);
     }
     //-------------------------------------------------------------
 
@@ -71,15 +73,15 @@ public class Player extends Entity {
 
     //-------------------------------------------------------------
 
-    private boolean updateMovement(KeyHandler keyH, double deltaMs) {
+    private boolean updateMovement(InputState input, double deltaMs) {
         double distance = speed * (deltaMs / 1000.0);
         double moveX = 0;
         double moveY = 0;
 
-        if (keyH.isUp())    { moveY -= distance; direction = Direction.UP; }
-        if (keyH.isDown())  { moveY += distance; direction = Direction.DOWN; }
-        if (keyH.isLeft())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = FACING_LEFT; }
-        if (keyH.isRight()) { moveX += distance; direction = Direction.RIGHT; facingDirection = FACING_RIGHT; }
+        if (input.up())    { moveY -= distance; direction = Direction.UP; }
+        if (input.down())  { moveY += distance; direction = Direction.DOWN; }
+        if (input.left())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = FACING_LEFT; }
+        if (input.right()) { moveX += distance; direction = Direction.RIGHT; facingDirection = FACING_RIGHT; }
 
         // Normalizza per mantenere la stessa velocità anche in diagonale (fattore 1/sqrt(2))
         if (moveX != 0 && moveY != 0) {
@@ -100,8 +102,8 @@ public class Player extends Entity {
      */
 
     //-------------------------------------------------------------
-    private void updateState(KeyHandler keyH, boolean isMoving) {
-        if (keyH.isAttack()) {
+    private void updateState(InputState input, boolean isMoving) {
+        if (input.attack()) {
             state = PlayerState.ATTACKING;
         } else if (isMoving) {
             state = PlayerState.WALKING;
@@ -120,6 +122,12 @@ public class Player extends Entity {
     public int getFacingRight() {
         return facingDirection;
     }
+    public int getScreenX() {
+        return screenX;
+    }
+    public int getScreenY() {
+        return screenY;
+    }
     //---------------------------------
 
     // SETTER ----------------------
@@ -128,6 +136,10 @@ public class Player extends Entity {
     }
     public void stopAttack() {
         state = PlayerState.IDLE;
+    }
+        public void setScreenPosition(int screenX, int screenY) {
+        this.screenX = screenX;
+        this.screenY = screenY;
     }
     //---------------------------------
 }

@@ -2,6 +2,7 @@ package controller;
 
 import model.GameModel;
 import view.GameView;
+import input.InputState;
 import main.GameSetting.GameState;
 
 /**
@@ -15,7 +16,7 @@ public class GameController {
     private final GameView view;
     private final KeyHandler keyHandler;
     private final GameLoop loop;
-    private boolean renderOnceOnPause = true;
+    private boolean renderOnceOnPause = true; // flag to control rendering when paused
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -25,8 +26,9 @@ public class GameController {
 
         this.keyHandler = new KeyHandler();
         this.loop = new GameLoop(this);
-        view.addKeyListener(keyHandler);
-        view.setFocusable(true);
+        
+        view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
+        view.setFocusable(true); // ensure the view can receive keyboard focus
     }
     //-------------------------------------------------------------
 
@@ -41,35 +43,38 @@ public class GameController {
     }
     //-------------------------------------------------------------
 
-    // CONTROLL GAME MODEL
-    public void update(double deltaMs) {
+    /**
+     * Update the model status and view rendering
+     */
+    public void update(double deltaMs) { //called by the game loop every frame with a fixed delta time
 
+        InputState input = keyHandler.getInputState();
         // pause toggle edge-triggered
-        if (keyHandler.isPauseToggle()) {
+        if (input.pause()) { 
             model.setGameState(GameState.PAUSED);
         } else {
             model.setGameState(GameState.PLAYING);
             renderOnceOnPause = true;
         }
 
-        // debug flag stored in model
-        model.setDebugMode(keyHandler.isDebugToggle());
+        // debug mode toggle edge-triggered
+        model.setDebugMode(input.debug());
 
-        model.update(keyHandler, deltaMs);
+        model.update(input, deltaMs);
 
         if (model.getGameState() == GameState.PLAYING) {
-            view.updateAnimations(deltaMs);
+            view.updateAnimations(deltaMs); // update animations only when playing
         }
 
     }
     //-------------------------------------------------------------
     // CONTROLL GAME VIEW
-    public void render() {
+    public void render() { // called by the game loop every frame to render the view
         if (model.getGameState() == GameState.PLAYING) {
             view.repaint();
-        } else if (renderOnceOnPause) {
+        } else if (renderOnceOnPause) { // render once when paused to show the pause screen
             view.repaint();
-            renderOnceOnPause = false;
+            renderOnceOnPause = false; 
 
         }
     }

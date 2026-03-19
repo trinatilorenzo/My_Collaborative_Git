@@ -27,7 +27,8 @@ public class GameLoop extends Thread {
     @Override
     public void run() {
         long drawInterval = (long)(1e9 / FPS); // ideal duration of a frame
-        double fixedDeltaMs = drawInterval / 1_000_000.0; // ns -> ms (es. 120 FPS = 8.33 ms)
+        double fixedDeltaMs = drawInterval / 1_000_000.0; // delta time used by model (ns -> ms) (es. 120 FPS = 8.33 ms)
+        
         long lastTime = System.nanoTime(); // when the last frame was drawn
 
         long lastFpsTime = lastTime; // when the last FPS was printed
@@ -37,9 +38,9 @@ public class GameLoop extends Thread {
             // CORE CICLING LOOP (COLOCK TICK)
             long currentTime = System.nanoTime(); // current time
             long deltaNs = currentTime - lastTime; // time since last frame
-            int catchUp = 0;
+            int catchUp = 0; // how many updates we've done to catch up with the current time
 
-            while (deltaNs >= drawInterval && catchUp < MAX_FRAME_SKIP) {
+            while (deltaNs >= drawInterval && catchUp < MAX_FRAME_SKIP) { // fixed timestep loop: if the game slows down, we can do multiple updates before rendering to catch up, until a max number
                 // INNER LOOP (Delay catch up)
                 controller.update(fixedDeltaMs);
 
@@ -60,10 +61,10 @@ public class GameLoop extends Thread {
 
             long sleepNs = drawInterval - (System.nanoTime() - lastTime);
             if (sleepNs > 300_000) {
-                LockSupport.parkNanos(sleepNs - 200_000);
+                LockSupport.parkNanos(sleepNs - 200_000); // park for most of the remaining time, then spin-wait for the last 200 microseconds to improve accuracy
                 long spinUntil = System.nanoTime() + 200_000;
                 while (System.nanoTime() < spinUntil) Thread.onSpinWait();
-            } else if (sleepNs > 0) {
+            } else if (sleepNs > 0) { // if the remaining time is very short, just spin-wait without parking to avoid oversleeping
                 long spinUntil = System.nanoTime() + sleepNs;
                 while (System.nanoTime() < spinUntil) Thread.onSpinWait();
             } else {
