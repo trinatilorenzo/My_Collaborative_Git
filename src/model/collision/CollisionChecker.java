@@ -2,8 +2,10 @@ package model.collision;
 
 import model.entity.Entity;
 import model.GameModel;
+import model.object.GameObject;
 
-import javax.swing.*;
+import java.awt.Rectangle;
+import java.util.List;
 
 import static main.GameSetting.*;
 import static main.GameSetting.Direction.*;
@@ -49,6 +51,46 @@ public class CollisionChecker {
 
         checkAxisX(entity, bounds);
         checkAxisY(entity, bounds);
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Checks collisions between an entity and solid objects in the world.
+     * Collision flags are updated per-axis to match tile handling.
+     */
+    //-------------------------------------------------------------
+    public void checkObjects(Entity entity) {
+        List<GameObject> objects = gameModel.getObjects();
+        if (objects == null || objects.isEmpty()) return;
+
+        EntityBounds bounds = EntityBounds.of(entity);
+        int dx = entity.getDx();
+        int dy = entity.getDy();
+
+        for (GameObject obj : objects) {
+            if (obj == null || obj.isRemoved() || !obj.isSolid()) continue;
+            Rectangle solidArea = obj.getSolidArea();
+            if (solidArea == null) continue;
+
+            int objLeft = obj.getWorldX() + solidArea.x;
+            int objRight = objLeft + solidArea.width - 1;
+            int objTop = obj.getWorldY() + solidArea.y;
+            int objBottom = objTop + solidArea.height - 1;
+
+            if (dx != 0 && overlaps(bounds.leftX + dx, bounds.rightX + dx, bounds.topY, bounds.bottomY,
+                    objLeft, objRight, objTop, objBottom)) {
+                entity.setCollisionX(true);
+            }
+
+            if (dy != 0 && overlaps(bounds.leftX, bounds.rightX, bounds.topY + dy, bounds.bottomY + dy,
+                    objLeft, objRight, objTop, objBottom)) {
+                entity.setCollisionY(true);
+            }
+
+            if (entity.isCollisionX() && entity.isCollisionY()) {
+                break; // both axes blocked; further checks unnecessary
+            }
+        }
     }
     //-------------------------------------------------------------
 
@@ -152,9 +194,13 @@ public class CollisionChecker {
                 || col >= gameModel.getWorldMap().getMaxMapCol();
     }
     //-------------------------------------------------------------
-
-
-
+    private boolean overlaps(int left, int right, int top, int bottom,
+                             int objLeft, int objRight, int objTop, int objBottom) {
+        boolean overlapX = right >= objLeft && left <= objRight;
+        boolean overlapY = bottom >= objTop && top <= objBottom;
+        return overlapX && overlapY;
+    }
+    //-------------------------------------------------------------
 
 }
 //-------------------------------------------------------------------------------------------------------------------

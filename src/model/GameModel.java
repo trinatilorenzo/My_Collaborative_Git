@@ -53,7 +53,7 @@ public class GameModel {
             player.update(input, deltaMs);
 
             collisionChecker.checkTile(player);
-            //collisionChecker.checkObjects(player);
+            collisionChecker.checkObjects(player);
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
@@ -84,8 +84,7 @@ public class GameModel {
     private void spawnStaticObjects() {
         // place a handful of trees near the starting area
         int[][] treeTiles = {
-            {48, 28},
-            {50, 29},
+            {60, 40},
             {52, 27},
             {54, 30},
             {56, 28}
