@@ -1,7 +1,5 @@
 package model.object;
 
-import model.object.GameObject;
-
 /**
  * Represents an item in the game world.
  */

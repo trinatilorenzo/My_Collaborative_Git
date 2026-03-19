@@ -1,7 +1,6 @@
 package view.renderer.object;
 
 import model.object.GameObject;
-import model.GameModel;
 import java.util.HashMap;
 import java.util.Map;
 

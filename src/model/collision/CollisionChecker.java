@@ -111,7 +111,7 @@ public class CollisionChecker {
     }
 
     //-------------------------------------------------------------
-    // TODO: c'è un bug quando mi muovo in orizontale non vanno le collisoni come dovrebbero (cambia di livello )
+
 
     public void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
         if (entity.getDx()!=0) return; // Only update layer on vertical movement
@@ -152,5 +152,9 @@ public class CollisionChecker {
                 || col >= gameModel.getWorldMap().getMaxMapCol();
     }
     //-------------------------------------------------------------
+
+
+
+
 }
 //-------------------------------------------------------------------------------------------------------------------

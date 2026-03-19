@@ -2,17 +2,19 @@ package view;
 
 import model.GameModel;
 import model.object.GameObject;
+import model.object.OBJ_Tree;
+import model.entity.Player;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
 
 import view.renderer.object.TreeRenderer;
+import view.renderer.object.ObjectRender;
+import view.renderer.object.RendererRegistry;
 
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
 
 import static main.GameSetting.*;
 
@@ -31,6 +33,7 @@ public class GameView extends JPanel {
     private TileSet tileSet;
     private PlayerRender playerRender;
     private UI ui_render;
+    private RendererRegistry rendererRegistry;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -52,9 +55,10 @@ public class GameView extends JPanel {
         //import the UI
         this.ui_render = new UI(model, playerRender, mapRender);
 
-        //this.rendererRegistry = new ObjectRendererRegistry();
-        //rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        // Aggiungi altri: rendererRegistry.register(OBJ_Rock.class, new RockRenderer());
+        // object renderers
+        this.rendererRegistry = new RendererRegistry();
+        rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
+        // Aggiungi altri renderer qui quando disponibili
         
         //TODO: import other asset (object, npc, monster)
           
@@ -77,6 +81,7 @@ public class GameView extends JPanel {
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
         
         //DRAW OBJECTS
+        drawObjects(g2);
 
         // DRAW THE PLAYER
         playerRender.draw(g2, model.getPlayer());
@@ -91,6 +96,7 @@ public class GameView extends JPanel {
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
+        updateObjectAnimations(deltaMs);
 
     }
 
@@ -99,6 +105,35 @@ public class GameView extends JPanel {
     // GETTER ----------------------
     public PlayerRender getPlayerRender() {return playerRender;}
     //---------------------------------
+
+    private void drawObjects(Graphics2D g2) {
+        Player player = model.getPlayer();
+
+        for (GameObject obj : model.getObjects()) {
+            @SuppressWarnings("unchecked")
+            ObjectRender<GameObject> renderer = (ObjectRender<GameObject>) rendererRegistry.getRenderer(obj.getClass());
+            if (renderer == null) continue;
+
+            int screenX = obj.getWorldX() - player.getWorldX() + player.getScreenX();
+            int screenY = obj.getWorldY() - player.getWorldY() + player.getScreenY();
+
+            // basic culling to avoid drawing off-screen
+            if (screenX + TILE_SIZE < 0 || screenX > SCREEN_WIDTH || screenY + TILE_SIZE < 0 || screenY > SCREEN_HEIGHT) {
+                continue;
+            }
+
+            renderer.draw(g2, obj, screenX, screenY);
+        }
+    }
+
+    private void updateObjectAnimations(double deltaMs) {
+        for (GameObject obj : model.getObjects()) {
+            @SuppressWarnings("unchecked")
+            ObjectRender<GameObject> renderer = (ObjectRender<GameObject>) rendererRegistry.getRenderer(obj.getClass());
+            if (renderer == null) continue;
+            renderer.update(obj, deltaMs);
+        }
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------

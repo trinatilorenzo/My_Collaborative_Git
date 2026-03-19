@@ -24,7 +24,7 @@ public class OBJ_Tree extends GameObject {
         this.solid = true;
 
         // hitbox
-        this.solidArea = new Rectangle(TREE_SPRITE_WIDTH/2 - (TREE_HITBOX_WIDTH/2), TREE_SPRITE_HEIGHT/2 - (TREE_HITBOX_HEIGHT/2), TREE_HITBOX_WIDTH, TREE_HITBOX_HEIGHT);
+        this.solidArea = new Rectangle(TREE_SPRITE_WIDTH/2 - (TREE_HITBOX_WIDTH/2), 190, TREE_HITBOX_WIDTH, TREE_HITBOX_HEIGHT);
         this.solid = true;
     }
 

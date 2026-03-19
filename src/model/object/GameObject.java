@@ -31,6 +31,9 @@ public class GameObject {
     public boolean isRemoved() {
         return removed;
     }
+    public Rectangle getSolidArea() {
+        return solidArea;
+    }
     public String getName() {
         return name;
     }

@@ -61,7 +61,11 @@ public class Player extends Entity {
     public void update(InputState input, double deltaMs) {
         super.update(); // reset dx, dy, collisions
 
-        boolean isMoving = updateMovement(input, deltaMs);
+        boolean isMoving = false;
+        // Durante l'attacco non aggiorniamo il movimento: resta fermo finché l'animazione non termina
+        if (state != PlayerState.ATTACKING) {
+            isMoving = updateMovement(input, deltaMs);
+        }
         updateState(input, isMoving);
     }
     //-------------------------------------------------------------
@@ -103,6 +107,10 @@ public class Player extends Entity {
 
     //-------------------------------------------------------------
     private void updateState(InputState input, boolean isMoving) {
+        if (state == PlayerState.ATTACKING) {
+            return;
+        }
+
         if (input.attack()) {
             state = PlayerState.ATTACKING;
         } else if (isMoving) {
