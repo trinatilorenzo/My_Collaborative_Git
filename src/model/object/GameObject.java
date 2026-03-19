@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 public class GameObject {
 
     protected int worldX, worldY;
+    protected int width, height;
     
     protected Rectangle solidArea;
     
@@ -42,6 +43,12 @@ public class GameObject {
     }
     public int getWorldY() {
         return worldY;
+    }
+    public int getWidth() {
+        return width;
+    }
+    public int getHeight() {
+        return height;
     }
 
 }

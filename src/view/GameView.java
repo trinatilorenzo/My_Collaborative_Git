@@ -80,11 +80,15 @@ public class GameView extends JPanel {
         // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
         mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
         
+
+        // Y-sorting logic: sort objects by their worldY coordinate
+        drawEntities(g2);
+
         //DRAW OBJECTS
-        drawObjects(g2);
+        //drawObjects(g2);
 
         // DRAW THE PLAYER
-        playerRender.draw(g2, model.getPlayer());
+        //playerRender.draw(g2, model.getPlayer());
 
         // DRAW THE UI
         ui_render.draw(g2);
@@ -99,32 +103,59 @@ public class GameView extends JPanel {
         updateObjectAnimations(deltaMs);
 
     }
-
     //-------------------------------------------------------------
+
+    //--------------------------------------------------------------
+    private void drawEntities(Graphics2D g2) {
+        Player player = model.getPlayer();
+
+        // List to hold all entities for sorting
+        java.util.List<Object> renderList = new java.util.ArrayList<>();
+
+        renderList.add(player);
+        renderList.addAll(model.getObjects());
+
+        // Sort for "bottom_y"
+        renderList.sort(java.util.Comparator.comparingInt(obj -> {
+            if (obj instanceof Player p) {
+                return p.getWorldY() + p.getSolidArea().y + p.getSolidArea().height;
+            } else if (obj instanceof GameObject o) {
+                return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
+            }
+            return 0;
+        }));
+
+        for (Object obj : renderList) {
+
+            if (obj instanceof Player p) {
+                playerRender.draw(g2, p);
+            }
+
+            else if (obj instanceof GameObject o) {
+                @SuppressWarnings("unchecked")
+                ObjectRender<GameObject> renderer =
+                        (ObjectRender<GameObject>) rendererRegistry.getRenderer(o.getClass());
+
+                if (renderer == null) continue; 
+
+                int screenX = o.getWorldX() - player.getWorldX() + player.getScreenX();
+                int screenY = o.getWorldY() - player.getWorldY() + player.getScreenY();
+
+                // culling: draw only if visible on screen
+                if (screenX + o.getHeight() < 0 || screenX > SCREEN_WIDTH ||
+                    screenY + o.getHeight() < 0 || screenY > SCREEN_HEIGHT) {
+                    continue;
+                }
+
+                renderer.draw(g2, o, screenX, screenY);
+            }
+        }
+    }
+    //--------------------------------------------------------------
 
     // GETTER ----------------------
     public PlayerRender getPlayerRender() {return playerRender;}
     //---------------------------------
-
-    private void drawObjects(Graphics2D g2) {
-        Player player = model.getPlayer();
-
-        for (GameObject obj : model.getObjects()) {
-            @SuppressWarnings("unchecked")
-            ObjectRender<GameObject> renderer = (ObjectRender<GameObject>) rendererRegistry.getRenderer(obj.getClass());
-            if (renderer == null) continue;
-
-            int screenX = obj.getWorldX() - player.getWorldX() + player.getScreenX();
-            int screenY = obj.getWorldY() - player.getWorldY() + player.getScreenY();
-
-            // basic culling to avoid drawing off-screen
-            if (screenX + TILE_SIZE < 0 || screenX > SCREEN_WIDTH || screenY + TILE_SIZE < 0 || screenY > SCREEN_HEIGHT) {
-                continue;
-            }
-
-            renderer.draw(g2, obj, screenX, screenY);
-        }
-    }
 
     private void updateObjectAnimations(double deltaMs) {
         for (GameObject obj : model.getObjects()) {

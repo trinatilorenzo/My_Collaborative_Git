@@ -11,8 +11,6 @@ public class OBJ_Tree extends GameObject {
 
     private boolean chopped = false;
     private int health = TREE_HEALTH;
-    private static final int width = TREE_SPRITE_WIDTH;
-    private static final int height = TREE_SPRITE_HEIGHT; 
 
     // COSTRUCTOR
     //---------------------------------------------------------------------------------------------
@@ -20,6 +18,8 @@ public class OBJ_Tree extends GameObject {
         // Qua gestisco posizione, stato e interazione con il player, ma non la logica di disegno che è gestita dalla view 
         this.worldX = worldX;
         this.worldY = worldY;
+        this.width = TREE_SPRITE_WIDTH;
+        this.height = TREE_SPRITE_HEIGHT;
         this.name = "TREE";
         this.solid = true;
 
@@ -47,14 +47,6 @@ public class OBJ_Tree extends GameObject {
 
     public boolean isChopped() {
         return chopped;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     @Override
