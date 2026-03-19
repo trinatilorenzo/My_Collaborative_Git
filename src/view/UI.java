@@ -105,6 +105,16 @@ public class UI {
         g2.setColor(GAME_BG_COLOR);
         g2.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+        ThreeSliceSprite pauseSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
+
+        int bannerWidth = 192 * 3; // desired logical width
+        int bannerHeight = pauseSprite.getHeight();
+
+        int bannerX = (SCREEN_WIDTH - bannerWidth) / 2;
+        int bannerY = (SCREEN_HEIGHT - bannerHeight) / 2;
+
+        pauseSprite.draw(g2, bannerX, bannerY, bannerWidth);
+
         // PAUSE TITLE
         g2.setColor(Color.WHITE);
         g2.setFont(MaruMonica.deriveFont(Font.BOLD, 80));
