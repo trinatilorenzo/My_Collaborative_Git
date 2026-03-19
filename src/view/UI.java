@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import main.GameSetting.*;
 
 import static main.GameSetting.*;
 
@@ -20,6 +21,9 @@ public class UI {
 
     Font arial_40;
     Font arial_80B;
+
+    Font DungeonFont;
+    Font MaruMonica;
 
     // FPS counter (updated once per second)
     private long fpsTimer = System.nanoTime();
@@ -34,6 +38,25 @@ public class UI {
 
         arial_40 = new Font ("Arial", Font. PLAIN, 40) ;
         arial_80B = new Font ("Arial", Font. BOLD, 80);
+
+        InputStream is = getClass().getResourceAsStream("/res/fonts/x12y16pxMaruMonica.ttf");
+        try {
+            MaruMonica = Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (FontFormatException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        is = getClass().getResourceAsStream("/res/fonts/DungeonFont.ttf");
+        try {
+            DungeonFont = Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (FontFormatException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
 
     }
@@ -79,13 +102,31 @@ public class UI {
     }
 
     private void drawPauseScreen() {
-        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 80F));
+        // BG
+        g2.setColor(GAME_BG_COLOR);
+        g2.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        ThreeSliceSprite pauseSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
+
+        int bannerWidth = 192 * 3; // desired logical width
+        int bannerHeight = pauseSprite.getHeight();
+
+        int bannerX = (SCREEN_WIDTH - bannerWidth) / 2;
+        int bannerY = (SCREEN_HEIGHT - bannerHeight) / 2;
+
+        pauseSprite.draw(g2, bannerX, bannerY, bannerWidth);
+
+        // PAUSE TITLE
+        g2.setColor(Color.WHITE);
+        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 80));
         String text = "PAUSED";
 
         int x = getXforCenteredText(text);
         int y = SCREEN_HEIGHT / 2;
 
         g2.drawString(text, x, y);
+
+
     }
 
     public int getXforCenteredText(String text) {
