@@ -67,7 +67,7 @@ public class GameSetting {
     //-----------------------------------------------------------------------
 
     //OBJ
-
+//
     public static final int TREE_SPRITE_WIDTH = 192;
     public static final int TREE_SPRITE_HEIGHT = 256;
     public static final int TREE_HITBOX_WIDTH = 45;
