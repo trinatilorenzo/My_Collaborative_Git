@@ -3,9 +3,10 @@ package model;
 //import controller.KeyHandler;
 import model.collision.CollisionChecker;
 import model.entity.Player;
+import model.object.ObjectManager;
 import model.world.GameMap;
 import model.object.GameObject;
-import model.object.WorldManager;
+
 import model.object.OBJ_Tree;
 
 import input.InputState;
@@ -27,7 +28,8 @@ public class GameModel {
     private GameMap worldGameMap;
     private Player player;
     private CollisionChecker collisionChecker;
-    private WorldManager worldManager;
+    private ObjectManager objectManager;
+
     private GameState gameState;
     private boolean debugMode = false;
 
@@ -37,8 +39,8 @@ public class GameModel {
         worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, GRAPHIC_LAYER_NUM, GAME_LAYER_NUM);
         player = new Player();
         collisionChecker = new CollisionChecker(this);
-        worldManager = new WorldManager();
-        spawnStaticObjects();
+        objectManager = new ObjectManager();
+
         gameState = GameState.PLAYING;
         
     }
@@ -66,7 +68,7 @@ public class GameModel {
             // Prendi l'area dell'attacco del player
             Rectangle attackArea = player.getAttackArea();
 
-            for (GameObject obj : worldManager.getObjects()) {
+            for (GameObject obj : objectManager.getObjects()) {
                 // Verifica solo gli alberi
                 if (obj instanceof OBJ_Tree) {
                     OBJ_Tree tree = (OBJ_Tree) obj;
@@ -80,7 +82,7 @@ public class GameModel {
         }
         // -------------------------
 
-            worldManager.update(deltaMs);
+            objectManager.update(deltaMs);
         }
     }
     //-------------------------------------------------------------
@@ -89,8 +91,8 @@ public class GameModel {
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
     public GameState getGameState() { return gameState; }
-    public List<GameObject> getObjects() { return worldManager.getObjects(); }
-    public WorldManager getWorldManager() { return worldManager; }
+    public List<GameObject> getObjects() { return objectManager.getObjects(); }
+    public ObjectManager getObjectManager() { return objectManager; }
     public boolean isDebugMode() { return debugMode; }
     //---------------------------------
 
@@ -100,27 +102,6 @@ public class GameModel {
 
     //---------------------------------
 
-    /**
-     * Temporary bootstrap of world objects until a proper loader is provided.
-     */
-    private void spawnStaticObjects() {
-        // place a handful of trees near the starting area
-        int[][] treeTiles = {
-            {60, 40},
-            {52, 27},
-            {54, 30},
-            {56, 28},
-            {58, 32},
-            {62, 26},
-            {70, 25}
-        };
-
-        for (int[] tile : treeTiles) {
-            int worldX = tile[0] * TILE_SIZE;
-            int worldY = tile[1] * TILE_SIZE;
-            worldManager.add(new OBJ_Tree(worldX, worldY));
-        }
-    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------

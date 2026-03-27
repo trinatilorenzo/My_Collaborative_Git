@@ -51,6 +51,7 @@ public class GameMap {
      */
     //-------------------------------------------------------------
     private void loadMap(String mapPath) {
+        //TODO: import della mappa tramite joson
         for (int i = 0; i < graphicLayerNum; i++) {
             try {
                 graphicLayers.add(new MapLayer(i, maxMapRow, maxMapCol, mapPath + i + ".csv"));

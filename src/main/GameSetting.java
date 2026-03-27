@@ -37,6 +37,7 @@ public class GameSetting {
     // ASSETT LOCATION
     //-----------------------------------------------------------------------
     public static final String MAP_PATH = "/res/maps/MappaGiocoV0_"; // no number and .csv
+    public static final String MAP_OBJECTS_PATH = "/res/maps/MappaGiocoV0.tmj";
     public static final String TILESET_PATH = "/res/tiles/tileSet1.png";
     //-----------------------------------------------------------------------
 
@@ -72,7 +73,9 @@ public class GameSetting {
     public static final int TREE_SPRITE_HEIGHT = 256;
     public static final int TREE_HITBOX_WIDTH = 40;
     public static final int TREE_HITBOX_HEIGHT = 25;
-    public static final int TREE_HEALTH = 2;
+    public static final int TREE_HEALTH = 4;
+    // Duration (ms) of each frame for tree idle animation
+    public static final double TREE_IDLE_FRAME_MS = 100.0;
 
     // FPS
     //----------------------------------------------------------------------
