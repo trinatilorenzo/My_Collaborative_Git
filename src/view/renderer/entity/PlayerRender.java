@@ -18,8 +18,8 @@ import static main.GameSetting.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class PlayerRender {
 
-    private final int spriteWidth = SPRITE_FRAME_WIDTH;
-    private final int spriteHeight = SPRITE_FRAME_HEIGHT;
+    private final int spriteWidth = PLAYER_SPRITE_WIDTH;
+    private final int spriteHeight = PLAYER_SPRITE_HEIGHT;
     private AnimationManager animationManager;
 
 

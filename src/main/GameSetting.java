@@ -49,10 +49,10 @@ public class GameSetting {
     public static final int START_WORLD_Y = 30 * TILE_SIZE;
     public static final int START_WORLD_LAYER = 1;
     //render
-    public static final int SPRITE_FRAME_WIDTH =  192;
-    public static final int SPRITE_FRAME_HEIGHT =  192;
-    public static final int PLAYER_RENDER_WIDTH = (int)(SPRITE_FRAME_WIDTH * 1.0); 
-    public static final int PLAYER_RENDER_HEIGHT = (int)(SPRITE_FRAME_HEIGHT * 1.0);
+    public static final int PLAYER_SPRITE_WIDTH =  192;
+    public static final int PLAYER_SPRITE_HEIGHT =  192;
+    public static final int PLAYER_RENDER_WIDTH = (int)(PLAYER_SPRITE_WIDTH * 1.0); 
+    public static final int PLAYER_RENDER_HEIGHT = (int)(PLAYER_SPRITE_HEIGHT * 1.0);
     public static final int FACING_RIGHT = 1;
     public static final int FACING_LEFT = -1;
     //hitbox

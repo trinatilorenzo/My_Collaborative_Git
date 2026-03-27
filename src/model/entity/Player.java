@@ -25,11 +25,11 @@ public class Player extends Entity {
     //-------------------------------------------------------------
     public Player() {
         // Initialize the player's solid area for collision detection
-        solidArea = new Rectangle((SPRITE_FRAME_WIDTH / 2) - (PLAYER_HITBOX_WIDTH/2),
-                (SPRITE_FRAME_HEIGHT/ 2) ,
+        solidArea = new Rectangle((PLAYER_SPRITE_WIDTH / 2) - (PLAYER_HITBOX_WIDTH/2),
+                (PLAYER_SPRITE_HEIGHT/ 2) ,
                 PLAYER_HITBOX_WIDTH,
                 PLAYER_HITBOX_HEIGHT);
-
+        
         initializeDefaultValues();
     }
     //-------------------------------------------------------------
@@ -42,8 +42,8 @@ public class Player extends Entity {
         currentLayer = START_WORLD_LAYER;
 
         // Screen position
-        screenX = SCREEN_WIDTH / 2 - PLAYER_RENDER_WIDTH/ 2;
-        screenY = SCREEN_HEIGHT / 2 - PLAYER_RENDER_HEIGHT / 2;
+        screenX = SCREEN_WIDTH / 2 - PLAYER_SPRITE_WIDTH/ 2;
+        screenY = SCREEN_HEIGHT / 2 - PLAYER_SPRITE_HEIGHT / 2;
 
         // Initialize movement values
         speed = START_PLAYER_SPEED;
@@ -121,6 +121,34 @@ public class Player extends Entity {
     }
     //-------------------------------------------------------------
 
+    //----------------------------------------------
+    public Rectangle getAttackArea() {
+        Rectangle attackArea = new Rectangle();
+        attackArea.width = solidArea.width + 20; 
+        attackArea.height = solidArea.height + 20;
+        int hitboxX = worldX + solidArea.x;
+        int hitboxY = worldY + solidArea.y;
+
+        switch(direction) {
+            case UP:
+                attackArea.x = hitboxX + (solidArea.width / 2) - (attackArea.width / 2);
+                attackArea.y = hitboxY - attackArea.height;
+                break;
+            case DOWN:
+                attackArea.x = hitboxX + (solidArea.width / 2) - (attackArea.width / 2);
+                attackArea.y = hitboxY + solidArea.height;
+                break;
+            case LEFT:
+                attackArea.x = hitboxX - attackArea.width;
+                attackArea.y = hitboxY + (solidArea.height / 2) - (attackArea.height / 2);
+                break;
+            case RIGHT:
+                attackArea.x = hitboxX + solidArea.width;
+                attackArea.y = hitboxY + (solidArea.height / 2) - (attackArea.height / 2);
+                break;
+        }
+        return attackArea;
+    }
 
 
     // GETTER ----------------------
