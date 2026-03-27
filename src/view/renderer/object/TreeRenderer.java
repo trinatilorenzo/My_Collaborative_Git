@@ -15,7 +15,7 @@ import static main.GameSetting.*;
 public class TreeRenderer extends ObjectRender<OBJ_Tree> {
 
     private final AnimationManager animationManager;
-    //private final BufferedImage choppedFrame;
+    private final BufferedImage choppedFrame;
 
     public TreeRenderer(){
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/object/tree/Tree1.png");
@@ -29,21 +29,32 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
 
         // Fallback frame used when the tree is chopped (no dedicated stump sprite available)
 
-        //choppedFrame = SpriteLoader.loadSpriteSheet("/res/object/tree/Stump1.png");
+        choppedFrame = SpriteLoader.loadSpriteSheet("/res/object/tree/Stump_1.png");
+        animationManager.addAnimation("tree_chopped", new Animation(new BufferedImage[]{choppedFrame}, 1000, false));
     }
 
-    @Override
+    /*@Override
     public void update(OBJ_Tree tree, double deltaMs) {
         if (!tree.isChopped()) {
             animationManager.playAnimation("tree_idle");
             animationManager.update(deltaMs);
+        } else {
+            // Stop animations when the tree is chopped to show the static stump image
+            animationManager.playAnimation("tree_chopped");
+            animationManager.update(deltaMs);
         }
+    }*/
+   @Override
+    public void update(OBJ_Tree tree, double deltaMs) {
+        // Aggiorna sempre l'animazione idle, ma non la usiamo se l'albero è chopped
+        animationManager.playAnimation("tree_idle");
+        animationManager.update(deltaMs);
     }
 
     @Override
     public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
         if (tree.isChopped()) {
-            //g2.drawImage(choppedFrame, screenX, screenY, tree.getWidth(), tree.getHeight(), null);
+            g2.drawImage(choppedFrame, screenX, screenY, tree.getWidth(), tree.getHeight(), null);
         } else {
             BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
             g2.drawImage(frame, screenX, screenY, tree.getWidth(), tree.getHeight(), null);

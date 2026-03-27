@@ -123,6 +123,21 @@ public class PlayerRender {
         // Solid red border
         g2.setColor(Color.RED);
         g2.drawRect(drawX, drawY, solid.width, solid.height);
+
+        // Draw attack area if attacking
+        if (player.getState() == PlayerState.ATTACKING) {
+            Rectangle attackArea = player.getAttackArea();
+            int attackDrawX = attackArea.x - player.getWorldX() + player.getScreenX();
+            int attackDrawY = attackArea.y - player.getWorldY() + player.getScreenY();
+
+            // Semi-transparent red fill for attack area
+            g2.setColor(new Color(255, 0, 0, 80));
+            g2.fillRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
+
+            // Solid red border for attack area
+            g2.setColor(Color.RED);
+            g2.drawRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
+        }
     }
     //-------------------------------------------------------------
 }

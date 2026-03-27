@@ -55,4 +55,7 @@ public class OBJ_Tree extends GameObject {
         hit();
     }
 
+    public Rectangle getSolidWorldArea() {
+        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+    }
 }

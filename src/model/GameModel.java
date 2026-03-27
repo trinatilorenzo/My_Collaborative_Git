@@ -13,6 +13,7 @@ import main.GameSetting.GameState;
 import main.GameSetting.PlayerState;
 import static main.GameSetting.*;
 
+import java.awt.Rectangle;
 import java.util.List;
 
 
@@ -57,6 +58,27 @@ public class GameModel {
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
+
+        // -------------------------
+        // NUOVA LOGICA ATTACCO
+        // -------------------------
+        if (player.getState() == PlayerState.ATTACKING) {
+            // Prendi l'area dell'attacco del player
+            Rectangle attackArea = player.getAttackArea();
+
+            for (GameObject obj : worldManager.getObjects()) {
+                // Verifica solo gli alberi
+                if (obj instanceof OBJ_Tree) {
+                    OBJ_Tree tree = (OBJ_Tree) obj;
+
+                    // Se collide con l'area di attacco → colpisci
+                    if (attackArea.intersects(tree.getSolidWorldArea())) {
+                        tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
+                    }
+                }
+            }
+        }
+        // -------------------------
 
             worldManager.update(deltaMs);
         }
