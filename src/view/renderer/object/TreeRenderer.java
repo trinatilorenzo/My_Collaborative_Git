@@ -48,9 +48,18 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
     public void update(OBJ_Tree tree, double deltaMs) {
         // Aggiorna sempre l'animazione idle, ma non la usiamo se l'albero è chopped
         animationManager.playAnimation("tree_idle");
-        animationManager.update(deltaMs);
-    }
 
+        // Se l'albero viene colpito, aggiorna più velocemente
+        if (tree.isChopping()) {
+            animationManager.update(deltaMs * 2.5); 
+        } else {
+            animationManager.update(deltaMs); 
+
+        }
+        
+        tree.updateChop(deltaMs);
+    }
+    /*
     @Override
     public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
         if (tree.isChopped()) {
@@ -58,6 +67,20 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         } else {
             BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
             g2.drawImage(frame, screenX, screenY, tree.getWidth(), tree.getHeight(), null);
+        }
+    }*/
+   @Override
+    public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
+        int drawX = screenX + tree.getShakeOffsetX();
+        int drawY = screenY + tree.getShakeOffsetY();
+
+        if (tree.isChopped()) {
+            // Disegna lo stump
+            g2.drawImage(choppedFrame, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
+        } else {
+            // Disegna il frame corrente
+            BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
+            g2.drawImage(frame, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
         }
     }
 

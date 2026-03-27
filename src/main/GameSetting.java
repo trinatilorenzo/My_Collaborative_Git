@@ -72,7 +72,7 @@ public class GameSetting {
     public static final int TREE_SPRITE_HEIGHT = 256;
     public static final int TREE_HITBOX_WIDTH = 40;
     public static final int TREE_HITBOX_HEIGHT = 25;
-    public static final int TREE_HEALTH = 1;
+    public static final int TREE_HEALTH = 2;
 
     // FPS
     //----------------------------------------------------------------------
