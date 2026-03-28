@@ -1,9 +1,12 @@
 package model.world;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +54,7 @@ public class GameMap {
      */
     //-------------------------------------------------------------
     private void loadMap(String mapPath) {
-        //TODO: import della mappa tramite joson
+        /*//TODO: import della mappa tramite joson
         for (int i = 0; i < graphicLayerNum; i++) {
             try {
                 graphicLayers.add(new MapLayer(i, maxMapRow, maxMapCol, mapPath + i + ".csv"));
@@ -61,7 +64,36 @@ public class GameMap {
         }
         for (int i = 0; i < gameLayerNum; i++) {
             loadCollisionLayer(mapPath + "COLLISION" + i + ".csv", i);
+        }*/
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new File("src/res/maps/MappaGiocoV0.tmx"));
+            doc.getDocumentElement().normalize();
+
+            NodeList layers = doc.getElementsByTagName("layer");
+
+            for (int i = 0; i < layers.getLength(); i++) {
+                Element layer = (Element) layers.item(i);
+                int width = Integer.parseInt(layer.getAttribute("width"));
+                int height = Integer.parseInt(layer.getAttribute("height"));
+
+                Element dataElement = (Element) layer.getElementsByTagName("data").item(0);
+
+                if (layer.getAttribute("class").equals("collison")) {
+                    System.out.println("colllayer");
+                    loadCollisionLayer(mapPath + "COLLISION" + (i-7) + ".csv", i-7);
+                } else {
+                    System.out.println("layer" + i);
+                    graphicLayers.add(new MapLayer(i, height, width, dataElement));
+
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("Errore nel parsing del TMX: " + e.getMessage());
         }
+
     }
     //-------------------------------------------------------------
 
