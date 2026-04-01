@@ -56,7 +56,7 @@ class MapLayer{
                 int tileId = gid - 1;      // porta il gid 1‑based a indice 0‑based
                 layer[row][col] = tileId;*/
             }
-            System.out.println();
+            //System.out.println();
         }
         /*System.out.println("Loading layer " + level);
         String[] line = dataElement.getTextContent().split("\n");

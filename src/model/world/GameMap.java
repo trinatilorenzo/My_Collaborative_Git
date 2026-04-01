@@ -10,6 +10,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static main.GameSetting.GRAPHIC_LAYER_NUM;
+
 /**
  * MAP CLASS <-- all the map layer
  * It supports graphical layers for visual
@@ -68,7 +70,7 @@ public class GameMap {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new File("src/res/maps/MappaGiocoV0.tmx"));
+            Document doc = builder.parse(new File("src/res/maps/MappaGiocoV4.tmx"));
             doc.getDocumentElement().normalize();
 
             NodeList layers = doc.getElementsByTagName("layer");
@@ -80,9 +82,10 @@ public class GameMap {
 
                 Element dataElement = (Element) layer.getElementsByTagName("data").item(0);
 
-                if (layer.getAttribute("class").equals("collison")) {
+                if (layer.getAttribute("class").equals("collision")) {
                     System.out.println("colllayer");
-                    loadCollisionLayer(mapPath + "COLLISION" + (i-7) + ".csv", i-7);
+                    //loadCollisionLayer(mapPath + "COLLISION" + (i-9) + ".csv", i-9);
+                    loadCollisionLayer(dataElement, i-GRAPHIC_LAYER_NUM);
                 } else {
                     System.out.println("layer" + i);
                     graphicLayers.add(new MapLayer(i, height, width, dataElement));
@@ -113,6 +116,19 @@ public class GameMap {
             System.err.println("Failed to load collision layer " + layer + " from " + pathFile);
             e.printStackTrace();
         }
+    }
+
+    public void loadCollisionLayer(Element dataElement, int layer){
+
+        String[] num = dataElement.getTextContent().trim().strip().replaceAll("[^0-9,]", "").split(",");
+        int index = 0;
+        for (int row = 0; row < maxMapRow; row++) {
+
+            for (int col = 0; col < maxMapCol; col++) {
+                collisionMap[layer][row][col] = Integer.parseInt(num[index++]) == 2;
+            }
+        }
+
     }
     //-------------------------------------------------------------
 

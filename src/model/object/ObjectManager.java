@@ -20,7 +20,7 @@ public class ObjectManager {
 
     public ObjectManager(){
         // Carica gli oggetti dal file TMX fornito; se fallisce usa il bootstrap statico
-        addOBJFromFile("src/res/maps/MappaGiocoV0.tmx");
+        addOBJFromFile("src/res/maps/MappaGiocoV4.tmx");
         //if (objects.isEmpty()) {
            // spawnStaticObjects();
        // }
@@ -54,7 +54,7 @@ public class ObjectManager {
             NodeList groups = doc.getElementsByTagName("objectgroup");
             for (int i = 0; i < groups.getLength(); i++) {
                 Element group = (Element) groups.item(i);
-                if (!"alberi".equals(group.getAttribute("name"))) {
+                if (!"trees".equals(group.getAttribute("name"))) {
                     continue;
                 }
 

@@ -22,8 +22,8 @@ public class GameSetting {
     //-----------------------------------------------------------------------
     public static final int MAX_WORLD_COL = 100;
     public static final int MAX_WORLD_ROW = 80;
-    public static final int GRAPHIC_LAYER_NUM = 7;
-    public static final int GAME_LAYER_NUM = 3;
+    public static final int GRAPHIC_LAYER_NUM = 9;
+    public static final int GAME_LAYER_NUM = 4;
     public static final Color GAME_BG_COLOR = new Color(71,171,169);
     //-----------------------------------------------------------------------
 
@@ -46,9 +46,9 @@ public class GameSetting {
     //-----------------------------------------------------------------------
     public static final int START_PLAYER_SPEED = 6*60; // pixel per second
     //position
-    public static final int START_WORLD_X = 50 * TILE_SIZE;
-    public static final int START_WORLD_Y = 30 * TILE_SIZE;
-    public static final int START_WORLD_LAYER = 1;
+    public static final int START_WORLD_X = 62 * TILE_SIZE;
+    public static final int START_WORLD_Y = 19 * TILE_SIZE;
+    public static final int START_WORLD_LAYER = 3;
     //render
     public static final int PLAYER_SPRITE_WIDTH =  192;
     public static final int PLAYER_SPRITE_HEIGHT =  192;
