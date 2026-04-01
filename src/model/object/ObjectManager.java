@@ -72,9 +72,9 @@ public class ObjectManager {
                     int worldX = (int) Math.round(x);
                     int worldY = (int) Math.round(y - height); // Tiled usa ancoraggio sul piede
 
-                    if (gid == 801) {
+                    //if (gid == 801) {
                         add(new OBJ_Tree(worldX, worldY));
-                    }
+                    //}
                 }
             }
         } catch (Exception e) {
