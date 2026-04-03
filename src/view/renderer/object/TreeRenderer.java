@@ -7,6 +7,8 @@ import view.SpriteLoader;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 import static main.GameSetting.*;
 /**
@@ -14,27 +16,33 @@ import static main.GameSetting.*;
  */
 public class TreeRenderer extends ObjectRender<OBJ_Tree> {
 
-    private final AnimationManager animationManager;
-    private final BufferedImage choppedFrame; 
+    private final Map<OBJ_Tree, AnimationManager> managerByTree = new HashMap<>();
+    private final BufferedImage[] leavesFrames;
+    private final BufferedImage choppedFrame;
 
     public TreeRenderer(){
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/object/tree/Tree1.png");
 
         // Extract the tree sprite from the sprite sheet
-        BufferedImage[] leavesFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 8, TREE_SPRITE_WIDTH, TREE_SPRITE_HEIGHT);
+        leavesFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 8, TREE_SPRITE_WIDTH, TREE_SPRITE_HEIGHT);
         
-        // Initialize the animation manager and add the idle animation
-        animationManager = new AnimationManager();
-        animationManager.addAnimation("tree_idle", new Animation(leavesFrames, 1000, true));
-
         // Fallback frame used when the tree is chopped (no dedicated stump sprite available)
-
         choppedFrame = SpriteLoader.loadSpriteSheet("/res/object/tree/Stump_1.png");
-        animationManager.addAnimation("tree_chopped", new Animation(new BufferedImage[]{choppedFrame}, 1000, false));
+    }
+
+    private AnimationManager getManager(OBJ_Tree tree) {
+        return managerByTree.computeIfAbsent(tree, t -> {
+            AnimationManager manager = new AnimationManager();
+            manager.addAnimation("tree_idle", new Animation(leavesFrames, 100, true));
+            manager.addAnimation("tree_chopped", new Animation(new BufferedImage[]{choppedFrame}, 1000, false));
+            return manager;
+        });
     }
 
    @Override
     public void update(OBJ_Tree tree, double deltaMs) {
+        AnimationManager animationManager = getManager(tree);
+
         // Aggiorna sempre l'animazione idle, ma non la usiamo se l'albero è chopped
         animationManager.playAnimation("tree_idle");
 
@@ -51,6 +59,8 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
 
    @Override
     public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
+        AnimationManager animationManager = getManager(tree);
+
         int drawX = screenX + tree.getShakeOffsetX();
         int drawY = screenY + tree.getShakeOffsetY();
 

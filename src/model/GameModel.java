@@ -3,9 +3,10 @@ package model;
 //import controller.KeyHandler;
 import model.collision.CollisionChecker;
 import model.entity.Player;
+import model.object.ObjectManager;
 import model.world.GameMap;
 import model.object.GameObject;
-import model.object.WorldManager;
+
 import model.object.OBJ_Tree;
 import model.object.OBJ_Monk;
 
@@ -28,7 +29,8 @@ public class GameModel {
     private GameMap worldGameMap;
     private Player player;
     private CollisionChecker collisionChecker;
-    private WorldManager worldManager;
+    private ObjectManager objectManager;
+
     private GameState gameState;
     private boolean debugMode = false;
 
@@ -38,8 +40,8 @@ public class GameModel {
         worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, GRAPHIC_LAYER_NUM, GAME_LAYER_NUM);
         player = new Player();
         collisionChecker = new CollisionChecker(this);
-        worldManager = new WorldManager();
-        spawnStaticObjects();
+        objectManager = new ObjectManager();
+
         gameState = GameState.PLAYING;
         
     }
@@ -59,43 +61,29 @@ public class GameModel {
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
-            // -------------------------
-            // Interaction with objects
-            // -------------------------
-            
-            for (GameObject obj : worldManager.getObjects()) {
-                
-                if (obj.isRemoved()) continue; // Skip removed objects
-                
-                // proximity check
-                if (obj instanceof OBJ_Monk monk) {
-                    double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) + 
-                                            Math.pow(player.getWorldY() - monk.getWorldY(), 2));
-                    if (dist < OBJ_Monk.DETECTION_RADIUS) {
-                        monk.activate();
-                        if (input.interact()) {
-                            monk.interact();
-                        }
-                    } else {
-                        monk.resetTarget(); // Se il giocatore si allontana, resetta lo stato del monaco
-                    }
-                }
-                
 
-                // Interaction check
-                Rectangle attackArea = player.getAttackArea();
-                if (player.getState() == PlayerState.ATTACKING) {
-                    if (obj instanceof OBJ_Tree) {
-                        OBJ_Tree tree = (OBJ_Tree) obj;
+        // -------------------------
+        // NUOVA LOGICA ATTACCO
+        // -------------------------
+        if (player.getState() == PlayerState.ATTACKING) {
+            // Prendi l'area dell'attacco del player
+            Rectangle attackArea = player.getAttackArea();
 
-                        // Se collide con l'area di attacco → colpisci
-                        if (attackArea.intersects(tree.getSolidWorldArea())) {
-                            tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
-                        }
+            for (GameObject obj : objectManager.getObjects()) {
+                // Verifica solo gli alberi
+                if (obj instanceof OBJ_Tree) {
+                    OBJ_Tree tree = (OBJ_Tree) obj;
+
+                    // Se collide con l'area di attacco → colpisci
+                    if (attackArea.intersects(tree.getSolidWorldArea())) {
+                        tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
                     }
                 }
             }
-            worldManager.update(deltaMs);
+        }
+        // -------------------------
+
+            objectManager.update(deltaMs);
         }
     }
     //-------------------------------------------------------------
@@ -104,8 +92,8 @@ public class GameModel {
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
     public GameState getGameState() { return gameState; }
-    public List<GameObject> getObjects() { return worldManager.getObjects(); }
-    public WorldManager getWorldManager() { return worldManager; }
+    public List<GameObject> getObjects() { return objectManager.getObjects(); }
+    public ObjectManager getObjectManager() { return objectManager; }
     public boolean isDebugMode() { return debugMode; }
     //---------------------------------
 
@@ -117,7 +105,7 @@ public class GameModel {
 
     /**
      * Temporary bootstrap of world objects until a proper loader is provided.
-     */
+     *//*
     private void spawnStaticObjects() {
         // place a handful of trees near the starting area
         int[][] treeTiles = {
@@ -133,11 +121,9 @@ public class GameModel {
         for (int[] tile : treeTiles) {
             int worldX = tile[0] * TILE_SIZE;
             int worldY = tile[1] * TILE_SIZE;
-            worldManager.add(new OBJ_Tree(worldX, worldY));
+            objectManager.add(new OBJ_Tree(worldX, worldY));
         }
-
-        worldManager.add(new OBJ_Monk(50 * TILE_SIZE, 27 * TILE_SIZE));
-    }
+    }*/
 
 }
 //-------------------------------------------------------------------------------------------------------------------

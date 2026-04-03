@@ -1,5 +1,7 @@
 package model.world;
 
+import org.w3c.dom.Element;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,38 +20,56 @@ class MapLayer{
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public MapLayer(int level, int maxMapRow, int maxMapCol, String pathFile){
+    public MapLayer(int level, int maxMapRow, int maxMapCol, Element dataElement){
         this.layer = new int[maxMapRow][maxMapCol];
         this.level = level;
         this.pathFile = pathFile;
 
-        loadMapLayer(pathFile); // load the map when a layer is created
+        loadMapLayer(dataElement); // load the map when a layer is created
     }
     //-------------------------------------------------------------
 
     // load the tile id into the array by reading the csv map file
     //-------------------------------------------------------------
-    public void loadMapLayer(String pathFile){ 
-        try {
-            InputStream is = getClass().getResourceAsStream(pathFile); // read the file as stream
-            BufferedReader br = new BufferedReader(new InputStreamReader(is)); // read the stream with a buffer reader
+    public void loadMapLayer(Element dataElement){
 
-            if (is == null) {
-                throw new RuntimeException("File not found: " + pathFile);
+        String[] num = dataElement.getTextContent().trim().strip().replaceAll("[^0-9,]", "").split(",");
+        int index = 0;
+        for (int row = 0; row < layer.length; row++) {
+
+            for (int col = 0; col < layer[row].length; col++) {
+                layer[row][col] = Integer.parseInt(num[index++])-1;
+                //System.out.print(layer[row][col]);
+                /*int gid = Integer.parseInt(num[index++]);
+
+                if (gid == 0) {            // 0 = cella vuota
+                    layer[row][col] = -1;
+                    continue;
+                }
+
+// gestisci solo il tileset principale (firstgid=1)
+                if (gid >= 801) {          // secondo tileset: per ora non disegnarlo
+                    layer[row][col] = -1;
+                    continue;
+                }
+
+                int tileId = gid - 1;      // porta il gid 1‑based a indice 0‑based
+                layer[row][col] = tileId;*/
             }
-            for (int row = 0; row < layer.length; row++) {
-                String line = br.readLine(); // read a line of the csv file
-                if (line == null) break; 
-                String numbers[] = line.split(","); // split the line by comma to get the tile id as string array
-                for (int col = 0; col < layer[row].length; col++) {
+            //System.out.println();
+        }
+        /*System.out.println("Loading layer " + level);
+        String[] line = dataElement.getTextContent().split("\n");
+
+            for (int row = 0; row < line.length; row++) {
+                String numbers[] = line[row].replaceAll("[^0-9,]", "").split(","); // split the line by comma to get the tile id as string array
+                for (int col = 0; col < numbers.length; col++) {
                     layer[row][col] = Integer.parseInt(numbers[col]);
                 }
             }
-            br.close();
+*/
 
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+
     }
     //-------------------------------------------------------------
 

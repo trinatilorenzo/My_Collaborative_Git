@@ -129,7 +129,12 @@ public class TileSet {
     //-------------------------------------------------------------
     private void loadAnimatedTiles() {
         // ESEMPIO 1: tile acqua (ID base 10, frame 10-13, velocità media)
-        animatedTiles.put(5, new AnimatedTile(new int[]{5, 6, 7, 8, 9,10,11}, 100));
+        //TODO: load from file
+
+        animatedTiles.put(5, new AnimatedTile(new int[]{5, 6, 7, 8, 9,10,11,12}, 100));
+        animatedTiles.put(13, new AnimatedTile(new int[]{13, 33, 53, 73, 14,34,54,74}, 100));
+        animatedTiles.put(16, new AnimatedTile(new int[]{16, 36, 56, 76, 17,37,57,77}, 100));
+        animatedTiles.put(18, new AnimatedTile(new int[]{18, 19, 38, 39, 58, 59,79,79}, 100));
 
         // AGGIUNGI QUI LE TUE TILE ANIMATE
         // animatedTiles.put(ID_BASE, new AnimatedTile(new int[]{frame1, frame2, frame3, ...}, delay));

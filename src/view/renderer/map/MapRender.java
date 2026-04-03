@@ -96,47 +96,63 @@ public class MapRender {
     public void drawAllGameLayers(GameMap gameMap, Player player, Graphics2D g2) {
 
         Color[] layerColors = {
-                new Color(255, 0, 0, 80),   // rosso  - layer 0
-                new Color(0, 0, 255, 80),   // blu    - layer 1
-                new Color(0, 255, 0, 80),   // verde  - layer 2
+                new Color(255, 0, 0, 80),    // layer 0
+                new Color(0, 0, 255, 80),    // layer 1
+                new Color(0, 255, 0, 80),    // layer 2
+                new Color(255, 97, 0, 80)    // layer 3
         };
 
-        // camera offset
         int camOffsetX = -player.getWorldX() + player.getScreenX();
         int camOffsetY = -player.getWorldY() + player.getScreenY();
 
         Stroke originalStroke = g2.getStroke();
         Font originalFont = g2.getFont();
+
         g2.setStroke(new BasicStroke(1));
         g2.setFont(new Font("Arial", Font.BOLD, 10));
 
-        for (int layer = GAME_LAYER_NUM -1; layer >= 0 ; layer--) {
-            Color fill = layer < layerColors.length
-                    ? layerColors[layer]
-                    : new Color(255, 255, 0, 80);
-            Color border = new Color(fill.getRed(), fill.getGreen(), fill.getBlue(), 160);
+        for (int row = 0; row < gameMap.getMaxMapRow(); row++) {
+            for (int col = 0; col < gameMap.getMaxMapCol(); col++) {
 
-            for (int row = 0; row < gameMap.getMaxMapRow(); row++) {
-                for (int col = 0; col < gameMap.getMaxMapCol(); col++) {
+                int visibleLayer = -1;
 
-                    if (gameMap.hasCollision(layer, row, col) ) continue;
-
-                    int screenX = col * TILE_SIZE + camOffsetX;
-                    int screenY = row * TILE_SIZE + camOffsetY;
-
-
-                    if (screenX + TILE_SIZE < 0 || screenX > SCREEN_WIDTH ||
-                            screenY + TILE_SIZE < 0 || screenY > SCREEN_HEIGHT) continue;
-
-                    g2.setColor(fill);
-                    g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
-
-                    g2.setColor(border);
-                    g2.drawRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
-
-                    g2.setColor(Color.WHITE);
-                    g2.drawString("L" + layer, screenX + 2, screenY + 12);
+                // Cerca il layer più alto calpestabile
+                for (int layer = GAME_LAYER_NUM - 1; layer >= 0; layer--) {
+                    if (!gameMap.hasCollision(layer, row, col)) {
+                        visibleLayer = layer;
+                        break;
+                    }
                 }
+
+                if (visibleLayer == -1) continue;
+
+                int screenX = col * TILE_SIZE + camOffsetX;
+                int screenY = row * TILE_SIZE + camOffsetY;
+
+                if (screenX + TILE_SIZE < 0 || screenX > SCREEN_WIDTH ||
+                        screenY + TILE_SIZE < 0 || screenY > SCREEN_HEIGHT) {
+                    continue;
+                }
+
+                Color fill = visibleLayer < layerColors.length
+                        ? layerColors[visibleLayer]
+                        : new Color(255, 255, 0, 80);
+
+                Color border = new Color(
+                        fill.getRed(),
+                        fill.getGreen(),
+                        fill.getBlue(),
+                        160
+                );
+
+                g2.setColor(fill);
+                g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+                g2.setColor(border);
+                g2.drawRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+                g2.setColor(Color.WHITE);
+                g2.drawString("L" + visibleLayer, screenX + 2, screenY + 12);
             }
         }
 
