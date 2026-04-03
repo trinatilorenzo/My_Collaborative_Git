@@ -43,6 +43,7 @@ public class OBJ_Monk extends GameObject {
     }
 
     @Override
+    /*
     public void interact() {
         if (state == MonkState.DISAPPEARED || state == MonkState.DISAPPEARING) return;
 
@@ -58,6 +59,28 @@ public class OBJ_Monk extends GameObject {
             state = MonkState.DISAPPEARING; 
             this.solid = false;
         }
+    }*/
+
+    public void interact() {
+        if (state == MonkState.IDLE){
+            state = MonkState.TALKING;
+        };
+    }
+
+    public String getCurrentDialogue() {
+        if (dialogueIndex < dialogues.length) {
+            return dialogues[dialogueIndex];
+        } else {
+            return null; // No more dialogues
+        }
+    }
+
+    public boolean hasFinishedDialogue() {
+        return dialogueIndex >= dialogues.length;
+    }
+
+    public void advanceDialogue() {
+        dialogueIndex++;
     }
 
     public void updateDisappearing() {
@@ -66,14 +89,13 @@ public class OBJ_Monk extends GameObject {
         }
     }
 
-    public void resetTarget() {
-    // Se stava parlando o era attivo, torna a guardarsi intorno
-    if (state == MonkState.TALKING) {
+    public void reset() {
         state = MonkState.IDLE;
-        dialogueIndex = 0; // resetta il dialogo
+        dialogueIndex = 0;
     }
-}
+
     // GETTERS
     public MonkState getState() { return state; }
+    public void setState(MonkState state) { this.state = state; }
 
 }

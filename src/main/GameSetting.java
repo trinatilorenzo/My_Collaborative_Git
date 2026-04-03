@@ -47,7 +47,7 @@ public class GameSetting {
     public static final int START_PLAYER_SPEED = 6*60; // pixel per second
     //position
     public static final int START_WORLD_X = 62 * TILE_SIZE;
-    public static final int START_WORLD_Y = 19 * TILE_SIZE;
+    public static final int START_WORLD_Y = 21 * TILE_SIZE;
     public static final int START_WORLD_LAYER = 3;
     //render
     public static final int PLAYER_SPRITE_WIDTH =  192;

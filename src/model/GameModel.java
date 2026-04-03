@@ -33,6 +33,7 @@ public class GameModel {
     private OBJ_Monk monk; //FOR TESTING PURPOSES, TO BE REMOVED
     private GameState gameState;
     private boolean debugMode = false;
+    private String currentDialogue = "";
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -62,45 +63,63 @@ public class GameModel {
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
-            // -------------------------
-            // Interaction with objects
-            // -------------------------
-            
-            for (GameObject obj : objectManager.getObjects()) {
-                
-                if (obj.isRemoved()) continue; // Skip removed objects
-                
-                // proximity check
-                if (obj instanceof OBJ_Monk monk) {
-                    double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) + 
-                                            Math.pow(player.getWorldY() - monk.getWorldY(), 2));
-                    if (dist < OBJ_Monk.DETECTION_RADIUS) {
-                        monk.activate();
-                        if (input.interact()) {
-                            monk.interact();
-                        }
-                    } else {
-                        monk.resetTarget(); // Se il giocatore si allontana, resetta lo stato del monaco
-                    }
-                }
-                
-
-                // Interaction check
-                Rectangle attackArea = player.getAttackArea();
-                if (player.getState() == PlayerState.ATTACKING) {
-                    if (obj instanceof OBJ_Tree) {
-                        OBJ_Tree tree = (OBJ_Tree) obj;
-
-                        // Se collide con l'area di attacco → colpisci
-                        if (attackArea.intersects(tree.getSolidWorldArea())) {
-                            tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
-                        }
-                    }
-                }
-            }   
+            updateInteractions(input);
             
             objectManager.update(deltaMs);
         }
+    }
+
+    // Interactions with objects 
+    private void updateInteractions(InputState input) {
+
+        for (GameObject obj : objectManager.getObjects()) {
+            
+            if (obj.isRemoved()) continue; // Skip removed objects
+
+            // oggetti che richiedono attacco
+            Rectangle attackArea = player.getAttackArea();
+            if (player.getState() == PlayerState.ATTACKING) {
+                if (obj instanceof OBJ_Tree) {
+                    OBJ_Tree tree = (OBJ_Tree) obj;
+
+                    // Se collide con l'area di attacco → colpisci
+                    if (attackArea.intersects(tree.getSolidWorldArea())) {
+                        tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
+                    }
+                }
+            }
+            
+            // oggetti che richiedono vicinanza con il player 
+            double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) + 
+                                    Math.pow(player.getWorldY() - monk.getWorldY(), 2));
+            if (obj instanceof OBJ_Monk monk) {
+                if (dist < OBJ_Monk.DETECTION_RADIUS) {  // In range
+
+                    if (monk.getState() == OBJ_Monk.MonkState.IDLE) {
+                        monk.interact(); 
+                        this.currentDialogue = monk.getCurrentDialogue(); 
+                    }
+
+                    if (input.interact()) {
+                        monk.advanceDialogue();
+                        
+                        if (!monk.hasFinishedDialogue()) {
+                            this.currentDialogue = monk.getCurrentDialogue();
+                        } else {
+                            this.currentDialogue = ""; 
+                            monk.setState(OBJ_Monk.MonkState.DISAPPEARING);
+                        }
+                    }
+                } else {
+                    // 3. FUORI RAGGIO: Reset se il giocatore si allontana
+                    if (monk.getState() == OBJ_Monk.MonkState.TALKING) {
+                        monk.reset();
+                        this.currentDialogue = ""; 
+                    }
+                }
+            }  
+        } 
+            
     }
     //-------------------------------------------------------------
     // GETTER ----------------------
@@ -111,6 +130,7 @@ public class GameModel {
     public List<GameObject> getObjects() { return objectManager.getObjects(); }
     public ObjectManager getObjectManager() { return objectManager; }
     public boolean isDebugMode() { return debugMode; }
+    public String getCurrentDialogue() { return currentDialogue; }
     //---------------------------------
 
     // SETTER ----------------------
