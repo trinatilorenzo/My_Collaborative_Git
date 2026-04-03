@@ -26,7 +26,7 @@ public final class GameConfig {
 
     private final ScreenConfig screenConfig;
     private final MapConfig mapConfig;
-    private final PlayerConfig playerConfig;
+    private final EntityConfig entityConfig;
     private final ObjConfig ObjConfig;
 
     private Document mapDoc;
@@ -45,7 +45,7 @@ public final class GameConfig {
 
         this.screenConfig = new ScreenConfig(TILE_SIZE, SCALE, MAX_SCREEN_COL, MAX_SCREEN_ROW, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
-        this.playerConfig = new PlayerConfig(screenConfig);
+        this.entityConfig = new EntityConfig(screenConfig);
         this.ObjConfig = new ObjConfig();
     }
 
@@ -72,8 +72,8 @@ public final class GameConfig {
         return mapConfig;
     }
 
-    public PlayerConfig playerConfig() {
-        return playerConfig;
+    public EntityConfig entityConfig() {
+        return entityConfig;
     }
 
     public ObjConfig ObjConfig() {

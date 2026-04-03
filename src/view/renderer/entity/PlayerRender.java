@@ -1,6 +1,6 @@
 package view.renderer.entity;
 
-import main.CONFIG.PlayerConfig;
+import main.CONFIG.EntityConfig;
 import main.ENUM.Direction;
 import main.ENUM.PlayerState;
 import model.entity.Player;
@@ -20,12 +20,12 @@ import java.awt.image.BufferedImage;
 public class PlayerRender {
 
     private AnimationManager animationManager;
-    private final PlayerConfig playerConfig;
+    private final EntityConfig entityConfig;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public PlayerRender(PlayerConfig playerConfig) {
-        this.playerConfig = playerConfig;
+    public PlayerRender(EntityConfig entityConfig) {
+        this.entityConfig = entityConfig;
         loadAnimations();
     }
     //-------------------------------------------------------------
@@ -37,11 +37,11 @@ public class PlayerRender {
 
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
 
-        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
-        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
+        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         // frame duration in milliseconds
@@ -62,17 +62,17 @@ public class PlayerRender {
         if (player.getFacing()!= Direction.RIGHT) {
             // Flip the image horizontally for left direction
             g2.drawImage(frame,
-                    player.getScreenX() + PlayerConfig.RENDER_WIDTH,
-                    player.getScreenY(), -PlayerConfig.RENDER_WIDTH,
-                    PlayerConfig.RENDER_HEIGHT,
+                    player.getScreenX() + EntityConfig.PLAYER_RENDER_WIDTH,
+                    player.getScreenY(), -EntityConfig.PLAYER_RENDER_HEIGHT,
+                    EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
         } else {
             // Draw normally for right direction
             g2.drawImage(frame,
                     player.getScreenX(),
                     player.getScreenY(),
-                    PlayerConfig.RENDER_WIDTH,
-                    PlayerConfig.RENDER_HEIGHT,
+                    EntityConfig.PLAYER_RENDER_WIDTH,
+                    EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
         }
 

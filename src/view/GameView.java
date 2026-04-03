@@ -4,7 +4,7 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.ScreenConfig;
 import model.GameModel;
 import model.object.GameObject;
-import model.object.OBJ_Monk;
+import model.entity.Monk;
 import model.object.OBJ_Tree;
 import model.entity.Player;
 import view.UI.UI;
@@ -15,7 +15,7 @@ import view.renderer.map.TileSet;
 import view.renderer.object.TreeRenderer;
 import view.renderer.object.ObjectRender;
 import view.renderer.object.RendererRegistry;
-import view.renderer.object.MonkRenderer;
+import view.renderer.entity.MonkRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,6 +36,7 @@ public class GameView extends JPanel {
     private MapRender mapRender;
     private TileSet tileSet;
     private PlayerRender playerRender;
+    private MonkRenderer monkRenderer;
     private UI ui_render;
     private RendererRegistry rendererRegistry;
 
@@ -58,7 +59,9 @@ public class GameView extends JPanel {
         this.tileSet = new TileSet(GS.TILESET_PATH, GS.mapConfig().ORIGINAL_TILESIZE(), GS.mapConfig().MAX_TILESET_ROW, GS.mapConfig().MAX_TILESET_COL);
 
         // import the player Render
-        this.playerRender = new PlayerRender(GS.playerConfig());
+        this.playerRender = new PlayerRender(GS.entityConfig());
+
+        this.monkRenderer = new MonkRenderer(GS.entityConfig());
 
         //import the UI
         this.ui_render = new UI(model, playerRender, mapRender,screenCfg,GS.mapConfig());
@@ -66,7 +69,6 @@ public class GameView extends JPanel {
         // object renderers
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        rendererRegistry.register(OBJ_Monk.class, new MonkRenderer(GS.playerConfig()));
         
         //TODO: import other asset (object, npc, monster)
           
@@ -111,6 +113,7 @@ public class GameView extends JPanel {
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
+        monkRenderer.update(model.getMonk(), deltaMs);
         updateObjectAnimations(deltaMs);
 
     }
@@ -119,17 +122,21 @@ public class GameView extends JPanel {
     //--------------------------------------------------------------
     private void drawEntities(Graphics2D g2) {
         Player player = model.getPlayer();
+        Monk monk = model.getMonk();
 
         // List to hold all entities for sorting
         java.util.List<Object> renderList = new java.util.ArrayList<>();
 
         renderList.add(player);
+        renderList.add(monk);
         renderList.addAll(model.getObjects());
 
         // Sort for "bottom_y"
         renderList.sort(java.util.Comparator.comparingInt(obj -> {
             if (obj instanceof Player p) {
                 return p.getWorldY() + p.getSolidArea().y + p.getSolidArea().height;
+            } else if (obj instanceof Monk m) {
+                return m.getWorldY() + m.getSolidArea().y + m.getSolidArea().height;
             } else if (obj instanceof GameObject o) {
                 return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
             }
@@ -140,6 +147,11 @@ public class GameView extends JPanel {
 
             if (obj instanceof Player p) {
                 playerRender.draw(g2, p);
+            }
+            if (obj instanceof Monk m) {
+                int screenX = m.getWorldX() - player.getWorldX() + player.getScreenX();
+                int screenY = m.getWorldY() - player.getWorldY() + player.getScreenY();
+                monkRenderer.draw(g2, m, screenX, screenY);
             }
 
             else if (obj instanceof GameObject o) {

@@ -1,7 +1,7 @@
 package model.entity;
 
 import input.InputState;
-import main.CONFIG.PlayerConfig;
+import main.CONFIG.EntityConfig;
 import main.ENUM.Direction;
 import main.ENUM.PlayerState;
 
@@ -17,45 +17,43 @@ import java.awt.Rectangle;
 public class Player extends Entity {
 
     protected int screenX, screenY;
-
     private static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
-
     private PlayerState state;
-
     private Direction facingDirection;
+    private EntityConfig entityConfig;
 
-    private PlayerConfig playerConfig;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public Player(PlayerConfig playerConfig) {
-        //get the playerConfig
-        this.playerConfig = playerConfig;
+    public Player(EntityConfig entityConfig) {
+        //get the entityConfig
+        this.entityConfig = entityConfig;
         // Initialize the player's solid area for collision detection
-        solidArea = new Rectangle((playerConfig.SPRITE_WIDTH / 2) - (playerConfig.PLAYER_HITBOX_WIDTH/2),
-                                        (playerConfig.SPRITE_HEIGHT / 2) ,
-                                        playerConfig.PLAYER_HITBOX_WIDTH,
-                                        playerConfig.PLAYER_HITBOX_HEIGHT);
+        solidArea = new Rectangle((entityConfig.SPRITE_WIDTH / 2) - (entityConfig.PLAYER_HITBOX_WIDTH/2),
+                                        (entityConfig.SPRITE_HEIGHT / 2) ,
+                                        entityConfig.PLAYER_HITBOX_WIDTH,
+                                        entityConfig.PLAYER_HITBOX_HEIGHT);
 
         initializeDefaultValues();
+
     }
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     private void initializeDefaultValues() {
         // Game start position
-        worldX = playerConfig.START_WORLD_X();
-        worldY = playerConfig.START_WORLD_Y();
-        currentLayer = playerConfig.START_WORLD_LAYER;
+        worldX = entityConfig.START_WORLD_X();
+        worldY = entityConfig.START_WORLD_Y();
+        currentLayer = entityConfig.START_WORLD_LAYER;
 
         // Screen position
-        screenX = playerConfig.SCREEN_POSX();
-        screenY = playerConfig.SCREEN_POSY();
+        screenX = entityConfig.SCREEN_POSX();
+        screenY = entityConfig.SCREEN_POSY();
 
         // Initialize movement values
-        speed = playerConfig.START_PLAYER_SPEED;
-        direction = playerConfig.FACING;
-        facingDirection = playerConfig.FACING;
+        speed = entityConfig.START_PLAYER_SPEED;
+        direction = entityConfig.FACING;
+        facingDirection = entityConfig.FACING;
         state = PlayerState.IDLE;
     }
     //-------------------------------------------------------------
@@ -129,8 +127,8 @@ public class Player extends Entity {
     //----------------------------------------------
     public Rectangle getAttackArea() {
         Rectangle attackArea = new Rectangle();
-        attackArea.width = solidArea.width +playerConfig.RANGE_ATTACK;
-        attackArea.height = solidArea.height + playerConfig.RANGE_ATTACK;
+        attackArea.width = solidArea.width + entityConfig.RANGE_ATTACK;
+        attackArea.height = solidArea.height + entityConfig.RANGE_ATTACK;
         int hitboxX = worldX + solidArea.x;
         int hitboxY = worldY + solidArea.y;
 

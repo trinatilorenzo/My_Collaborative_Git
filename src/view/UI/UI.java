@@ -77,9 +77,9 @@ public class UI {
 
             case PLAYING :
                 //PLAY STATE
-                if (!gameModel.getCurrentDialogue().isEmpty()){
+               /* if (!gameModel.getCurrentDialogue().isEmpty()){
                     drawDialogueWindow();
-                }
+                }*/
                 break;
 
             case PAUSED :
@@ -161,10 +161,10 @@ public class UI {
         int textY = y + 80;
 
         // Disegno riga per riga (se usi \n nel testo)
-        for (String line : gameModel.getCurrentDialogue().split("\n")) {
+        /*for (String line : gameModel.getCurrentDialogue().split("\n")) {
             g2.drawString(line, textX, textY);
             textY += 40;
-        }
+        }*/
         
         // Indicatore per il giocatore
         g2.setFont(MaruMonica.deriveFont(Font.ITALIC, 22F));

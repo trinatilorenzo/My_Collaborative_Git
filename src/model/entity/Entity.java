@@ -16,6 +16,7 @@ public class Entity {
     protected int dx, dy; // movement deltas per frame
     protected Direction direction;
     protected int currentLayer;
+    protected String name;
 
     // Hitbox and collision
     protected Rectangle solidArea;

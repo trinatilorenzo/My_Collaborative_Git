@@ -5,7 +5,7 @@ import main.ENUM.PlayerState;
 import main.CONFIG.GameConfig;
 import model.collision.CollisionChecker;
 import model.entity.Player;
-import model.object.OBJ_Monk;
+import model.entity.Monk;
 import model.object.ObjectManager;
 import model.world.GameMap;
 import model.object.GameObject;
@@ -24,29 +24,35 @@ import java.util.List;
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
 
-    private GameConfig gameConfig;
-    private GameMap worldGameMap;
-    private Player player;
-    private CollisionChecker collisionChecker;
-    private ObjectManager objectManager;
-    private OBJ_Monk monk; //FOR TESTING PURPOSES, TO BE REMOVED
+    private final GameConfig gameConfig;
+
+    private final CollisionChecker collisionChecker;
+
+    private final GameMap worldGameMap;
+    private final ObjectManager objectManager;
+
+    private final Player player;
+    private final Monk monk;
+
     private GameState gameState;
     private boolean debugMode = false;
-    private String currentDialogue = "";
 
-    // COSTRUCTOR
+
+    /**
+     * COSTRUCTOR
+      */
     //-------------------------------------------------------------
     public GameModel(GameConfig GS) {
         gameConfig = GS;
         worldGameMap = new GameMap(GS.mapConfig(), GS.mapDoc());
-        player = new Player(GS.playerConfig());
+        player = new Player(GS.entityConfig());
 
         collisionChecker = new CollisionChecker(this);
         objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
 
         //TODO leggere la posizione del monk dal file
-        monk = new OBJ_Monk(62 * GS.screenConfig().TILE_SIZE(), 18* GS.screenConfig().TILE_SIZE(), GS.playerConfig()); // Posizione di test
-        objectManager.add(monk);
+        monk = new Monk(62 * GS.screenConfig().TILE_SIZE(), 18* GS.screenConfig().TILE_SIZE(), GS.entityConfig());
+
         gameState = GameState.PLAYING;
         
     }
@@ -71,10 +77,13 @@ public class GameModel {
             objectManager.update(deltaMs);
         }
     }
-
+    //-------------------------------------------------------------
     //TODO controllare bene
 
-    // Interactions with objects
+    /**
+     * Interactions with objects
+     */
+    //-------------------------------------------------------------
     private void updateInteractions(InputState input) {
 
         for (GameObject obj : objectManager.getObjects()) {
@@ -94,13 +103,16 @@ public class GameModel {
                 }
             }
 
+            //TODO interazione con il monaco che va fatta in collison chechker
+
             // oggetti che richiedono vicinanza con il player
+            /*
             double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) +
                                     Math.pow(player.getWorldY() - monk.getWorldY(), 2));
-            if (obj instanceof OBJ_Monk monk) {
-                if (dist < OBJ_Monk.DETECTION_RADIUS) {  // In range
+            if (obj instanceof Monk monk) {
+                if (dist < Monk.DETECTION_RADIUS) {  // In range
 
-                    if (monk.getState() == OBJ_Monk.MonkState.IDLE) {
+                    if (monk.getState() == Monk.MonkState.IDLE) {
                         monk.interact();
                         this.currentDialogue = monk.getCurrentDialogue();
                     }
@@ -112,21 +124,23 @@ public class GameModel {
                             this.currentDialogue = monk.getCurrentDialogue();
                         } else {
                             this.currentDialogue = "";
-                            monk.setState(OBJ_Monk.MonkState.DISAPPEARING);
+                            monk.setState(Monk.MonkState.DISAPPEARING);
                         }
                     }
                 } else {
                     // 3. FUORI RAGGIO: Reset se il giocatore si allontana
-                    if (monk.getState() == OBJ_Monk.MonkState.TALKING) {
+                    if (monk.getState() == Monk.MonkState.TALKING) {
                         monk.reset();
                         this.currentDialogue = "";
                     }
                 }
-            }
+            }*/
         }
 
     }
     //-------------------------------------------------------------
+
+    //TODO ordine
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
@@ -135,14 +149,15 @@ public class GameModel {
     public List<GameObject> getObjects() { return objectManager.getObjects(); }
     public ObjectManager getObjectManager() { return objectManager; }
     public boolean isDebugMode() { return debugMode; }
-    public String getCurrentDialogue() { return currentDialogue; }
     public int getTILE_SIZE(){ return gameConfig.screenConfig().TILE_SIZE(); }
+    public Monk getMonk() {
+        return monk;
+    }
     //---------------------------------
 
     // SETTER ----------------------
     public void setGameState(GameState gameState) { this.gameState = gameState; }
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
-
     //---------------------------------
 
 
