@@ -50,8 +50,7 @@ public class GameModel {
         collisionChecker = new CollisionChecker(this);
         objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
 
-        //TODO leggere la posizione del monk dal file
-        monk = new Monk(62 * GS.screenConfig().TILE_SIZE(), 18* GS.screenConfig().TILE_SIZE(), GS.entityConfig());
+        monk = new Monk(GS.entityConfig().MONK_START_X(), GS.entityConfig().MONK_START_Y(), GS.entityConfig());
 
         gameState = GameState.PLAYING;
         

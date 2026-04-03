@@ -44,7 +44,7 @@ public class Player extends Entity {
         // Game start position
         worldX = entityConfig.START_WORLD_X();
         worldY = entityConfig.START_WORLD_Y();
-        currentLayer = entityConfig.START_WORLD_LAYER;
+        currentLayer = entityConfig.START_WORLD_LAYER();
 
         // Screen position
         screenX = entityConfig.SCREEN_POSX();
