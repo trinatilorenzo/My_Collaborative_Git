@@ -58,6 +58,9 @@ public class GameSetting {
     //hitbox
     public static final int PLAYER_HITBOX_WIDTH = 45;
     public static final int PLAYER_HITBOX_HEIGHT = 35;
+    // attack
+    public static final int RANGE_ATTACK = 20; 
+
 
     //-----------------------------------------------------------------------
 

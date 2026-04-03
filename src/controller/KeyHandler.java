@@ -11,7 +11,7 @@ import input.InputState;
 public class KeyHandler implements KeyListener {
     private boolean up, down, left, right ;
     private boolean attack;
-    private boolean interact = false; // reserved for future use
+    private boolean interact = false; 
 
     private boolean debugToggle = false;
     private boolean pauseToggle = false;
@@ -26,6 +26,7 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_SPACE -> attack = true;
             case KeyEvent.VK_P -> pauseToggle = !pauseToggle;
             case KeyEvent.VK_F3 -> debugToggle = !debugToggle;
+            case KeyEvent.VK_M -> interact = true;
         }
     }
 
@@ -37,6 +38,7 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_A -> left = false;
             case KeyEvent.VK_D -> right = false;
             case KeyEvent.VK_SPACE -> attack = false;
+            case KeyEvent.VK_M -> interact = false;
         }
     }
 
@@ -46,7 +48,9 @@ public class KeyHandler implements KeyListener {
     }
 
     public InputState getInputState() { // translates the keyboard state into the game's input state, it's a bridge between controller and model
-        return new InputState(up, down, left, right, attack, interact, pauseToggle, debugToggle);
+        InputState state = new InputState(up, down, left, right, attack, pauseToggle, debugToggle, interact);
+        interact = false; // Reset interact after returning the state, so it only triggers once per key press
+        return state;
     }
 }
 //-------------------------------------------------------------------------------------------------------------------

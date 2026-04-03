@@ -7,6 +7,7 @@ import model.world.GameMap;
 import model.object.GameObject;
 import model.object.WorldManager;
 import model.object.OBJ_Tree;
+import model.object.OBJ_Monk;
 
 import input.InputState;
 import main.GameSetting.GameState;
@@ -58,28 +59,42 @@ public class GameModel {
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
-
-        // -------------------------
-        // NUOVA LOGICA ATTACCO
-        // -------------------------
-        if (player.getState() == PlayerState.ATTACKING) {
-            // Prendi l'area dell'attacco del player
-            Rectangle attackArea = player.getAttackArea();
-
+            // -------------------------
+            // Interaction with objects
+            // -------------------------
+            
             for (GameObject obj : worldManager.getObjects()) {
-                // Verifica solo gli alberi
-                if (obj instanceof OBJ_Tree) {
-                    OBJ_Tree tree = (OBJ_Tree) obj;
+                
+                if (obj.isRemoved()) continue; // Skip removed objects
+                
+                // proximity check
+                if (obj instanceof OBJ_Monk monk) {
+                    double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) + 
+                                            Math.pow(player.getWorldY() - monk.getWorldY(), 2));
+                    if (dist < OBJ_Monk.DETECTION_RADIUS) {
+                        monk.activate();
+                        if (input.interact()) {
+                            monk.interact();
+                        }
+                    } else {
+                        monk.resetTarget(); // Se il giocatore si allontana, resetta lo stato del monaco
+                    }
+                }
+                
 
-                    // Se collide con l'area di attacco → colpisci
-                    if (attackArea.intersects(tree.getSolidWorldArea())) {
-                        tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
+                // Interaction check
+                Rectangle attackArea = player.getAttackArea();
+                if (player.getState() == PlayerState.ATTACKING) {
+                    if (obj instanceof OBJ_Tree) {
+                        OBJ_Tree tree = (OBJ_Tree) obj;
+
+                        // Se collide con l'area di attacco → colpisci
+                        if (attackArea.intersects(tree.getSolidWorldArea())) {
+                            tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
+                        }
                     }
                 }
             }
-        }
-        // -------------------------
-
             worldManager.update(deltaMs);
         }
     }
@@ -120,6 +135,8 @@ public class GameModel {
             int worldY = tile[1] * TILE_SIZE;
             worldManager.add(new OBJ_Tree(worldX, worldY));
         }
+
+        worldManager.add(new OBJ_Monk(50 * TILE_SIZE, 27 * TILE_SIZE));
     }
 
 }

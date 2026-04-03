@@ -10,7 +10,7 @@ public record InputState(
         boolean left,
         boolean right,
         boolean attack,
-        boolean interact, // reserved for future use
         boolean pause,
-        boolean debug
+        boolean debug,
+        boolean interact
 ) {}
