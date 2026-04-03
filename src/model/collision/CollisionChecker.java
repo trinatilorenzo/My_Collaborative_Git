@@ -1,7 +1,8 @@
 package model.collision;
 
-import model.entity.Entity;
 import model.GameModel;
+import model.entity.Entity;
+import model.entity.Monk;
 import model.object.GameObject;
 
 import java.awt.Rectangle;
@@ -91,6 +92,38 @@ public class CollisionChecker {
                 break; // both axes blocked; further checks unnecessary
             }
         }
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Checks collision between a moving entity (player) and the monk.
+     * Returns true if any collision occurs. Also sets the entity collision flags.
+     */
+    //-------------------------------------------------------------
+    public boolean checkMonk(Entity entity, Monk monk) {
+        if (monk == null) return false;
+        if (monk.getState() == main.ENUM.MonkState.DISAPPEARED) return false;
+        if (entity.getCurrentLayer() != monk.getCurrentLayer()) return false;
+
+        EntityBounds mover = EntityBounds.of(entity);
+        EntityBounds target = EntityBounds.of(monk);
+        int dx = entity.getDx();
+        int dy = entity.getDy();
+        boolean collided = false;
+
+        if (dx != 0 && overlaps(mover.leftX + dx, mover.rightX + dx, mover.topY, mover.bottomY,
+                target.leftX, target.rightX, target.topY, target.bottomY)) {
+            entity.setCollisionX(true);
+            collided = true;
+        }
+
+        if (dy != 0 && overlaps(mover.leftX, mover.rightX, mover.topY + dy, mover.bottomY + dy,
+                target.leftX, target.rightX, target.topY, target.bottomY)) {
+            entity.setCollisionY(true);
+            collided = true;
+        }
+
+        return collided;
     }
     //-------------------------------------------------------------
 

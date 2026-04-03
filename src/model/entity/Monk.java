@@ -42,12 +42,7 @@ public class Monk extends Entity {
     public void activate() {
         if (state == MonkState.IDLE) {
             state = MonkState.TALKING;
-
-            // First dialogue now
-            if (dialogueIndex == 0 && dialogueIndex < dialogues.length) {
-                System.out.println("Monaco: " + dialogues[dialogueIndex]);
-                dialogueIndex++;
-            }
+            dialogueIndex = 0; // start from the first dialogue line
         }
     }
     //-------------------------------------------------------------
@@ -92,6 +87,7 @@ public class Monk extends Entity {
             return null; // No more dialogues
         }
     }
+    public int getDialogueIndex() { return dialogueIndex; }
     public MonkState getState() { return state; }
     public void setState(MonkState state) { this.state = state; }
     //-------------------------------------------------------------

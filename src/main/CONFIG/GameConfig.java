@@ -98,6 +98,8 @@ public final class GameConfig {
         }
     }
 
+    //TODO rivedere (fatto tutto da AI funziona ma non so pereche)
+
     private Map<String, SpawnInfo> loadEntitySpawns(Document document) {
         Map<String, SpawnInfo> positions = new HashMap<>();
 

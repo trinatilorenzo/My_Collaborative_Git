@@ -2,6 +2,7 @@ package model;
 
 import main.ENUM.GameState;
 import main.ENUM.PlayerState;
+import main.ENUM.MonkState;
 import main.CONFIG.GameConfig;
 import model.collision.CollisionChecker;
 import model.entity.Player;
@@ -36,6 +37,7 @@ public class GameModel {
 
     private GameState gameState;
     private boolean debugMode = false;
+    private String currentDialogue = "";
 
 
     /**
@@ -68,10 +70,11 @@ public class GameModel {
 
             collisionChecker.checkTile(player);
             collisionChecker.checkObjects(player);
+            boolean monkCollision = collisionChecker.checkMonk(player, monk);
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
-            updateInteractions(input);
+            updateInteractions(input, monkCollision);
 
             objectManager.update(deltaMs);
         }
@@ -83,7 +86,8 @@ public class GameModel {
      * Interactions with objects
      */
     //-------------------------------------------------------------
-    private void updateInteractions(InputState input) {
+    //TODO beter timing and animation
+    private void updateInteractions(InputState input, boolean monkCollision) {
 
         for (GameObject obj : objectManager.getObjects()) {
 
@@ -102,38 +106,23 @@ public class GameModel {
                 }
             }
 
-            //TODO interazione con il monaco che va fatta in collison chechker
+        }
 
-            // oggetti che richiedono vicinanza con il player
-            /*
-            double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) +
-                                    Math.pow(player.getWorldY() - monk.getWorldY(), 2));
-            if (obj instanceof Monk monk) {
-                if (dist < Monk.DETECTION_RADIUS) {  // In range
+        // Monk interaction triggered by collision
+        if (monkCollision && monk.getState() == MonkState.IDLE) {
+            monk.activate();
+            currentDialogue = monk.getCurrentDialogue();
+        }
 
-                    if (monk.getState() == Monk.MonkState.IDLE) {
-                        monk.interact();
-                        this.currentDialogue = monk.getCurrentDialogue();
-                    }
+        if (monk.getState() == MonkState.TALKING && input.interact()) {
+            monk.advanceDialogue();
 
-                    if (input.interact()) {
-                        monk.advanceDialogue();
-
-                        if (!monk.hasFinishedDialogue()) {
-                            this.currentDialogue = monk.getCurrentDialogue();
-                        } else {
-                            this.currentDialogue = "";
-                            monk.setState(Monk.MonkState.DISAPPEARING);
-                        }
-                    }
-                } else {
-                    // 3. FUORI RAGGIO: Reset se il giocatore si allontana
-                    if (monk.getState() == Monk.MonkState.TALKING) {
-                        monk.reset();
-                        this.currentDialogue = "";
-                    }
-                }
-            }*/
+            if (!monk.hasFinishedDialogue()) {
+                currentDialogue = monk.getCurrentDialogue();
+            } else {
+                currentDialogue = "";
+                monk.setState(MonkState.DISAPPEARING);
+            }
         }
 
     }
@@ -152,6 +141,7 @@ public class GameModel {
     public Monk getMonk() {
         return monk;
     }
+    public String getCurrentDialogue() { return currentDialogue; }
     //---------------------------------
 
     // SETTER ----------------------
