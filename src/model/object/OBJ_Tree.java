@@ -1,37 +1,45 @@
 package model.object;
+import main.CONFIG.ObjConfig;
 
-import static main.GameSetting.*;
 import java.awt.Rectangle;
+
+
+
 /**
  * The OBJ_TREE CLASS represents a tree object in the game world, which can be interacted with by the player (e.g., chopped down for resources).
  * It extends the base GameObject class and includes properties specific to trees.
  */
+//TODO usare la stessa sintassi dei commenti
+    //TODO controlare funzionameto metodi
 
 public class OBJ_Tree extends GameObject {
+    private ObjConfig objConfig = new ObjConfig();
+    private int health;
 
     private boolean chopped = false;
-    private int health = TREE_HEALTH;
-
     private boolean chopping = false; // Flag to indicate if the tree is currently being chopped (for animation purposes)
-    private static final double CHOP_ANIMATION_DURATION = 500; // ms
-    private double chopTimer = 0; // Timer to track chopping animation progress 
-    private boolean readyToDrop = false; // Flag to indicate if the tree is ready to drop the item after being chopped
+    private double chopTimer = 0; // Timer to track chopping animation progress
+
     private int shakeOffsetX = 0;
     private int shakeOffsetY = 0;
     // COSTRUCTOR
     //---------------------------------------------------------------------------------------------
-    public OBJ_Tree(int worldX, int worldY) {
-        // Qua gestisco posizione, stato e interazione con il player, ma non la logica di disegno che è gestita dalla view 
+    public OBJ_Tree(int worldX, int worldY, ObjConfig objConfig) {
+        this.objConfig = objConfig;
         this.worldX = worldX;
         this.worldY = worldY;
-        this.width = TREE_SPRITE_WIDTH;
-        this.height = TREE_SPRITE_HEIGHT;
-        this.name = "TREE";
-        this.solid = true;
+        this.width = objConfig.TREE_SPRITE_WIDTH;
+        this.height = objConfig.TREE_SPRITE_HEIGHT;
+        this.name = objConfig.TREE_TAG;
+
+        this.health = objConfig.TREE_HEALTH;
 
         // hitbox
-        this.solidArea = new Rectangle(TREE_SPRITE_WIDTH/2 - (TREE_HITBOX_WIDTH/2), 195, TREE_HITBOX_WIDTH, TREE_HITBOX_HEIGHT);
-        this.solid = true;
+        this.solidArea = new Rectangle(objConfig.TREE_SPRITE_WIDTH/2 - (objConfig.TREE_HITBOX_WIDTH/2),
+                                       195, //TODO better
+                                          objConfig.TREE_HITBOX_WIDTH,
+                                          objConfig.TREE_HITBOX_HEIGHT);
+        this.solid = objConfig.TREE_SOLID;
     }
 
     /**
@@ -51,7 +59,7 @@ public class OBJ_Tree extends GameObject {
 
     public void startChopping() {
         this.chopping = true;
-        chopTimer = CHOP_ANIMATION_DURATION;
+        chopTimer = objConfig.CHOP_ANIMATION_DURATION_MS;
     }
     public boolean isChopped() {
         return chopped;
@@ -72,7 +80,6 @@ public class OBJ_Tree extends GameObject {
             if(chopTimer <= 0) {
                 chopping = false;
                 chopped = true; // ora l'albero è effettivamente tagliato
-                readyToDrop = true;
                 shakeOffsetX = 0;
                 shakeOffsetY = 0;
                 solid = false;

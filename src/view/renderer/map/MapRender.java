@@ -1,11 +1,10 @@
 package view.renderer.map;
 
+import main.CONFIG.ScreenConfig;
 import model.world.GameMap;
 import model.entity.Player;
 
 import java.awt.*;
-
-import static main.GameSetting.*;
 
 /**
  * The MAP RENDER CLASS is responsible for rendering the visual representation of the game world.
@@ -14,19 +13,15 @@ import static main.GameSetting.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class MapRender {
 
+    ScreenConfig screenCfg;
     /**
      * Draw all the layers of the gameMap
      */
     // -----------------------------------------------------
-    public void DrawMap(GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
-        /*-----------------------------------------------
-        DEBUG : draw a single layer
-        drawLayer(0, gameMap, tileSet, g2);
-        drawLayer(1, gameMap, tileSet, g2);
-        drawLayer(2, gameMap, tileSet, g2);
-        drawLayer(3, gameMap, tileSet, g2);
-        drawLayer(4, gameMap, tileSet, g2);
-        -----------------------------------------------*/
+    public void DrawMap(ScreenConfig screenCfg, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
+
+       this.screenCfg = screenCfg;
+
         for (int i = 0; i < gameMap.getGraphicLayerNum(); i++) {
             drawLayer(i, gameMap, tileSet, player, g2);
         }
@@ -39,10 +34,10 @@ public class MapRender {
     // -----------------------------------------------------
     void drawLayer(int layer, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
 
-        int leftCol = Math.max(0, (player.getWorldX() - player.getScreenX())/ TILE_SIZE);
-        int rightCol = Math.min(gameMap.getMaxMapCol()-1, player.getWorldX() + (SCREEN_WIDTH - player.getScreenX()) / TILE_SIZE );
-        int topRow = Math.max(0, (player.getWorldY() - player.getScreenY()) / TILE_SIZE );
-        int bottomRow = Math.min(gameMap.getMaxMapRow()-1, (player.getWorldY() + (SCREEN_HEIGHT - player.getScreenY())) / TILE_SIZE );
+        int leftCol = Math.max(0, (player.getWorldX() - player.getScreenX())/ screenCfg.TILE_SIZE());
+        int rightCol = Math.min(gameMap.getMaxMapCol()-1, player.getWorldX() + (screenCfg.SCREEN_WIDTH() - player.getScreenX()) / screenCfg.TILE_SIZE() );
+        int topRow = Math.max(0, (player.getWorldY() - player.getScreenY()) / screenCfg.TILE_SIZE() );
+        int bottomRow = Math.min(gameMap.getMaxMapRow()-1, (player.getWorldY() + (screenCfg.SCREEN_HEIGHT() - player.getScreenY())) / screenCfg.TILE_SIZE() );
 
         for (int i = topRow; i<= bottomRow; i++){
             for (int j = leftCol; j<= rightCol; j++){
@@ -65,19 +60,19 @@ public class MapRender {
     // -----------------------------------------------------
     void drawTile(int tileId, int row, int col, TileSet tileSet, Player player, Graphics2D g2) {
 
-        int worldX = col * TILE_SIZE;
-        int worldY = row * TILE_SIZE;
+        int worldX = col * screenCfg.TILE_SIZE();
+        int worldY = row * screenCfg.TILE_SIZE();
 
         int screenX = worldX - player.getWorldX() + player.getScreenX();
         int screenY = worldY - player.getWorldY() + player.getScreenY();
 
-        int dx2 = screenX + TILE_SIZE;
-        int dy2 = screenY + TILE_SIZE;
+        int dx2 = screenX + screenCfg.TILE_SIZE();
+        int dy2 = screenY + screenCfg.TILE_SIZE();
 
         int sx1 = tileSet.getTileX(tileId);
         int sy1 = tileSet.getTileY(tileId);
-        int sx2 = sx1 + TILE_SIZE;
-        int sy2 = sy1 + TILE_SIZE;
+        int sx2 = sx1 + screenCfg.TILE_SIZE();
+        int sy2 = sy1 + screenCfg.TILE_SIZE();
 
 
         g2.drawImage(tileSet.getTileSetImg(), 
@@ -117,7 +112,7 @@ public class MapRender {
                 int visibleLayer = -1;
 
                 // Cerca il layer più alto calpestabile
-                for (int layer = GAME_LAYER_NUM - 1; layer >= 0; layer--) {
+                for (int layer = gameMap.getGraphicLayerNum() - 1; layer >= 0; layer--) {
                     if (!gameMap.hasCollision(layer, row, col)) {
                         visibleLayer = layer;
                         break;
@@ -126,11 +121,11 @@ public class MapRender {
 
                 if (visibleLayer == -1) continue;
 
-                int screenX = col * TILE_SIZE + camOffsetX;
-                int screenY = row * TILE_SIZE + camOffsetY;
+                int screenX = col * screenCfg.TILE_SIZE() + camOffsetX;
+                int screenY = row * screenCfg.TILE_SIZE() + camOffsetY;
 
-                if (screenX + TILE_SIZE < 0 || screenX > SCREEN_WIDTH ||
-                        screenY + TILE_SIZE < 0 || screenY > SCREEN_HEIGHT) {
+                if (screenX + screenCfg.TILE_SIZE() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
+                        screenY + screenCfg.TILE_SIZE() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 
@@ -146,10 +141,10 @@ public class MapRender {
                 );
 
                 g2.setColor(fill);
-                g2.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                g2.fillRect(screenX, screenY, screenCfg.TILE_SIZE(), screenCfg.TILE_SIZE());
 
                 g2.setColor(border);
-                g2.drawRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                g2.drawRect(screenX, screenY, screenCfg.TILE_SIZE(), screenCfg.TILE_SIZE());
 
                 g2.setColor(Color.WHITE);
                 g2.drawString("L" + visibleLayer, screenX + 2, screenY + 12);

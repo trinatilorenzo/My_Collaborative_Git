@@ -1,6 +1,10 @@
 package model;
 
-//import controller.KeyHandler;
+
+
+import main.ENUM.GameState;
+import main.ENUM.PlayerState;
+import main.CONFIG.GameConfig;
 import model.collision.CollisionChecker;
 import model.entity.Player;
 import model.object.ObjectManager;
@@ -10,9 +14,6 @@ import model.object.GameObject;
 import model.object.OBJ_Tree;
 
 import input.InputState;
-import main.GameSetting.GameState;
-import main.GameSetting.PlayerState;
-import static main.GameSetting.*;
 
 import java.awt.Rectangle;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
 
+    private GameConfig gameConfig;
     private GameMap worldGameMap;
     private Player player;
     private CollisionChecker collisionChecker;
@@ -35,11 +37,13 @@ public class GameModel {
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public GameModel() {
-        worldGameMap = new GameMap(MAP_PATH, MAX_WORLD_ROW, MAX_WORLD_COL, GRAPHIC_LAYER_NUM, GAME_LAYER_NUM);
-        player = new Player();
+    public GameModel(GameConfig GS) {
+        gameConfig = GS;
+        worldGameMap = new GameMap(GS.mapConfig(), GS.mapDoc());
+        player = new Player(GS.playerConfig());
+
         collisionChecker = new CollisionChecker(this);
-        objectManager = new ObjectManager();
+        objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
 
         gameState = GameState.PLAYING;
         
@@ -94,6 +98,7 @@ public class GameModel {
     public List<GameObject> getObjects() { return objectManager.getObjects(); }
     public ObjectManager getObjectManager() { return objectManager; }
     public boolean isDebugMode() { return debugMode; }
+    public int getTILE_SIZE(){ return gameConfig.screenConfig().TILE_SIZE(); }
     //---------------------------------
 
     // SETTER ----------------------

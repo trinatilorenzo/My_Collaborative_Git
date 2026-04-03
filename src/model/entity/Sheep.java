@@ -1,9 +1,10 @@
 package model.entity;
 
 import java.awt.Rectangle;
+
+import main.ENUM.Direction;
 import model.object.Item;
 
-import main.GameSetting;
 
 
 public class Sheep extends Entity {
@@ -15,7 +16,7 @@ public class Sheep extends Entity {
         this.worldX = worldX;
         this.worldY = worldY;
         this.speed = 1; // Example speed value
-        this.direction = GameSetting.Direction.DOWN; // Default direction
+        this.direction = Direction.DOWN; // Default direction
         this.currentLayer = 0; // Default layer
 
         // Initialize hitbox (example values, adjust as needed)

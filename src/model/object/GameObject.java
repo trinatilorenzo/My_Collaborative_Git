@@ -2,6 +2,8 @@ package model.object;
 
 import java.awt.Rectangle;
 
+//TODO usare la stessa sintassi dei commenti
+
 /**
  * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world, providing common properties such as position, collision handling, and rendering information.
  */

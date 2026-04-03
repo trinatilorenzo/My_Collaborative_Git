@@ -1,5 +1,7 @@
 package view;
 
+import main.CONFIG.GameConfig;
+import main.CONFIG.ScreenConfig;
 import model.GameModel;
 import model.object.GameObject;
 import model.object.OBJ_Tree;
@@ -16,7 +18,6 @@ import view.renderer.object.RendererRegistry;
 import javax.swing.*;
 import java.awt.*;
 
-import static main.GameSetting.*;
 
 /**
  * ALL THE RENDERING STAFF HERE
@@ -27,6 +28,7 @@ import static main.GameSetting.*;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameView extends JPanel {
+    private final ScreenConfig screenCfg;
 
     private GameModel model;
     private MapRender mapRender;
@@ -35,25 +37,29 @@ public class GameView extends JPanel {
     private UI ui_render;
     private RendererRegistry rendererRegistry;
 
+
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public GameView(GameModel model) {
+    public GameView(GameConfig GS, GameModel model) {
+        this.screenCfg = GS.screenConfig();
+
         this.model = model;
         this.mapRender = new MapRender();
 
-        this.setPreferredSize (new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT)) ;
+        this.setPreferredSize (new Dimension(screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT()));
         this.setBackground (Color.black) ;
         this.setDoubleBuffered (true) ;
         this.setFocusable(true);
 
         //  import the tileset Asset
-        this.tileSet = new TileSet(TILESET_PATH, ORIGINAL_TILE_SIZE, MAX_TILESET_RAW, MAX_TILESET_COL);
+        //TODO take only tilesetCOnfig
+        this.tileSet = new TileSet(GS.TILESET_PATH, GS.mapConfig().ORIGINAL_TILESIZE(), GS.mapConfig().MAX_TILESET_ROW, GS.mapConfig().MAX_TILESET_COL);
 
         // import the player Render
-        this.playerRender = new PlayerRender();
+        this.playerRender = new PlayerRender(GS.playerConfig());
 
         //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender);
+        this.ui_render = new UI(model, playerRender, mapRender,screenCfg,GS.mapConfig());
 
         // object renderers
         this.rendererRegistry = new RendererRegistry();
@@ -74,11 +80,11 @@ public class GameView extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
 
         // Always clear background
-        g2.setColor(GAME_BG_COLOR);
-        g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        g2.setColor(screenCfg.GAME_BG_COLOR());
+        g2.fillRect(0,0, screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT());
 
         // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
-        mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
+        mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
         
 
         // Y-sorting logic: sort objects by their worldY coordinate
@@ -97,6 +103,7 @@ public class GameView extends JPanel {
     }
 
     //-------------------------------------------------------------
+
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
@@ -142,8 +149,8 @@ public class GameView extends JPanel {
                 int screenY = o.getWorldY() - player.getWorldY() + player.getScreenY();
 
                 // culling: draw only if visible on screen
-                if (screenX + o.getHeight() < 0 || screenX > SCREEN_WIDTH ||
-                    screenY + o.getHeight() < 0 || screenY > SCREEN_HEIGHT) {
+                if (screenX + o.getHeight() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
+                    screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 

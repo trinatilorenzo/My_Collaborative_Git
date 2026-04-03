@@ -3,14 +3,14 @@ package view;
 import model.GameModel;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
+import main.CONFIG.ScreenConfig;
+import main.CONFIG.MapConfig;
+import main.ENUM.GameState;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import main.GameSetting.*;
-
-import static main.GameSetting.*;
 
 public class UI {
     GameModel gameModel;
@@ -18,6 +18,8 @@ public class UI {
 
     private PlayerRender playerRender;
     private MapRender mapRender;
+    private final ScreenConfig screenConfig;
+    private final MapConfig mapConfig;
 
     Font arial_40;
     Font arial_80B;
@@ -31,10 +33,13 @@ public class UI {
     private int fps = 0;
 
 
-    public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender) {
+    public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender,
+              ScreenConfig screenConfig, MapConfig mapConfig) {
         this.gameModel = gameModel;
         this.playerRender = playerRender;
         this.mapRender =  mapRender;
+        this.screenConfig = screenConfig;
+        this.mapConfig = mapConfig;
 
         arial_40 = new Font ("Arial", Font. PLAIN, 40) ;
         arial_80B = new Font ("Arial", Font. BOLD, 80);
@@ -103,16 +108,16 @@ public class UI {
 
     private void drawPauseScreen() {
         // BG
-        g2.setColor(GAME_BG_COLOR);
-        g2.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        g2.setColor(screenConfig.GAME_BG_COLOR());
+        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
 
         ThreeSliceSprite pauseSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
 
         int bannerWidth = 192 * 3; // desired logical width
         int bannerHeight = pauseSprite.getHeight();
 
-        int bannerX = (SCREEN_WIDTH - bannerWidth) / 2;
-        int bannerY = (SCREEN_HEIGHT - bannerHeight) / 2;
+        int bannerX = (screenConfig.SCREEN_WIDTH() - bannerWidth) / 2;
+        int bannerY = (screenConfig.SCREEN_HEIGHT() - bannerHeight) / 2;
 
         pauseSprite.draw(g2, bannerX, bannerY, bannerWidth);
 
@@ -122,7 +127,7 @@ public class UI {
         String text = "PAUSED";
 
         int x = getXforCenteredText(text);
-        int y = SCREEN_HEIGHT / 2;
+        int y = screenConfig.SCREEN_HEIGHT() / 2;
 
         g2.drawString(text, x, y);
 
@@ -131,7 +136,7 @@ public class UI {
 
     public int getXforCenteredText(String text) {
         int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        int x = SCREEN_WIDTH / 2 - length / 2;
+        int x = screenConfig.SCREEN_WIDTH() / 2 - length / 2;
         return x;
     }
 

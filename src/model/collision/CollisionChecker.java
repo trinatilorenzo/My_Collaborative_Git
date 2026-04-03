@@ -7,8 +7,8 @@ import model.object.GameObject;
 import java.awt.Rectangle;
 import java.util.List;
 
-import static main.GameSetting.*;
-import static main.GameSetting.Direction.*;
+import static main.ENUM.Direction.*;
+
 
 /**
  * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
@@ -99,10 +99,10 @@ public class CollisionChecker {
         if (dx == 0) return; // not moving
 
         //anticipate the entity movement (move left or right)
-        int projectedLeftCol = (bounds.leftX + dx) / TILE_SIZE;
-        int projectedRightCol = (bounds.rightX + dx) / TILE_SIZE;
-        int rowTop = bounds.topY / TILE_SIZE;
-        int rowBottom = bounds.bottomY / TILE_SIZE;
+        int projectedLeftCol = (bounds.leftX + dx) / gameModel.getTILE_SIZE();
+        int projectedRightCol = (bounds.rightX + dx) / gameModel.getTILE_SIZE();
+        int rowTop = bounds.topY / gameModel.getTILE_SIZE();
+        int rowBottom = bounds.bottomY / gameModel.getTILE_SIZE();
 
         int checkCol;
         if (dx < 0) {
@@ -127,10 +127,10 @@ public class CollisionChecker {
         if (dy == 0) return; // not moving
 
         //anticipate the entity movement (move up or down)
-        int colLeft = bounds.leftX / TILE_SIZE;
-        int colRight = bounds.rightX / TILE_SIZE;
-        int projectedTopRow = (bounds.topY + dy) / TILE_SIZE;
-        int projectedBottomRow = (bounds.bottomY + dy) / TILE_SIZE;
+        int colLeft = bounds.leftX / gameModel.getTILE_SIZE();
+        int colRight = bounds.rightX / gameModel.getTILE_SIZE();
+        int projectedTopRow = (bounds.topY + dy) / gameModel.getTILE_SIZE();
+        int projectedBottomRow = (bounds.bottomY + dy) / gameModel.getTILE_SIZE();
 
 
         int checkRow;
