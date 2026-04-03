@@ -30,7 +30,7 @@ public class GameModel {
     private Player player;
     private CollisionChecker collisionChecker;
     private ObjectManager objectManager;
-
+    private OBJ_Monk monk; //FOR TESTING PURPOSES, TO BE REMOVED
     private GameState gameState;
     private boolean debugMode = false;
 
@@ -41,7 +41,8 @@ public class GameModel {
         player = new Player();
         collisionChecker = new CollisionChecker(this);
         objectManager = new ObjectManager();
-
+        monk = new OBJ_Monk(62 * TILE_SIZE, 18* TILE_SIZE); // Posizione di test
+        objectManager.add(monk);
         gameState = GameState.PLAYING;
         
     }
@@ -61,28 +62,43 @@ public class GameModel {
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
-
-        // -------------------------
-        // NUOVA LOGICA ATTACCO
-        // -------------------------
-        if (player.getState() == PlayerState.ATTACKING) {
-            // Prendi l'area dell'attacco del player
-            Rectangle attackArea = player.getAttackArea();
-
+            // -------------------------
+            // Interaction with objects
+            // -------------------------
+            
             for (GameObject obj : objectManager.getObjects()) {
-                // Verifica solo gli alberi
-                if (obj instanceof OBJ_Tree) {
-                    OBJ_Tree tree = (OBJ_Tree) obj;
-
-                    // Se collide con l'area di attacco → colpisci
-                    if (attackArea.intersects(tree.getSolidWorldArea())) {
-                        tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
+                
+                if (obj.isRemoved()) continue; // Skip removed objects
+                
+                // proximity check
+                if (obj instanceof OBJ_Monk monk) {
+                    double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) + 
+                                            Math.pow(player.getWorldY() - monk.getWorldY(), 2));
+                    if (dist < OBJ_Monk.DETECTION_RADIUS) {
+                        monk.activate();
+                        if (input.interact()) {
+                            monk.interact();
+                        }
+                    } else {
+                        monk.resetTarget(); // Se il giocatore si allontana, resetta lo stato del monaco
                     }
                 }
-            }
-        }
-        // -------------------------
+                
 
+                // Interaction check
+                Rectangle attackArea = player.getAttackArea();
+                if (player.getState() == PlayerState.ATTACKING) {
+                    if (obj instanceof OBJ_Tree) {
+                        OBJ_Tree tree = (OBJ_Tree) obj;
+
+                        // Se collide con l'area di attacco → colpisci
+                        if (attackArea.intersects(tree.getSolidWorldArea())) {
+                            tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
+                        }
+                    }
+                }
+            }   
+            
             objectManager.update(deltaMs);
         }
     }
@@ -102,28 +118,6 @@ public class GameModel {
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
 
     //---------------------------------
-
-    /**
-     * Temporary bootstrap of world objects until a proper loader is provided.
-     *//*
-    private void spawnStaticObjects() {
-        // place a handful of trees near the starting area
-        int[][] treeTiles = {
-            {60, 40},
-            {52, 27},
-            {54, 30},
-            {56, 28},
-            {58, 32},
-            {62, 26},
-            {70, 25}
-        };
-
-        for (int[] tile : treeTiles) {
-            int worldX = tile[0] * TILE_SIZE;
-            int worldY = tile[1] * TILE_SIZE;
-            objectManager.add(new OBJ_Tree(worldX, worldY));
-        }
-    }*/
 
 }
 //-------------------------------------------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ public class ObjectManager {
        // }
     }
 
-    private void add(GameObject obj){
+    public void add(GameObject obj){
         objects.add(obj);
     }
 
