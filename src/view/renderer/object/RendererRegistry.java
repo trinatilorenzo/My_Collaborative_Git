@@ -14,7 +14,7 @@ public class RendererRegistry {
         this.registry = new HashMap<>();
     }
 
-    public <T extends GameObject> void register(Class<T> objClass, ObjectRender<T> renderer) {
+    public <T extends GameObject> void register(Class<T> objClass, ObjectRender<? super T> renderer) {
         registry.put(objClass, renderer);
     }
 

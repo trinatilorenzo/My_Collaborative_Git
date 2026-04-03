@@ -31,9 +31,10 @@ public class GameModel {
     private Player player;
     private CollisionChecker collisionChecker;
     private ObjectManager objectManager;
-
+    private OBJ_Monk monk; //FOR TESTING PURPOSES, TO BE REMOVED
     private GameState gameState;
     private boolean debugMode = false;
+    private String currentDialogue = "";
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -44,7 +45,8 @@ public class GameModel {
 
         collisionChecker = new CollisionChecker(this);
         objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
-
+        monk = new OBJ_Monk(62 * TILE_SIZE, 18* TILE_SIZE); // Posizione di test
+        objectManager.add(monk);
         gameState = GameState.PLAYING;
         
     }
@@ -64,16 +66,22 @@ public class GameModel {
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
+            updateInteractions(input);
 
-        // -------------------------
-        // NUOVA LOGICA ATTACCO
-        // -------------------------
-        if (player.getState() == PlayerState.ATTACKING) {
-            // Prendi l'area dell'attacco del player
+            objectManager.update(deltaMs);
+        }
+    }
+
+    // Interactions with objects
+    private void updateInteractions(InputState input) {
+
+        for (GameObject obj : objectManager.getObjects()) {
+
+            if (obj.isRemoved()) continue; // Skip removed objects
+
+            // oggetti che richiedono attacco
             Rectangle attackArea = player.getAttackArea();
-
-            for (GameObject obj : objectManager.getObjects()) {
-                // Verifica solo gli alberi
+            if (player.getState() == PlayerState.ATTACKING) {
                 if (obj instanceof OBJ_Tree) {
                     OBJ_Tree tree = (OBJ_Tree) obj;
 
@@ -83,11 +91,38 @@ public class GameModel {
                     }
                 }
             }
-        }
-        // -------------------------
 
-            objectManager.update(deltaMs);
+            // oggetti che richiedono vicinanza con il player
+            double dist = Math.sqrt(Math.pow(player.getWorldX() - monk.getWorldX(), 2) +
+                                    Math.pow(player.getWorldY() - monk.getWorldY(), 2));
+            if (obj instanceof OBJ_Monk monk) {
+                if (dist < OBJ_Monk.DETECTION_RADIUS) {  // In range
+
+                    if (monk.getState() == OBJ_Monk.MonkState.IDLE) {
+                        monk.interact();
+                        this.currentDialogue = monk.getCurrentDialogue();
+                    }
+
+                    if (input.interact()) {
+                        monk.advanceDialogue();
+
+                        if (!monk.hasFinishedDialogue()) {
+                            this.currentDialogue = monk.getCurrentDialogue();
+                        } else {
+                            this.currentDialogue = "";
+                            monk.setState(OBJ_Monk.MonkState.DISAPPEARING);
+                        }
+                    }
+                } else {
+                    // 3. FUORI RAGGIO: Reset se il giocatore si allontana
+                    if (monk.getState() == OBJ_Monk.MonkState.TALKING) {
+                        monk.reset();
+                        this.currentDialogue = "";
+                    }
+                }
+            }
         }
+
     }
     //-------------------------------------------------------------
     // GETTER ----------------------
@@ -98,6 +133,7 @@ public class GameModel {
     public List<GameObject> getObjects() { return objectManager.getObjects(); }
     public ObjectManager getObjectManager() { return objectManager; }
     public boolean isDebugMode() { return debugMode; }
+    public String getCurrentDialogue() { return currentDialogue; }
     public int getTILE_SIZE(){ return gameConfig.screenConfig().TILE_SIZE(); }
     //---------------------------------
 

@@ -4,6 +4,7 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.ScreenConfig;
 import model.GameModel;
 import model.object.GameObject;
+import model.object.OBJ_Monk;
 import model.object.OBJ_Tree;
 import model.entity.Player;
 import view.renderer.entity.PlayerRender;
@@ -13,7 +14,7 @@ import view.renderer.map.TileSet;
 import view.renderer.object.TreeRenderer;
 import view.renderer.object.ObjectRender;
 import view.renderer.object.RendererRegistry;
-
+import view.renderer.object.MonkRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +65,7 @@ public class GameView extends JPanel {
         // object renderers
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        // Aggiungi altri renderer qui quando disponibili
+        rendererRegistry.register(OBJ_Monk.class, new MonkRenderer());
         
         //TODO: import other asset (object, npc, monster)
           
@@ -149,8 +150,8 @@ public class GameView extends JPanel {
                 int screenY = o.getWorldY() - player.getWorldY() + player.getScreenY();
 
                 // culling: draw only if visible on screen
-                if (screenX + o.getHeight() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                    screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+                if (screenX + o.getWidth() < 0 || screenX > SCREEN_WIDTH ||
+                    screenY + o.getHeight() < 0 || screenY > SCREEN_HEIGHT) {
                     continue;
                 }
 

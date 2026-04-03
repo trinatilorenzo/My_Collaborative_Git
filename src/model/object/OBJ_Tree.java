@@ -103,4 +103,5 @@ public class OBJ_Tree extends GameObject {
     public int getShakeOffsetY() {
         return shakeOffsetY;
     }
+
 }

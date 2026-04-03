@@ -39,17 +39,6 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         });
     }
 
-    /*@Override
-    public void update(OBJ_Tree tree, double deltaMs) {
-        if (!tree.isChopped()) {
-            animationManager.playAnimation("tree_idle");
-            animationManager.update(deltaMs);
-        } else {
-            // Stop animations when the tree is chopped to show the static stump image
-            animationManager.playAnimation("tree_chopped");
-            animationManager.update(deltaMs);
-        }
-    }*/
    @Override
     public void update(OBJ_Tree tree, double deltaMs) {
         AnimationManager animationManager = getManager(tree);
@@ -67,16 +56,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         
         tree.updateChop(deltaMs);
     }
-    /*
-    @Override
-    public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
-        if (tree.isChopped()) {
-            g2.drawImage(choppedFrame, screenX, screenY, tree.getWidth(), tree.getHeight(), null);
-        } else {
-            BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
-            g2.drawImage(frame, screenX, screenY, tree.getWidth(), tree.getHeight(), null);
-        }
-    }*/
+
    @Override
     public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
         AnimationManager animationManager = getManager(tree);

@@ -1,7 +1,6 @@
 package view.renderer.map;
 
 import javax.imageio.ImageIO;
-import view.Animation.FrameTimeline;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,13 +37,14 @@ class TileRegion {
 //-------------------------------------------------------------------------------------------------------------------
 class AnimatedTile {
     private int[] frameIds;
-    private FrameTimeline timeline;
-
+    private final double frameDurationMs;
+    private int currentFrameIndex = 0;
+    private double accumulatorMs = 0.0;
     // COSTRUCTOR
     //-------------------------------------------------------------
     public AnimatedTile(int[] frameIds, double frameDurationMs) {
         this.frameIds = frameIds;
-        this.timeline = new FrameTimeline(frameIds.length, frameDurationMs, true);
+        this.frameDurationMs = frameDurationMs;
     }
     //-------------------------------------------------------------
 
@@ -53,13 +53,24 @@ class AnimatedTile {
      */
     //-------------------------------------------------------------
     public void update(double deltaMs) {
-        timeline.update(deltaMs);
+        if (frameIds.length <= 1) {
+            return; // Non c'è animazione se c'è solo un frame
+        }
+
+        accumulatorMs += deltaMs;
+        while (accumulatorMs >= frameDurationMs) {
+            accumulatorMs -= frameDurationMs;
+            currentFrameIndex++;
+            if (currentFrameIndex >= frameIds.length) {
+                currentFrameIndex = 0; // Loop dell'animazione
+            }
+        }
     }
     //-------------------------------------------------------------
 
     // GETTER ----------------------
     public int getCurrentFrameId() {
-        return frameIds[timeline.getCurrentFrame()];
+        return frameIds[currentFrameIndex];
     }
     public int getBaseId() {
         return frameIds[0];

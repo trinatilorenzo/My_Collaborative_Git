@@ -78,6 +78,9 @@ public class UI {
 
             case PLAYING :
                 //PLAY STATE
+                if (!gameModel.getCurrentDialogue().isEmpty()){
+                    drawDialogueWindow();
+                }
                 break;
 
             case PAUSED :
@@ -140,6 +143,32 @@ public class UI {
         return x;
     }
 
+    public void drawDialogueWindow() {
+       // Parametri finestra (Simile alla pausa ma in basso)
+        int width = SCREEN_WIDTH - (TILE_SIZE * 2);
+        int height = TILE_SIZE * 4;
+        int x = (SCREEN_WIDTH - width) / 2;
+        int y = SCREEN_HEIGHT - height - TILE_SIZE;
 
+        // Disegno Banner (ThreeSliceSprite)
+        ThreeSliceSprite diagSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 64, 64);
+        diagSprite.draw(g2, x, y, width);
 
+        // Testo
+        g2.setColor(new Color(60, 40, 20)); // Colore scuro per pergamena
+        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 28F));
+        
+        int textX = x + 60;
+        int textY = y + 80;
+
+        // Disegno riga per riga (se usi \n nel testo)
+        for (String line : gameModel.getCurrentDialogue().split("\n")) {
+            g2.drawString(line, textX, textY);
+            textY += 40;
+        }
+        
+        // Indicatore per il giocatore
+        g2.setFont(MaruMonica.deriveFont(Font.ITALIC, 22F));
+        g2.drawString("Premi M per continuare...", x + width - 300, y + height - 130);
+    }
 }

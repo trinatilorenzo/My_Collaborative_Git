@@ -25,7 +25,7 @@ public class ObjectManager {
         addOBJFromFile(mapDoc);
     }
 
-    private void add(GameObject obj){
+    public void add(GameObject obj){
         objects.add(obj);
     }
 
