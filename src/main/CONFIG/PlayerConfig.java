@@ -18,6 +18,7 @@ public record PlayerConfig(ScreenConfig screenConfig) {
     public static final int RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
     public static final int RENDER_HEIGHT = SPRITE_HEIGHT * PLAYER_SCALE;
     public static final Direction FACING = Direction.RIGHT;
+    public static final int RANGE_ATTACK = 20;
 
     public static final int PLAYER_HITBOX_WIDTH = 45 * PLAYER_SCALE;
     public static final int PLAYER_HITBOX_HEIGHT = 35 * PLAYER_SCALE;

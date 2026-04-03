@@ -128,8 +128,8 @@ public class Player extends Entity {
     //----------------------------------------------
     public Rectangle getAttackArea() {
         Rectangle attackArea = new Rectangle();
-        attackArea.width = solidArea.width + RANGE_ATTACK; 
-        attackArea.height = solidArea.height + RANGE_ATTACK;
+        attackArea.width = solidArea.width +playerConfig.RANGE_ATTACK;
+        attackArea.height = solidArea.height + playerConfig.RANGE_ATTACK;
         int hitboxX = worldX + solidArea.x;
         int hitboxY = worldY + solidArea.y;
 

@@ -1,7 +1,9 @@
 package model.object;
 
+import main.CONFIG.PlayerConfig;
+import model.entity.Player;
+
 import java.awt.Rectangle;
-import static main.GameSetting.*;
 
 public class OBJ_Monk extends GameObject {
 
@@ -14,13 +16,13 @@ public class OBJ_Monk extends GameObject {
     // Raggio di attivazione (usato dal GameModel per chiamare activate())
     public static final int DETECTION_RADIUS = 150;
 
-    public OBJ_Monk(int worldX, int worldY) {
+    public OBJ_Monk(int worldX, int worldY, PlayerConfig playerConfig) {
         this.worldX = worldX;
         this.worldY = worldY;
         this.name = "MONK";
         this.solid = false;
-        this.width = PLAYER_SPRITE_WIDTH;
-        this.height = PLAYER_SPRITE_HEIGHT;
+        this.width = playerConfig.SPRITE_WIDTH;
+        this.height = playerConfig.SPRITE_HEIGHT;
         // Hitbox standard
         this.solidArea = new Rectangle(this.width * 1/4, this.height * 1/4, this.width / 2, this.height / 2);
         this.dialogues = new String[] {

@@ -145,10 +145,10 @@ public class UI {
 
     public void drawDialogueWindow() {
        // Parametri finestra (Simile alla pausa ma in basso)
-        int width = SCREEN_WIDTH - (TILE_SIZE * 2);
-        int height = TILE_SIZE * 4;
-        int x = (SCREEN_WIDTH - width) / 2;
-        int y = SCREEN_HEIGHT - height - TILE_SIZE;
+        int width = screenConfig.SCREEN_WIDTH() - (screenConfig.TILE_SIZE() * 2);
+        int height = screenConfig.TILE_SIZE() * 4;
+        int x = (screenConfig.SCREEN_WIDTH() - width) / 2;
+        int y = screenConfig.SCREEN_HEIGHT() - height - screenConfig.TILE_SIZE();
 
         // Disegno Banner (ThreeSliceSprite)
         ThreeSliceSprite diagSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 64, 64);

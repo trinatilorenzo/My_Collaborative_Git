@@ -65,7 +65,7 @@ public class GameView extends JPanel {
         // object renderers
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        rendererRegistry.register(OBJ_Monk.class, new MonkRenderer());
+        rendererRegistry.register(OBJ_Monk.class, new MonkRenderer(GS.playerConfig()));
         
         //TODO: import other asset (object, npc, monster)
           
@@ -150,8 +150,8 @@ public class GameView extends JPanel {
                 int screenY = o.getWorldY() - player.getWorldY() + player.getScreenY();
 
                 // culling: draw only if visible on screen
-                if (screenX + o.getWidth() < 0 || screenX > SCREEN_WIDTH ||
-                    screenY + o.getHeight() < 0 || screenY > SCREEN_HEIGHT) {
+                if (screenX + o.getWidth() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
+                    screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 

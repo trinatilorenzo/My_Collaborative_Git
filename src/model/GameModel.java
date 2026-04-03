@@ -7,6 +7,7 @@ import main.ENUM.PlayerState;
 import main.CONFIG.GameConfig;
 import model.collision.CollisionChecker;
 import model.entity.Player;
+import model.object.OBJ_Monk;
 import model.object.ObjectManager;
 import model.world.GameMap;
 import model.object.GameObject;
@@ -45,7 +46,7 @@ public class GameModel {
 
         collisionChecker = new CollisionChecker(this);
         objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
-        monk = new OBJ_Monk(62 * TILE_SIZE, 18* TILE_SIZE); // Posizione di test
+        monk = new OBJ_Monk(62 * GS.screenConfig().TILE_SIZE(), 18* GS.screenConfig().TILE_SIZE(), GS.playerConfig()); // Posizione di test
         objectManager.add(monk);
         gameState = GameState.PLAYING;
         

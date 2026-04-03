@@ -1,5 +1,6 @@
 package view.renderer.object;
 
+import main.CONFIG.PlayerConfig;
 import model.object.OBJ_Monk;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
@@ -8,22 +9,22 @@ import view.SpriteLoader;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static main.GameSetting.*;
+
 
 public class MonkRenderer extends ObjectRender<OBJ_Monk> {
 
     private final AnimationManager animationManager;
 
-    public MonkRenderer() {
+    public MonkRenderer(PlayerConfig playerCnfg) {
         BufferedImage idleSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Idle.png");
         BufferedImage talkSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Heal.png");
         BufferedImage disappearSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Heal_effect.png");
 
 
         // Estrazione dei frame (Esempio: riga 0 Idle, riga 1 Talking/Action)
-        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(idleSheetImage, 0, 1, 6, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
-        BufferedImage[] talkingFrames = SpriteLoader.getAnimationFrames(talkSheetImage, 0, 1, 10, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
-        BufferedImage[] disappearFrames = SpriteLoader.getAnimationFrames(disappearSheetImage, 0, 1, 11, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
+        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(idleSheetImage, 0, 1, 6, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
+        BufferedImage[] talkingFrames = SpriteLoader.getAnimationFrames(talkSheetImage, 0, 1, 10, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
+        BufferedImage[] disappearFrames = SpriteLoader.getAnimationFrames(disappearSheetImage, 0, 1, 11, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         animationManager.addAnimation("monk_idle", new Animation(idleFrames, 200, true));
