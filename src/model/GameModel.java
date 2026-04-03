@@ -1,7 +1,5 @@
 package model;
 
-
-
 import main.ENUM.GameState;
 import main.ENUM.PlayerState;
 import main.CONFIG.GameConfig;
@@ -18,7 +16,6 @@ import input.InputState;
 
 import java.awt.Rectangle;
 import java.util.List;
-
 
 /**
  * ALL THE GAME MODEL STAFF HERE
@@ -46,6 +43,8 @@ public class GameModel {
 
         collisionChecker = new CollisionChecker(this);
         objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
+
+        //TODO leggere la posizione del monk dal file
         monk = new OBJ_Monk(62 * GS.screenConfig().TILE_SIZE(), 18* GS.screenConfig().TILE_SIZE(), GS.playerConfig()); // Posizione di test
         objectManager.add(monk);
         gameState = GameState.PLAYING;
@@ -72,6 +71,8 @@ public class GameModel {
             objectManager.update(deltaMs);
         }
     }
+
+    //TODO controllare bene
 
     // Interactions with objects
     private void updateInteractions(InputState input) {

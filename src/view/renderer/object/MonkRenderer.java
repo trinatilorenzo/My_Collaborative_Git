@@ -16,6 +16,7 @@ public class MonkRenderer extends ObjectRender<OBJ_Monk> {
     private final AnimationManager animationManager;
 
     public MonkRenderer(PlayerConfig playerCnfg) {
+        //TODO carica da file
         BufferedImage idleSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Idle.png");
         BufferedImage talkSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Heal.png");
         BufferedImage disappearSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Heal_effect.png");

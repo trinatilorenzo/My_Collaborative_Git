@@ -7,6 +7,8 @@ import java.awt.Rectangle;
 
 public class OBJ_Monk extends GameObject {
 
+    //TODO non deve essere un oggetto ma un entity
+
     public enum MonkState { IDLE, TALKING, DISAPPEARING, DISAPPEARED }
 
     private MonkState state = MonkState.IDLE;

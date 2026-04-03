@@ -7,6 +7,8 @@ import java.util.Map;
 /**
  * The OBJECT RENDERER REGISTRY CLASS manages the association between game object types and their corresponding renderers. It allows for dynamic registration and retrieval of renderers based on the class of the game object, facilitating a flexible rendering system that can easily accommodate new object types and their visual representations.
  */
+
+//TODO usare la stessa sintassi dei commenti + controllare funzionameto metodi
 public class RendererRegistry {
     private Map<Class<? extends GameObject>, ObjectRender<? extends GameObject>> registry;
     

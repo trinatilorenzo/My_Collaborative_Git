@@ -20,6 +20,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
     private final BufferedImage[] leavesFrames;
     private final BufferedImage choppedFrame;
 
+    // TODO caricare le informazioni dal file
     public TreeRenderer(){
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/object/tree/Tree1.png");
 

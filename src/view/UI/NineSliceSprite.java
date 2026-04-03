@@ -1,4 +1,4 @@
-package view;
+package view.UI;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
+//TODO sintassi commenti e revisione codice
 /**
  * Utility for drawing 9-slice scalable sprites using nearest-neighbor filtering.
  */

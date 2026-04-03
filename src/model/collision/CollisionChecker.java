@@ -155,6 +155,7 @@ public class CollisionChecker {
     //-------------------------------------------------------------
 
 
+    //TODO debug del metodo + blocco scale
     public void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
         if (entity.getDx()!=0) return; // Only update layer on vertical movement
         if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {

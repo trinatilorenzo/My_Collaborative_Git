@@ -16,8 +16,6 @@ public class Main {
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
         //TODO : leggere le impostazioni di avvio da file
-
-
         GameConfig GS = new GameConfig();
 
         GameModel model = new GameModel(GS);
@@ -29,6 +27,8 @@ public class Main {
         // ------------------------------------------------------------------------------------------------------------
         JFrame window = new JFrame("Tiny Swords Island");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //TODO: FINESTRA RIDIMENSIONABILE
         window.setResizable(true);
 
         window.add(view);

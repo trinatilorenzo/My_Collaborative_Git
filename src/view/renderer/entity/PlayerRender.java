@@ -20,14 +20,12 @@ import java.awt.image.BufferedImage;
 public class PlayerRender {
 
     private AnimationManager animationManager;
-    private final PlayerConfig playerCnfg;
-
-
+    private final PlayerConfig playerConfig;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public PlayerRender(PlayerConfig playerCnfg) {
-        this.playerCnfg = playerCnfg;
+    public PlayerRender(PlayerConfig playerConfig) {
+        this.playerConfig = playerConfig;
         loadAnimations();
     }
     //-------------------------------------------------------------
@@ -39,11 +37,11 @@ public class PlayerRender {
 
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
 
-        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
-        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
-        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
-        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
-        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, playerCnfg.SPRITE_WIDTH, playerCnfg.SPRITE_HEIGHT);
+        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
+        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, playerConfig.SPRITE_WIDTH, playerConfig.SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         // frame duration in milliseconds
@@ -57,6 +55,7 @@ public class PlayerRender {
 
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, Player player) {
+        //TODO controllare se ci sono altri modi per le animazioni nella corsa
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
         //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
 

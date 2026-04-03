@@ -54,7 +54,7 @@ class AnimatedTile {
     //-------------------------------------------------------------
     public void update(double deltaMs) {
         if (frameIds.length <= 1) {
-            return; // Non c'è animazione se c'è solo un frame
+            return;
         }
 
         accumulatorMs += deltaMs;
@@ -62,7 +62,7 @@ class AnimatedTile {
             accumulatorMs -= frameDurationMs;
             currentFrameIndex++;
             if (currentFrameIndex >= frameIds.length) {
-                currentFrameIndex = 0; // Loop dell'animazione
+                currentFrameIndex = 0;
             }
         }
     }
@@ -146,7 +146,7 @@ public class TileSet {
         }
     }
     //-------------------------------------------------------------
-
+    // TODO load from file
     private BufferedImage loadTileSetImage(String path) {
         String normalized = path.startsWith("/") ? path : "/" + path;
         try (InputStream is = TileSet.class.getResourceAsStream(normalized)) {

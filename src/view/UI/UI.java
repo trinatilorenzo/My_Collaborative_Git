@@ -1,17 +1,16 @@
-package view;
+package view.UI;
 
 import model.GameModel;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.MapConfig;
-import main.ENUM.GameState;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
+//TODO sintassi commenti e revisione codice
 public class UI {
     GameModel gameModel;
     Graphics2D g2;

@@ -7,6 +7,7 @@ import model.object.GameObject;
 import model.object.OBJ_Monk;
 import model.object.OBJ_Tree;
 import model.entity.Player;
+import view.UI.UI;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
@@ -79,6 +80,8 @@ public class GameView extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+
+        //TODO pulire la logica di rendering
 
         // Always clear background
         g2.setColor(screenCfg.GAME_BG_COLOR());
