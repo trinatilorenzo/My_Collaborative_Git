@@ -35,6 +35,10 @@ public final class GameConfig {
     private static final String MONK_NAME = "monk";
     private static final String START_LAYER_PROP = "StartLayer";
 
+    //LAYER1 COLLISON FOR BRIDGE x : 42, 43, 44 y:25
+    //LAYER2 COLLISON FOR BRIDGE x : 57, 58, 59 y:43
+
+
     private final ScreenConfig screenConfig;
     private final MapConfig mapConfig;
     private final EntityConfig entityConfig;

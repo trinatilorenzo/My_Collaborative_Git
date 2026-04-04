@@ -147,7 +147,7 @@ public class MapRender {
                 g2.drawRect(screenX, screenY, screenCfg.TILE_SIZE(), screenCfg.TILE_SIZE());
 
                 g2.setColor(Color.WHITE);
-                g2.drawString("L" + visibleLayer, screenX + 2, screenY + 12);
+                g2.drawString(col+" , "+ row + "\nL" + visibleLayer , screenX + 2, screenY + 12);
             }
         }
 

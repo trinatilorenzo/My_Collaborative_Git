@@ -103,7 +103,9 @@ public class UI {
 
             g2.setColor(Color.YELLOW);
             g2.setFont(new Font("Monospaced", Font.BOLD, 18));
-            g2.drawString("FPS: " + fps, 10, 18);
+            int xTile = (gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getSolidArea().x )/ screenConfig.TILE_SIZE();
+            int yTile = (gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getSolidArea().y )/ screenConfig.TILE_SIZE();
+            g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
         }
 
     }
