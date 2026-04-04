@@ -9,10 +9,6 @@ import main.CONFIG.MapConfig;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-<<<<<<< HEAD:src/view/UI.java
-import static main.GameSetting.*;
-=======
->>>>>>> 069bd5f6f2c1b577b57e86fb611131d32e5b3c56:src/view/UI/UI.java
 
 //TODO sintassi commenti e revisione codice
 public class UI {

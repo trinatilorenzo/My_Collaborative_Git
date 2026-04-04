@@ -9,11 +9,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-<<<<<<< HEAD
-=======
 //TODO sintassi commenti
 
->>>>>>> 069bd5f6f2c1b577b57e86fb611131d32e5b3c56
 public class ObjectManager {
 
     private final List<GameObject> objects = new ArrayList<>();

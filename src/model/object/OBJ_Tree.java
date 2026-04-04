@@ -18,13 +18,8 @@ public class OBJ_Tree extends GameObject {
 
     private boolean chopped = false;
     private boolean chopping = false; // Flag to indicate if the tree is currently being chopped (for animation purposes)
-<<<<<<< HEAD
-    private static final double CHOP_ANIMATION_DURATION = 500; // ms
-    private double chopTimer = 0; // Timer to track chopping animation progress 
-=======
     private double chopTimer = 0; // Timer to track chopping animation progress
 
->>>>>>> 069bd5f6f2c1b577b57e86fb611131d32e5b3c56
     private int shakeOffsetX = 0;
     private int shakeOffsetY = 0;
     // COSTRUCTOR
