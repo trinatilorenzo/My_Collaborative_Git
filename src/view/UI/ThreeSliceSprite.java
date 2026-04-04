@@ -1,4 +1,4 @@
-package view;
+package view.UI;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
+//TODO sintassi commenti e revisione codice
 /**
  * Horizontal 3-slice sprite (left cap, stretchable middle, right cap) with nearest-neighbor rendering.
  */

@@ -1,12 +1,14 @@
 package model.entity;
 
 import input.InputState;
-import main.GameSetting.Direction;
-import main.GameSetting.PlayerState;
+import main.CONFIG.EntityConfig;
+import main.ENUM.Direction;
+import main.ENUM.PlayerState;
+
 
 import java.awt.Rectangle;
 
-import static main.GameSetting.*;
+
 
 /**
  * The PLAYER CLASS represents the main player character in the game, extending the base Entity class.
@@ -15,41 +17,44 @@ import static main.GameSetting.*;
 public class Player extends Entity {
 
     protected int screenX, screenY;
-
     private static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
-
     private PlayerState state;
-    private int facingDirection;
+    private Direction facingDirection;
+    private EntityConfig entityConfig;
+
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public Player() {
+    public Player(EntityConfig entityConfig) {
+        //get the entityConfig
+        this.entityConfig = entityConfig;
         // Initialize the player's solid area for collision detection
-        solidArea = new Rectangle((PLAYER_SPRITE_WIDTH / 2) - (PLAYER_HITBOX_WIDTH/2),
-                (PLAYER_SPRITE_HEIGHT/ 2) ,
-                PLAYER_HITBOX_WIDTH,
-                PLAYER_HITBOX_HEIGHT);
-        
+        solidArea = new Rectangle((entityConfig.SPRITE_WIDTH / 2) - (entityConfig.PLAYER_HITBOX_WIDTH/2),
+                                        (entityConfig.SPRITE_HEIGHT / 2) ,
+                                        entityConfig.PLAYER_HITBOX_WIDTH,
+                                        entityConfig.PLAYER_HITBOX_HEIGHT);
+
         initializeDefaultValues();
+
     }
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     private void initializeDefaultValues() {
         // Game start position
-        worldX = START_WORLD_X;
-        worldY = START_WORLD_Y;
-        currentLayer = START_WORLD_LAYER;
+        worldX = entityConfig.START_WORLD_X();
+        worldY = entityConfig.START_WORLD_Y();
+        currentLayer = entityConfig.START_WORLD_LAYER();
 
         // Screen position
-        screenX = SCREEN_WIDTH / 2 - PLAYER_SPRITE_WIDTH/ 2;
-        screenY = SCREEN_HEIGHT / 2 - PLAYER_SPRITE_HEIGHT / 2;
+        screenX = entityConfig.SCREEN_POSX();
+        screenY = entityConfig.SCREEN_POSY();
 
         // Initialize movement values
-        speed = START_PLAYER_SPEED;
-        direction = Direction.RIGHT;
+        speed = entityConfig.START_PLAYER_SPEED;
+        direction = entityConfig.FACING;
+        facingDirection = entityConfig.FACING;
         state = PlayerState.IDLE;
-        facingDirection = FACING_RIGHT;
     }
     //-------------------------------------------------------------
 
@@ -74,9 +79,8 @@ public class Player extends Entity {
      * Reads all directional keys simultaneously, accumulates dx/dy,
      * and normalizes for diagonal movement to keep constant speed.
      */
-
     //-------------------------------------------------------------
-
+    //TODO il moviemto va corretto nella velocità
     private boolean updateMovement(InputState input, double deltaMs) {
         double distance = speed * (deltaMs / 1000.0);
         double moveX = 0;
@@ -84,8 +88,8 @@ public class Player extends Entity {
 
         if (input.up())    { moveY -= distance; direction = Direction.UP; }
         if (input.down())  { moveY += distance; direction = Direction.DOWN; }
-        if (input.left())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = FACING_LEFT; }
-        if (input.right()) { moveX += distance; direction = Direction.RIGHT; facingDirection = FACING_RIGHT; }
+        if (input.left())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = Direction.LEFT; }
+        if (input.right()) { moveX += distance; direction = Direction.RIGHT; facingDirection = Direction.RIGHT; }
 
         // Normalizza per mantenere la stessa velocità anche in diagonale (fattore 1/sqrt(2))
         if (moveX != 0 && moveY != 0) {
@@ -98,13 +102,11 @@ public class Player extends Entity {
 
         return moveX != 0 || moveY != 0;
     }
-
+    //-------------------------------------------------------------
 
     /**
-     * Updates the player's current state based on input from the {@link KeyHandler}
-     * and movement status.
+     * Updates the player's current state based on input
      */
-
     //-------------------------------------------------------------
     private void updateState(InputState input, boolean isMoving) {
         if (state == PlayerState.ATTACKING) {
@@ -121,11 +123,12 @@ public class Player extends Entity {
     }
     //-------------------------------------------------------------
 
+    //TODO VEDERE BENE IL METODO
     //----------------------------------------------
     public Rectangle getAttackArea() {
         Rectangle attackArea = new Rectangle();
-        attackArea.width = solidArea.width + RANGE_ATTACK; 
-        attackArea.height = solidArea.height + RANGE_ATTACK;
+        attackArea.width = solidArea.width + entityConfig.RANGE_ATTACK;
+        attackArea.height = solidArea.height + entityConfig.RANGE_ATTACK;
         int hitboxX = worldX + solidArea.x;
         int hitboxY = worldY + solidArea.y;
 
@@ -155,7 +158,7 @@ public class Player extends Entity {
     public PlayerState getState() {
         return state;
     }
-    public int getFacingRight() {
+    public Direction getFacing() {
         return facingDirection;
     }
     public int getScreenX() {

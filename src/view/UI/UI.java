@@ -1,20 +1,28 @@
-package view;
+package view.UI;
 
 import model.GameModel;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
+import main.CONFIG.ScreenConfig;
+import main.CONFIG.MapConfig;
 
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+<<<<<<< HEAD:src/view/UI.java
 import static main.GameSetting.*;
+=======
+>>>>>>> 069bd5f6f2c1b577b57e86fb611131d32e5b3c56:src/view/UI/UI.java
 
+//TODO sintassi commenti e revisione codice
 public class UI {
     GameModel gameModel;
     Graphics2D g2;
 
     private PlayerRender playerRender;
     private MapRender mapRender;
+    private final ScreenConfig screenConfig;
+    private final MapConfig mapConfig;
 
     Font arial_40;
     Font arial_80B;
@@ -28,10 +36,13 @@ public class UI {
     private int fps = 0;
 
 
-    public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender) {
+    public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender,
+              ScreenConfig screenConfig, MapConfig mapConfig) {
         this.gameModel = gameModel;
         this.playerRender = playerRender;
         this.mapRender =  mapRender;
+        this.screenConfig = screenConfig;
+        this.mapConfig = mapConfig;
 
         arial_40 = new Font ("Arial", Font. PLAIN, 40) ;
         arial_80B = new Font ("Arial", Font. BOLD, 80);
@@ -96,23 +107,25 @@ public class UI {
 
             g2.setColor(Color.YELLOW);
             g2.setFont(new Font("Monospaced", Font.BOLD, 18));
-            g2.drawString("FPS: " + fps, 10, 18);
+            int xTile = (gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getSolidArea().x )/ screenConfig.TILE_SIZE();
+            int yTile = (gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getSolidArea().y )/ screenConfig.TILE_SIZE();
+            g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
         }
 
     }
 
     private void drawPauseScreen() {
         // BG
-        g2.setColor(GAME_BG_COLOR);
-        g2.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        g2.setColor(screenConfig.GAME_BG_COLOR());
+        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
 
         ThreeSliceSprite pauseSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
 
         int bannerWidth = 192 * 3; // desired logical width
         int bannerHeight = pauseSprite.getHeight();
 
-        int bannerX = (SCREEN_WIDTH - bannerWidth) / 2;
-        int bannerY = (SCREEN_HEIGHT - bannerHeight) / 2;
+        int bannerX = (screenConfig.SCREEN_WIDTH() - bannerWidth) / 2;
+        int bannerY = (screenConfig.SCREEN_HEIGHT() - bannerHeight) / 2;
 
         pauseSprite.draw(g2, bannerX, bannerY, bannerWidth);
 
@@ -122,7 +135,7 @@ public class UI {
         String text = "PAUSED";
 
         int x = getXforCenteredText(text);
-        int y = SCREEN_HEIGHT / 2;
+        int y = screenConfig.SCREEN_HEIGHT() / 2;
 
         g2.drawString(text, x, y);
 
@@ -131,16 +144,16 @@ public class UI {
 
     public int getXforCenteredText(String text) {
         int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        int x = SCREEN_WIDTH / 2 - length / 2;
+        int x = screenConfig.SCREEN_WIDTH() / 2 - length / 2;
         return x;
     }
 
     public void drawDialogueWindow() {
        // Parametri finestra (Simile alla pausa ma in basso)
-        int width = SCREEN_WIDTH - (TILE_SIZE * 2);
-        int height = TILE_SIZE * 4;
-        int x = (SCREEN_WIDTH - width) / 2;
-        int y = SCREEN_HEIGHT - height - TILE_SIZE;
+        int width = screenConfig.SCREEN_WIDTH() - (screenConfig.TILE_SIZE() * 2);
+        int height = screenConfig.TILE_SIZE() * 4;
+        int x = (screenConfig.SCREEN_WIDTH() - width) / 2;
+        int y = screenConfig.SCREEN_HEIGHT() - height - screenConfig.TILE_SIZE();
 
         // Disegno Banner (ThreeSliceSprite)
         ThreeSliceSprite diagSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 64, 64);
@@ -154,7 +167,10 @@ public class UI {
         int textY = y + 80;
 
         // Disegno riga per riga (se usi \n nel testo)
-        for (String line : gameModel.getCurrentDialogue().split("\n")) {
+        String dialogue = gameModel.getCurrentDialogue();
+        if (dialogue == null || dialogue.isEmpty()) return;
+
+        for (String line : dialogue.split("\n")) {
             g2.drawString(line, textX, textY);
             textY += 40;
         }

@@ -2,6 +2,7 @@ package main;
 
 
 import controller.GameController;
+import main.CONFIG.GameConfig;
 import model.GameModel;
 import view.GameView;
 
@@ -14,16 +15,21 @@ public class Main {
 
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
-        GameModel model = new GameModel();
-        GameView view = new GameView(model);
+        //TODO : leggere le impostazioni di avvio da file
+        GameConfig GS = new GameConfig();
+
+        GameModel model = new GameModel(GS);
+        GameView view = new GameView(GS, model);
         GameController controller = new GameController(model, view);
         // ------------------------------------------------------------------------------------------------------------
 
         // main application window: contains the whole game
         // ------------------------------------------------------------------------------------------------------------
-        JFrame window = new JFrame("Tiny Swords");
+        JFrame window = new JFrame("Tiny Swords Island");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
+
+        //TODO: FINESTRA RIDIMENSIONABILE
+        window.setResizable(true);
 
         window.add(view);
         window.pack();

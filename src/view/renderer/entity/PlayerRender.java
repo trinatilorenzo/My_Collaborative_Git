@@ -1,5 +1,8 @@
 package view.renderer.entity;
 
+import main.CONFIG.EntityConfig;
+import main.ENUM.Direction;
+import main.ENUM.PlayerState;
 import model.entity.Player;
 import view.SpriteLoader;
 import view.Animation.Animation;
@@ -7,8 +10,6 @@ import view.Animation.AnimationManager;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-
-import static main.GameSetting.*;
 
 
 
@@ -18,15 +19,13 @@ import static main.GameSetting.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class PlayerRender {
 
-    private final int spriteWidth = PLAYER_SPRITE_WIDTH;
-    private final int spriteHeight = PLAYER_SPRITE_HEIGHT;
     private AnimationManager animationManager;
-
-
+    private final EntityConfig entityConfig;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public PlayerRender() {
+    public PlayerRender(EntityConfig entityConfig) {
+        this.entityConfig = entityConfig;
         loadAnimations();
     }
     //-------------------------------------------------------------
@@ -38,11 +37,11 @@ public class PlayerRender {
 
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
 
-        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, spriteWidth, spriteHeight);
-        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, spriteWidth, spriteHeight);
-        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, spriteWidth, spriteHeight);
-        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, spriteWidth, spriteHeight);
-        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, spriteWidth, spriteHeight);
+        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         // frame duration in milliseconds
@@ -56,23 +55,24 @@ public class PlayerRender {
 
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, Player player) {
+        //TODO controllare se ci sono altri modi per le animazioni nella corsa
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
         //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
 
-        if (player.getFacingRight() == -1) {
+        if (player.getFacing()!= Direction.RIGHT) {
             // Flip the image horizontally for left direction
             g2.drawImage(frame,
-                    player.getScreenX() + PLAYER_RENDER_WIDTH,
-                    player.getScreenY(), -PLAYER_RENDER_WIDTH,
-                    PLAYER_RENDER_HEIGHT,
+                    player.getScreenX() + EntityConfig.PLAYER_RENDER_WIDTH,
+                    player.getScreenY(), -EntityConfig.PLAYER_RENDER_HEIGHT,
+                    EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
         } else {
             // Draw normally for right direction
             g2.drawImage(frame,
                     player.getScreenX(),
                     player.getScreenY(),
-                    PLAYER_RENDER_WIDTH,
-                    PLAYER_RENDER_HEIGHT,
+                    EntityConfig.PLAYER_RENDER_WIDTH,
+                    EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
         }
 

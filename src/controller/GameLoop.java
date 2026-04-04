@@ -1,7 +1,7 @@
 package controller;
 
 import java.util.concurrent.locks.LockSupport;
-import static main.GameSetting.*;
+import static main.CONFIG.GameConfig.*;
 
 // GAME LOOP CLAS
 // This class is a Thread that control the game update every n FPS

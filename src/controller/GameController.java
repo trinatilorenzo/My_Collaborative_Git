@@ -3,7 +3,7 @@ package controller;
 import model.GameModel;
 import view.GameView;
 import input.InputState;
-import main.GameSetting.GameState;
+import main.ENUM.GameState;
 
 /**
  * ALL THE CONTROLLER STAFF HERE

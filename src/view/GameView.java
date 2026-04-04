@@ -1,10 +1,13 @@
 package view;
 
+import main.CONFIG.GameConfig;
+import main.CONFIG.ScreenConfig;
 import model.GameModel;
 import model.object.GameObject;
-import model.object.OBJ_Monk;
+import model.entity.Monk;
 import model.object.OBJ_Tree;
 import model.entity.Player;
+import view.UI.UI;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
@@ -12,12 +15,11 @@ import view.renderer.map.TileSet;
 import view.renderer.object.TreeRenderer;
 import view.renderer.object.ObjectRender;
 import view.renderer.object.RendererRegistry;
-import view.renderer.object.MonkRenderer;
+import view.renderer.entity.MonkRenderer;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static main.GameSetting.*;
 
 /**
  * ALL THE RENDERING STAFF HERE
@@ -28,38 +30,45 @@ import static main.GameSetting.*;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameView extends JPanel {
+    private final ScreenConfig screenCfg;
 
     private GameModel model;
     private MapRender mapRender;
     private TileSet tileSet;
     private PlayerRender playerRender;
+    private MonkRenderer monkRenderer;
     private UI ui_render;
     private RendererRegistry rendererRegistry;
 
+
     // COSTRUCTOR
     //-------------------------------------------------------------
-    public GameView(GameModel model) {
+    public GameView(GameConfig GS, GameModel model) {
+        this.screenCfg = GS.screenConfig();
+
         this.model = model;
         this.mapRender = new MapRender();
 
-        this.setPreferredSize (new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT)) ;
+        this.setPreferredSize (new Dimension(screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT()));
         this.setBackground (Color.black) ;
         this.setDoubleBuffered (true) ;
         this.setFocusable(true);
 
         //  import the tileset Asset
-        this.tileSet = new TileSet(TILESET_PATH, ORIGINAL_TILE_SIZE, MAX_TILESET_RAW, MAX_TILESET_COL);
+        //TODO take only tilesetCOnfig
+        this.tileSet = new TileSet(GS.TILESET_PATH, GS.mapConfig().ORIGINAL_TILESIZE(), GS.mapConfig().MAX_TILESET_ROW, GS.mapConfig().MAX_TILESET_COL);
 
         // import the player Render
-        this.playerRender = new PlayerRender();
+        this.playerRender = new PlayerRender(GS.entityConfig());
+
+        this.monkRenderer = new MonkRenderer(GS.entityConfig());
 
         //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender);
+        this.ui_render = new UI(model, playerRender, mapRender,screenCfg,GS.mapConfig());
 
         // object renderers
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        rendererRegistry.register(OBJ_Monk.class, new MonkRenderer());
         
         //TODO: import other asset (object, npc, monster)
           
@@ -74,12 +83,14 @@ public class GameView extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
+        //TODO pulire la logica di rendering
+
         // Always clear background
-        g2.setColor(GAME_BG_COLOR);
-        g2.fillRect(0,0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        g2.setColor(screenCfg.GAME_BG_COLOR());
+        g2.fillRect(0,0, screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT());
 
         // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
-        mapRender.DrawMap(model.getWorldMap(), tileSet, model.getPlayer(), g2);
+        mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
         
 
         // Y-sorting logic: sort objects by their worldY coordinate
@@ -98,9 +109,11 @@ public class GameView extends JPanel {
     }
 
     //-------------------------------------------------------------
+
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
+        monkRenderer.update(model.getMonk(), deltaMs);
         updateObjectAnimations(deltaMs);
 
     }
@@ -109,17 +122,21 @@ public class GameView extends JPanel {
     //--------------------------------------------------------------
     private void drawEntities(Graphics2D g2) {
         Player player = model.getPlayer();
+        Monk monk = model.getMonk();
 
         // List to hold all entities for sorting
         java.util.List<Object> renderList = new java.util.ArrayList<>();
 
         renderList.add(player);
+        renderList.add(monk);
         renderList.addAll(model.getObjects());
 
         // Sort for "bottom_y"
         renderList.sort(java.util.Comparator.comparingInt(obj -> {
             if (obj instanceof Player p) {
                 return p.getWorldY() + p.getSolidArea().y + p.getSolidArea().height;
+            } else if (obj instanceof Monk m) {
+                return m.getWorldY() + m.getSolidArea().y + m.getSolidArea().height;
             } else if (obj instanceof GameObject o) {
                 return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
             }
@@ -130,6 +147,11 @@ public class GameView extends JPanel {
 
             if (obj instanceof Player p) {
                 playerRender.draw(g2, p);
+            }
+            if (obj instanceof Monk m) {
+                int screenX = m.getWorldX() - player.getWorldX() + player.getScreenX();
+                int screenY = m.getWorldY() - player.getWorldY() + player.getScreenY();
+                monkRenderer.draw(g2, m, screenX, screenY);
             }
 
             else if (obj instanceof GameObject o) {
@@ -143,8 +165,8 @@ public class GameView extends JPanel {
                 int screenY = o.getWorldY() - player.getWorldY() + player.getScreenY();
 
                 // culling: draw only if visible on screen
-                if (screenX + o.getWidth() < 0 || screenX > SCREEN_WIDTH ||
-                    screenY + o.getHeight() < 0 || screenY > SCREEN_HEIGHT) {
+                if (screenX + o.getWidth() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
+                    screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 

@@ -1,6 +1,5 @@
 package model.entity;
-
-import main.GameSetting;
+import main.ENUM.Direction;
 
 import java.awt.Rectangle;
 
@@ -15,8 +14,9 @@ public class Entity {
     protected int worldX, worldY;
     protected int speed; // PIXELS PER SECOND
     protected int dx, dy; // movement deltas per frame
-    protected GameSetting.Direction direction;
+    protected Direction direction;
     protected int currentLayer;
+    protected String name;
 
     // Hitbox and collision
     protected Rectangle solidArea;
@@ -78,7 +78,7 @@ public class Entity {
     public int getCurrentLayer() {
         return currentLayer;
     }
-    public GameSetting.Direction getDirection() {
+    public Direction getDirection() {
         return direction;
     }
     public Rectangle getSolidArea() {
@@ -87,7 +87,7 @@ public class Entity {
     //---------------------------------
 
     // SETTER ----------------------
-    public void setDirection(GameSetting.Direction direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
     public void setLayer(int layer) {

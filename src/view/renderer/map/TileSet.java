@@ -3,6 +3,7 @@ package view.renderer.map;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ class AnimatedTile {
     //-------------------------------------------------------------
     public void update(double deltaMs) {
         if (frameIds.length <= 1) {
-            return; // Non c'è animazione se c'è solo un frame
+            return;
         }
 
         accumulatorMs += deltaMs;
@@ -61,7 +62,7 @@ class AnimatedTile {
             accumulatorMs -= frameDurationMs;
             currentFrameIndex++;
             if (currentFrameIndex >= frameIds.length) {
-                currentFrameIndex = 0; // Loop dell'animazione
+                currentFrameIndex = 0;
             }
         }
     }
@@ -97,11 +98,7 @@ public class TileSet {
     //-------------------------------------------------------------
     public TileSet(String tileImagePath, int tileSize, int maxTilesetRaw, int maxTilesetCol){
         // read the tileset image
-        try {
-            tileSetImg = ImageIO.read(getClass().getResourceAsStream(tileImagePath));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.tileSetImg = loadTileSetImage(tileImagePath);
         // split the tileset image in tiles
         loadTileSet(tileSize, maxTilesetRaw, maxTilesetCol);
         // load the animated tiles
@@ -149,6 +146,18 @@ public class TileSet {
         }
     }
     //-------------------------------------------------------------
+    // TODO load from file
+    private BufferedImage loadTileSetImage(String path) {
+        String normalized = path.startsWith("/") ? path : "/" + path;
+        try (InputStream is = TileSet.class.getResourceAsStream(normalized)) {
+            if (is != null) {
+                return ImageIO.read(is);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Errore nel caricamento del tileset: " + path, e);
+        }
+        throw new IllegalArgumentException("Tileset non trovato nel classpath: " + normalized);
+    }
 
 
 

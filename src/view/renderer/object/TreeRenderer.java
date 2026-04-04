@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
-import static main.GameSetting.*;
+import static main.CONFIG.ObjConfig.*;
 /**
  * The TREE RENDERER CLASS is responsible for rendering the visual representation of the tree objects, managing their animations and states.
  */
@@ -20,6 +20,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
     private final BufferedImage[] leavesFrames;
     private final BufferedImage choppedFrame;
 
+    // TODO caricare le informazioni dal file
     public TreeRenderer(){
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/object/tree/Tree1.png");
 

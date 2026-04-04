@@ -1,57 +1,42 @@
 package model.object;
 
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import main.CONFIG.ObjConfig;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+<<<<<<< HEAD
+=======
+//TODO sintassi commenti
+
+>>>>>>> 069bd5f6f2c1b577b57e86fb611131d32e5b3c56
 public class ObjectManager {
 
     private final List<GameObject> objects = new ArrayList<>();
+    ObjConfig objConfig;
 
-    public ObjectManager(){
-        // Carica gli oggetti dal file TMX fornito; se fallisce usa il bootstrap statico
-        addOBJFromFile("src/res/maps/MappaGiocoV4.tmx");
-        //if (objects.isEmpty()) {
-           // spawnStaticObjects();
-       // }
+    public ObjectManager(ObjConfig objConfig, Document mapDoc){
+        this.objConfig = objConfig;
+        addOBJFromFile(mapDoc);
     }
 
     public void add(GameObject obj){
         objects.add(obj);
     }
 
-    public List<GameObject> getObjects(){
-        return objects;
-    }
-
-    public void update(double deltaMs){
-
-        objects.removeIf(GameObject::isRemoved);
-
-        for(GameObject obj : objects){
-            obj.update(deltaMs);
-        }
-    }
-
-
-    public void addOBJFromFile(String path){
+    public void addOBJFromFile(Document mapDoc){
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new File(path));
-            doc.getDocumentElement().normalize();
 
-            NodeList groups = doc.getElementsByTagName("objectgroup");
+            NodeList groups = mapDoc.getElementsByTagName(objConfig.OBJ_TAG);
+
             for (int i = 0; i < groups.getLength(); i++) {
                 Element group = (Element) groups.item(i);
+
+                //TODO migliorare caricmeto degli oggetti
                 if (!"trees".equals(group.getAttribute("name"))) {
                     continue;
                 }
@@ -71,7 +56,7 @@ public class ObjectManager {
                     int worldY = (int) Math.round(y - height); // Tiled usa ancoraggio sul piede
 
                     //if (gid == 801) {
-                        add(new OBJ_Tree(worldX, worldY));
+                        add(new OBJ_Tree(worldX, worldY, objConfig));
                     //}
                 }
             }
@@ -80,5 +65,16 @@ public class ObjectManager {
         }
     }
 
+    public void update(double deltaMs){
+
+        objects.removeIf(GameObject::isRemoved);
+
+        for(GameObject obj : objects){
+            obj.update(deltaMs);
+        }
+    }
+    public List<GameObject> getObjects(){
+        return objects;
+    }
 
 }

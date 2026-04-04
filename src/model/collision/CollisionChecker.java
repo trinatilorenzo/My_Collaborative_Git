@@ -1,14 +1,15 @@
 package model.collision;
 
-import model.entity.Entity;
 import model.GameModel;
+import model.entity.Entity;
+import model.entity.Monk;
 import model.object.GameObject;
 
 import java.awt.Rectangle;
 import java.util.List;
 
-import static main.GameSetting.*;
-import static main.GameSetting.Direction.*;
+import static main.ENUM.Direction.*;
+
 
 /**
  * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
@@ -94,15 +95,47 @@ public class CollisionChecker {
     }
     //-------------------------------------------------------------
 
+    /**
+     * Checks collision between a moving entity (player) and the monk.
+     * Returns true if any collision occurs. Also sets the entity collision flags.
+     */
+    //-------------------------------------------------------------
+    public boolean checkMonk(Entity entity, Monk monk) {
+        if (monk == null) return false;
+        if (monk.getState() == main.ENUM.MonkState.DISAPPEARED) return false;
+        if (entity.getCurrentLayer() != monk.getCurrentLayer()) return false;
+
+        EntityBounds mover = EntityBounds.of(entity);
+        EntityBounds target = EntityBounds.of(monk);
+        int dx = entity.getDx();
+        int dy = entity.getDy();
+        boolean collided = false;
+
+        if (dx != 0 && overlaps(mover.leftX + dx, mover.rightX + dx, mover.topY, mover.bottomY,
+                target.leftX, target.rightX, target.topY, target.bottomY)) {
+            entity.setCollisionX(true);
+            collided = true;
+        }
+
+        if (dy != 0 && overlaps(mover.leftX, mover.rightX, mover.topY + dy, mover.bottomY + dy,
+                target.leftX, target.rightX, target.topY, target.bottomY)) {
+            entity.setCollisionY(true);
+            collided = true;
+        }
+
+        return collided;
+    }
+    //-------------------------------------------------------------
+
     private void checkAxisX(Entity entity, EntityBounds bounds) {
         int dx = entity.getDx();
         if (dx == 0) return; // not moving
 
         //anticipate the entity movement (move left or right)
-        int projectedLeftCol = (bounds.leftX + dx) / TILE_SIZE;
-        int projectedRightCol = (bounds.rightX + dx) / TILE_SIZE;
-        int rowTop = bounds.topY / TILE_SIZE;
-        int rowBottom = bounds.bottomY / TILE_SIZE;
+        int projectedLeftCol = (bounds.leftX + dx) / gameModel.getTILE_SIZE();
+        int projectedRightCol = (bounds.rightX + dx) / gameModel.getTILE_SIZE();
+        int rowTop = bounds.topY / gameModel.getTILE_SIZE();
+        int rowBottom = bounds.bottomY / gameModel.getTILE_SIZE();
 
         int checkCol;
         if (dx < 0) {
@@ -127,10 +160,10 @@ public class CollisionChecker {
         if (dy == 0) return; // not moving
 
         //anticipate the entity movement (move up or down)
-        int colLeft = bounds.leftX / TILE_SIZE;
-        int colRight = bounds.rightX / TILE_SIZE;
-        int projectedTopRow = (bounds.topY + dy) / TILE_SIZE;
-        int projectedBottomRow = (bounds.bottomY + dy) / TILE_SIZE;
+        int colLeft = bounds.leftX / gameModel.getTILE_SIZE();
+        int colRight = bounds.rightX / gameModel.getTILE_SIZE();
+        int projectedTopRow = (bounds.topY + dy) / gameModel.getTILE_SIZE();
+        int projectedBottomRow = (bounds.bottomY + dy) / gameModel.getTILE_SIZE();
 
 
         int checkRow;
@@ -155,6 +188,7 @@ public class CollisionChecker {
     //-------------------------------------------------------------
 
 
+    //TODO debug del metodo + blocco scale
     public void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
         if (entity.getDx()!=0) return; // Only update layer on vertical movement
         if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {
