@@ -15,7 +15,6 @@ public class OBJ_Tree extends GameObject {
     private boolean chopping = false; // Flag to indicate if the tree is currently being chopped (for animation purposes)
     private static final double CHOP_ANIMATION_DURATION = 500; // ms
     private double chopTimer = 0; // Timer to track chopping animation progress 
-    private boolean readyToDrop = false; // Flag to indicate if the tree is ready to drop the item after being chopped
     private int shakeOffsetX = 0;
     private int shakeOffsetY = 0;
     // COSTRUCTOR
@@ -72,7 +71,6 @@ public class OBJ_Tree extends GameObject {
             if(chopTimer <= 0) {
                 chopping = false;
                 chopped = true; // ora l'albero è effettivamente tagliato
-                readyToDrop = true;
                 shakeOffsetX = 0;
                 shakeOffsetY = 0;
                 solid = false;

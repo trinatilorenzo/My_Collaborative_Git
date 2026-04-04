@@ -22,12 +22,12 @@ public class MonkRenderer extends ObjectRender<OBJ_Monk> {
 
         // Estrazione dei frame (Esempio: riga 0 Idle, riga 1 Talking/Action)
         BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(idleSheetImage, 0, 1, 6, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
-        BufferedImage[] talkingFrames = SpriteLoader.getAnimationFrames(talkSheetImage, 0, 1, 10, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
+        BufferedImage[] talkingFrames = SpriteLoader.getAnimationFrames(talkSheetImage, 0, 1, 9, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
         BufferedImage[] disappearFrames = SpriteLoader.getAnimationFrames(disappearSheetImage, 0, 1, 11, PLAYER_SPRITE_WIDTH, PLAYER_SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         animationManager.addAnimation("monk_idle", new Animation(idleFrames, 200, true));
-        animationManager.addAnimation("monk_talking", new Animation(talkingFrames, 200, false));
+        animationManager.addAnimation("monk_talking", new Animation(talkingFrames, 200, true));
         animationManager.addAnimation("monk_disappear", new Animation(disappearFrames, 150, false));
     }
 
