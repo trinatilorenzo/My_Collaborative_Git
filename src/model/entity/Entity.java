@@ -11,9 +11,12 @@ import java.awt.Rectangle;
 public class Entity {
 
     // Position and movement
+    protected static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
+
     protected int worldX, worldY;
     protected int speed; // PIXELS PER SECOND
     protected int dx, dy; // movement deltas per frame
+    protected int intendedDx, intendedDy;
     protected Direction direction;
     protected int currentLayer;
     protected String name;
@@ -30,6 +33,8 @@ public class Entity {
     public void update() {
         dx = 0;
         dy = 0;
+        intendedDx = 0;
+        intendedDy = 0;
         collisionX = false;
         collisionY = false;
     }
@@ -41,11 +46,27 @@ public class Entity {
 
     //-------------------------------------------------------------
     public void move() {
+        int appliedDx = dx;
+        int appliedDy = dy;
+
+        // normalized movement when coliding on a border
+        if (dx != 0 && dy != 0) {
+            // the paleyr is moving diagonally
+            if (collisionY) {
+                // the player is moving horizontally
+                appliedDx = intendedDx;
+            }
+            if (collisionX) {
+                // the player is moving vertically
+                appliedDy = intendedDy;
+            }
+        }
+
         if (!collisionX) { 
-            worldX += dx;
+            worldX += appliedDx;
         }
         if (!collisionY) {
-            worldY += dy;
+            worldY += appliedDy;
         }
     }
     //-------------------------------------------------------------

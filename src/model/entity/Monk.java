@@ -7,7 +7,7 @@ import java.awt.Rectangle;
 
 public class Monk extends Entity {
 
-    //TODO non deve essere un oggetto ma un entity
+    //TODO caricamento delle variabili da file
 
     private EntityConfig entityConfig;
     private MonkState state;

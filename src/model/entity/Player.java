@@ -17,7 +17,6 @@ import java.awt.Rectangle;
 public class Player extends Entity {
 
     protected int screenX, screenY;
-    private static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
     private PlayerState state;
     private Direction facingDirection;
     private EntityConfig entityConfig;
@@ -52,8 +51,8 @@ public class Player extends Entity {
 
         // Initialize movement values
         speed = entityConfig.START_PLAYER_SPEED;
-        direction = entityConfig.FACING;
-        facingDirection = entityConfig.FACING;
+        direction = entityConfig.START_FACING;
+        facingDirection = entityConfig.START_FACING;
         state = PlayerState.IDLE;
     }
     //-------------------------------------------------------------
@@ -82,7 +81,7 @@ public class Player extends Entity {
     //-------------------------------------------------------------
     //TODO il moviemto va corretto nella velocità
     private boolean updateMovement(InputState input, double deltaMs) {
-        double distance = speed * (deltaMs / 1000.0);
+        double distance = speed * (deltaMs / 1000.0); //normalized movement speed
         double moveX = 0;
         double moveY = 0;
 
@@ -90,6 +89,9 @@ public class Player extends Entity {
         if (input.down())  { moveY += distance; direction = Direction.DOWN; }
         if (input.left())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = Direction.LEFT; }
         if (input.right()) { moveX += distance; direction = Direction.RIGHT; facingDirection = Direction.RIGHT; }
+
+        intendedDx = (int) Math.round(moveX);
+        intendedDy = (int) Math.round(moveY);
 
         // Normalizza per mantenere la stessa velocità anche in diagonale (fattore 1/sqrt(2))
         if (moveX != 0 && moveY != 0) {
@@ -102,6 +104,8 @@ public class Player extends Entity {
 
         return moveX != 0 || moveY != 0;
     }
+
+
     //-------------------------------------------------------------
 
     /**

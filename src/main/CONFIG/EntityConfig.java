@@ -31,7 +31,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int PLAYER_SCALE = 1;
     public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
     public static final int PLAYER_RENDER_HEIGHT = SPRITE_HEIGHT * PLAYER_SCALE;
-    public static final Direction FACING = Direction.RIGHT;
+    public static final Direction START_FACING = Direction.RIGHT;
     public static final int RANGE_ATTACK = 20;
 
     public static final int PLAYER_HITBOX_WIDTH = 45 * PLAYER_SCALE;
