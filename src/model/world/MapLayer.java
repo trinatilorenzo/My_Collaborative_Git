@@ -2,11 +2,6 @@ package model.world;
 
 import org.w3c.dom.Element;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-
 /**
  * GameMap Layer Class
  * single layer of the map

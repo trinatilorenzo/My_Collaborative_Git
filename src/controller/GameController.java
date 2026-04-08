@@ -56,6 +56,7 @@ public class GameController {
             model.setGameState(GameState.PLAYING);
             renderOnceOnPause = true;
         }
+            
 
         // debug mode toggle edge-triggered
         model.setDebugMode(input.debug());

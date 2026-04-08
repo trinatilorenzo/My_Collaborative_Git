@@ -6,7 +6,6 @@ import model.entity.Monk;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 import view.SpriteLoader;
-import view.renderer.object.ObjectRender;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -37,12 +36,12 @@ public class MonkRenderer {
 
         // Estrazione dei frame (Esempio: riga 0 Idle, riga 1 Talking/Action)
         BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(idleSheetImage, 0, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
-        BufferedImage[] talkingFrames = SpriteLoader.getAnimationFrames(talkSheetImage, 0, 1, 10, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] talkingFrames = SpriteLoader.getAnimationFrames(talkSheetImage, 0, 1, 9, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
         BufferedImage[] disappearFrames = SpriteLoader.getAnimationFrames(disappearSheetImage, 0, 1, 11, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         animationManager.addAnimation("monk_idle", new Animation(idleFrames, 200, true));
-        animationManager.addAnimation("monk_talking", new Animation(talkingFrames, 200, false));
+        animationManager.addAnimation("monk_talking", new Animation(talkingFrames, 200, true));
         animationManager.addAnimation("monk_disappear", new Animation(disappearFrames, 150, false));
     }
 //TODO make it better
