@@ -3,6 +3,7 @@ package model;
 import main.ENUM.GameState;
 import main.ENUM.PlayerState;
 import main.ENUM.MonkState;
+import main.ENUM.TNTState;
 import main.CONFIG.GameConfig;
 import model.collision.CollisionChecker;
 import model.entity.Player;
@@ -10,6 +11,9 @@ import model.entity.Monk;
 import model.object.ObjectManager;
 import model.world.GameMap;
 import model.object.GameObject;
+import model.entity.EnemyTNT;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.object.OBJ_Tree;
 
@@ -39,7 +43,9 @@ public class GameModel {
     private boolean debugMode = false;
     private String currentDialogue = "";
 
-
+    // TODO: TNT from file
+    private List<EnemyTNT> tntEnemies = new ArrayList<>();
+    
     /**
      * COSTRUCTOR
       */
@@ -55,7 +61,11 @@ public class GameModel {
         monk = new Monk(GS.entityConfig().MONK_START_X(), GS.entityConfig().MONK_START_Y(), GS.entityConfig());
 
         gameState = GameState.PLAYING;
-        
+
+        //DEBUG
+        tntEnemies.add(new EnemyTNT(49*64, 22*64, gameConfig.entityConfig()));
+        tntEnemies.add(new EnemyTNT(52*64, 27*64, gameConfig.entityConfig()));
+ 
     }
     //-------------------------------------------------------------
 
@@ -70,6 +80,7 @@ public class GameModel {
 
             collisionChecker.checkTile(player);
             collisionChecker.checkObjects(player);
+
             boolean monkCollision = collisionChecker.checkMonk(player, monk);
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
@@ -77,6 +88,20 @@ public class GameModel {
             updateInteractions(input, monkCollision);
 
             objectManager.update(deltaMs);
+
+            //TODO: da valutare se spostare 
+            
+            for (EnemyTNT tnt : tntEnemies) {
+
+                tnt.update(player, deltaMs);
+
+                collisionChecker.checkTile(tnt);
+                collisionChecker.checkObjects(tnt);
+
+                tnt.move();
+            }
+
+
         }
     }
     //-------------------------------------------------------------
@@ -124,6 +149,8 @@ public class GameModel {
                 monk.setState(MonkState.DISAPPEARING);
             }
         }
+
+        //TODO: gestione attacco player danno
 
     }
     //-------------------------------------------------------------

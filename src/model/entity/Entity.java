@@ -16,6 +16,7 @@ public class Entity {
     protected int worldX, worldY;
     protected int speed; // PIXELS PER SECOND
     protected int dx, dy; // movement deltas per frame
+    protected int life;
     protected int intendedDx, intendedDy;
     protected Direction direction;
     protected int currentLayer;
