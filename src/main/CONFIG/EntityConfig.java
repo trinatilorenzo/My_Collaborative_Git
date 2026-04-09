@@ -65,6 +65,12 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int TNT_DETECTION_RADIUS = 100;
     public static final int TNT_EXPLOSION_RADIUS = 50;
 
+    public static final int TNT_SPRITE_WIDTH = 128;
+    public static final int TNT_SPRITE_HEIGHT = 128;
+
+    public static final int TNT_HITBOX_WIDTH = 45;
+    public static final int TNT_HITBOX_HEIGHT = 35;
+
 
     //-------------------------------------------------------------
 

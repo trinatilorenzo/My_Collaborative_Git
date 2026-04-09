@@ -1,5 +1,6 @@
 package model.entity;
 
+import java.awt.*;
 import java.util.Random;
 
 import main.CONFIG.EntityConfig;
@@ -28,7 +29,12 @@ public class EnemyTNT extends Entity{
 
         this.speed = entityConfig.START_TNT_SPEED;
 
-        this.solidArea = new java.awt.Rectangle(0, 0, 32, 32); // Example hitbox size
+        solidArea = new Rectangle((entityConfig.TNT_SPRITE_WIDTH / 2) - (entityConfig.TNT_HITBOX_WIDTH/2),
+                (entityConfig.TNT_SPRITE_HEIGHT / 2) ,
+                entityConfig.TNT_HITBOX_WIDTH,
+                entityConfig.TNT_HITBOX_HEIGHT);
+
+
     }
 
     public void update(Player player, double deltaMs) {

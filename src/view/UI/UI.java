@@ -1,7 +1,12 @@
 package view.UI;
 
 import model.GameModel;
+import model.entity.EnemyTNT;
+import model.entity.Monk;
+import model.entity.Player;
+import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.PlayerRender;
+import view.renderer.entity.TNTRenderer;
 import view.renderer.map.MapRender;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.MapConfig;
@@ -11,6 +16,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 //TODO sintassi commenti e revisione codice
@@ -19,6 +26,8 @@ public class UI {
     Graphics2D g2;
 
     private PlayerRender playerRender;
+    private TNTRenderer tntRenderer;
+    private MonkRenderer monkRenderer;
     private MapRender mapRender;
     private final ScreenConfig screenConfig;
     private final MapConfig mapConfig;
@@ -40,12 +49,15 @@ public class UI {
 
 
     public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender,
-              ScreenConfig screenConfig, MapConfig mapConfig) {
+              ScreenConfig screenConfig, MapConfig mapConfig, TNTRenderer tntRenderer, MonkRenderer monkRenderer) {
         this.gameModel = gameModel;
         this.playerRender = playerRender;
         this.mapRender =  mapRender;
         this.screenConfig = screenConfig;
         this.mapConfig = mapConfig;
+
+        this.tntRenderer = tntRenderer;
+        this.monkRenderer = monkRenderer;
 
         arial_40 = new Font ("Arial", Font. PLAIN, 40) ;
         arial_80B = new Font ("Arial", Font. BOLD, 80);
@@ -106,6 +118,26 @@ public class UI {
         if (gameModel.isDebugMode()) {
             playerRender.drawSolidArea(g2, gameModel.getPlayer());
             mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
+            List<Object> renderList = new ArrayList<>();
+            renderList.add(gameModel.getPlayer());
+            renderList.add(gameModel.getMonk());
+            renderList.addAll(gameModel.getTntEnemies());
+
+            for (Object obj : renderList) {
+                if (obj instanceof Player p) {
+                    playerRender.drawSolidArea(g2, p);
+                }
+                if (obj instanceof Monk m) {
+                   // monkRenderer.drawSolidArea(g2, m);
+                }
+                if (obj instanceof EnemyTNT t){
+                    tntRenderer.drawSolidArea(g2, t, gameModel.getPlayer());
+                }
+
+            }
+
+
+
 
             // FPS overlay (updates every second)
             frames++;

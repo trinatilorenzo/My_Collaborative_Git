@@ -29,9 +29,9 @@ public class MonkRenderer {
 
     private void loadAnimations() {
         //TODO carica da file
-        BufferedImage idleSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Idle.png");
-        BufferedImage talkSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Heal.png");
-        BufferedImage disappearSheetImage = SpriteLoader.loadSpriteSheet("/res/object/monk/Heal_Effect.png");
+        BufferedImage idleSheetImage = SpriteLoader.loadSpriteSheet("/res/npc/monk/Idle.png");
+        BufferedImage talkSheetImage = SpriteLoader.loadSpriteSheet("/res/npc/monk/Heal.png");
+        BufferedImage disappearSheetImage = SpriteLoader.loadSpriteSheet("/res/npc/monk/Heal_Effect.png");
 
 
         // Estrazione dei frame (Esempio: riga 0 Idle, riga 1 Talking/Action)

@@ -4,6 +4,7 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.ScreenConfig;
 import model.GameModel;
 import model.object.GameObject;
+import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.object.OBJ_Tree;
 import model.entity.Player;
@@ -16,6 +17,7 @@ import view.renderer.object.TreeRenderer;
 import view.renderer.object.ObjectRender;
 import view.renderer.object.RendererRegistry;
 import view.renderer.entity.MonkRenderer;
+import view.renderer.entity.TNTRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,6 +39,7 @@ public class GameView extends JPanel {
     private TileSet tileSet;
     private PlayerRender playerRender;
     private MonkRenderer monkRenderer;
+    private TNTRenderer tntRenderer;
     private UI ui_render;
     private RendererRegistry rendererRegistry;
 
@@ -62,9 +65,10 @@ public class GameView extends JPanel {
         this.playerRender = new PlayerRender(GS.entityConfig());
 
         this.monkRenderer = new MonkRenderer(GS.entityConfig());
+        this.tntRenderer = new TNTRenderer(GS.entityConfig());
 
         //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender,screenCfg,GS.mapConfig());
+        this.ui_render = new UI(model, playerRender, mapRender,screenCfg,GS.mapConfig(), tntRenderer, monkRenderer);
 
         // object renderers
         this.rendererRegistry = new RendererRegistry();
@@ -129,6 +133,7 @@ public class GameView extends JPanel {
 
         renderList.add(player);
         renderList.add(monk);
+        renderList.addAll(model.getTntEnemies());
         renderList.addAll(model.getObjects());
 
         // Sort for "bottom_y"
@@ -137,6 +142,8 @@ public class GameView extends JPanel {
                 return p.getWorldY() + p.getSolidArea().y + p.getSolidArea().height;
             } else if (obj instanceof Monk m) {
                 return m.getWorldY() + m.getSolidArea().y + m.getSolidArea().height;
+            } else if (obj instanceof EnemyTNT tnt) {
+                return tnt.getWorldY() + tnt.getSolidArea().y + tnt.getSolidArea().height;
             } else if (obj instanceof GameObject o) {
                 return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
             }
@@ -152,6 +159,17 @@ public class GameView extends JPanel {
                 int screenX = m.getWorldX() - player.getWorldX() + player.getScreenX();
                 int screenY = m.getWorldY() - player.getWorldY() + player.getScreenY();
                 monkRenderer.draw(g2, m, screenX, screenY);
+            }
+            else if (obj instanceof EnemyTNT tnt) {
+                int screenX = tnt.getWorldX() - player.getWorldX() + player.getScreenX();
+                int screenY = tnt.getWorldY() - player.getWorldY() + player.getScreenY();
+
+                if (screenX + 48 < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
+                    screenY + 48 < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+                    continue;
+                }
+
+                tntRenderer.draw(g2, tnt, screenX, screenY);
             }
 
             else if (obj instanceof GameObject o) {

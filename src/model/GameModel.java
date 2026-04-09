@@ -168,6 +168,7 @@ public class GameModel {
     public Monk getMonk() {
         return monk;
     }
+    public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
     //---------------------------------
 
