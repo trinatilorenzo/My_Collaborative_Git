@@ -25,9 +25,9 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     //PlayerConfig
     //-------------------------------------------------------------
-    public static final int START_PLAYER_SPEED = 6 * 60;
     public static final int START_WORLD_LAYER = 3;
 
+    public static final int START_PLAYER_SPEED = 6*60;
     public static final int PLAYER_SCALE = 1;
     public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
     public static final int PLAYER_RENDER_HEIGHT = SPRITE_HEIGHT * PLAYER_SCALE;
@@ -36,6 +36,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     public static final int PLAYER_HITBOX_WIDTH = 45 * PLAYER_SCALE;
     public static final int PLAYER_HITBOX_HEIGHT = 35 * PLAYER_SCALE;
+
 
     public int START_WORLD_X(){return playerStartX;}
     public int START_WORLD_Y(){return playerStartY;}

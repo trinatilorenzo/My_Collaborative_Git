@@ -19,7 +19,8 @@ public class Entity {
     protected int intendedDx, intendedDy;
     protected Direction direction;
     protected int currentLayer;
-    protected String name;
+    protected int life;
+    protected int maxLife;
 
     // Hitbox and collision
     protected Rectangle solidArea;
@@ -105,6 +106,8 @@ public class Entity {
     public Rectangle getSolidArea() {
         return solidArea;
     }
+    public int getLife() {return life;}
+    public int getMaxLife() {return maxLife;}
     //---------------------------------
 
     // SETTER ----------------------
@@ -131,6 +134,12 @@ public class Entity {
     }  
     public void setWorldY(int worldY) {
         this.worldY = worldY;
+    }
+    public void setLife(int life) {
+        this.life = life;
+    }
+    public void setMaxLife(int maxLife) {
+        this.maxLife = maxLife;
     }
     //---------------------------------
 }

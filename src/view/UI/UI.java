@@ -7,8 +7,11 @@ import main.CONFIG.ScreenConfig;
 import main.CONFIG.MapConfig;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.imageio.ImageIO;
 
 //TODO sintassi commenti e revisione codice
 public class UI {
@@ -25,6 +28,10 @@ public class UI {
 
     Font DungeonFont;
     Font MaruMonica;
+
+    private final BufferedImage heartFull;
+    private final BufferedImage heartHalf;
+    private final BufferedImage heartBlank;
 
     // FPS counter (updated once per second)
     private long fpsTimer = System.nanoTime();
@@ -61,6 +68,12 @@ public class UI {
             throw new RuntimeException(e);
         }
 
+        heartFull = scaleImage(loadUiImage("src/res/UI/heart_full.png"),
+                screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
+        heartHalf = scaleImage(loadUiImage("src/res/UI/heart_half.png"),
+                screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
+        heartBlank = scaleImage(loadUiImage("src/res/UI/heart_blank.png"),
+                screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
 
 
     }
@@ -77,6 +90,7 @@ public class UI {
 
             case PLAYING :
                 //PLAY STATE
+                drawPlayerLife();
                 if (!gameModel.getCurrentDialogue().isEmpty()){
                     drawDialogueWindow();
                 }
@@ -84,6 +98,7 @@ public class UI {
 
             case PAUSED :
                 // PAUSE STATE
+                drawPlayerLife();
                 drawPauseScreen();
                 break;
         }
@@ -108,6 +123,41 @@ public class UI {
             g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
         }
 
+    }
+
+    private BufferedImage loadUiImage(String path) {
+        try {
+            return ImageIO.read(new File(path));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Unable to load UI image: " + path, e);
+        }
+    }
+
+    private void drawPlayerLife() {
+        int playerLife = gameModel.getPlayer().getLife();
+        int maxLife = gameModel.getPlayer().getMaxLife();
+        int totalHearts = (maxLife + 1) / 2;
+
+        int heartWidth = heartFull.getWidth();
+        int heartHeight = heartFull.getHeight();
+        int x = 20;
+        int y = 20;
+        int spacing = Math.max(4, heartWidth / 6);
+
+        for (int i = 0; i < totalHearts; i++) {
+            int lifeForHeart = playerLife - (i * 2);
+            BufferedImage heartImage;
+
+            if (lifeForHeart >= 2) {
+                heartImage = heartFull;
+            } else if (lifeForHeart == 1) {
+                heartImage = heartHalf;
+            } else {
+                heartImage = heartBlank;
+            }
+
+            g2.drawImage(heartImage, x + (i * (heartWidth + spacing)), y, null);
+        }
     }
 
     private void drawPauseScreen() {
@@ -175,4 +225,14 @@ public class UI {
         g2.setFont(MaruMonica.deriveFont(Font.ITALIC, 22F));
         g2.drawString("Premi M per continuare...", x + width - 300, y + height - 130);
     }
+
+    public BufferedImage scaleImage(BufferedImage original, int width, int height ){
+        BufferedImage scaledImage = new BufferedImage(width, height, original.getType());
+        Graphics2D g2 = scaledImage.createGraphics(); // andrà a disegnarlo in scale image
+        g2.drawImage(original, 0, 0, width, height, null);
+        g2.dispose();
+
+        return scaledImage;
+    }
+
 }

@@ -20,7 +20,6 @@ public class Monk extends Entity {
     public Monk(int worldX, int worldY, EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
 
-        this.name = entityConfig.MONK_TAG;
         this.state = entityConfig.MONK_DEFAULT_STATE;
 
         this.worldX = worldX;

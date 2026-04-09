@@ -24,7 +24,7 @@ public final class GameConfig {
     public static final String MAP_PATH = "res/maps/MappaGiocoV4.tmx";
     public static final String TILESET_PATH = "/res/tiles/tileSet1.png";
 
-    public static final int FPS =120;
+    public static final int FPS = 120;
     public static final int MAX_FRAME_SKIP = 10;
     public static final int SCALE = 1;
     public static final int MAX_SCREEN_COL = 20;
