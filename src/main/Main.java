@@ -15,7 +15,6 @@ public class Main {
 
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
-        //TODO : leggere le impostazioni di avvio da file
         GameConfig GS = new GameConfig();
 
         GameModel model = new GameModel(GS);
