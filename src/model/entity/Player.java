@@ -79,7 +79,6 @@ public class Player extends Entity {
      * and normalizes for diagonal movement to keep constant speed.
      */
     //-------------------------------------------------------------
-    //TODO il moviemto va corretto nella velocità
     private boolean updateMovement(InputState input, double deltaMs) {
         double distance = speed * (deltaMs / 1000.0); //normalized movement speed
         double moveX = 0;
