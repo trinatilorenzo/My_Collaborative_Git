@@ -86,7 +86,7 @@ public class GameModel {
      * Interactions with objects
      */
     //-------------------------------------------------------------
-    //TODO beter timing and animation
+    //TODO better timing and animation
     private void updateInteractions(InputState input, boolean monkCollision) {
 
         for (GameObject obj : objectManager.getObjects()) {

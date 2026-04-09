@@ -19,7 +19,6 @@ public class Entity {
     protected int intendedDx, intendedDy;
     protected Direction direction;
     protected int currentLayer;
-    protected String name;
 
     // Hitbox and collision
     protected Rectangle solidArea;
