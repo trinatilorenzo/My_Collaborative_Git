@@ -8,6 +8,8 @@ import model.object.GameObject;
 import java.awt.Rectangle;
 import java.util.List;
 
+import model.entity.Player;
+
 import static main.ENUM.Direction.*;
 
 
@@ -176,8 +178,10 @@ public class CollisionChecker {
         }
 
         if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
-
-            updateEntityLayer(entity, bounds, checkRow, colLeft);
+            if (entity instanceof Player){
+                //only update the player layer, other entities simply can't move on the stairs if they collide with them
+                updateEntityLayer(entity, bounds, checkRow, colLeft);
+            }
 
             entity.setCollisionY(true);
 

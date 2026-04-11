@@ -118,7 +118,11 @@ public class GameView extends JPanel {
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
         monkRenderer.update(model.getMonk(), deltaMs);
+        for (EnemyTNT tnt : model.getTntEnemies()) {
+            tntRenderer.update(tnt, deltaMs);
+        }
         updateObjectAnimations(deltaMs);
+
 
     }
     //-------------------------------------------------------------

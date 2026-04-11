@@ -1,28 +1,32 @@
 package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
-import main.ENUM.Direction;
-import main.ENUM.PlayerState;
 import main.ENUM.TNTState;
 import model.entity.EnemyTNT;
-import model.entity.Player;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 import view.SpriteLoader;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Map;
+import java.util.HashMap;
 
 public class TNTRenderer {
 
-    private AnimationManager animationManager;
+    private final Map<EnemyTNT, AnimationManager> managerByTNT;
     private final EntityConfig entityConfig;
+
+    private BufferedImage[] wanderFrames;
+    private BufferedImage[] triggeredFrames;
+    private BufferedImage[] explosionFrames;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
     public TNTRenderer(EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
         loadAnimations();
+        managerByTNT = new HashMap<>();
     }
     //-------------------------------------------------------------
 
@@ -33,26 +37,25 @@ public class TNTRenderer {
 
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Barrel_Purple.png");
 
-        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 1, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
-        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
-
-
-        animationManager = new AnimationManager();
-        animationManager.addAnimation("idle", new Animation(idleFrames, 120, true));
-        animationManager.addAnimation("walk", new Animation(walkFrames, 90, true));
-
-        // frame duration in milliseconds
-       /*
-        animationManager.addAnimation("walk", new Animation(walkFrames, 90, true));
-        animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 60, false));
-        animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
-        animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
-        */
+        //BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 1, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
+        wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
+        triggeredFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 1, 3, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
+        explosionFrames = SpriteLoader.getAnimationFrames(sheetImage, 5, 1, 3, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
     }
     //-------------------------------------------------------------
 
+    private AnimationManager getManager(EnemyTNT tnt) {
+        return managerByTNT.computeIfAbsent(tnt, k -> {
+            AnimationManager manager = new AnimationManager();
+            manager.addAnimation("wander", new Animation(wanderFrames, 90, true));
+            manager.addAnimation("triggered", new Animation(triggeredFrames, 100, true));
+            manager.addAnimation("explosion", new Animation(explosionFrames, 100, false));
+            manager.playAnimation("wander"); // Stato iniziale
+            return manager;
+        });
+    }
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2, EnemyTNT enemy, int screenX, int screenY) {
+    /*public void draw(Graphics2D g2, EnemyTNT enemy, int screenX, int screenY) {
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
         //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
@@ -74,53 +77,49 @@ public class TNTRenderer {
                     null);
         }
 
-    }
+    }*/
     //-------------------------------------------------------------
+    public void update(EnemyTNT tnt, double deltaMs) {
+            AnimationManager animationManager = getManager(tnt);
+            switch (tnt.getState()) {
 
-    //-------------------------------------------------------------
-    public void updateAnimations(Player player, double deltaMs) {
-        switch (player.getState()) {
-            case IDLE:
-                animationManager.playAnimation("idle");
-                break;
-            case WALKING:
-                animationManager.playAnimation("walk");
-                break;
-            case ATTACKING:
-                // Attack animation takes priority even while moving
-                if (player.getDirection() == Direction.DOWN) {
-                    animationManager.playAnimation("attack_down");
-                } else if (player.getDirection() == Direction.UP) {
-                    animationManager.playAnimation("attack_up");
-                } else {
-                    animationManager.playAnimation("attack_right");
-                }
+                case WANDER:
+                    animationManager.playAnimation("wander");
+                    System.out.println("TNT is wandering");
+                    break;
+                case TRIGGERED:
+                    animationManager.playAnimation("triggered");
+                    System.out.println("TNT is triggered");
+                    break;
+                case EXPLODING:
+                    animationManager.playAnimation("explosion");
+                    System.out.println("TNT is exploding");
+                    break;
+                case EXPLODED:
+                    break;
+            }
 
-                // When attack animation finishes, release the attack state
-                if (animationManager.getCurrent().isFinished()) {
-                    player.stopAttack();
-                }
-                break;
+            animationManager.update(deltaMs);
         }
-        animationManager.update(deltaMs);
-    }
-    //-------------------------------------------------------------
 
+        //-------------------------------------------------------------
+        public void draw(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
 
-    //DEBUG METOD
-    //-------------------------------------------------------------
-    public void drawSolidArea(Graphics2D g2, EnemyTNT enemy, Player player) {
-        Rectangle solid = enemy.getSolidArea();
-        int drawX = enemy.getWorldX() - player.getWorldX() + player.getScreenX() + solid.x;
-        int drawY = enemy.getWorldY() - player.getWorldY() + player.getScreenY() + solid.y;
+            if (tnt.getState() == TNTState.EXPLODED) return;
+            AnimationManager animationManager = getManager(tnt);
+            BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
-        // Semi-transparent red fill
-        g2.setColor(new Color(255, 0, 0, 80));
-        g2.fillRect(drawX, drawY, solid.width, solid.height);
+            g2.drawImage(
+                    frame,
+                    screenX,
+                    screenY,
+                    entityConfig.TNT_SPRITE_WIDTH,
+                    entityConfig.TNT_SPRITE_HEIGHT,
+                    null
+            );
+        }
 
-        // Solid red border
-        g2.setColor(Color.RED);
-        g2.drawRect(drawX, drawY, solid.width, solid.height);
-
-    }
+        public void removeTNT(EnemyTNT tnt) {
+            managerByTNT.remove(tnt);
+        }
 }

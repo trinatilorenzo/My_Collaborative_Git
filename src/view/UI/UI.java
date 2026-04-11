@@ -131,7 +131,7 @@ public class UI {
                    // monkRenderer.drawSolidArea(g2, m);
                 }
                 if (obj instanceof EnemyTNT t){
-                    tntRenderer.drawSolidArea(g2, t, gameModel.getPlayer());
+                    //tntRenderer.drawSolidArea(g2, t, gameModel.getPlayer());
                 }
 
             }

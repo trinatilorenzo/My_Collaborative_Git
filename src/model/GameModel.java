@@ -64,7 +64,7 @@ public class GameModel {
 
         //DEBUG
         tntEnemies.add(new EnemyTNT(49*64, 22*64, gameConfig.entityConfig()));
-        tntEnemies.add(new EnemyTNT(52*64, 27*64, gameConfig.entityConfig()));
+        tntEnemies.add(new EnemyTNT(54*64, 20*64, gameConfig.entityConfig()));
  
     }
     //-------------------------------------------------------------
@@ -97,6 +97,8 @@ public class GameModel {
 
                 collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
+                System.out.println("collisionX=" + tnt.isCollisionX() + 
+                   " collisionY=" + tnt.isCollisionY());
 
                 tnt.move();
             }

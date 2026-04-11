@@ -1,31 +1,36 @@
 package model.entity;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Random;
 
 import main.CONFIG.EntityConfig;
 import main.ENUM.TNTState;
 
 public class EnemyTNT extends Entity{
-    private TNTState state;
+    private TNTState state = TNTState.WANDER;
     private int hp = 1;
-    private long triggerTime;
-    private long explosionDelay = 2000;
+
+    private long triggerTimer;
+    private long explosionTimer;
+
+    private long explosionDelay = 2000; // Time in milliseconds between being triggered and exploding
 
     private final int detectionRadius = 100; // Example radius for detecting the player
     private final int explosionRadius = 50; // Example radius for explosion damage
 
     private EntityConfig entityConfig;
+
     private Random random = new Random();
-    private long lastMoveChange = EntityConfig.START_TNT_SPEED;
-    private long moveChangeInterval = EntityConfig.START_TNT_SPEED; // Change direction every second
+
+    private double moveTimer = 0; // Timer to control wandering movement
+    private final double moveInterval = 1000; // Change direction every 1 second
+    private final int EXPLOSION_DURATION = 300;
 
     public EnemyTNT(int worldX, int worldY, EntityConfig entityConfig) {
         
         this.entityConfig = entityConfig;
         this.worldX = worldX;
         this.worldY = worldY;
-        this.state = TNTState.WANDER;
 
         this.speed = entityConfig.START_TNT_SPEED;
 
@@ -33,7 +38,6 @@ public class EnemyTNT extends Entity{
                 (entityConfig.TNT_SPRITE_HEIGHT / 2) ,
                 entityConfig.TNT_HITBOX_WIDTH,
                 entityConfig.TNT_HITBOX_HEIGHT);
-
 
     }
 
@@ -47,13 +51,22 @@ public class EnemyTNT extends Entity{
             case TRIGGERED: 
                 dx = 0;
                 dy = 0;
-                if (System.currentTimeMillis() - triggerTime > explosionDelay) {
-                    explode(player);
-                    state = TNTState.EXPLODED;
+                triggerTimer += deltaMs;
+                if (triggerTimer >= explosionDelay) {
+                    state = TNTState.EXPLODING;
+                    explosionTimer = 0;
                 }
                 break;
+
+
             case EXPLODING: 
-                state = TNTState.EXPLODED;
+                dx = 0;
+                dy = 0;
+                explode(player);
+                explosionTimer += deltaMs; 
+                if (explosionTimer >= EXPLOSION_DURATION) {
+                    state = TNTState.EXPLODED;
+                }
                 break;
             case EXPLODED: {
                 // TODO: Handle post-explosion logic, e.g., remove from game
@@ -65,9 +78,11 @@ public class EnemyTNT extends Entity{
     //--------------------------------------------------------------
     // Simple wandering behavior: changes direction at set intervals
     private void wander(double deltaMs) {
-        long now = System.currentTimeMillis();
 
-        if (now - lastMoveChange > moveChangeInterval) {
+        moveTimer += deltaMs;
+        System.out.println("dx, dy before wandering: " + dx + ", " + dy);
+
+        if (moveTimer >= moveInterval) {
             intendedDx = 0;
             intendedDy = 0;
 
@@ -80,36 +95,39 @@ public class EnemyTNT extends Entity{
                 case 3 -> intendedDx = speed;
             }
 
-            lastMoveChange = now;
+            moveTimer = 0;
         }
 
         dx = intendedDx;
         dy = intendedDy;
-    }
+        System.out.println("dx, dy after wandering: " + dx + ", " + dy);
+    
+        }
     
     //-------------------------------------------------------------
     // Checks if the player is within the detection radius and triggers the TNT if so
     private void checkPlayerProximity(Player player) {
         int distanceX = player.worldX - worldX;
         int distanceY = player.worldY - worldY;
+
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
         if (distance < detectionRadius) {
             state = TNTState.TRIGGERED;
-            triggerTime = System.currentTimeMillis();
+            triggerTimer = 0;
         }
     }
 
     //--------------------------------------------------------------
-    // Handles the explosion logic, e.g., damaging the player if within the explosion radius
+    // Handles the explosion logic, damaging the player if within the explosion radius
     private void explode(Player player) {
         int distanceX = player.worldX - worldX;
         int distanceY = player.worldY - worldY;
+        
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
         if (distance < explosionRadius) {
-            // TODO: Implement explosion damage logic
-            // e.g., player.takeDamage();
+            player.takeDamage(10);
         }
     }
 

@@ -162,6 +162,7 @@ public class Player extends Entity {
     // Methods to reduce a life 
     public void takeDamage(int damage) {
         life -= damage;
+        System.out.println("Player takes " + damage + " damage! Remaining life: " + life);
         if (life <= 0) {
             //TODO: Handle player death (e.g., trigger game over, respawn, etc.)
             life = 0;
