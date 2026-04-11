@@ -89,17 +89,13 @@ public class GameModel {
 
             objectManager.update(deltaMs);
 
-            //TODO: da valutare se spostare 
-            
+            // Update TNT enemies
             for (EnemyTNT tnt : tntEnemies) {
 
                 tnt.update(player, deltaMs);
 
-                collisionChecker.checkTile(tnt);
+                //collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
-                System.out.println("collisionX=" + tnt.isCollisionX() + 
-                   " collisionY=" + tnt.isCollisionY());
-
                 tnt.move();
             }
 

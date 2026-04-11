@@ -36,11 +36,12 @@ public class TNTRenderer {
         //TODO: make the loading form diffferent source
 
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Barrel_Purple.png");
+        BufferedImage explosionSheet = SpriteLoader.loadSpriteSheet("/res/npc/Explosions.png");
 
         //BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 1, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
         wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
         triggeredFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 1, 3, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
-        explosionFrames = SpriteLoader.getAnimationFrames(sheetImage, 5, 1, 3, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
+        explosionFrames = SpriteLoader.getAnimationFrames(explosionSheet, 0, 1, 9, entityConfig.PLAYER_RENDER_WIDTH, entityConfig.PLAYER_RENDER_HEIGHT);
     }
     //-------------------------------------------------------------
 
@@ -85,15 +86,12 @@ public class TNTRenderer {
 
                 case WANDER:
                     animationManager.playAnimation("wander");
-                    System.out.println("TNT is wandering");
                     break;
                 case TRIGGERED:
                     animationManager.playAnimation("triggered");
-                    System.out.println("TNT is triggered");
                     break;
                 case EXPLODING:
                     animationManager.playAnimation("explosion");
-                    System.out.println("TNT is exploding");
                     break;
                 case EXPLODED:
                     break;

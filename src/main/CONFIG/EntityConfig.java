@@ -61,7 +61,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     //-------------------------------------------------------------
     //TNTConfig
-    public static final int START_TNT_SPEED = 3 * 60;
+    public static final int START_TNT_SPEED = 1;
     public static final int TNT_DETECTION_RADIUS = 100;
     public static final int TNT_EXPLOSION_RADIUS = 50;
 

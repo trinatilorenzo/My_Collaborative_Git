@@ -69,6 +69,8 @@ public class Entity {
         if (!collisionY) {
             worldY += appliedDy;
         }
+        System.out.println("collisionX: " + collisionX + " collisionY: " + collisionY);
+
     }
     //-------------------------------------------------------------
 

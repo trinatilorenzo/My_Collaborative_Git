@@ -78,9 +78,7 @@ public class EnemyTNT extends Entity{
     //--------------------------------------------------------------
     // Simple wandering behavior: changes direction at set intervals
     private void wander(double deltaMs) {
-
         moveTimer += deltaMs;
-        System.out.println("dx, dy before wandering: " + dx + ", " + dy);
 
         if (moveTimer >= moveInterval) {
             intendedDx = 0;
@@ -100,7 +98,6 @@ public class EnemyTNT extends Entity{
 
         dx = intendedDx;
         dy = intendedDy;
-        System.out.println("dx, dy after wandering: " + dx + ", " + dy);
     
         }
     
