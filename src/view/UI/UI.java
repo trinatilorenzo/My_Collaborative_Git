@@ -135,6 +135,11 @@ public class UI {
                 }
 
             }
+            for (EnemyTNT tnt : gameModel.getTntEnemies()) {
+                tntRenderer.drawSolidArea(g2, tnt, tnt.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX(),
+                tnt.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY()
+                );
+            }
 
 
 

@@ -94,7 +94,7 @@ public class GameModel {
 
                 tnt.update(player, deltaMs);
 
-                //collisionChecker.checkTile(tnt);
+                collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
                 tnt.move();
             }

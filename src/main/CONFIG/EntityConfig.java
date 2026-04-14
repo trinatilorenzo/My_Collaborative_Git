@@ -27,7 +27,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     //-------------------------------------------------------------
     public static final int START_WORLD_LAYER = 3;
 
-    public static final int START_PLAYER_SPEED = 6*60;
+    public static final int START_PLAYER_SPEED = 384; // pixels per second
     public static final int PLAYER_SCALE = 1;
     public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
     public static final int PLAYER_RENDER_HEIGHT = SPRITE_HEIGHT * PLAYER_SCALE;
@@ -61,9 +61,10 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     //-------------------------------------------------------------
     //TNTConfig
-    public static final int START_TNT_SPEED = 1;
+    public static final int START_TNT_SPEED = 128;
     public static final int TNT_DETECTION_RADIUS = 100;
     public static final int TNT_EXPLOSION_RADIUS = 50;
+    public static final int ENEMY_TNT_LAYER = 3;
 
     public static final int TNT_SPRITE_WIDTH = 128;
     public static final int TNT_SPRITE_HEIGHT = 128;
