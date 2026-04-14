@@ -18,6 +18,9 @@ public class EnemyTNT extends Entity{
     private final int detectionRadius = 100; // Example radius for detecting the player
     private final int explosionRadius = 50; // Example radius for explosion damage
 
+    private double dirX = 0; //save the current direction of TNT
+    private double dirY = 0;
+
     private EntityConfig entityConfig;
 
     private Random random = new Random();
@@ -31,14 +34,13 @@ public class EnemyTNT extends Entity{
         this.entityConfig = entityConfig;
         this.worldX = worldX;
         this.worldY = worldY;
-
+        this.currentLayer = entityConfig.ENEMY_TNT_LAYER;
         this.speed = entityConfig.START_TNT_SPEED;
 
         solidArea = new Rectangle((entityConfig.TNT_SPRITE_WIDTH / 2) - (entityConfig.TNT_HITBOX_WIDTH/2),
-                (entityConfig.TNT_SPRITE_HEIGHT / 2) ,
+                (entityConfig.TNT_SPRITE_HEIGHT / 2) - (entityConfig.TNT_HITBOX_HEIGHT/2),
                 entityConfig.TNT_HITBOX_WIDTH,
                 entityConfig.TNT_HITBOX_HEIGHT);
-
     }
 
     public void update(Player player, double deltaMs) {
@@ -49,8 +51,6 @@ public class EnemyTNT extends Entity{
                 checkPlayerProximity(player);
                 break;
             case TRIGGERED: 
-                dx = 0;
-                dy = 0;
                 triggerTimer += deltaMs;
                 if (triggerTimer >= explosionDelay) {
                     state = TNTState.EXPLODING;
@@ -58,16 +58,14 @@ public class EnemyTNT extends Entity{
                 }
                 break;
 
-
             case EXPLODING: 
-                dx = 0;
-                dy = 0;
                 explode(player);
                 explosionTimer += deltaMs; 
                 if (explosionTimer >= EXPLOSION_DURATION) {
                     state = TNTState.EXPLODED;
                 }
                 break;
+
             case EXPLODED: {
                 // TODO: Handle post-explosion logic, e.g., remove from game
                 break;
@@ -78,28 +76,28 @@ public class EnemyTNT extends Entity{
     //--------------------------------------------------------------
     // Simple wandering behavior: changes direction at set intervals
     private void wander(double deltaMs) {
-        moveTimer += deltaMs;
-
-        if (moveTimer >= moveInterval) {
-            intendedDx = 0;
-            intendedDy = 0;
-
-            int dir = random.nextInt(4);
+        double deltaTime = deltaMs / 1000.0; // Convert ms to seconds for speed calculation
+        moveTimer += deltaMs; // Increment the timer by the elapsed time
+        
+        // Change direction at intervals
+        if (moveTimer >= moveInterval) { 
+            int dir = random.nextInt(4); //Random direction
 
             switch (dir) { // 0: up, 1: down, 2: left, 3: right
-                case 0 -> intendedDy = -speed;
-                case 1 -> intendedDy = speed;
-                case 2 -> intendedDx = -speed;
-                case 3 -> intendedDx = speed;
+                case 0 -> {dirX = 0; dirY = -1;}
+                case 1 -> {dirX = 0; dirY = 1;}
+                case 2 -> {dirX = -1; dirY = 0;}
+                case 3 -> {dirX = 1; dirY = 0;}
             }
-
-            moveTimer = 0;
+            moveTimer = 0; // Reset timer after changing direction
         }
+ 
+        dx = (int) Math.round(dirX *speed * deltaTime);
+        dy = (int) Math.round(dirY * speed * deltaTime);
 
-        dx = intendedDx;
-        dy = intendedDy;
-    
-        }
+        intendedDx = dx;
+        intendedDy = dy;
+    }   
     
     //-------------------------------------------------------------
     // Checks if the player is within the detection radius and triggers the TNT if so

@@ -120,4 +120,23 @@ public class TNTRenderer {
         public void removeTNT(EnemyTNT tnt) {
             managerByTNT.remove(tnt);
         }
+
+        //DEBUG METOD
+        //-------------------------------------------------------------
+        public void drawSolidArea(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
+
+            Rectangle solid = tnt.getSolidArea();
+
+            int drawX = screenX + solid.x;
+            int drawY = screenY + solid.y;
+
+            // semi-trasparente rosso
+            g2.setColor(new Color(255, 0, 0, 80));
+            g2.fillRect(drawX, drawY, solid.width, solid.height);
+
+            // bordo rosso
+            g2.setColor(Color.RED);
+            g2.drawRect(drawX, drawY, solid.width, solid.height);
+    }
+
 }

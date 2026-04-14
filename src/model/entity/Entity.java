@@ -34,8 +34,8 @@ public class Entity {
     public void update() {
         dx = 0;
         dy = 0;
-        //intendedDx = 0;
-        //intendedDy = 0;
+        intendedDx = 0;
+        intendedDy = 0;
         collisionX = false;
         collisionY = false;
     }

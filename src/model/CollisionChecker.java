@@ -151,10 +151,6 @@ public class CollisionChecker {
         if (isCollision(bounds.layer, rowTop, checkCol) || isCollision(bounds.layer, rowBottom, checkCol)) {
                 entity.setCollisionX(true);
         }
-
-
-
-
     }
 
     private void checkAxisY(Entity entity, EntityBounds bounds) {
@@ -198,12 +194,10 @@ public class CollisionChecker {
         if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {
             // move level down
             entity.setLayer(entity.getCurrentLayer() - 1);
-            System.out.println("Moved down to layer " + entity.getCurrentLayer());
         }
         if (!isCollision(bounds.layer + 1, checkRow, colLeft)&& entity.getDirection() != DOWN) {
             // move level up
             entity.setLayer(entity.getCurrentLayer() + 1);
-            System.out.println("Moved up to layer " + entity.getCurrentLayer());
         }
     }
     //-------------------------------------------------------------
