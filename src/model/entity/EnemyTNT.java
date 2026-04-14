@@ -38,7 +38,7 @@ public class EnemyTNT extends Entity{
         this.speed = entityConfig.START_TNT_SPEED;
 
         solidArea = new Rectangle((entityConfig.TNT_SPRITE_WIDTH / 2) - (entityConfig.TNT_HITBOX_WIDTH/2),
-                (entityConfig.TNT_SPRITE_HEIGHT / 2) - (entityConfig.TNT_HITBOX_HEIGHT/2),
+                (entityConfig.TNT_SPRITE_HEIGHT / 2),
                 entityConfig.TNT_HITBOX_WIDTH,
                 entityConfig.TNT_HITBOX_HEIGHT);
     }

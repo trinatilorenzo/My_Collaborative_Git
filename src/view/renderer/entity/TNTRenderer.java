@@ -40,7 +40,7 @@ public class TNTRenderer {
 
         //BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 1, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
         wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
-        triggeredFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 1, 3, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
+        triggeredFrames = SpriteLoader.getAnimationFrames(sheetImage, 5, 1, 3, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
         explosionFrames = SpriteLoader.getAnimationFrames(explosionSheet, 0, 1, 9, entityConfig.PLAYER_RENDER_WIDTH, entityConfig.PLAYER_RENDER_HEIGHT);
     }
     //-------------------------------------------------------------
@@ -125,18 +125,18 @@ public class TNTRenderer {
         //-------------------------------------------------------------
         public void drawSolidArea(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
 
-            Rectangle solid = tnt.getSolidArea();
+        Rectangle solid = tnt.getSolidArea();
 
-            int drawX = screenX + solid.x;
-            int drawY = screenY + solid.y;
+        int drawX = screenX + solid.x;
+        int drawY = screenY + solid.y;
 
-            // semi-trasparente rosso
-            g2.setColor(new Color(255, 0, 0, 80));
-            g2.fillRect(drawX, drawY, solid.width, solid.height);
+        // semi-trasparente rosso
+        g2.setColor(new Color(255, 0, 0, 80));
+        g2.fillRect(drawX, drawY, solid.width, solid.height);
 
-            // bordo rosso
-            g2.setColor(Color.RED);
-            g2.drawRect(drawX, drawY, solid.width, solid.height);
+        // bordo rosso
+        g2.setColor(Color.RED);
+        g2.drawRect(drawX, drawY, solid.width, solid.height);
     }
 
 }
