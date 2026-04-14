@@ -1,7 +1,8 @@
 package main.CONFIG;
 
-import main.ENUM.Direction;
-import main.ENUM.MonkState;
+import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.MonkState;
 
 
 /**
@@ -27,7 +28,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     //-------------------------------------------------------------
     public static final int START_WORLD_LAYER = 3;
 
-    public static final int START_PLAYER_SPEED = 6*60;
+    public static final int START_PLAYER_SPEED = 6*64; //pixels per second
     public static final int PLAYER_SCALE = 1;
     public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
     public static final int PLAYER_RENDER_HEIGHT = SPRITE_HEIGHT * PLAYER_SCALE;

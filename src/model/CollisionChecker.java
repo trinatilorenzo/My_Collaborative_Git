@@ -10,7 +10,7 @@ import java.util.List;
 
 import model.entity.Player;
 
-import static main.ENUM.Direction.*;
+import static main.CONFIG.enu.Direction.*;
 
 
 /**
@@ -104,7 +104,7 @@ public class CollisionChecker {
     //-------------------------------------------------------------
     public boolean checkMonk(Entity entity, Monk monk) {
         if (monk == null) return false;
-        if (monk.getState() == main.ENUM.MonkState.DISAPPEARED) return false;
+        if (monk.getState() == main.CONFIG.enu.MonkState.DISAPPEARED) return false;
         if (entity.getCurrentLayer() != monk.getCurrentLayer()) return false;
 
         EntityBounds mover = EntityBounds.of(entity);

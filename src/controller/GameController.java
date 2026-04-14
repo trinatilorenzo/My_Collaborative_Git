@@ -2,12 +2,11 @@ package controller;
 
 import model.GameModel;
 import view.GameView;
-import input.InputState;
-import main.ENUM.GameState;
+import main.CONFIG.enu.GameState;
 
 /**
  * ALL THE CONTROLLER STAFF HERE
- * input, game loop , system ...
+ * input, game loop, system ...
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {

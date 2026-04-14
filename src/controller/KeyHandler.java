@@ -3,8 +3,6 @@ package controller;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import input.InputState;
-
 // - KEY HANDLER CLASS
 //  Manage input from keyboard
 //-------------------------------------------------------------------------------------------------------------------

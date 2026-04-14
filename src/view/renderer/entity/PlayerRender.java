@@ -1,8 +1,8 @@
 package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
-import main.ENUM.Direction;
-import main.ENUM.PlayerState;
+import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.PlayerState;
 import model.entity.Player;
 import view.SpriteLoader;
 import view.Animation.Animation;

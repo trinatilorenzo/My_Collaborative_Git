@@ -117,6 +117,7 @@ public class UI {
 
         if (gameModel.isDebugMode()) {
             playerRender.drawSolidArea(g2, gameModel.getPlayer());
+
             mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
             List<Object> renderList = new ArrayList<>();
             renderList.add(gameModel.getPlayer());

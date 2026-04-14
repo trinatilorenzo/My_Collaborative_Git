@@ -1,9 +1,9 @@
 package model.entity;
 
-import input.InputState;
+import controller.InputState;
 import main.CONFIG.EntityConfig;
-import main.ENUM.Direction;
-import main.ENUM.PlayerState;
+import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.PlayerState;
 
 
 import java.awt.Rectangle;
@@ -82,7 +82,10 @@ public class Player extends Entity {
      */
     //-------------------------------------------------------------
     private boolean updateMovement(InputState input, double deltaMs) {
-        double distance = speed * (deltaMs / 1000.0); //normalized movement speed
+        //speed is pixel per second
+        //deltaMs is the time elapsed since the last frame
+        double distance = speed * (deltaMs / 1000.0); //distance is the distance to move in the current frame
+
         double moveX = 0;
         double moveY = 0;
 

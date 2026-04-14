@@ -1,5 +1,5 @@
-package main.ENUM;
+package main.CONFIG.enu;
 //-----------------------------------------------------------------------
 // MonkState
 //-----------------------------------------------------------------------
-    public enum MonkState { IDLE, TALKING, DISAPPEARING, DISAPPEARED }
+public enum MonkState { IDLE, TALKING, DISAPPEARING, DISAPPEARED }

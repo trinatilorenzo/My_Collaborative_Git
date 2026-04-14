@@ -1,6 +1,6 @@
-package main.ENUM;
+package main.CONFIG.enu;
 
 //-----------------------------------------------------------------------
-// Player State
+// GAME STATE
 //-----------------------------------------------------------------------
-public enum PlayerState {IDLE, WALKING, ATTACKING}
+public enum GameState {PLAYING, PAUSED}

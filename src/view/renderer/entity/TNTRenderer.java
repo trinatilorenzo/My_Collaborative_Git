@@ -1,7 +1,7 @@
 package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
-import main.ENUM.TNTState;
+import main.CONFIG.enu.TNTState;
 import model.entity.EnemyTNT;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;

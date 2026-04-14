@@ -1,5 +1,5 @@
 package model.entity;
-import main.ENUM.Direction;
+import main.CONFIG.enu.Direction;
 
 import java.awt.Rectangle;
 

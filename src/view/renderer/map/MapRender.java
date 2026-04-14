@@ -1,7 +1,7 @@
 package view.renderer.map;
 
 import main.CONFIG.ScreenConfig;
-import model.world.GameMap;
+import model.GameMap;
 import model.entity.Player;
 
 import java.awt.*;

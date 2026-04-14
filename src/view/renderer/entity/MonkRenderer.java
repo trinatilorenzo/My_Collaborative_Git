@@ -1,7 +1,7 @@
 package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
-import main.ENUM.MonkState;
+import main.CONFIG.enu.MonkState;
 import model.entity.Monk;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;

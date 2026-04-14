@@ -1,15 +1,13 @@
 package model;
 
-import main.ENUM.GameState;
-import main.ENUM.PlayerState;
-import main.ENUM.MonkState;
-import main.ENUM.TNTState;
+import main.CONFIG.enu.GameState;
+import main.CONFIG.enu.PlayerState;
+import main.CONFIG.enu.MonkState;
 import main.CONFIG.GameConfig;
 import model.collision.CollisionChecker;
 import model.entity.Player;
 import model.entity.Monk;
 import model.object.ObjectManager;
-import model.world.GameMap;
 import model.object.GameObject;
 import model.entity.EnemyTNT;
 import java.util.ArrayList;
@@ -17,10 +15,9 @@ import java.util.List;
 
 import model.object.OBJ_Tree;
 
-import input.InputState;
+import controller.InputState;
 
 import java.awt.Rectangle;
-import java.util.List;
 
 /**
  * ALL THE GAME MODEL STAFF HERE

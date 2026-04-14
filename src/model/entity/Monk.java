@@ -1,7 +1,7 @@
 package model.entity;
 
 import main.CONFIG.EntityConfig;
-import main.ENUM.MonkState;
+import main.CONFIG.enu.MonkState;
 
 import java.awt.Rectangle;
 

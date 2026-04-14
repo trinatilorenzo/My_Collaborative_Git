@@ -1,4 +1,4 @@
-package main.ENUM;
+package main.CONFIG.enu;
 
 //-----------------------------------------------------------------------
 // Direction

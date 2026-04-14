@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 import main.CONFIG.EntityConfig;
-import main.ENUM.TNTState;
+import main.CONFIG.enu.TNTState;
 
 public class EnemyTNT extends Entity{
     private TNTState state = TNTState.WANDER;
