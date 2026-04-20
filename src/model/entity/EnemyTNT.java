@@ -122,7 +122,7 @@ public class EnemyTNT extends Entity{
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
         if (distance < explosionRadius) {
-            player.takeDamage(10);
+            player.takeDamage();
         }
     }
 
