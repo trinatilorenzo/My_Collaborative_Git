@@ -55,30 +55,7 @@ public class TNTRenderer {
             return manager;
         });
     }
-    //-------------------------------------------------------------
-    /*public void draw(Graphics2D g2, EnemyTNT enemy, int screenX, int screenY) {
-        BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
-        //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
-
-        if (enemy.getDirection()!= Direction.RIGHT) {
-            // Flip the image horizontally for left direction
-            g2.drawImage(frame,
-                    screenX + EntityConfig.PLAYER_RENDER_WIDTH,
-                    screenY, -EntityConfig.PLAYER_RENDER_HEIGHT,
-                    EntityConfig.PLAYER_RENDER_HEIGHT,
-                    null);
-        } else {
-            // Draw normally for right direction
-            g2.drawImage(frame,
-                    screenX,
-                    screenY,
-                    EntityConfig.PLAYER_RENDER_WIDTH,
-                    EntityConfig.PLAYER_RENDER_HEIGHT,
-                    null);
-        }
-
-    }*/
     //-------------------------------------------------------------
     public void update(EnemyTNT tnt, double deltaMs) {
             AnimationManager animationManager = getManager(tnt);
