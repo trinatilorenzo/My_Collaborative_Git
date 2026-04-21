@@ -80,19 +80,19 @@ public class TNTRenderer {
 
         //-------------------------------------------------------------
         public void draw(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
-
-            if (tnt.getState() == TNTState.EXPLODED) return;
             AnimationManager animationManager = getManager(tnt);
             BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
-            g2.drawImage(
-                    frame,
-                    screenX,
-                    screenY,
-                    entityConfig.TNT_SPRITE_WIDTH,
-                    entityConfig.TNT_SPRITE_HEIGHT,
-                    null
-            );
+            //TODO migliorare la sintassi e la dismesione (forse)
+            if (tnt.getState() == TNTState.EXPLODING) {
+                int drawW = entityConfig.TNT_SPRITE_WIDTH * 3;
+                int drawH = entityConfig.TNT_SPRITE_HEIGHT * 3;
+                int drawX = screenX - entityConfig.TNT_SPRITE_WIDTH;
+                int drawY = screenY - entityConfig.TNT_SPRITE_HEIGHT ;
+                g2.drawImage(frame, drawX, drawY, drawW, drawH, null);
+            } else if (tnt.getState() != TNTState.EXPLODED) {
+                g2.drawImage(frame, screenX, screenY, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT, null);
+            }
         }
 
         public void removeTNT(EnemyTNT tnt) {
@@ -103,18 +103,37 @@ public class TNTRenderer {
         //-------------------------------------------------------------
         public void drawSolidArea(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
 
-        Rectangle solid = tnt.getSolidArea();
+            Rectangle solid = tnt.getSolidArea();
 
-        int drawX = screenX + solid.x;
-        int drawY = screenY + solid.y;
+            int drawX = screenX + solid.x;
+            int drawY = screenY + solid.y;
 
-        // semi-trasparente rosso
-        g2.setColor(new Color(255, 0, 0, 80));
-        g2.fillRect(drawX, drawY, solid.width, solid.height);
+            // semi-trasparente rosso
+            g2.setColor(new Color(255, 0, 0, 80));
+            g2.fillRect(drawX, drawY, solid.width, solid.height);
 
-        // bordo rosso
-        g2.setColor(Color.RED);
-        g2.drawRect(drawX, drawY, solid.width, solid.height);
-    }
+            // bordo rosso
+            g2.setColor(Color.RED);
+            g2.drawRect(drawX, drawY, solid.width, solid.height);
 
+            // draw explosion area (centered on sprite center, consistent with explode())
+            int centerX = screenX + entityConfig.TNT_SPRITE_WIDTH / 2;
+            int centerY = screenY + entityConfig.TNT_SPRITE_HEIGHT / 2;
+
+            g2.setColor(new Color(93, 255, 0, 80));
+            int r = entityConfig.TNT_EXPLOSION_RADIUS;
+            g2.fillOval(centerX - r, centerY - r, 2 * r, 2 * r);
+
+            g2.setColor(Color.GREEN);
+            g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
+
+            // draw detection area (centered on sprite center, consistent with checkPlayerProximity())
+            g2.setColor(new Color(0, 84, 255, 80));
+            r = entityConfig.TNT_DETECTION_RADIUS;
+            g2.fillOval(centerX - r, centerY - r, 2 * r, 2 * r);
+
+            g2.setColor(Color.BLUE);
+            g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
+        }
 }
+

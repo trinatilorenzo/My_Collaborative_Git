@@ -63,15 +63,6 @@ public final class GameConfig {
         int MAX_WORLD_ROW = Integer.parseInt(mapDoc.getDocumentElement().getAttribute("height"));
         Color GAME_BG_COLOR = Color.decode(mapDoc.getDocumentElement().getAttribute("backgroundcolor"));
 
-
-
-        SpawnPoint playerSpawn = loadEntitySpawns(PLAYER_NAME).get(0);
-        SpawnPoint monkSpawn = loadEntitySpawns(MONK_NAME).get(0);
-        ArrayList<SpawnPoint> tntSpawn = loadEntitySpawns(TNT_NAME);
-
-
-
-
         this.screenConfig = new ScreenConfig(TILE_SIZE, SCALE, MAX_SCREEN_COL, MAX_SCREEN_ROW, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
         this.entityConfig = new EntityConfig(
@@ -81,6 +72,8 @@ public final class GameConfig {
                 loadEntitySpawns(TNT_NAME)
         );
         this.ObjConfig = new ObjConfig();
+
+        System.out.println(entityConfig.playerSpawnPoint().x() + " " + entityConfig.playerSpawnPoint().y());
     }
 
     private Document loadMapDoc(String mapPath) {

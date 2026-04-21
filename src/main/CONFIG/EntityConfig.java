@@ -62,8 +62,8 @@ public record EntityConfig(ScreenConfig screenConfig,
     //-------------------------------------------------------------
     //TNTConfig
     public static final int START_TNT_SPEED = 128;
-    public static final int TNT_DETECTION_RADIUS = 100;
-    public static final int TNT_EXPLOSION_RADIUS = 50;
+    public static final int TNT_DETECTION_RADIUS = 80;
+    public static final int TNT_EXPLOSION_RADIUS = 100;
 
     public static final int TNT_SPRITE_WIDTH = 128;
     public static final int TNT_SPRITE_HEIGHT = 128;
@@ -71,7 +71,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int TNT_HITBOX_WIDTH = 55;
     public static final int TNT_HITBOX_HEIGHT = 35;
 
-    public static final int NPC_FOR_SPAWNPOINT = 40;
+    public static final int NPC_FOR_SPAWNPOINT = 10;
     public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
     //-------------------------------------------------------------

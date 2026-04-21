@@ -21,8 +21,8 @@ public class Monk extends Entity {
         this.entityConfig = entityConfig;
         this.state = entityConfig.MONK_DEFAULT_STATE;
 
-        this.worldX = worldX;
-        this.worldY = worldY;
+        this.worldX = worldX - (entityConfig.SPRITE_WIDTH / 2);
+        this.worldY = worldY - (entityConfig.SPRITE_HEIGHT / 2);
         this.currentLayer = entityConfig.MONK_START_LAYER();
 
         solidArea = new Rectangle((entityConfig.SPRITE_WIDTH / 2) - (entityConfig.HITBOX_WIDTH/2),
