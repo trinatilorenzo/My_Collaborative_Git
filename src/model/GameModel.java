@@ -3,6 +3,7 @@ package model;
 import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
+import main.CONFIG.enu.TNTState;
 import main.CONFIG.GameConfig;
 import model.CollisionChecker;
 import model.entity.Player;
@@ -79,6 +80,11 @@ public class GameModel {
             collisionChecker.checkObjects(player);
 
             boolean monkCollision = collisionChecker.checkMonk(player, monk);
+            for (EnemyTNT tnt : tntEnemies) {
+                if (tnt.getState() != TNTState.EXPLODED) {
+                    collisionChecker.checkEntity(player, tnt);
+                }
+            }
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
@@ -93,6 +99,9 @@ public class GameModel {
 
                 collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
+                if (tnt.getState() == TNTState.WANDER) {
+                    collisionChecker.checkEntity(tnt, player);
+                }
                 tnt.move();
             }
 

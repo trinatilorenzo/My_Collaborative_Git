@@ -97,6 +97,7 @@ public class CollisionChecker {
     }
     //-------------------------------------------------------------
 
+    // TODO unificare a quello sotto
     /**
      * Checks collision between a moving entity (player) and the monk.
      * Returns true if any collision occurs. Also sets the entity collision flags.
@@ -122,6 +123,38 @@ public class CollisionChecker {
         if (dy != 0 && overlaps(mover.leftX, mover.rightX, mover.topY + dy, mover.bottomY + dy,
                 target.leftX, target.rightX, target.topY, target.bottomY)) {
             entity.setCollisionY(true);
+            collided = true;
+        }
+
+        return collided;
+    }
+    //-------------------------------------------------------------
+
+    // TODO vedere meglio
+    /**
+     * Checks collision between two entities (mover blocked by obstacle).
+     * Sets mover's collision flags per axis.
+     */
+    //-------------------------------------------------------------
+    public boolean checkEntity(Entity mover, Entity obstacle) {
+        if (obstacle == null) return false;
+        if (mover.getCurrentLayer() != obstacle.getCurrentLayer()) return false;
+
+        EntityBounds m = EntityBounds.of(mover);
+        EntityBounds o = EntityBounds.of(obstacle);
+        int dx = mover.getDx();
+        int dy = mover.getDy();
+        boolean collided = false;
+
+        if (dx != 0 && overlaps(m.leftX + dx, m.rightX + dx, m.topY, m.bottomY,
+                o.leftX, o.rightX, o.topY, o.bottomY)) {
+            mover.setCollisionX(true);
+            collided = true;
+        }
+
+        if (dy != 0 && overlaps(m.leftX, m.rightX, m.topY + dy, m.bottomY + dy,
+                o.leftX, o.rightX, o.topY, o.bottomY)) {
+            mover.setCollisionY(true);
             collided = true;
         }
 
