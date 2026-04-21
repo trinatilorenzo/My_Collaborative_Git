@@ -28,6 +28,8 @@ public class EnemyTNT extends Entity{
     private final double moveInterval = 1000; // Change direction every 1 second
     private final int EXPLOSION_DURATION = 300;
 
+    private boolean hasDealtDamage = false; // Flag to ensure damage is applied only once per explosion
+
     public EnemyTNT(int worldX, int worldY, EntityConfig entityConfig) {
         
         this.entityConfig = entityConfig;
@@ -115,6 +117,8 @@ public class EnemyTNT extends Entity{
     //--------------------------------------------------------------
     // Handles the explosion logic, damaging the player if within the explosion radius
     private void explode(Player player) {
+
+        if (hasDealtDamage) return; // Ensure damage is applied only once per explosion
         int distanceX = player.worldX - worldX;
         int distanceY = player.worldY - worldY;
         
@@ -122,6 +126,7 @@ public class EnemyTNT extends Entity{
 
         if (distance < detectionRadius) {
             player.takeDamage();
+            hasDealtDamage = true; // Set flag to prevent further damage
         }
     }
 

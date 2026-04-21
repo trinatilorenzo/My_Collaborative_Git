@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static main.CONFIG.EntityConfig.*;
 import static main.CONFIG.ObjConfig.*;
-import static main.CONFIG.enu.TreeState.CHOPPING;
+import static main.CONFIG.enu.TreeState.*;
 /**
  * The TREE RENDERER CLASS is responsible for rendering the visual representation of the tree objects, managing their animations and states.
  */
@@ -48,7 +48,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         animationManager.playAnimation("tree_idle");
    
         // Se l'albero viene colpito, aggiorna più velocemente
-        if (tree.getState()==CHOPPING) {
+        if (tree.getState() == CHOPPING) {
             animationManager.update(deltaMs * 2.5); 
         } else {
             animationManager.update(deltaMs); 

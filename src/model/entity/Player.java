@@ -54,7 +54,7 @@ public class Player extends Entity {
         direction = entityConfig.START_FACING;
         facingDirection = entityConfig.START_FACING;
         state = PlayerState.IDLE;
-        maxLife = 8;
+        maxLife = 6;
         life = maxLife;
     }
     //-------------------------------------------------------------

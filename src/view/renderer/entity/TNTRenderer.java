@@ -71,6 +71,7 @@ public class TNTRenderer {
                     animationManager.playAnimation("explosion");
                     break;
                 case EXPLODED:
+                    removeTNT(tnt);
                     break;
             }
 
