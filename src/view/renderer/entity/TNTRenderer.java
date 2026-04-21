@@ -35,8 +35,8 @@ public class TNTRenderer {
 
         //TODO: make the loading form diffferent source
 
-        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Barrel_Purple.png");
-        BufferedImage explosionSheet = SpriteLoader.loadSpriteSheet("/res/npc/Explosions.png");
+        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_TNT/Barrel_Purple.png");
+        BufferedImage explosionSheet = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_TNT/Explosions.png");
 
         //BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 1, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
         wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
@@ -55,30 +55,7 @@ public class TNTRenderer {
             return manager;
         });
     }
-    //-------------------------------------------------------------
-    /*public void draw(Graphics2D g2, EnemyTNT enemy, int screenX, int screenY) {
-        BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
-        //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
-
-        if (enemy.getDirection()!= Direction.RIGHT) {
-            // Flip the image horizontally for left direction
-            g2.drawImage(frame,
-                    screenX + EntityConfig.PLAYER_RENDER_WIDTH,
-                    screenY, -EntityConfig.PLAYER_RENDER_HEIGHT,
-                    EntityConfig.PLAYER_RENDER_HEIGHT,
-                    null);
-        } else {
-            // Draw normally for right direction
-            g2.drawImage(frame,
-                    screenX,
-                    screenY,
-                    EntityConfig.PLAYER_RENDER_WIDTH,
-                    EntityConfig.PLAYER_RENDER_HEIGHT,
-                    null);
-        }
-
-    }*/
     //-------------------------------------------------------------
     public void update(EnemyTNT tnt, double deltaMs) {
             AnimationManager animationManager = getManager(tnt);
@@ -94,6 +71,7 @@ public class TNTRenderer {
                     animationManager.playAnimation("explosion");
                     break;
                 case EXPLODED:
+                    removeTNT(tnt);
                     break;
             }
 

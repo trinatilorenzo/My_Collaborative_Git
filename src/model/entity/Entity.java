@@ -69,7 +69,6 @@ public class Entity {
         if (!collisionY) {
             worldY += appliedDy;
         }
-
     }
     //-------------------------------------------------------------
 

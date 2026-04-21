@@ -80,11 +80,11 @@ public class UI {
             throw new RuntimeException(e);
         }
 
-        heartFull = scaleImage(loadUiImage("src/res/UI/heart_full.png"),
+        heartFull = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),
                 screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
-        heartHalf = scaleImage(loadUiImage("src/res/UI/heart_half.png"),
+        heartHalf = scaleImage(loadUiImage("src/res/UI/heart/heart_half.png"),
                 screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
-        heartBlank = scaleImage(loadUiImage("src/res/UI/heart_blank.png"),
+        heartBlank = scaleImage(loadUiImage("src/res/UI/heart/heart_blank.png"),
                 screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
 
 
