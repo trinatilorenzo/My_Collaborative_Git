@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="63" nextobjectid="257">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="64" nextobjectid="265">
  <tileset firstgid="1" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/TILE_SET.tsx"/>
  <tileset firstgid="801" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/tilset_obj.tsx"/>
  <layer id="45" name="wawew" width="100" height="80">
@@ -758,7 +758,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <group id="58" name="COLLISION">
+ <group id="58" name="COLLISION" visible="0">
   <layer id="52" name="COLLISON0" class="collision" width="100" height="80" visible="0" opacity="0.42">
    <data encoding="csv">
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -1103,7 +1103,25 @@
    </properties>
    <point/>
   </object>
-  <object id="250" name="Player" x="2727.28" y="1485.11">
+  <object id="250" name="Player" x="3876.56" y="1452.02">
+   <properties>
+    <property name="StartLayer" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="262" name="TNT_spawnPoint" x="5361.46" y="1388.39">
+   <properties>
+    <property name="StartLayer" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="263" name="TNT_spawnPoint" x="2137.06" y="1435.93">
+   <properties>
+    <property name="StartLayer" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="264" name="TNT_spawnPoint" x="4418.7" y="1588.43">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
