@@ -1,4 +1,4 @@
-package model.collision;
+package model;
 
 import model.GameModel;
 import model.entity.Entity;

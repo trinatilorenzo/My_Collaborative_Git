@@ -4,7 +4,7 @@ import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
 import main.CONFIG.GameConfig;
-import model.collision.CollisionChecker;
+import model.CollisionChecker;
 import model.entity.Player;
 import model.entity.Monk;
 import model.object.ObjectManager;

@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+import static main.CONFIG.EntityConfig.*;
 import static main.CONFIG.ObjConfig.*;
 /**
  * The TREE RENDERER CLASS is responsible for rendering the visual representation of the tree objects, managing their animations and states.
@@ -27,7 +28,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         // Extract the tree sprite from the sprite sheet
         leavesFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 8, TREE_SPRITE_WIDTH, TREE_SPRITE_HEIGHT);
         
-        // Fallback frame used when the tree is chopped (no dedicated stump sprite available)
+        // Fallback frame used when the tree is chopped
         choppedFrame = SpriteLoader.loadSpriteSheet("/res/object/tree/Stump_1.png");
     }
 
@@ -44,18 +45,19 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
     public void update(OBJ_Tree tree, double deltaMs) {
         AnimationManager animationManager = getManager(tree);
 
-        // Aggiorna sempre l'animazione idle, ma non la usiamo se l'albero è chopped
-        animationManager.playAnimation("tree_idle");
-
-        // Se l'albero viene colpito, aggiorna più velocemente
-        if (tree.isChopping()) {
-            animationManager.update(deltaMs * 2.5); 
-        } else {
-            animationManager.update(deltaMs); 
-
+        switch (tree.getState()) {
+            case IDLE:
+                animationManager.playAnimation("tree_idle");
+                animationManager.update(deltaMs);
+                break;
+            case CHOPPING:
+                animationManager.playAnimation("tree_idle"); // Continua a mostrare stessa animazione durante il chopping ma piu veloce
+                animationManager.update(deltaMs*2.5);
+                break;
+            case CHOPPED:
+                animationManager.playAnimation("tree_chopped");
+                break;
         }
-        
-        tree.updateChop(deltaMs);
     }
 
    @Override
@@ -65,13 +67,16 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         int drawX = screenX + tree.getShakeOffsetX();
         int drawY = screenY + tree.getShakeOffsetY();
 
-        if (tree.isChopped()) {
-            // Disegna lo stump
-            g2.drawImage(choppedFrame, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
-        } else {
-            // Disegna il frame corrente
-            BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
-            g2.drawImage(frame, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
+        switch (tree.getState()) {
+
+            case CHOPPED -> {
+                g2.drawImage(choppedFrame, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
+            }
+
+            default -> {
+                BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
+                g2.drawImage(frame, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
+            }
         }
     }
 
