@@ -35,8 +35,8 @@ public class TNTRenderer {
 
         //TODO: make the loading form diffferent source
 
-        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Barrel_Purple.png");
-        BufferedImage explosionSheet = SpriteLoader.loadSpriteSheet("/res/npc/Explosions.png");
+        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_TNT/Barrel_Purple.png");
+        BufferedImage explosionSheet = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_TNT/Explosions.png");
 
         //BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 1, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
         wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT);
