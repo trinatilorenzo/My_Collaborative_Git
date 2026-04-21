@@ -1,5 +1,6 @@
 package model;
 
+import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
@@ -58,11 +59,14 @@ public class GameModel {
 
         monk = new Monk(GS.entityConfig().MONK_START_X(), GS.entityConfig().MONK_START_Y(), GS.entityConfig());
 
-        gameState = GameState.PLAYING;
+        // create the enemy
+        for(SpawnPoint sp : GS.entityConfig().TNT_SPAWNPOINT()){
+            for (int i = 0; i < GS.entityConfig().NPC_FOR_SPAWNPOINT; i++) {
+                tntEnemies.add(new EnemyTNT(sp, GS.entityConfig()));
+            }
+        }
 
-        //DEBUG
-        tntEnemies.add(new EnemyTNT(49*64, 22*64, gameConfig.entityConfig()));
-        tntEnemies.add(new EnemyTNT(54*64, 20*64, gameConfig.entityConfig()));
+        gameState = GameState.PLAYING;
  
     }
     //-------------------------------------------------------------

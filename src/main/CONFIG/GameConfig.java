@@ -30,6 +30,7 @@ public final class GameConfig {
     private static final String ENTITY_GROUP_NAME = "entity";
     private static final String PLAYER_NAME = "player";
     private static final String MONK_NAME = "monk";
+    private static final String TNT_NAME = "TNT_spawnPoint";
     private static final String START_LAYER_PROP = "StartLayer";
     //-------------------------------------------------------------
 
@@ -46,7 +47,9 @@ public final class GameConfig {
     private final ObjConfig ObjConfig;
     //-------------------------------------------------------------
 
+    //UTIL
     private Document mapDoc;
+    //-------------------------------------------------------------
 
     public GameConfig() {
         this.mapDoc = loadMapDoc(MAP_PATH);
@@ -62,20 +65,20 @@ public final class GameConfig {
 
 
 
-        SpawnInfo playerSpawn = loadEntitySpawns(PLAYER_NAME).get(0);
-        SpawnInfo monkSpawn = loadEntitySpawns(MONK_NAME).get(0);
+        SpawnPoint playerSpawn = loadEntitySpawns(PLAYER_NAME).get(0);
+        SpawnPoint monkSpawn = loadEntitySpawns(MONK_NAME).get(0);
+        ArrayList<SpawnPoint> tntSpawn = loadEntitySpawns(TNT_NAME);
+
+
 
 
         this.screenConfig = new ScreenConfig(TILE_SIZE, SCALE, MAX_SCREEN_COL, MAX_SCREEN_ROW, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
         this.entityConfig = new EntityConfig(
                 screenConfig,
-                playerSpawn.x(),
-                playerSpawn.y(),
-                playerSpawn.layer(),
-                monkSpawn.x(),
-                monkSpawn.y(),
-                monkSpawn.layer()
+                loadEntitySpawns(PLAYER_NAME).get(0),
+                loadEntitySpawns(MONK_NAME).get(0),
+                loadEntitySpawns(TNT_NAME)
         );
         this.ObjConfig = new ObjConfig();
     }
@@ -97,9 +100,9 @@ public final class GameConfig {
 
 
     //-------------------------------------------------------------
-    private ArrayList<SpawnInfo> loadEntitySpawns(String EntityName) {
+    private ArrayList<SpawnPoint> loadEntitySpawns(String EntityName) {
 
-        ArrayList<SpawnInfo> spawns = new ArrayList<>();
+        ArrayList<SpawnPoint> spawns = new ArrayList<>();
         NodeList groups = mapDoc.getElementsByTagName("objectgroup");
 
         for (int g = 0; g < groups.getLength(); g++) {
@@ -120,7 +123,7 @@ public final class GameConfig {
                             int startLayer = Integer.parseInt(getPropertyValue(obj, "StartLayer"));
 
 
-                            spawns.add(new SpawnInfo(x,y,startLayer));
+                            spawns.add(new SpawnPoint(x,y,startLayer));
 
                         }
                     }
@@ -147,8 +150,6 @@ public final class GameConfig {
     }
 
     //-------------------------------------------------------------
-
-    private record SpawnInfo(int x, int y, int layer) {}
 
     public ScreenConfig screenConfig() {
         return screenConfig;

@@ -4,18 +4,17 @@ import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.MonkState;
 
+import java.util.ArrayList;
+
 
 /**
  * PLAYER SETTINGS
  */
 //----------------------------------------------------------------------------------------------------------------------
 public record EntityConfig(ScreenConfig screenConfig,
-                          int playerStartX,
-                          int playerStartY,
-                          int playerStartLayer,
-                          int monkStartX,
-                          int monkStartY,
-                          int monkStartLayer) {
+                           SpawnPoint playerSpawnPoint,
+                          SpawnPoint monkSpawnPoint,
+                          ArrayList<SpawnPoint> TntSpawnPoint) {
 
     //TODO load from somwere
     public static final int SPRITE_WIDTH = 192;
@@ -39,9 +38,9 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int PLAYER_HITBOX_HEIGHT = 35 * PLAYER_SCALE;
 
 
-    public int START_WORLD_X(){return playerStartX;}
-    public int START_WORLD_Y(){return playerStartY;}
-    public int START_WORLD_LAYER(){return playerStartLayer;}
+    public int START_WORLD_X(){return playerSpawnPoint().x();}
+    public int START_WORLD_Y(){return playerSpawnPoint().y();}
+    public int START_WORLD_LAYER(){return playerSpawnPoint().layer();}
     public int SCREEN_POSX(){ return screenConfig.SCREEN_WIDTH() / 2 - SPRITE_WIDTH / 2;}
     public int SCREEN_POSY(){ return screenConfig.SCREEN_HEIGHT() / 2 - SPRITE_HEIGHT / 2;}
     //-------------------------------------------------------------
@@ -50,9 +49,9 @@ public record EntityConfig(ScreenConfig screenConfig,
     //-------------------------------------------------------------
     public static MonkState MONK_DEFAULT_STATE = MonkState.IDLE;
     public static String MONK_TAG = "Monk";
-    public int MONK_START_X(){return monkStartX;}
-    public int MONK_START_Y(){return monkStartY;}
-    public int MONK_START_LAYER(){return monkStartLayer;}
+    public int MONK_START_X(){return monkSpawnPoint().x();}
+    public int MONK_START_Y(){return monkSpawnPoint().y();}
+    public int MONK_START_LAYER(){return monkSpawnPoint().layer();}
 
     public static String[] MONK_DIALOUGES = new String[] {
             "Benvenuto nell'isola delle Piccole Spade, giovane eroe.",
@@ -65,7 +64,6 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int START_TNT_SPEED = 128;
     public static final int TNT_DETECTION_RADIUS = 100;
     public static final int TNT_EXPLOSION_RADIUS = 50;
-    public static final int ENEMY_TNT_LAYER = 3;
 
     public static final int TNT_SPRITE_WIDTH = 128;
     public static final int TNT_SPRITE_HEIGHT = 128;
@@ -73,6 +71,8 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int TNT_HITBOX_WIDTH = 55;
     public static final int TNT_HITBOX_HEIGHT = 35;
 
+    public static final int NPC_FOR_SPAWNPOINT = 40;
+    public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
     //-------------------------------------------------------------
 

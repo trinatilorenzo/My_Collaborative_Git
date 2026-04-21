@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.util.Random;
 
 import main.CONFIG.EntityConfig;
+import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.TNTState;
 
 public class EnemyTNT extends Entity{
@@ -29,12 +30,13 @@ public class EnemyTNT extends Entity{
     private final double moveInterval = 1000; // Change direction every 1 second
     private final int EXPLOSION_DURATION = 300;
 
-    public EnemyTNT(int worldX, int worldY, EntityConfig entityConfig) {
+    public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
         
         this.entityConfig = entityConfig;
-        this.worldX = worldX;
-        this.worldY = worldY;
-        this.currentLayer = entityConfig.ENEMY_TNT_LAYER;
+        this.worldX = spawnPoint.x();
+        this.worldY = spawnPoint.y();
+        this.currentLayer = spawnPoint.layer();
+
         this.speed = entityConfig.START_TNT_SPEED;
 
         solidArea = new Rectangle((entityConfig.TNT_SPRITE_WIDTH / 2) - (entityConfig.TNT_HITBOX_WIDTH/2),
