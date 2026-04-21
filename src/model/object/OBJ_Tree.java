@@ -39,6 +39,12 @@ public class OBJ_Tree extends GameObject {
         this.solid = objConfig.TREE_SOLID;
     }
 
+    @Override
+    public void interact(){
+        // This method can be called by the player when interacting with the tree (e.g., pressing an action key while near it)
+        hit();
+    }
+
     /**
      * Called when the player hits the tree.
      */
@@ -46,6 +52,7 @@ public class OBJ_Tree extends GameObject {
 
         if(state == TreeState.CHOPPED || state == TreeState.CHOPPING) return; // If already chopped, no further interaction
         health -= 1;
+        System.out.println("Remaining tree health: "+ health);
         if(health <= 0) { // If health is depleted, start chopping animation
             startChopping();
         }
@@ -58,7 +65,7 @@ public class OBJ_Tree extends GameObject {
         return;
     }
     
-    public void updateChopping(double deltaMs) {
+    public void update(double deltaMs) { 
 
         switch(state) {
             case IDLE:
@@ -77,17 +84,13 @@ public class OBJ_Tree extends GameObject {
                     solid = false;
                     state = TreeState.CHOPPED;
                 }
+                System.out.println(state);
                 break; 
 
             case CHOPPED:
                 // No update needed in chopped state
                 break;
         }
-    }
-    @Override
-    public void interact(){
-        // This method can be called by the player when interacting with the tree (e.g., pressing an action key while near it)
-        hit();
     }
 
     public Rectangle getSolidWorldArea() { //called by game model to check attack collision with the tree, since the solidArea is relative to the object position we need to get the world coordinates of the solid area

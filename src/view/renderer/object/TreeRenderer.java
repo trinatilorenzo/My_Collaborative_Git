@@ -44,7 +44,6 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
    @Override
     public void update(OBJ_Tree tree, double deltaMs) {
         AnimationManager animationManager = getManager(tree);
-
         switch (tree.getState()) {
             case IDLE:
                 animationManager.playAnimation("tree_idle");
@@ -58,6 +57,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
                 animationManager.playAnimation("tree_chopped");
                 break;
         }
+        tree.update(deltaMs);
     }
 
    @Override

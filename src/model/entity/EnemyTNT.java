@@ -16,7 +16,6 @@ public class EnemyTNT extends Entity{
     private long explosionDelay = 2000; // Time in milliseconds between being triggered and exploding
 
     private final int detectionRadius = 100; // Example radius for detecting the player
-    private final int explosionRadius = 50; // Example radius for explosion damage
 
     private double dirX = 0; //save the current direction of TNT
     private double dirY = 0;
@@ -121,7 +120,7 @@ public class EnemyTNT extends Entity{
         
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-        if (distance < explosionRadius) {
+        if (distance < detectionRadius) {
             player.takeDamage();
         }
     }
