@@ -10,11 +10,12 @@ import view.SpriteLoader;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 
 public class TNTRenderer {
 
-    private final Map<EnemyTNT, AnimationManager> managerByTNT;
+    private final ConcurrentHashMap<EnemyTNT, AnimationManager> managerByTNT;
     private final EntityConfig entityConfig;
 
     private BufferedImage[] wanderFrames;
@@ -26,7 +27,7 @@ public class TNTRenderer {
     public TNTRenderer(EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
         loadAnimations();
-        managerByTNT = new HashMap<>();
+        managerByTNT = new ConcurrentHashMap<>();
     }
     //-------------------------------------------------------------
 

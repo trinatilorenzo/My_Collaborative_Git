@@ -52,7 +52,7 @@ public class Entity {
 
         // normalized movement when coliding on a border
         if (dx != 0 && dy != 0) {
-            // the paleyr is moving diagonally
+            // the player is moving diagonally
             if (collisionY) {
                 // the player is moving horizontally
                 appliedDx = intendedDx;

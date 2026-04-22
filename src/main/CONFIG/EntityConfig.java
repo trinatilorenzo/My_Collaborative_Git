@@ -75,5 +75,14 @@ public record EntityConfig(ScreenConfig screenConfig,
     public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
     //-------------------------------------------------------------
+    //DynamiteConfig
+    public static final int DYNAMITE_SPEED = 128;
+    public static final int DYNAMITE_DETECTION_RADIUS = 150;
+    public static final int DYNAMITE_ATTACK_INTERVAL = 2000; // 2 seconds
 
+    public static final int DYNAMITE_SPRITE_WIDTH = 192;
+    public static final int DYNAMITE_SPRITE_HEIGHT = 192;
+
+    public static final int DYNAMITE_HITBOX_WIDTH = 55;
+    public static final int DYNAMITE_HITBOX_HEIGHT = 35;
 }

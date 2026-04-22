@@ -9,14 +9,12 @@ import main.CONFIG.enu.TNTState;
 
 public class EnemyTNT extends Entity{
     private TNTState state = TNTState.WANDER;
-    private int hp = 1;
+    private int hp = 1; //one hit
 
     private long triggerTimer;
     private long explosionTimer;
 
-    private long explosionDelay = 2000; // Time in milliseconds between being triggered and exploding
-
-
+    private long explosionDelay = 1000; // Time in milliseconds between being triggered and exploding
 
     private double dirX = 0; //save the current direction of TNT
     private double dirY = 0;
@@ -31,8 +29,6 @@ public class EnemyTNT extends Entity{
     private boolean hasDealtDamage = false; // Flag to ensure damage is applied only once per explosion
 
     public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
-
-
 
         this.entityConfig = entityConfig;
         this.worldX = spawnPoint.x() - (entityConfig.TNT_SPRITE_WIDTH / 2);
@@ -99,8 +95,8 @@ public class EnemyTNT extends Entity{
         dx = (int) Math.round(dirX *speed * deltaTime);
         dy = (int) Math.round(dirY * speed * deltaTime);
 
-        intendedDx = dx;
-        intendedDy = dy;
+        //intendedDx = dx;
+        //intendedDy = dy;
     }   
     
     //-------------------------------------------------------------
@@ -143,6 +139,7 @@ public class EnemyTNT extends Entity{
 
     //-------------------------------------------------------------
     // Method to apply damage to the TNT, potentially triggering an explosion
+    // TODO: implementare possibilità sconfitta TNT prima dell'esplosione
     public void takeDamage(int damage) {
         if (state == TNTState.EXPLODED) return; // Already exploded, no further damage
         hp -= damage;

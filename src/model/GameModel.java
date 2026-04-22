@@ -1,6 +1,7 @@
 package model;
 
 import main.CONFIG.SpawnPoint;
+import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
@@ -11,6 +12,7 @@ import model.entity.Player;
 import model.entity.Monk;
 import model.object.ObjectManager;
 import model.object.GameObject;
+import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ public class GameModel {
 
     // TODO: TNT from file
     private List<EnemyTNT> tntEnemies = new ArrayList<>();
+    private List<EnemyDynamite> dynamiteEnemies = new ArrayList<>();
     
     /**
      * COSTRUCTOR
@@ -63,8 +66,11 @@ public class GameModel {
         for(SpawnPoint sp : GS.entityConfig().TNT_SPAWNPOINT()){
             for (int i = 0; i < GS.entityConfig().NPC_FOR_SPAWNPOINT; i++) {
                 tntEnemies.add(new EnemyTNT(sp, GS.entityConfig()));
+
             }
         }
+        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(44*64, 29*64, 2), GS.entityConfig()));
+        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(44*64, 29*64, 2), GS.entityConfig()));
 
         gameState = GameState.PLAYING;
  
@@ -84,21 +90,11 @@ public class GameModel {
             collisionChecker.checkObjects(player);
 
             boolean monkCollision = collisionChecker.checkMonk(player, monk);
+            
             for (EnemyTNT tnt : tntEnemies) {
                 if (tnt.getState() != TNTState.EXPLODED) {
                     collisionChecker.checkEntity(player, tnt);
                 }
-            }
-            if (player.getState() == PlayerState.WALKING) {
-                player.move();
-            }
-            updateInteractions(input, monkCollision);
-
-            objectManager.update(deltaMs);
-
-            // Update TNT enemies
-            for (EnemyTNT tnt : tntEnemies) {
-
                 tnt.update(player, deltaMs);
 
                 collisionChecker.checkTile(tnt);
@@ -108,6 +104,26 @@ public class GameModel {
                 }
                 tnt.move();
             }
+
+            for (EnemyDynamite dynamite : dynamiteEnemies){
+                collisionChecker.checkEntity(player, dynamite);
+                dynamite.update(player, deltaMs);
+
+                collisionChecker.checkTile(dynamite);
+                collisionChecker.checkObjects(dynamite);
+                if (dynamite.getState() == DynamiteState.WANDER) {
+                    collisionChecker.checkEntity(dynamite, player);
+                }
+                dynamite.move();
+            }
+            
+            if (player.getState() == PlayerState.WALKING) {
+                player.move();
+            }
+            updateInteractions(input, monkCollision);
+
+            objectManager.update(deltaMs);
+
 
 
         }
@@ -177,6 +193,7 @@ public class GameModel {
         return monk;
     }
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
+    public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
     //---------------------------------
 
