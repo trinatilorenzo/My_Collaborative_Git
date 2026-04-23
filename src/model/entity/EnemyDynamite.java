@@ -6,7 +6,6 @@ import java.util.List;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.DynamiteState;
-import main.CONFIG.enu.TNTState;
 
 public class EnemyDynamite extends Entity {
     private DynamiteState state = DynamiteState.WANDER;
@@ -23,6 +22,8 @@ public class EnemyDynamite extends Entity {
     private double detectionRadius; // Radius within which the dynamite detects the player
     private List<DynamiteProjectile> dynamite = new ArrayList<>();
 
+    private boolean facingRight = true;
+    
     public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
         this.worldX = spawnPoint.x() - (entityConfig.DYNAMITE_SPRITE_WIDTH / 2);
@@ -47,7 +48,8 @@ public class EnemyDynamite extends Entity {
                 break;
 
             case CHASING:
-                //chasePlayer(player, deltaMs);
+                chasePlayer(player, deltaMs);
+                checkPlayerProximity(player);
                 break;
             
             case ATTACKING:
@@ -58,8 +60,9 @@ public class EnemyDynamite extends Entity {
                     attack(player);
                     attackTimer = 0;
                 }
-                break;
                 */
+                break;
+                
         }
         /*
         // Update dynamite projectiles
@@ -71,6 +74,8 @@ public class EnemyDynamite extends Entity {
 
     }  
 
+    //-------------------------------------------------------------------------------
+    // CHeck if the player is near the enemy
     private void checkPlayerProximity(Player player) {
         int dynamiteCenterX = worldX + entityConfig.DYNAMITE_SPRITE_WIDTH / 2;
         int dynamiteCenterY = worldY + entityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
@@ -81,19 +86,22 @@ public class EnemyDynamite extends Entity {
         int distanceY = playerCenterY - dynamiteCenterY;
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-        if (distance < entityConfig.DYNAMITE_DETECTION_RADIUS) {
+        if (distance < entityConfig.DYNAMITE_ATTACKING_RADIUS) {
             state = DynamiteState.ATTACKING;
             //triggerTimer = 0;
-        }else {
+        } else if (distance < entityConfig.DYNAMITE_DETECTION_RADIUS){
+            state = DynamiteState.CHASING;
+        } else {
             state = DynamiteState.WANDER;
         }
     }
     
-    
+    //-------------------------------------------------------------------------------
     /* Wander randomly within a small area */
     private void wander(double deltaMs) {
         // Simple random movement logic 
         moveTimer += deltaMs;
+
         if (moveTimer >= moveInterval) {
             double angle = Math.random() * 2 * Math.PI;
             dirX = Math.cos(angle);
@@ -105,21 +113,29 @@ public class EnemyDynamite extends Entity {
         dx = (int) Math.round(dirX * dist);
         dy = (int) Math.round(dirY * dist);
 
+        facingRight = dirX >= 0;
+
     }
 
-    /*
+    //-------------------------------------------------------------------------------
     /* Chase the player */
-    /*private void chasePlayer(Player player, double deltaMs) {
-        double dx = player.getWorldX() - worldX;
-        double dy = player.getWorldY() - worldY;
-        double distance = Math.sqrt(dx * dx + dy * dy);
+    private void chasePlayer(Player player, double deltaMs) {
+        double dxPlayer = player.getWorldX() - worldX;
+        double dyPlayer = player.getWorldY() - worldY;
+        double distance = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
         if (distance > 0) {
-            dirX = (dx / distance) * speed;
-            dirY = (dy / distance) * speed;
-            worldX += dirX * deltaMs / 1000.0;
-            worldY += dirY * deltaMs / 1000.0;
+            dirX = (dxPlayer / distance); //normalization
+            dirY = (dyPlayer / distance);
         }
+
+        double dist = speed * (deltaMs/1000.0);
+
+        dx = (int) Math.round(dirX * dist);
+        dy = (int) Math.round(dirY * dist);
+
+        facingRight = dirX>=0;
+        
     }
 
     /* Check if the player is within detection radius *//*
@@ -145,6 +161,10 @@ public class EnemyDynamite extends Entity {
     public DynamiteState getState(){
         return state;
     }
+    public boolean isFacingRight(){
+        return facingRight;
+    }
+    
 
 
 

@@ -77,7 +77,8 @@ public record EntityConfig(ScreenConfig screenConfig,
     //-------------------------------------------------------------
     //DynamiteConfig
     public static final int DYNAMITE_SPEED = 128;
-    public static final int DYNAMITE_DETECTION_RADIUS = 150;
+    public static final int DYNAMITE_DETECTION_RADIUS = 300;
+    public static final int DYNAMITE_ATTACKING_RADIUS = 80;
     public static final int DYNAMITE_ATTACK_INTERVAL = 2000; // 2 seconds
 
     public static final int DYNAMITE_SPRITE_WIDTH = 192;

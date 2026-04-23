@@ -63,11 +63,12 @@ public class PlayerRender {
             // Flip the image horizontally for left direction
             g2.drawImage(frame,
                     player.getScreenX() + EntityConfig.PLAYER_RENDER_WIDTH,
-                    player.getScreenY(), -EntityConfig.PLAYER_RENDER_HEIGHT,
+                    player.getScreenY(), 
+                    -EntityConfig.PLAYER_RENDER_WIDTH,
                     EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
         } else {
-            // Draw normally for right direction
+            // Draw normally for right directionc
             g2.drawImage(frame,
                     player.getScreenX(),
                     player.getScreenY(),

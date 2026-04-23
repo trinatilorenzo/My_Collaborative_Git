@@ -60,15 +60,24 @@ public class DynamiteRender {
 
         AnimationManager manager = getManager(enemy);
         BufferedImage frame = manager.getCurrent().getCurrentFrame();
-
-        g2.drawImage(
-                frame,
-                screenX,
-                screenY,
-                entityConfig.DYNAMITE_SPRITE_WIDTH,
-                entityConfig.DYNAMITE_SPRITE_HEIGHT,
-                null
-        );
+        if (!enemy.isFacingRight()){
+            // Flip the image
+            g2.drawImage(frame,
+                    screenX + EntityConfig.DYNAMITE_SPRITE_WIDTH,
+                    screenY, 
+                    -EntityConfig.DYNAMITE_SPRITE_WIDTH,
+                    EntityConfig.DYNAMITE_SPRITE_HEIGHT,
+                    null);
+        }else{
+            g2.drawImage(
+                    frame,
+                    screenX,
+                    screenY,
+                    entityConfig.DYNAMITE_SPRITE_WIDTH,
+                    entityConfig.DYNAMITE_SPRITE_HEIGHT,
+                    null
+            );
+        }
     }
 
     //-------------------------------------------------------------
