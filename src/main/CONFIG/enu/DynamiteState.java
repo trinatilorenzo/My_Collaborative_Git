@@ -3,5 +3,6 @@ package main.CONFIG.enu;
 public enum DynamiteState {
     WANDER,
     CHASING,
-    ATTACKING
+    ATTACKING,
+    DEAD
 }

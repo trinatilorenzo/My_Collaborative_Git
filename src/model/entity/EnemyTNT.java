@@ -139,5 +139,8 @@ public class EnemyTNT extends Entity{
     public TNTState getState() {
         return state;
     }
+    public boolean isExploded() {
+        return state==TNTState.EXPLODED;
+    }
 }
 

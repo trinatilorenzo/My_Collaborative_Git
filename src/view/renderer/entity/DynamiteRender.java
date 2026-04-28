@@ -2,6 +2,7 @@ package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.DynamiteState;
+import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
@@ -9,6 +10,7 @@ import view.SpriteLoader;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamiteRender {
@@ -17,6 +19,8 @@ public class DynamiteRender {
 
     private BufferedImage[] wanderFrames;
     private BufferedImage[] attackFrames;
+
+    private BufferedImage[] projectileFrames;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -29,8 +33,11 @@ public class DynamiteRender {
     //-------------------------------------------------------------
     private void loadAnimations() {
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_Dynamite/TNT_Red.png");
+        BufferedImage projectileImage = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_Dynamite/Dynamite.png");
         wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.DYNAMITE_SPRITE_WIDTH, entityConfig.DYNAMITE_SPRITE_HEIGHT);
         attackFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 1, 6, entityConfig.DYNAMITE_SPRITE_WIDTH, entityConfig.DYNAMITE_SPRITE_HEIGHT);
+        
+        projectileFrames = SpriteLoader.getAnimationFrames(projectileImage, 0, 1, 6, entityConfig.PROJECTILE_SPRITE_WIDTH, entityConfig.PROJECTILE_SPRITE_HEIGHT);
     }
 
     //--------------------------------------------------------------
@@ -85,5 +92,6 @@ public class DynamiteRender {
         managerByEnemy.remove(enemy);
     }
 
-    
+    //-------------------------------------------------------------
+
 }
