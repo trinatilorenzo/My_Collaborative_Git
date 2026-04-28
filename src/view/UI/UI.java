@@ -53,6 +53,7 @@ public class UI {
     private final BufferedImage ribbonYellowPressed;
     private final BufferedImage ribbonRedPressed;
     private final BufferedImage ribbonBluePressed;
+    private final BufferedImage[] menuClouds;
 
     // FPS counter (updated once per second)
     private long fpsTimer = System.nanoTime();
@@ -135,6 +136,16 @@ public class UI {
         ribbonYellowPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right_Pressed.png");
         ribbonRedPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right_Pressed.png");
         ribbonBluePressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right_Pressed.png");
+        menuClouds = new BufferedImage[]{
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_01.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_02.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_03.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_04.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_05.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_06.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_07.png")),
+                trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_08.png"))
+        };
 
 
     }
@@ -235,6 +246,7 @@ public class UI {
         g2.fillRect(panelX, panelY, panelW, panelH);
         g2.setColor(new Color(140, 224, 228));
         g2.drawRect(panelX, panelY, panelW - 1, panelH - 1);
+        drawMenuClouds(panelX, panelY, panelW, panelH);
 
         int logoWidth = 500;
         int logoHeight = (int) (((double) menuLogo.getHeight() / menuLogo.getWidth()) * logoWidth);
@@ -312,6 +324,64 @@ public class UI {
         int contentHeight = height - 35;
         int textY = contentY + (int) Math.round((contentHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
         g2.drawString(label, textX, textY);
+    }
+
+    private void drawMenuClouds(int panelX, int panelY, int panelW, int panelH) {
+        if (menuClouds == null || menuClouds.length == 0) {
+            return;
+        }
+
+        float[][] placements = {
+                {0.12f, 0.16f, 180f},
+                {0.29f, 0.24f, 140f},
+                {0.63f, 0.16f, 185f},
+                {0.82f, 0.26f, 135f},
+                {0.11f, 0.49f, 175f},
+                {0.89f, 0.88f, 130f},
+                {0.78f, 0.53f, 165f},
+                {0.28f, 0.72f, 205f}
+
+        };
+
+        Composite oldComposite = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.86f));
+
+        for (int i = 0; i < placements.length; i++) {
+            BufferedImage cloud = menuClouds[i % menuClouds.length];
+            int drawWidth = Math.round(placements[i][2]);
+            int drawHeight = Math.max(1, Math.round(drawWidth * ((float) cloud.getHeight() / cloud.getWidth())));
+
+            int drawX = panelX + Math.round(placements[i][0] * panelW) - (drawWidth / 2);
+            int drawY = panelY + Math.round(placements[i][1] * panelH) - (drawHeight / 2);
+
+            g2.drawImage(cloud, drawX, drawY, drawWidth, drawHeight, null);
+        }
+
+        g2.setComposite(oldComposite);
+    }
+
+    private BufferedImage trimTransparentPadding(BufferedImage source) {
+        int minX = source.getWidth();
+        int minY = source.getHeight();
+        int maxX = -1;
+        int maxY = -1;
+
+        for (int y = 0; y < source.getHeight(); y++) {
+            for (int x = 0; x < source.getWidth(); x++) {
+                int alpha = (source.getRGB(x, y) >>> 24) & 0xFF;
+                if (alpha > 0) {
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+
+        if (maxX < minX || maxY < minY) {
+            return source;
+        }
+        return source.getSubimage(minX, minY, (maxX - minX) + 1, (maxY - minY) + 1);
     }
 
     private BufferedImage loadUiImage(String path) {
