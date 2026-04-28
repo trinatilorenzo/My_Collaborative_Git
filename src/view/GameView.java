@@ -3,6 +3,7 @@ package view;
 import main.CONFIG.GameConfig;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.EntityConfig;
+import main.CONFIG.enu.GameState;
 import model.GameModel;
 import model.object.GameObject;
 import model.entity.EnemyDynamite;
@@ -23,7 +24,12 @@ import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.TNTRenderer;
 
 import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 /**
@@ -46,6 +52,7 @@ public class GameView extends JPanel {
     private DynamiteRender enemyDynamiteRender;
     private UI ui_render;
     private RendererRegistry rendererRegistry;
+    private Cursor customGameCursor;
 
 
     // COSTRUCTOR
@@ -60,6 +67,7 @@ public class GameView extends JPanel {
         this.setBackground (Color.black) ;
         this.setDoubleBuffered (true) ;
         this.setFocusable(true);
+        applyCustomCursor();
 
         //  import the tileset Asset
         //TODO take only tilesetCOnfig
@@ -84,6 +92,31 @@ public class GameView extends JPanel {
     }
     //-------------------------------------------------------------
 
+    public UI.MainMenuLayout getMainMenuLayout() {
+        return ui_render.getMainMenuLayout();
+    }
+
+    private void applyCustomCursor() {
+        try {
+            BufferedImage cursorImage = null;
+            try (InputStream is = getClass().getResourceAsStream("/res/UI/Pointers/01.png")) {
+                if (is != null) {
+                    cursorImage = ImageIO.read(is);
+                }
+            }
+            if (cursorImage == null) {
+                cursorImage = ImageIO.read(new File("src/res/UI/Pointers/01.png"));
+            }
+            customGameCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage, new Point(0, 0), "game_cursor");
+            setCursor(customGameCursor);
+        } catch (IOException e) {
+            // If cursor asset cannot be loaded, keep default cursor.
+        }
+    }
+
+    public Cursor getCustomGameCursor() {
+        return customGameCursor;
+    }
 
     // where everything will be drawn
     //-------------------------------------------------------------
@@ -98,12 +131,13 @@ public class GameView extends JPanel {
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT());
 
-        // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
-        mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
-        
+        if (model.getGameState() != GameState.MENU) {
+            // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
+            mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
 
-        // Y-sorting logic: sort objects by their worldY coordinate
-        drawEntities(g2);
+            // Y-sorting logic: sort objects by their worldY coordinate
+            drawEntities(g2);
+        }
 
         //DRAW OBJECTS
         //drawObjects(g2);

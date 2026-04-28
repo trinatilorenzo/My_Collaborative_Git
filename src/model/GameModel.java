@@ -43,6 +43,9 @@ public class GameModel {
     private GameState gameState;
     private boolean debugMode = false;
     private String currentDialogue = "";
+    private int mainMenuSelection = 0;
+    private int hoveredRibbon = -1;
+    private int activeRibbon = -1;
 
     // TODO: TNT from file
     private List<EnemyTNT> tntEnemies = new ArrayList<>();
@@ -72,7 +75,7 @@ public class GameModel {
         dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(44*64, 29*64, 2), GS.entityConfig()));
         dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(44*64, 29*64, 2), GS.entityConfig()));
 
-        gameState = GameState.PLAYING;
+        gameState = GameState.MENU;
  
     }
     //-------------------------------------------------------------
@@ -195,11 +198,17 @@ public class GameModel {
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
+    public int getMainMenuSelection() { return mainMenuSelection; }
+    public int getHoveredRibbon() { return hoveredRibbon; }
+    public int getActiveRibbon() { return activeRibbon; }
     //---------------------------------
 
     // SETTER ----------------------
     public void setGameState(GameState gameState) { this.gameState = gameState; }
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
+    public void setMainMenuSelection(int mainMenuSelection) { this.mainMenuSelection = mainMenuSelection; }
+    public void setHoveredRibbon(int hoveredRibbon) { this.hoveredRibbon = hoveredRibbon; }
+    public void setActiveRibbon(int activeRibbon) { this.activeRibbon = activeRibbon; }
     //---------------------------------
 
 

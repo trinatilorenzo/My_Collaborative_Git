@@ -3,4 +3,4 @@ package main.CONFIG.enu;
 //-----------------------------------------------------------------------
 // GAME STATE
 //-----------------------------------------------------------------------
-public enum GameState {PLAYING, PAUSED}
+public enum GameState {MENU, PLAYING, PAUSED}

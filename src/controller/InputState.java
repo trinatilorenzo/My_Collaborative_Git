@@ -12,5 +12,8 @@ public record InputState(
         boolean attack,
         boolean pause,
         boolean debug,
-        boolean interact
+        boolean interact,
+        boolean menuPrevious,
+        boolean menuNext,
+        boolean menuConfirm
 ) {}

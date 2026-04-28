@@ -13,15 +13,36 @@ public class KeyHandler implements KeyListener {
 
     private boolean debugToggle = false;
     private boolean pauseToggle = false;
+    private boolean menuPrevious = false;
+    private boolean menuNext = false;
+    private boolean menuConfirm = false;
 
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W -> up = true;
-            case KeyEvent.VK_S -> down = true;
-            case KeyEvent.VK_A -> left = true;
-            case KeyEvent.VK_D -> right = true;
-            case KeyEvent.VK_SPACE -> attack = true;
+            case KeyEvent.VK_W -> {
+                up = true;
+                menuPrevious = true;
+            }
+            case KeyEvent.VK_S -> {
+                down = true;
+                menuNext = true;
+            }
+            case KeyEvent.VK_A -> {
+                left = true;
+                menuPrevious = true;
+            }
+            case KeyEvent.VK_D -> {
+                right = true;
+                menuNext = true;
+            }
+            case KeyEvent.VK_UP, KeyEvent.VK_LEFT -> menuPrevious = true;
+            case KeyEvent.VK_DOWN, KeyEvent.VK_RIGHT -> menuNext = true;
+            case KeyEvent.VK_SPACE -> {
+                attack = true;
+                menuConfirm = true;
+            }
+            case KeyEvent.VK_ENTER -> menuConfirm = true;
             case KeyEvent.VK_P -> pauseToggle = !pauseToggle;
             case KeyEvent.VK_F3 -> debugToggle = !debugToggle;
             case KeyEvent.VK_M -> interact = true;
@@ -46,8 +67,23 @@ public class KeyHandler implements KeyListener {
     }
 
     public InputState getInputState() { // translates the keyboard state into the game's input state, it's a bridge between controller and model
-        InputState state = new InputState(up, down, left, right, attack, pauseToggle, debugToggle, interact);
+        InputState state = new InputState(
+                up,
+                down,
+                left,
+                right,
+                attack,
+                pauseToggle,
+                debugToggle,
+                interact,
+                menuPrevious,
+                menuNext,
+                menuConfirm
+        );
         interact = false; // Reset interact after returning the state, so it only triggers once per key press
+        menuPrevious = false;
+        menuNext = false;
+        menuConfirm = false;
         return state;
     }
 }

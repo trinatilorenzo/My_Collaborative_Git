@@ -6,6 +6,7 @@ import main.CONFIG.GameConfig;
 import model.GameModel;
 import view.GameView;
 
+import java.awt.Cursor;
 import javax.swing.JFrame;
 
 /**
@@ -39,6 +40,11 @@ public class Main {
 
         window.add(view);
         window.pack();
+        Cursor customCursor = view.getCustomGameCursor();
+        if (customCursor != null) {
+            view.setCursor(customCursor);
+            window.setCursor(customCursor);
+        }
 
         //window.addKeyListener(controller);
 
