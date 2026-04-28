@@ -27,12 +27,9 @@ public class Player extends Entity {
     public Player(EntityConfig entityConfig) {
         //get the entityConfig
         this.entityConfig = entityConfig;
-        // Initialize the player's solid area for collision detection
-        solidArea = new Rectangle((entityConfig.SPRITE_WIDTH / 2) - (entityConfig.PLAYER_HITBOX_WIDTH/2),
-                                        (entityConfig.SPRITE_HEIGHT / 2) ,
-                                        entityConfig.PLAYER_HITBOX_WIDTH,
-                                        entityConfig.PLAYER_HITBOX_HEIGHT);
 
+        // Initialize the player's solid area for collision detection
+        solidArea = new Rectangle(0,0, entityConfig.PLAYER_HITBOX_WIDTH, entityConfig.PLAYER_HITBOX_HEIGHT);
         initializeDefaultValues();
 
     }
@@ -41,8 +38,8 @@ public class Player extends Entity {
     //-------------------------------------------------------------
     private void initializeDefaultValues() {
         // Game start position
-        worldX = entityConfig.START_WORLD_X() - entityConfig.SPRITE_WIDTH / 2;
-        worldY = entityConfig.START_WORLD_Y() - (entityConfig.SPRITE_HEIGHT / 2);
+        worldX = entityConfig.START_WORLD_X() ;
+        worldY = entityConfig.START_WORLD_Y() ;
         currentLayer = entityConfig.START_WORLD_LAYER();
 
         // Screen position
@@ -137,25 +134,26 @@ public class Player extends Entity {
         Rectangle attackArea = new Rectangle();
         attackArea.width = solidArea.width + entityConfig.RANGE_ATTACK;
         attackArea.height = solidArea.height + entityConfig.RANGE_ATTACK;
-        int hitboxX = worldX + solidArea.x;
-        int hitboxY = worldY + solidArea.y;
+        // worldX/Y = center of solid area
+        int hitboxLeft = worldX - solidArea.width / 2;
+        int hitboxTop = worldY - solidArea.height / 2;
 
         switch(direction) {
             case UP:
-                attackArea.x = hitboxX + (solidArea.width / 2) - (attackArea.width / 2);
-                attackArea.y = hitboxY - attackArea.height;
+                attackArea.x = worldX - attackArea.width / 2;
+                attackArea.y = hitboxTop - attackArea.height;
                 break;
             case DOWN:
-                attackArea.x = hitboxX + (solidArea.width / 2) - (attackArea.width / 2);
-                attackArea.y = hitboxY + solidArea.height;
+                attackArea.x = worldX - attackArea.width / 2;
+                attackArea.y = hitboxTop + solidArea.height;
                 break;
             case LEFT:
-                attackArea.x = hitboxX - attackArea.width;
-                attackArea.y = hitboxY + (solidArea.height / 2) - (attackArea.height / 2);
+                attackArea.x = hitboxLeft - attackArea.width;
+                attackArea.y = worldY - attackArea.height / 2;
                 break;
             case RIGHT:
-                attackArea.x = hitboxX + solidArea.width;
-                attackArea.y = hitboxY + (solidArea.height / 2) - (attackArea.height / 2);
+                attackArea.x = hitboxLeft + solidArea.width;
+                attackArea.y = worldY - attackArea.height / 2;
                 break;
         }
         return attackArea;
@@ -195,6 +193,7 @@ public class Player extends Entity {
     public void stopAttack() {
         state = PlayerState.IDLE;
     }
+
         public void setScreenPosition(int screenX, int screenY) {
         this.screenX = screenX;
         this.screenY = screenY;

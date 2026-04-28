@@ -88,11 +88,13 @@ public class TNTRenderer {
             if (tnt.getState() == TNTState.EXPLODING) {
                 int drawW = entityConfig.TNT_SPRITE_WIDTH * 3;
                 int drawH = entityConfig.TNT_SPRITE_HEIGHT * 3;
-                int drawX = screenX - entityConfig.TNT_SPRITE_WIDTH;
-                int drawY = screenY - entityConfig.TNT_SPRITE_HEIGHT ;
+                int drawX = screenX - drawW / 2;
+                int drawY = screenY - drawH / 2;
                 g2.drawImage(frame, drawX, drawY, drawW, drawH, null);
             } else if (tnt.getState() != TNTState.EXPLODED) {
-                g2.drawImage(frame, screenX, screenY, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT, null);
+                int drawX = screenX - entityConfig.TNT_SPRITE_WIDTH / 2;
+                int drawY = screenY - entityConfig.TNT_SPRITE_HEIGHT / 2;
+                g2.drawImage(frame, drawX, drawY, entityConfig.TNT_SPRITE_WIDTH, entityConfig.TNT_SPRITE_HEIGHT, null);
             }
         }
 
@@ -106,8 +108,8 @@ public class TNTRenderer {
 
             Rectangle solid = tnt.getSolidArea();
 
-            int drawX = screenX + solid.x;
-            int drawY = screenY + solid.y;
+            int drawX = screenX - solid.width / 2;
+            int drawY = screenY - solid.height / 2;
 
             // semi-trasparente rosso
             g2.setColor(new Color(255, 0, 0, 80));
@@ -118,8 +120,8 @@ public class TNTRenderer {
             g2.drawRect(drawX, drawY, solid.width, solid.height);
 
             // draw explosion area (centered on sprite center, consistent with explode())
-            int centerX = screenX + entityConfig.TNT_SPRITE_WIDTH / 2;
-            int centerY = screenY + entityConfig.TNT_SPRITE_HEIGHT / 2;
+            int centerX = screenX;
+            int centerY = screenY;
 
             g2.setColor(new Color(93, 255, 0, 80));
             int r = entityConfig.TNT_EXPLOSION_RADIUS;
@@ -137,4 +139,3 @@ public class TNTRenderer {
             g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
         }
 }
-

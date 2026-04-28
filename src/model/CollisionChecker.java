@@ -24,14 +24,11 @@ public class CollisionChecker {
     private record EntityBounds(int leftX, int rightX, int topY, int bottomY, int layer) {
 
         static EntityBounds of(Entity entity) {
-            // LEFT BORDER of entity hitbox in the world coordinates
-            int leftX = entity.getWorldX() + entity.getSolidArea().x;
-            // RIGTH BORDER of entity hitbox in the world coordinates
-            int rightX = leftX + entity.getSolidArea().width - 1;
-            // UPPER BORDER of entity hitbox in the world coordinates
-            int topY = entity.getWorldY() + entity.getSolidArea().y;
-            // BOTTOM BORDER of entity hitbox in the world coordinates
-            int bottomY = topY + entity.getSolidArea().height - 1;
+            // worldX/Y = center of solid area
+            int leftX = entity.getWorldX() - entity.getSolidArea().width / 2;
+            int rightX = entity.getWorldX() + entity.getSolidArea().width / 2 - 1;
+            int topY = entity.getWorldY() - entity.getSolidArea().height / 2;
+            int bottomY = entity.getWorldY() + entity.getSolidArea().height / 2 - 1;
             return new EntityBounds(leftX, rightX, topY, bottomY, entity.getCurrentLayer());
         }
     }

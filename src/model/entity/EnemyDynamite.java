@@ -26,17 +26,14 @@ public class EnemyDynamite extends Entity {
     
     public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
-        this.worldX = spawnPoint.x() - (entityConfig.DYNAMITE_SPRITE_WIDTH / 2);
-        this.worldY = spawnPoint.y() - (entityConfig.DYNAMITE_SPRITE_HEIGHT / 2);
+        this.worldX = spawnPoint.x();
+        this.worldY = spawnPoint.y();
         this.currentLayer = 2; //TODO: set well
 
         this.speed = entityConfig.DYNAMITE_SPEED;
         this.detectionRadius = entityConfig.DYNAMITE_DETECTION_RADIUS;
 
-        solidArea = new Rectangle((entityConfig.DYNAMITE_SPRITE_WIDTH / 2) - (entityConfig.DYNAMITE_HITBOX_WIDTH/2),
-                (entityConfig.DYNAMITE_SPRITE_HEIGHT / 2),
-                entityConfig.DYNAMITE_HITBOX_WIDTH,
-                entityConfig.DYNAMITE_HITBOX_HEIGHT);
+        solidArea = new Rectangle(0, 0, entityConfig.DYNAMITE_HITBOX_WIDTH, entityConfig.DYNAMITE_HITBOX_HEIGHT);
     }
 
     public void update(Player player, double deltaMs) {
@@ -77,13 +74,8 @@ public class EnemyDynamite extends Entity {
     //-------------------------------------------------------------------------------
     // CHeck if the player is near the enemy
     private void checkPlayerProximity(Player player) {
-        int dynamiteCenterX = worldX + entityConfig.DYNAMITE_SPRITE_WIDTH / 2;
-        int dynamiteCenterY = worldY + entityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
-        int playerCenterX = player.worldX + entityConfig.SPRITE_WIDTH / 2;
-        int playerCenterY = player.worldY + entityConfig.SPRITE_HEIGHT / 2;
-
-        int distanceX = playerCenterX - dynamiteCenterX;
-        int distanceY = playerCenterY - dynamiteCenterY;
+        int distanceX = player.worldX - worldX;
+        int distanceY = player.worldY - worldY;
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
         if (distance < entityConfig.DYNAMITE_ATTACKING_RADIUS) {
@@ -170,4 +162,3 @@ public class EnemyDynamite extends Entity {
 
 
 }
-

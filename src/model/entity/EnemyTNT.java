@@ -31,16 +31,13 @@ public class EnemyTNT extends Entity{
     public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
 
         this.entityConfig = entityConfig;
-        this.worldX = spawnPoint.x() - (entityConfig.TNT_SPRITE_WIDTH / 2);
-        this.worldY = spawnPoint.y() - (entityConfig.TNT_SPRITE_HEIGHT / 2);
+        this.worldX = spawnPoint.x();
+        this.worldY = spawnPoint.y();
         this.currentLayer = spawnPoint.layer();
 
         this.speed = entityConfig.START_TNT_SPEED;
 
-        solidArea = new Rectangle((entityConfig.TNT_SPRITE_WIDTH / 2) - (entityConfig.TNT_HITBOX_WIDTH/2),
-                (entityConfig.TNT_SPRITE_HEIGHT / 2),
-                entityConfig.TNT_HITBOX_WIDTH,
-                entityConfig.TNT_HITBOX_HEIGHT);
+        solidArea = new Rectangle(0, 0, entityConfig.TNT_HITBOX_WIDTH, entityConfig.TNT_HITBOX_HEIGHT);
     }
 
     public void update(Player player, double deltaMs) {
@@ -102,13 +99,8 @@ public class EnemyTNT extends Entity{
     //-------------------------------------------------------------
     // Checks if the player is within the detection radius and triggers the TNT if so
     private void checkPlayerProximity(Player player) {
-        int tntCenterX = worldX + entityConfig.TNT_SPRITE_WIDTH / 2;
-        int tntCenterY = worldY + entityConfig.TNT_SPRITE_HEIGHT / 2;
-        int playerCenterX = player.worldX + entityConfig.SPRITE_WIDTH / 2;
-        int playerCenterY = player.worldY + entityConfig.SPRITE_HEIGHT / 2;
-
-        int distanceX = playerCenterX - tntCenterX;
-        int distanceY = playerCenterY - tntCenterY;
+        int distanceX = player.worldX - worldX;
+        int distanceY = player.worldY - worldY;
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
         if (distance < entityConfig.TNT_DETECTION_RADIUS) {
@@ -122,13 +114,8 @@ public class EnemyTNT extends Entity{
     private void explode(Player player) {
 
         if (hasDealtDamage) return; // Ensure damage is applied only once per explosion
-        int tntCenterX = worldX + entityConfig.TNT_SPRITE_WIDTH / 2;
-        int tntCenterY = worldY + entityConfig.TNT_SPRITE_HEIGHT / 2;
-        int playerCenterX = player.worldX + entityConfig.SPRITE_WIDTH / 2;
-        int playerCenterY = player.worldY + entityConfig.SPRITE_HEIGHT / 2;
-
-        int distanceX = playerCenterX - tntCenterX;
-        int distanceY = playerCenterY - tntCenterY;
+        int distanceX = player.worldX - worldX;
+        int distanceY = player.worldY - worldY;
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
         if (distance < entityConfig.TNT_EXPLOSION_RADIUS) {
@@ -153,5 +140,4 @@ public class EnemyTNT extends Entity{
         return state;
     }
 }
-
 

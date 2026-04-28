@@ -8,15 +8,22 @@ import view.GameView;
 
 import javax.swing.JFrame;
 
+/**
+ * This is the main class of the game.
+ * The game java app uses an MVC structure. So to work need to create a GameController, a GameModel, and a GameView.
+ */
+
 public class Main {
 
     public static void main(String[] args) {
-        // MVC structure
 
-        // Define the tre basic object Model View Controller
-        // ------------------------------------------------------------------------------------------------------------
+        // load the game configuration from the XML file
+        // this class is specific for our game and contains all the game's constants'
         GameConfig GS = new GameConfig();
 
+        // MVC structure
+        // Define the tre basic object Model View Controller
+        // ------------------------------------------------------------------------------------------------------------
         GameModel model = new GameModel(GS);
         GameView view = new GameView(GS, model);
         GameController controller = new GameController(model, view);
