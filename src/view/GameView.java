@@ -4,6 +4,7 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.ScreenConfig;
 import model.GameModel;
 import model.object.GameObject;
+import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
@@ -158,7 +159,9 @@ public class GameView extends JPanel {
                 return tnt.getWorldY() + tnt.getSolidArea().y + tnt.getSolidArea().height;
             } else if (obj instanceof GameObject o) {
                 return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
-            } else if (obj instanceof EnemyDynamite d) {
+            } else if (obj instanceof EnemyDynamite ed) {
+                return ed.getWorldY() + ed.getSolidArea().y + ed.getSolidArea().height;
+            } else if (obj instanceof DynamiteProjectile d) {
                 return d.getWorldY() + d.getSolidArea().y + d.getSolidArea().height;
             }
             return 0;
@@ -189,6 +192,8 @@ public class GameView extends JPanel {
                 int screenX = enemyDynamite.getWorldX() - player.getWorldX() + player.getScreenX();
                 int screenY = enemyDynamite.getWorldY() - player.getWorldY() + player.getScreenY();
                 enemyDynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
+
+                
 
 
             }

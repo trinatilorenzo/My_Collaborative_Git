@@ -14,6 +14,7 @@ import model.object.ObjectManager;
 import model.object.GameObject;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
+import model.entity.DynamiteProjectile;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,8 @@ public class GameModel {
     // TODO: TNT from file
     private List<EnemyTNT> tntEnemies = new ArrayList<>();
     private List<EnemyDynamite> dynamiteEnemies = new ArrayList<>();
-    
+    private List<DynamiteProjectile> projectiles = new ArrayList<>();
+
     /**
      * COSTRUCTOR
       */
@@ -69,8 +71,8 @@ public class GameModel {
 
             }
         }
-        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(44*64, 29*64, 2), GS.entityConfig()));
-        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(44*64, 29*64, 2), GS.entityConfig()));
+        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60*64, 40*64, 2), GS.entityConfig(), projectiles));
+        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60*64, 40*64, 2), GS.entityConfig(), projectiles));
 
         gameState = GameState.PLAYING;
  
@@ -104,6 +106,7 @@ public class GameModel {
                 }
                 tnt.move();
             }
+            tntEnemies.removeIf(EnemyTNT::isExploded);
 
             for (EnemyDynamite dynamite : dynamiteEnemies){
                 collisionChecker.checkEntity(player, dynamite);
@@ -116,6 +119,20 @@ public class GameModel {
                 }
                 dynamite.move();
             }
+            dynamiteEnemies.removeIf(EnemyDynamite::isDead);
+
+            for (DynamiteProjectile proj : projectiles) {
+                proj.update(deltaMs);
+                collisionChecker.checkTile(proj);
+
+                if (collisionChecker.checkEntity(player, proj)){
+                    player.takeDamage();
+                    proj.explode();
+                }
+            }
+            // Remove exploded projectiles
+            projectiles.removeIf(DynamiteProjectile::isExploded);
+
             
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
@@ -195,6 +212,9 @@ public class GameModel {
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
+    public List<DynamiteProjectile> getProjectiles(){
+        return projectiles;
+    }
     //---------------------------------
 
     // SETTER ----------------------

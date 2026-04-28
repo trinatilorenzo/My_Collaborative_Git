@@ -8,8 +8,9 @@ import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.DynamiteState;
 
 public class EnemyDynamite extends Entity {
-    private DynamiteState state = DynamiteState.WANDER;
 
+    private DynamiteState state = DynamiteState.WANDER;
+    private List<DynamiteProjectile> globalProjectiles;
     private EntityConfig entityConfig;
     private double attackTimer = 0;
     private double moveTimer = 0; // Timer to control wandering movement
@@ -20,11 +21,11 @@ public class EnemyDynamite extends Entity {
     private final double moveInterval = 1000; // Change direction every 1 second
 
     private double detectionRadius; // Radius within which the dynamite detects the player
-    private List<DynamiteProjectile> dynamite = new ArrayList<>();
 
     private boolean facingRight = true;
     
-    public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig) {
+    //CONSTRUCTOR
+    public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig, List<DynamiteProjectile> globalProjectiles) {
         this.entityConfig = entityConfig;
         this.worldX = spawnPoint.x() - (entityConfig.DYNAMITE_SPRITE_WIDTH / 2);
         this.worldY = spawnPoint.y() - (entityConfig.DYNAMITE_SPRITE_HEIGHT / 2);
@@ -33,6 +34,7 @@ public class EnemyDynamite extends Entity {
         this.speed = entityConfig.DYNAMITE_SPEED;
         this.detectionRadius = entityConfig.DYNAMITE_DETECTION_RADIUS;
 
+        this.globalProjectiles = globalProjectiles;
         solidArea = new Rectangle((entityConfig.DYNAMITE_SPRITE_WIDTH / 2) - (entityConfig.DYNAMITE_HITBOX_WIDTH/2),
                 (entityConfig.DYNAMITE_SPRITE_HEIGHT / 2),
                 entityConfig.DYNAMITE_HITBOX_WIDTH,
@@ -53,25 +55,17 @@ public class EnemyDynamite extends Entity {
                 break;
             
             case ATTACKING:
-                checkPlayerProximity(player);
-                /*
                 attackTimer += deltaMs;
                 if (attackTimer >= entityConfig.DYNAMITE_ATTACK_INTERVAL) { // Attack every 2 seconds
                     attack(player);
                     attackTimer = 0;
                 }
-                */
+                checkPlayerProximity(player);
                 break;
-                
+            
         }
-        /*
-        // Update dynamite projectiles
-        for (DynamiteProjectile proj : dynamite) {
-            proj.update(deltaMs);
-        }
-        // Remove exploded projectiles
-        dynamite.removeIf(DynamiteProjectile::isExploded);*/
-
+        
+        
     }  
 
     //-------------------------------------------------------------------------------
@@ -138,36 +132,23 @@ public class EnemyDynamite extends Entity {
         
     }
 
-    /* Check if the player is within detection radius *//*
-    private void checkPlayerProximity(Player player) {
-        double dx = player.getWorldX() - worldX;
-        double dy = player.getWorldY() - worldY;
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance <= detectionRadius) {
-            state = DynamiteState.CHASING;
-        } else {
-            state = DynamiteState.WANDER;
-        }
-    }
-
-    /* Attack by launching a projectile towards the player *//*
+    /* Attack by launching a projectile towards the player */
     private void attack(Player player) {
-        DynamiteProjectile dynamite = new DynamiteProjectile(worldX, worldY, player.getWorldX(), player.getWorldY(), entityConfig);
-        dynamite.add();
+        DynamiteProjectile proj = new DynamiteProjectile(worldX, worldY, player.getWorldX(), player.getWorldY(), entityConfig);
+        globalProjectiles.add(proj);
     }
-*/
+
     //GETTER
     public DynamiteState getState(){
         return state;
+    }
+    public boolean isDead(){
+        return state==DynamiteState.DEAD;
     }
     public boolean isFacingRight(){
         return facingRight;
     }
     
-
-
-
-
 }
+
 
