@@ -14,6 +14,7 @@ public class DynamiteProjectile extends Entity{
     private boolean exploded = false;
 
     private double timer = 0;
+    private final double flightTime = 1.2; // Il tempo (in secondi) che la dinamite impiega per colpire il punto target
 
     private EntityConfig entityConfig;
 
@@ -34,15 +35,8 @@ public class DynamiteProjectile extends Entity{
         double dx = targetX - startX;
         double dy = targetY - startY;
 
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance > 0.01){
-            dx /= distance;
-            dy /= distance;
-        }
-
-        velocityX = dx * entityConfig.PROJECTILE_THROW_SPEED;
-        velocityY = -entityConfig.PROJECTILE_THROW_HEIGHT;
+        this.velocityX = dx / flightTime;
+        this.velocityY = (dy - 0.5 * gravity * (flightTime * flightTime)) / flightTime;
 
     }
 
@@ -52,6 +46,7 @@ public class DynamiteProjectile extends Entity{
         if (exploded) return;
 
         double dt = deltaMs / 1000.0;
+        timer += dt;
 
         // gravità
         velocityY += gravity * dt;
@@ -59,17 +54,21 @@ public class DynamiteProjectile extends Entity{
         // movimento
         worldXDouble += velocityX * dt;
         worldYDouble += velocityY * dt;
+
         angle = Math.atan2(velocityY, velocityX);
+
+        this.worldX = (int)worldXDouble;
+        this.worldY = (int)worldYDouble;
 
         //sync con entity
         solidArea.x = worldX;
         solidArea.y = worldY;
 
         // esplosione a tempo
-        timer += deltaMs;
-        if (timer > entityConfig.PROJECTILE_FUSE_TIME) {
+        if (timer > flightTime) {
             explode();
         }
+
     }
 
     public void explode() {

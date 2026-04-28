@@ -50,7 +50,7 @@ public class GameView extends JPanel {
     private PlayerRender playerRender;
     private MonkRenderer monkRenderer;
     private TNTRenderer tntRenderer;
-    private DynamiteRender enemyDynamiteRender;
+    private DynamiteRender dynamiteRender;
     private UI ui_render;
     private RendererRegistry rendererRegistry;
     private Cursor customGameCursor;
@@ -76,13 +76,12 @@ public class GameView extends JPanel {
 
         // import the player Render
         this.playerRender = new PlayerRender(GS.entityConfig());
-
         this.monkRenderer = new MonkRenderer(GS.entityConfig());
         this.tntRenderer = new TNTRenderer(GS.entityConfig());
-        this.enemyDynamiteRender = new DynamiteRender(GS.entityConfig());
+        this.dynamiteRender = new DynamiteRender(GS.entityConfig());
 
         //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer);
+        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender);
 
         // object renderers
         this.rendererRegistry = new RendererRegistry();
@@ -139,7 +138,6 @@ public class GameView extends JPanel {
             // Y-sorting logic: sort objects by their worldY coordinate
             drawEntities(g2);
         }
-
         //DRAW OBJECTS
         //drawObjects(g2);
 
@@ -162,7 +160,7 @@ public class GameView extends JPanel {
             tntRenderer.update(tnt, deltaMs);
         }
         for (EnemyDynamite enemyDynamite : model.getDynamiteEnemies()){
-            enemyDynamiteRender.update(enemyDynamite, deltaMs);
+            dynamiteRender.update(enemyDynamite, deltaMs);
         }
         updateObjectAnimations(deltaMs);
 
@@ -182,6 +180,7 @@ public class GameView extends JPanel {
         renderList.add(monk);
         renderList.addAll(model.getTntEnemies());
         renderList.addAll(model.getDynamiteEnemies());
+        renderList.addAll(model.getProjectiles());
         renderList.addAll(model.getObjects());
 
         // Sort for "bottom_y"
@@ -234,13 +233,22 @@ public class GameView extends JPanel {
                     screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
-                enemyDynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
-
-                
-
-
+                dynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
             }
+            else if (obj instanceof DynamiteProjectile proj) {
+                int screenX = proj.getWorldX() - player.getWorldX() + player.getScreenX();
+                int screenY = proj.getWorldY() - player.getWorldY() + player.getScreenY();
 
+                int halfW = EntityConfig.PROJECTILE_SPRITE_WIDTH / 2;
+                int halfH = EntityConfig.PROJECTILE_SPRITE_HEIGHT / 2;
+
+                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
+                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                    continue;
+                }
+
+                dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
+            }
             else if (obj instanceof GameObject o) {
                 @SuppressWarnings("unchecked")
                 ObjectRender<GameObject> renderer =

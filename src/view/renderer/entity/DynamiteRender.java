@@ -93,5 +93,39 @@ public class DynamiteRender {
     }
 
     //-------------------------------------------------------------
+    public void drawProjectile(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
+
+        BufferedImage frame = projectileFrames[0]; // oppure animazione futura
+
+        int w = entityConfig.PROJECTILE_SPRITE_WIDTH;
+        int h = entityConfig.PROJECTILE_SPRITE_HEIGHT;
+
+        double angle = proj.getAngle();
+
+        // salva trasformazione corrente
+        java.awt.geom.AffineTransform old = g2.getTransform();
+
+        // trasla al centro del proiettile
+        g2.translate(screenX, screenY);
+
+        // ruota
+        g2.rotate(angle);
+
+        // disegna centrato
+        g2.drawImage(
+            frame,
+            -w / 2,
+            -h / 2,
+            w,
+            h,
+            null
+        );
+
+        // ripristina trasformazione
+        g2.setTransform(old);
+    }
+
+    //DEBUG
+    //TODO: drawSolidArea
 
 }

@@ -1,4 +1,6 @@
 package model.entity;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class EnemyDynamite extends Entity {
         this.worldX = spawnPoint.x();
         this.worldY = spawnPoint.y();
         this.currentLayer = 2; //TODO: set well
-
+        this.globalProjectiles = globalProjectiles;
         this.speed = entityConfig.DYNAMITE_SPEED;
         this.detectionRadius = entityConfig.DYNAMITE_DETECTION_RADIUS;
 
@@ -128,6 +130,23 @@ public class EnemyDynamite extends Entity {
         DynamiteProjectile proj = new DynamiteProjectile(worldX, worldY, player.getWorldX(), player.getWorldY(), entityConfig);
         globalProjectiles.add(proj);
     }
+
+    //DEBUG 
+    //-------------------------------------------------------------
+    public void drawProjectileHitbox(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
+
+        Rectangle hitbox = proj.getSolidArea();
+
+        int x = screenX - (proj.getWorldX() - hitbox.x);
+        int y = screenY - (proj.getWorldY() - hitbox.y);
+
+        g2.setColor(new Color(255, 0, 0, 120)); // rosso semi trasparente
+        g2.fillRect(x, y, hitbox.width, hitbox.height);
+
+        g2.setColor(Color.RED);
+        g2.drawRect(x, y, hitbox.width, hitbox.height);
+    }
+
 
     //GETTER
     public DynamiteState getState(){

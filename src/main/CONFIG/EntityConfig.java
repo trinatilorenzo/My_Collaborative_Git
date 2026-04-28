@@ -79,8 +79,8 @@ public record EntityConfig(ScreenConfig screenConfig,
     //EnemyDynamiteConfig
     public static final int DYNAMITE_SPEED = 128;
     public static final int DYNAMITE_DETECTION_RADIUS = 300;
-    public static final int DYNAMITE_ATTACKING_RADIUS = 80;
-    public static final int DYNAMITE_ATTACK_INTERVAL = 2000; // 2 seconds
+    public static final int DYNAMITE_ATTACKING_RADIUS = 150;
+    public static final int DYNAMITE_ATTACK_INTERVAL = 800; 
 
     public static final int DYNAMITE_SPRITE_WIDTH = 192;
     public static final int DYNAMITE_SPRITE_HEIGHT = 192;
@@ -88,7 +88,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int DYNAMITE_HITBOX_WIDTH = 55;
     public static final int DYNAMITE_HITBOX_HEIGHT = 35;
     //Dynamite projectile Config
-    public static final int PROJECTILE_THROW_SPEED = 200;
+    public static final int PROJECTILE_THROW_SPEED = 100;
     public static final int PROJECTILE_THROW_HEIGHT = 300;
     public static final int PROJECTILE_FUSE_TIME = 2000; // ms
     public static final int PROJECTILE_EXPLOSION_RADIUS = 50;

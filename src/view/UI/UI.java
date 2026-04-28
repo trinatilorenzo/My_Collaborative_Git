@@ -1,9 +1,12 @@
 package view.UI;
 
 import model.GameModel;
+import model.entity.DynamiteProjectile;
+import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.entity.Player;
+import view.renderer.entity.DynamiteRender;
 import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.PlayerRender;
 import view.renderer.entity.TNTRenderer;
@@ -30,6 +33,7 @@ public class UI {
     private TNTRenderer tntRenderer;
     private MonkRenderer monkRenderer;
     private MapRender mapRender;
+    private DynamiteRender dynamiteRender;
     private final ScreenConfig screenConfig;
     private final MapConfig mapConfig;
 
@@ -88,7 +92,7 @@ public class UI {
 
 
     public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender,
-              ScreenConfig screenConfig, MapConfig mapConfig, TNTRenderer tntRenderer, MonkRenderer monkRenderer) {
+              ScreenConfig screenConfig, MapConfig mapConfig, TNTRenderer tntRenderer, MonkRenderer monkRenderer, DynamiteRender dynamiteRender) {
         this.gameModel = gameModel;
         this.playerRender = playerRender;
         this.mapRender =  mapRender;
@@ -97,6 +101,7 @@ public class UI {
 
         this.tntRenderer = tntRenderer;
         this.monkRenderer = monkRenderer;
+        this.dynamiteRender = dynamiteRender;
 
         arial_40 = new Font ("Arial", Font. PLAIN, 40) ;
         arial_80B = new Font ("Arial", Font. BOLD, 80);
@@ -187,6 +192,8 @@ public class UI {
             renderList.add(gameModel.getPlayer());
             renderList.add(gameModel.getMonk());
             renderList.addAll(gameModel.getTntEnemies());
+            renderList.addAll(gameModel.getDynamiteEnemies());
+            renderList.addAll(gameModel.getProjectiles());
 
             for (Object obj : renderList) {
                 if (obj instanceof Player p) {
@@ -195,19 +202,25 @@ public class UI {
                 if (obj instanceof Monk m) {
                    // monkRenderer.drawSolidArea(g2, m);
                 }
-                if (obj instanceof EnemyTNT t){
-                    //tntRenderer.drawSolidArea(g2, t, gameModel.getPlayer());
+                if (obj instanceof EnemyDynamite ed) {
+                    //TODO drawSolidArea
                 }
+                if (obj instanceof DynamiteProjectile proj) {
 
+                    int screenX = proj.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX();
+                    int screenY = proj.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY();
+
+                    dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
+                }
             }
+
+        
             for (EnemyTNT tnt : gameModel.getTntEnemies()) {
                 tntRenderer.drawSolidArea(g2, tnt, tnt.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX(),
                 tnt.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY()
                 );
             }
-
-
-
+            
 
             // FPS overlay (updates every second)
             frames++;
@@ -224,7 +237,6 @@ public class UI {
             int yTile = (gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getSolidArea().y )/ screenConfig.TILE_SIZE();
             g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
         }
-
     }
 
     private void drawMainMenu() {
