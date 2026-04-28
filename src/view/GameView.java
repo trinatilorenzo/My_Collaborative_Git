@@ -2,6 +2,7 @@ package view;
 
 import main.CONFIG.GameConfig;
 import main.CONFIG.ScreenConfig;
+import main.CONFIG.EntityConfig;
 import model.GameModel;
 import model.object.GameObject;
 import model.entity.DynamiteProjectile;
@@ -152,17 +153,17 @@ public class GameView extends JPanel {
         // Sort for "bottom_y"
         renderList.sort(java.util.Comparator.comparingInt(obj -> {
             if (obj instanceof Player p) {
-                return p.getWorldY() + p.getSolidArea().y + p.getSolidArea().height;
+                return p.getWorldY() + p.getSolidArea().height / 2;
             } else if (obj instanceof Monk m) {
-                return m.getWorldY() + m.getSolidArea().y + m.getSolidArea().height;
+                return m.getWorldY() + m.getSolidArea().height / 2;
             } else if (obj instanceof EnemyTNT tnt) {
-                return tnt.getWorldY() + tnt.getSolidArea().y + tnt.getSolidArea().height;
+                return tnt.getWorldY() + tnt.getSolidArea().height / 2;
             } else if (obj instanceof GameObject o) {
                 return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
             } else if (obj instanceof EnemyDynamite ed) {
-                return ed.getWorldY() + ed.getSolidArea().y + ed.getSolidArea().height;
+                return ed.getWorldY() + ed.getSolidArea().height / 2;
             } else if (obj instanceof DynamiteProjectile d) {
-                return d.getWorldY() + d.getSolidArea().y + d.getSolidArea().height;
+                return d.getWorldY() + d.getSolidArea().height/2;
             }
             return 0;
         }));
@@ -181,8 +182,10 @@ public class GameView extends JPanel {
                 int screenX = tnt.getWorldX() - player.getWorldX() + player.getScreenX();
                 int screenY = tnt.getWorldY() - player.getWorldY() + player.getScreenY();
 
-                if (screenX + 48 < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                    screenY + 48 < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+                int halfW = EntityConfig.TNT_SPRITE_WIDTH / 2;
+                int halfH = EntityConfig.TNT_SPRITE_HEIGHT / 2;
+                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
+                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 
@@ -191,6 +194,12 @@ public class GameView extends JPanel {
             else if (obj instanceof EnemyDynamite enemyDynamite) {
                 int screenX = enemyDynamite.getWorldX() - player.getWorldX() + player.getScreenX();
                 int screenY = enemyDynamite.getWorldY() - player.getWorldY() + player.getScreenY();
+                int halfW = EntityConfig.DYNAMITE_SPRITE_WIDTH / 2;
+                int halfH = EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
+                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
+                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                    continue;
+                }
                 enemyDynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
 
                 

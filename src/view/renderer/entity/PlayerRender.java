@@ -62,16 +62,16 @@ public class PlayerRender {
         if (player.getFacing()!= Direction.RIGHT) {
             // Flip the image horizontally for left direction
             g2.drawImage(frame,
-                    player.getScreenX() + EntityConfig.PLAYER_RENDER_WIDTH,
-                    player.getScreenY(), 
+                    player.getScreenX() + EntityConfig.PLAYER_RENDER_WIDTH/2,
+                    player.getScreenY() - EntityConfig.PLAYER_RENDER_HEIGHT/2 ,
                     -EntityConfig.PLAYER_RENDER_WIDTH,
                     EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
         } else {
             // Draw normally for right directionc
             g2.drawImage(frame,
-                    player.getScreenX(),
-                    player.getScreenY(),
+                    player.getScreenX() - EntityConfig.PLAYER_RENDER_WIDTH/2,
+                    player.getScreenY() - EntityConfig.PLAYER_RENDER_HEIGHT/2,
                     EntityConfig.PLAYER_RENDER_WIDTH,
                     EntityConfig.PLAYER_RENDER_HEIGHT,
                     null);
@@ -114,8 +114,8 @@ public class PlayerRender {
     //-------------------------------------------------------------
     public void drawSolidArea(Graphics2D g2, Player player) {
         Rectangle solid = player.getSolidArea();
-        int drawX = player.getScreenX() + solid.x;
-        int drawY = player.getScreenY() + solid.y;
+        int drawX = player.getScreenX() - player.getSolidArea().width/2;
+        int drawY = player.getScreenY() - player.getSolidArea().height/2;
 
         // Semi-transparent red fill
         g2.setColor(new Color(255, 0, 0, 80));

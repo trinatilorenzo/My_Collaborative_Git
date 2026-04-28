@@ -1103,7 +1103,7 @@
    </properties>
    <point/>
   </object>
-  <object id="250" name="Player" x="1952.06" y="1533.81">
+  <object id="250" name="Player" x="1983.3" y="1472.06">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>

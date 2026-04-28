@@ -70,16 +70,16 @@ public class DynamiteRender {
         if (!enemy.isFacingRight()){
             // Flip the image
             g2.drawImage(frame,
-                    screenX + EntityConfig.DYNAMITE_SPRITE_WIDTH,
-                    screenY, 
+                    screenX + EntityConfig.DYNAMITE_SPRITE_WIDTH / 2,
+                    screenY - EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2,
                     -EntityConfig.DYNAMITE_SPRITE_WIDTH,
                     EntityConfig.DYNAMITE_SPRITE_HEIGHT,
                     null);
         }else{
             g2.drawImage(
                     frame,
-                    screenX,
-                    screenY,
+                    screenX - entityConfig.DYNAMITE_SPRITE_WIDTH / 2,
+                    screenY - entityConfig.DYNAMITE_SPRITE_HEIGHT / 2,
                     entityConfig.DYNAMITE_SPRITE_WIDTH,
                     entityConfig.DYNAMITE_SPRITE_HEIGHT,
                     null

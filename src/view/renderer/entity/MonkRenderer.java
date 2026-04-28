@@ -68,6 +68,8 @@ public class MonkRenderer {
         if (monk.getState() == MonkState.DISAPPEARED) return;
 
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
-        g2.drawImage(frame, screenX, screenY, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT, null);
+        int drawX = screenX - entityConfig.SPRITE_WIDTH / 2;
+        int drawY = screenY - entityConfig.SPRITE_HEIGHT / 2;
+        g2.drawImage(frame, drawX, drawY, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT, null);
     }
 }
