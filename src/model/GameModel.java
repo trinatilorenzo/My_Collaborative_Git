@@ -15,7 +15,6 @@ import model.object.GameObject;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import model.object.OBJ_Tree;
@@ -45,6 +44,7 @@ public class GameModel {
     private boolean debugMode = false;
     private String currentDialogue = "";
 
+    // TODO: TNT from file
     private List<EnemyTNT> tntEnemies = new ArrayList<>();
     private List<EnemyDynamite> dynamiteEnemies = new ArrayList<>();
     
@@ -91,18 +91,11 @@ public class GameModel {
 
             boolean monkCollision = collisionChecker.checkMonk(player, monk);
             
-            Iterator<EnemyTNT> tntIterator = tntEnemies.iterator();
-            while (tntIterator.hasNext()) {
-                EnemyTNT tnt = tntIterator.next();
+            for (EnemyTNT tnt : tntEnemies) {
                 if (tnt.getState() != TNTState.EXPLODED) {
                     collisionChecker.checkEntity(player, tnt);
                 }
                 tnt.update(player, deltaMs);
-
-                if (tnt.getState() == TNTState.EXPLODED) {
-                    tntIterator.remove();
-                    continue;
-                }
 
                 collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
