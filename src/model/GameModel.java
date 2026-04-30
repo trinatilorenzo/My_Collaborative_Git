@@ -94,7 +94,7 @@ public class GameModel {
             collisionChecker.checkTile(player);
             collisionChecker.checkObjects(player);
 
-            boolean monkCollision = collisionChecker.checkMonk(player, monk);
+            boolean monkCollision = collisionChecker.intersects(player, monk);
             
             for (EnemyTNT tnt : tntEnemies) {
                 if (tnt.getState() != TNTState.EXPLODED) {
@@ -128,7 +128,7 @@ public class GameModel {
                 proj.update(deltaMs);
                 collisionChecker.checkTile(proj);
 
-                if (collisionChecker.checkEntity(player, proj)){
+                if (collisionChecker.intersects(player, proj)){
                     player.takeDamage();
                     proj.explode();
                 }
@@ -149,8 +149,6 @@ public class GameModel {
         }
     }
     //-------------------------------------------------------------
-    //TODO controllare bene
-
     /**
      * Interactions with objects
      */
@@ -161,10 +159,11 @@ public class GameModel {
         for (GameObject obj : objectManager.getObjects()) {
 
             if (obj.isRemoved()) continue; // Skip removed objects
-
-            // oggetti che richiedono attacco
-            Rectangle attackArea = player.getAttackArea();
+      
             if (player.getState() == PlayerState.ATTACKING) {
+
+                Rectangle attackArea = player.getAttackArea();
+
                 if (obj instanceof OBJ_Tree) {
                     OBJ_Tree tree = (OBJ_Tree) obj;
 
@@ -173,6 +172,19 @@ public class GameModel {
                         tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
                     }
                 }
+
+                for (EnemyDynamite enemy : dynamiteEnemies) {
+                    if (attackArea.intersects(enemy.getSolidWorldArea())) {
+                        enemy.takeDamage();
+                    }
+                }
+
+                for (EnemyTNT tnt : tntEnemies) {
+                    if (attackArea.intersects(tnt.getSolidWorldArea())) {
+                        tnt.takeDamage(); 
+                    }
+                }
+
             }
 
         }

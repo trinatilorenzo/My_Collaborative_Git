@@ -8,12 +8,14 @@ import java.util.List;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.DynamiteState;
+import main.CONFIG.enu.TNTState;
 
 public class EnemyDynamite extends Entity {
 
     private DynamiteState state = DynamiteState.WANDER;
     private List<DynamiteProjectile> globalProjectiles;
     private EntityConfig entityConfig;
+    private int health = 1;
     private double attackTimer = 0;
     private double moveTimer = 0; // Timer to control wandering movement
 
@@ -131,20 +133,14 @@ public class EnemyDynamite extends Entity {
         globalProjectiles.add(proj);
     }
 
-    //DEBUG 
     //-------------------------------------------------------------
-    public void drawProjectileHitbox(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
-
-        Rectangle hitbox = proj.getSolidArea();
-
-        int x = screenX - (proj.getWorldX() - hitbox.x);
-        int y = screenY - (proj.getWorldY() - hitbox.y);
-
-        g2.setColor(new Color(255, 0, 0, 120)); // rosso semi trasparente
-        g2.fillRect(x, y, hitbox.width, hitbox.height);
-
-        g2.setColor(Color.RED);
-        g2.drawRect(x, y, hitbox.width, hitbox.height);
+    // Method to apply damage to the EnemyDynamite
+    public void takeDamage() {
+        if (state == DynamiteState.DEAD) return; // Already dead
+        health--;
+        if (health <= 0) {
+            state = DynamiteState.DEAD;
+        }
     }
 
 
