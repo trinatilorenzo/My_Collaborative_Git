@@ -8,7 +8,9 @@ import view.Animation.Animation;
 import view.Animation.AnimationManager;
 import view.SpriteLoader;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -125,7 +127,39 @@ public class DynamiteRender {
         g2.setTransform(old);
     }
 
-    //DEBUG
-    //TODO: drawSolidArea
+    // DEBUG
+//-------------------------------------------------------------
+public void drawSolidArea(Graphics2D g2, EnemyDynamite enemy, int screenX, int screenY) {
+
+    Rectangle solid = enemy.getSolidArea();
+
+    int drawX = screenX - solid.width / 2;
+    int drawY = screenY - solid.height / 2;
+
+    // Fill semi-transparent
+    g2.setColor(new Color(255, 0, 0, 80));
+    g2.fillRect(drawX, drawY, solid.width, solid.height);
+
+    // Border
+    g2.setColor(Color.RED);
+    g2.drawRect(drawX, drawY, solid.width, solid.height);
+}
+
+//-------------------------------------------------------------
+public void drawProjectileSolidArea(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
+
+    Rectangle solid = proj.getSolidArea();
+
+    int drawX = screenX - solid.width / 2;
+    int drawY = screenY - solid.height / 2;
+
+    // Fill semi-transparent
+    g2.setColor(new Color(255, 165, 0, 80)); // arancione per distinguerlo
+    g2.fillRect(drawX, drawY, solid.width, solid.height);
+
+    // Border
+    g2.setColor(Color.ORANGE);
+    g2.drawRect(drawX, drawY, solid.width, solid.height);
+}
 
 }

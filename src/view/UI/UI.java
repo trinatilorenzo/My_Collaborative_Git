@@ -203,14 +203,17 @@ public class UI {
                    // monkRenderer.drawSolidArea(g2, m);
                 }
                 if (obj instanceof EnemyDynamite ed) {
-                    //TODO drawSolidArea
+                    int screenX = ed.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX();
+                    int screenY = ed.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY();
+
+                    dynamiteRender.drawSolidArea(g2, ed, screenX, screenY);
                 }
                 if (obj instanceof DynamiteProjectile proj) {
 
                     int screenX = proj.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX();
                     int screenY = proj.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY();
 
-                    dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
+                    dynamiteRender.drawProjectileSolidArea(g2, proj, screenX, screenY);
                 }
             }
 
