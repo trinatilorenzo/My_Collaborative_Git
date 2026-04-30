@@ -303,6 +303,7 @@ public class GameModel {
     public int getMainMenuSelection() { return mainMenuSelection; }
     public int getHoveredRibbon() { return hoveredRibbon; }
     public int getActiveRibbon() { return activeRibbon; }
+    public boolean isHoveredGameOverButton() { return hoveredGameOverButton; }
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
@@ -314,6 +315,7 @@ public class GameModel {
     public void setMainMenuSelection(int mainMenuSelection) { this.mainMenuSelection = mainMenuSelection; }
     public void setHoveredRibbon(int hoveredRibbon) { this.hoveredRibbon = hoveredRibbon; }
     public void setActiveRibbon(int activeRibbon) { this.activeRibbon = activeRibbon; }
+    public void setHoveredGameOverButton(boolean hoveredGameOverButton) { this.hoveredGameOverButton = hoveredGameOverButton; }
     //---------------------------------
 
 
