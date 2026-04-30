@@ -30,7 +30,7 @@ public class DynamiteProjectile extends Entity{
 
         this.entityConfig = entityConfig;
         
-        this.solidArea = new Rectangle(worldX, worldY, entityConfig.PROJECTILE_SIZE, entityConfig.PROJECTILE_SIZE); //TODO: aggiustare 
+        this.solidArea = new Rectangle(0, 0, entityConfig.PROJECTILE_SIZE, entityConfig.PROJECTILE_SIZE); //TODO: aggiustare 
 
         double dx = targetX - startX;
         double dy = targetY - startY;
@@ -59,10 +59,6 @@ public class DynamiteProjectile extends Entity{
 
         this.worldX = (int)worldXDouble;
         this.worldY = (int)worldYDouble;
-
-        //sync con entity
-        solidArea.x = worldX;
-        solidArea.y = worldY;
 
         // esplosione a tempo
         if (timer > flightTime) {

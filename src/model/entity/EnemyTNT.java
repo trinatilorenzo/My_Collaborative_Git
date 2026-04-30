@@ -9,8 +9,7 @@ import main.CONFIG.enu.TNTState;
 
 public class EnemyTNT extends Entity{
     private TNTState state = TNTState.WANDER;
-    private int hp = 1; //one hit
-
+    private int health = 1;
     private long triggerTimer;
     private long explosionTimer;
 
@@ -126,11 +125,10 @@ public class EnemyTNT extends Entity{
 
     //-------------------------------------------------------------
     // Method to apply damage to the TNT, potentially triggering an explosion
-    // TODO: implementare possibilità sconfitta TNT prima dell'esplosione
-    public void takeDamage(int damage) {
+    public void takeDamage() {
         if (state == TNTState.EXPLODED) return; // Already exploded, no further damage
-        hp -= damage;
-        if (hp <= 0) {
+        health--;
+        if (health <= 0) {
             state = TNTState.EXPLODED;
         }
     }

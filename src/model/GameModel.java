@@ -93,7 +93,7 @@ public class GameModel {
             collisionChecker.checkTile(player);
             collisionChecker.checkObjects(player);
 
-            boolean monkCollision = collisionChecker.checkMonk(player, monk);
+            boolean monkCollision = collisionChecker.intersects(player, monk);
             
             for (EnemyTNT tnt : tntEnemies) {
                 if (tnt.getState() != TNTState.EXPLODED) {
@@ -127,7 +127,7 @@ public class GameModel {
                 proj.update(deltaMs);
                 collisionChecker.checkTile(proj);
 
-                if (collisionChecker.checkEntity(player, proj)){
+                if (collisionChecker.intersects(player, proj)){
                     player.takeDamage();
                     proj.explode();
                 }
@@ -233,9 +233,10 @@ public class GameModel {
 
             if (obj.isRemoved()) continue; // Skip removed objects
 
-            // oggetti che richiedono attacco
-            Rectangle attackArea = player.getAttackArea();
             if (player.getState() == PlayerState.ATTACKING) {
+
+                Rectangle attackArea = player.getAttackArea();
+
                 if (obj instanceof OBJ_Tree) {
                     OBJ_Tree tree = (OBJ_Tree) obj;
 
@@ -244,6 +245,19 @@ public class GameModel {
                         tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
                     }
                 }
+
+                for (EnemyDynamite enemy : dynamiteEnemies) {
+                    if (attackArea.intersects(enemy.getSolidWorldArea())) {
+                        enemy.takeDamage();
+                    }
+                }
+
+                for (EnemyTNT tnt : tntEnemies) {
+                    if (attackArea.intersects(tnt.getSolidWorldArea())) {
+                        tnt.takeDamage();
+                    }
+                }
+
             }
 
         }
@@ -289,7 +303,6 @@ public class GameModel {
     public int getMainMenuSelection() { return mainMenuSelection; }
     public int getHoveredRibbon() { return hoveredRibbon; }
     public int getActiveRibbon() { return activeRibbon; }
-    public boolean isHoveredGameOverButton() { return hoveredGameOverButton; }
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
@@ -301,7 +314,6 @@ public class GameModel {
     public void setMainMenuSelection(int mainMenuSelection) { this.mainMenuSelection = mainMenuSelection; }
     public void setHoveredRibbon(int hoveredRibbon) { this.hoveredRibbon = hoveredRibbon; }
     public void setActiveRibbon(int activeRibbon) { this.activeRibbon = activeRibbon; }
-    public void setHoveredGameOverButton(boolean hoveredGameOverButton) { this.hoveredGameOverButton = hoveredGameOverButton; }
     //---------------------------------
 
 

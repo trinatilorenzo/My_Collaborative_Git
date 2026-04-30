@@ -172,7 +172,6 @@ public class Player extends Entity {
             return;
         }
         life -= 1;
-        System.out.println("Remaining life: " + life);
         if (life <= 0) {
             life = 0;
             state = PlayerState.DYING;

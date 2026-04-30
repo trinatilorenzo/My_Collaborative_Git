@@ -107,6 +107,14 @@ public class Entity {
     public Rectangle getSolidArea() {
         return solidArea;
     }
+    public Rectangle getSolidWorldArea() {
+        return new Rectangle(
+            worldX - solidArea.width / 2,
+            worldY - solidArea.height / 2,
+            solidArea.width,
+            solidArea.height
+        );
+    }
     public int getLife() {return life;}
     public int getMaxLife() {return maxLife;}
     //---------------------------------
