@@ -20,6 +20,7 @@ public class Player extends Entity {
     private PlayerState state;
     private Direction facingDirection;
     private EntityConfig entityConfig;
+    private boolean deathAnimationCompleted;
 
 
     // COSTRUCTOR
@@ -53,6 +54,7 @@ public class Player extends Entity {
         state = PlayerState.IDLE;
         maxLife = 6;
         life = maxLife;
+        deathAnimationCompleted = false;
     }
     //-------------------------------------------------------------
 
@@ -63,6 +65,10 @@ public class Player extends Entity {
     //-------------------------------------------------------------
     public void update(InputState input, double deltaMs) {
         super.update(); // reset dx, dy, collisions
+
+        if (state == PlayerState.DYING || state == PlayerState.DEAD) {
+            return;
+        }
 
         boolean isMoving = false;
         // Durante l'attacco non aggiorniamo il movimento: resta fermo finché l'animazione non termina
@@ -162,12 +168,27 @@ public class Player extends Entity {
     //--------------------------------------------------------------
     // Methods to reduce a life 
     public void takeDamage() {
+        if (state == PlayerState.DYING || state == PlayerState.DEAD) {
+            return;
+        }
         life -= 1;
         System.out.println("Remaining life: " + life);
         if (life <= 0) {
-            //TODO: Handle player death (e.g., trigger game over, respawn, etc.)
             life = 0;
+            state = PlayerState.DYING;
+            deathAnimationCompleted = false;
         }
+    }
+
+    public void completeDeathAnimation() {
+        if (state == PlayerState.DYING) {
+            state = PlayerState.DEAD;
+            deathAnimationCompleted = true;
+        }
+    }
+
+    public void resetForNewGame() {
+        initializeDefaultValues();
     }
 
 
@@ -184,11 +205,23 @@ public class Player extends Entity {
     public int getScreenY() {
         return screenY;
     }
+    public boolean isDying() {
+        return state == PlayerState.DYING;
+    }
+    public boolean isDead() {
+        return state == PlayerState.DEAD;
+    }
+    public boolean isDeathAnimationCompleted() {
+        return deathAnimationCompleted;
+    }
     //---------------------------------
 
     // SETTER ----------------------
     public void setState(PlayerState state) {
         this.state = state;
+        if (state == PlayerState.DYING) {
+            deathAnimationCompleted = false;
+        }
     }
     public void stopAttack() {
         state = PlayerState.IDLE;

@@ -95,6 +95,9 @@ public class GameView extends JPanel {
     public UI.MainMenuLayout getMainMenuLayout() {
         return ui_render.getMainMenuLayout();
     }
+    public UI.GameOverLayout getGameOverLayout() {
+        return ui_render.getGameOverLayout();
+    }
 
     private void applyCustomCursor() {
         try {

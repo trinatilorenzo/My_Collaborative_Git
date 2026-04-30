@@ -6,6 +6,7 @@ import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
 import main.CONFIG.enu.TNTState;
+import main.CONFIG.enu.TreeState;
 import main.CONFIG.GameConfig;
 import model.CollisionChecker;
 import model.entity.Player;
@@ -47,6 +48,7 @@ public class GameModel {
     private int mainMenuSelection = 0;
     private int hoveredRibbon = -1;
     private int activeRibbon = -1;
+    private boolean hoveredGameOverButton = false;
 
     // TODO: TNT from file
     private List<EnemyTNT> tntEnemies = new ArrayList<>();
@@ -67,15 +69,7 @@ public class GameModel {
 
         monk = new Monk(GS.entityConfig().MONK_START_X(), GS.entityConfig().MONK_START_Y(), GS.entityConfig());
 
-        // create the enemy
-        for(SpawnPoint sp : GS.entityConfig().TNT_SPAWNPOINT()){
-            for (int i = 0; i < GS.entityConfig().NPC_FOR_SPAWNPOINT; i++) {
-                tntEnemies.add(new EnemyTNT(sp, GS.entityConfig()));
-
-            }
-        }
-        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60*64, 40*64, 2), GS.entityConfig(), projectiles));
-        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60*64, 40*64, 2), GS.entityConfig(), projectiles));
+        initializeEnemies();
 
         gameState = GameState.MENU;
  
@@ -89,6 +83,11 @@ public class GameModel {
     public void update(InputState input, double deltaMs) {
 
         if (gameState == GameState.PLAYING) {
+            if (player.isDying() || player.isDead()) {
+                updateDeathSequence(deltaMs);
+                return;
+            }
+
             player.update(input, deltaMs);
 
             collisionChecker.checkTile(player);
@@ -149,6 +148,78 @@ public class GameModel {
         }
     }
     //-------------------------------------------------------------
+
+    private void updateDeathSequence(double deltaMs) {
+        // Keep only finite transitions running; do not start new gameplay logic.
+        for (EnemyTNT tnt : tntEnemies) {
+            if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
+                tnt.update(player, deltaMs);
+            }
+        }
+        tntEnemies.removeIf(EnemyTNT::isExploded);
+
+        for (DynamiteProjectile proj : projectiles) {
+            proj.update(deltaMs);
+            collisionChecker.checkTile(proj);
+        }
+        projectiles.removeIf(DynamiteProjectile::isExploded);
+
+        objectManager.update(deltaMs);
+    }
+
+    public boolean hasPendingTransientAnimations() {
+        if (player.isDying()) {
+            return true;
+        }
+        if (monk.getState() == MonkState.DISAPPEARING) {
+            return true;
+        }
+
+        for (EnemyTNT tnt : tntEnemies) {
+            if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
+                return true;
+            }
+        }
+
+        if (!projectiles.isEmpty()) {
+            return true;
+        }
+
+        for (GameObject obj : objectManager.getObjects()) {
+            if (obj instanceof OBJ_Tree tree && tree.getState() == TreeState.CHOPPING) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void resetForNewGame() {
+        player.resetForNewGame();
+        monk.resetDialogue();
+        currentDialogue = "";
+        hoveredRibbon = -1;
+        activeRibbon = -1;
+        hoveredGameOverButton = false;
+        objectManager.reset(gameConfig.mapDoc());
+        initializeEnemies();
+        gameState = GameState.PLAYING;
+    }
+
+    private void initializeEnemies() {
+        projectiles = new ArrayList<>();
+        tntEnemies = new ArrayList<>();
+        dynamiteEnemies = new ArrayList<>();
+
+        for (SpawnPoint sp : gameConfig.entityConfig().TNT_SPAWNPOINT()) {
+            for (int i = 0; i < gameConfig.entityConfig().NPC_FOR_SPAWNPOINT; i++) {
+                tntEnemies.add(new EnemyTNT(sp, gameConfig.entityConfig()));
+            }
+        }
+
+        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60 * 64, 40 * 64, 2), gameConfig.entityConfig(), projectiles));
+        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60 * 64, 40 * 64, 2), gameConfig.entityConfig(), projectiles));
+    }
     //TODO controllare bene
 
     /**
@@ -218,6 +289,7 @@ public class GameModel {
     public int getMainMenuSelection() { return mainMenuSelection; }
     public int getHoveredRibbon() { return hoveredRibbon; }
     public int getActiveRibbon() { return activeRibbon; }
+    public boolean isHoveredGameOverButton() { return hoveredGameOverButton; }
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
@@ -229,6 +301,7 @@ public class GameModel {
     public void setMainMenuSelection(int mainMenuSelection) { this.mainMenuSelection = mainMenuSelection; }
     public void setHoveredRibbon(int hoveredRibbon) { this.hoveredRibbon = hoveredRibbon; }
     public void setActiveRibbon(int activeRibbon) { this.activeRibbon = activeRibbon; }
+    public void setHoveredGameOverButton(boolean hoveredGameOverButton) { this.hoveredGameOverButton = hoveredGameOverButton; }
     //---------------------------------
 
 

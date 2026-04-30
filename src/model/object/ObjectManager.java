@@ -74,4 +74,9 @@ public class ObjectManager {
         return objects;
     }
 
+    public void reset(Document mapDoc) {
+        objects.clear();
+        addOBJFromFile(mapDoc);
+    }
+
 }

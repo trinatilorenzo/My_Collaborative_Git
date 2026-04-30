@@ -57,6 +57,7 @@ public class UI {
     private final BufferedImage ribbonYellowPressed;
     private final BufferedImage ribbonRedPressed;
     private final BufferedImage ribbonBluePressed;
+    private final ThreeSliceSprite ribbonBlueWide;
     private final BufferedImage[] menuClouds;
 
     // FPS counter (updated once per second)
@@ -88,6 +89,16 @@ public class UI {
         public Rectangle ribbonYellowBounds() { return ribbonYellowBounds; }
         public Rectangle ribbonRedBounds() { return ribbonRedBounds; }
         public Rectangle ribbonBlueBounds() { return ribbonBlueBounds; }
+    }
+
+    public static final class GameOverLayout {
+        private final Rectangle newGameBounds;
+
+        public GameOverLayout(Rectangle newGameBounds) {
+            this.newGameBounds = newGameBounds;
+        }
+
+        public Rectangle newGameBounds() { return newGameBounds; }
     }
 
 
@@ -141,6 +152,7 @@ public class UI {
         ribbonYellowPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right_Pressed.png");
         ribbonRedPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right_Pressed.png");
         ribbonBluePressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right_Pressed.png");
+        ribbonBlueWide = new ThreeSliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", 64, 64);
         menuClouds = new BufferedImage[]{
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_01.png")),
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_02.png")),
@@ -181,6 +193,10 @@ public class UI {
                 // PAUSE STATE
                 drawPlayerLife();
                 drawPauseScreen();
+                break;
+
+            case GAME_OVER :
+                drawGameOverScreen();
                 break;
         }
 
@@ -322,6 +338,15 @@ public class UI {
                 ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds);
     }
 
+    public GameOverLayout getGameOverLayout() {
+        int buttonWidth = 320;
+        int buttonHeight = 84;
+        int centerX = screenConfig.SCREEN_WIDTH() / 2;
+        int buttonY = screenConfig.SCREEN_HEIGHT() - buttonHeight - 56;
+        Rectangle newGameBounds = new Rectangle(centerX - (buttonWidth / 2), buttonY, buttonWidth, buttonHeight);
+        return new GameOverLayout(newGameBounds);
+    }
+
     private void drawMainMenuOption(int x, int y, int width, int height, String label, boolean selected) {
         if (selected) {
             menuButtonSelected.draw(g2, x, y, width, height);
@@ -460,6 +485,35 @@ public class UI {
         g2.drawString(text, x, y);
 
 
+    }
+
+    private void drawGameOverScreen() {
+        drawPlayerLife();
+
+        Composite oldComposite = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+        g2.setColor(new Color(8, 8, 8));
+        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
+        g2.setComposite(oldComposite);
+
+        int titleRibbonWidth = 520;
+        int titleRibbonHeight = 80;
+        int titleRibbonX = (screenConfig.SCREEN_WIDTH() - titleRibbonWidth) / 2;
+        int titleRibbonY = 72;
+        ribbonBlueWide.draw(g2, titleRibbonX, titleRibbonY, titleRibbonWidth, titleRibbonHeight);
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 70F));
+        String title = "GAME OVER";
+        Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(title, g2);
+        int textX = getXforCenteredText(title);
+        int textY = titleRibbonY + (int) Math.round((titleRibbonHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
+        g2.drawString(title, textX, textY);
+
+        GameOverLayout layout = getGameOverLayout();
+        Rectangle newGameBounds = layout.newGameBounds();
+        boolean highlighted = gameModel.isHoveredGameOverButton();
+        drawMainMenuOption(newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height, "New Game", highlighted);
     }
 
     public int getXforCenteredText(String text) {
