@@ -6,6 +6,8 @@ import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.entity.Player;
+import model.object.GameObject;
+import model.object.OBJ_Tree;
 import view.renderer.entity.DynamiteRender;
 import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.PlayerRender;
@@ -242,7 +244,8 @@ public class UI {
                 tnt.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY()
                 );
             }
-            
+
+            drawTreeSolidAreas();
 
             // FPS overlay (updates every second)
             frames++;
@@ -258,6 +261,26 @@ public class UI {
             int xTile = (gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getSolidArea().x )/ screenConfig.TILE_SIZE();
             int yTile = (gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getSolidArea().y )/ screenConfig.TILE_SIZE();
             g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
+        }
+    }
+
+    private void drawTreeSolidAreas() {
+        Player player = gameModel.getPlayer();
+        for (GameObject obj : gameModel.getObjects()) {
+            if (!(obj instanceof OBJ_Tree tree)) continue;
+            if (!tree.isSolid() || tree.getSolidArea() == null) continue;
+
+            Rectangle solid = tree.getSolidArea();
+            int screenX = tree.getWorldX() - player.getWorldX() + player.getScreenX();
+            int screenY = tree.getWorldY() - player.getWorldY() + player.getScreenY();
+
+            int drawX = screenX + solid.x;
+            int drawY = screenY + solid.y;
+
+            g2.setColor(new Color(0, 255, 255, 80));
+            g2.fillRect(drawX, drawY, solid.width, solid.height);
+            g2.setColor(Color.CYAN);
+            g2.drawRect(drawX, drawY, solid.width, solid.height);
         }
     }
 

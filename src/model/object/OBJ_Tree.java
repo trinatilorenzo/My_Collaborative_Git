@@ -23,19 +23,17 @@ public class OBJ_Tree extends GameObject {
     private int health = objConfig.TREE_HEALTH;
     // COSTRUCTOR
     //---------------------------------------------------------------------------------------------
-    public OBJ_Tree(int worldX, int worldY, ObjConfig objConfig) {
+    public OBJ_Tree(String name, int worldX, int worldY, int layer, int width, int height, Rectangle solidArea, ObjConfig objConfig) {
         this.objConfig = objConfig;
         this.worldX = worldX;
         this.worldY = worldY;
-        this.width = objConfig.TREE_03_WIDTH;
-        this.height = objConfig.TREE_03_HEIGHT;
-        this.name = objConfig.TREE_TAG_03;
+        this.layer = layer;
+        this.width = width;
+        this.height = height;
+        this.name = name;
 
         // hitbox
-        this.solidArea = new Rectangle(objConfig.TREE_03_WIDTH/2 - (objConfig.TREE_HITBOX_WIDTH/2),
-                                       195, //TODO better
-                                          objConfig.TREE_HITBOX_WIDTH,
-                                          objConfig.TREE_HITBOX_HEIGHT);
+        this.solidArea = solidArea;
         this.solid = objConfig.TREE_SOLID;
     }
 

@@ -7,9 +7,7 @@ import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
 import main.CONFIG.enu.TNTState;
-import main.CONFIG.enu.TreeState;
 import main.CONFIG.GameConfig;
-import model.CollisionChecker;
 import model.entity.Player;
 import model.entity.Monk;
 import model.object.GameObject;
@@ -214,18 +212,35 @@ public class GameModel {
      */
     //-------------------------------------------------------------
     private void initialieOBJ(){
+        ObjConfig objC = gameConfig.ObjConfig();
+        Rectangle solidArea = new Rectangle(objC.TREE_03_WIDTH/2 - (objC.TREE_HITBOX_WIDTH/2),
+                195, //TODO better
+                objC.TREE_HITBOX_WIDTH,
+                objC.TREE_HITBOX_HEIGHT);
         //load the first type of tree
         for (SpawnPoint sp : gameConfig.ObjConfig().TREES_03_SPAWNPOINT()) {
-            objects.add(new OBJ_Tree(sp.x(), sp.y(), gameConfig.ObjConfig()));
+            objects.add(new OBJ_Tree(objC.TREE_TAG_03(),
+                            sp.x(), sp.y(), sp.layer(),
+                            objC.TREE_03_WIDTH, objC.TREE_03_HEIGHT,solidArea,
+                            gameConfig.ObjConfig()));
         }
+        Rectangle solidArea2 = new Rectangle(objC.TREE_02_WIDTH/2 - (objC.TREE_HITBOX_WIDTH/2),
+                135, //TODO better
+                objC.TREE_HITBOX_WIDTH,
+                objC.TREE_HITBOX_HEIGHT);
         // load the second type of tree
         for (SpawnPoint sp : gameConfig.ObjConfig().TREES_02_SPAWNPOINT()) {
-            objects.add(new OBJ_Tree(sp.x(), sp.y(), gameConfig.ObjConfig()));
-
+            objects.add(new OBJ_Tree(objC.TREE_TAG_02(),
+                    sp.x(), sp.y(), sp.layer(),
+                    objC.TREE_02_WIDTH, objC.TREE_02_HEIGHT,solidArea2,
+                    gameConfig.ObjConfig()));
         }
         // load the third type of tree
         for (SpawnPoint sp : gameConfig.ObjConfig().TREES_01_SPAWNPOINT()) {
-            objects.add(new OBJ_Tree(sp.x(), sp.y(), gameConfig.ObjConfig()));
+            objects.add(new OBJ_Tree(objC.TREE_TAG_01(),
+                    sp.x(), sp.y(), sp.layer(),
+                    objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT,solidArea2,
+                    gameConfig.ObjConfig()));
         }
 
     }

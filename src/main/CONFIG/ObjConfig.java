@@ -10,7 +10,10 @@ import java.util.ArrayList;
  * OBJ SETTINGS
  */
 //----------------------------------------------------------------------------------------------------------------------
-public record ObjConfig(ArrayList<SpawnPoint> tree03SpawnPoint,
+public record ObjConfig(String TREE_TAG_03,
+                        String TREE_TAG_02,
+                        String TREE_TAG_01,
+                        ArrayList<SpawnPoint> tree03SpawnPoint,
                         ArrayList<SpawnPoint> tree02SpawnPoint,
                         ArrayList<SpawnPoint> tree01SpawnPoint) {
     //TREE (COMMON)
@@ -24,7 +27,6 @@ public record ObjConfig(ArrayList<SpawnPoint> tree03SpawnPoint,
     //-------------------------------------------------------------
 
     // TREE 03
-    public static final String TREE_TAG_03 = "trees_03";
     public static final int TREE_03_WIDTH = 192; //TODO from file
     public static final int TREE_03_HEIGHT = 256;
 
@@ -32,17 +34,15 @@ public record ObjConfig(ArrayList<SpawnPoint> tree03SpawnPoint,
     //-------------------------------------------------------------
 
     // TREE 02
-    public static final String TREE_TAG_02 = "trees_02";
     public static final int TREE_02_WIDTH = 192;
-    public static final int TREE_02_HEIGHT = 256;
+    public static final int TREE_02_HEIGHT = 192;
 
     public ArrayList<SpawnPoint> TREES_02_SPAWNPOINT() {return tree02SpawnPoint;}
     //-------------------------------------------------------------
 
     // TREE 01
-    public static final String TREE_TAG_01 = "trees_01";
     public static final int TREE_01_WIDTH = 192;
-    public static final int TREE_01_HEIGHT = 256;
+    public static final int TREE_01_HEIGHT = 192;
 
     public ArrayList<SpawnPoint> TREES_01_SPAWNPOINT() {return tree01SpawnPoint;}
     //-------------------------------------------------------------

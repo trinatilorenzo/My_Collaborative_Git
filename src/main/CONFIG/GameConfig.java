@@ -39,9 +39,9 @@ public final class GameConfig {
     private static final String DYNAMITE_NAME = "Dynamite_spawnPoint";
     private static final String START_LAYER_PROP = "StartLayer";
 
-    private static final String TREE_03_NAME = "trees_03";
-    private static final String TREE_02_NAME = "trees_02";
-    private static final String TREE_01_NAME = "trees_01";
+    private static final String TREE_TAG_03 = "trees_03";
+    private static final String TREE_TAG_02 = "trees_02";
+    private static final String TREE_TAG_01 = "trees_01";
     //-------------------------------------------------------------
 
     // CONFIG
@@ -89,16 +89,16 @@ public final class GameConfig {
         ArrayList<SpawnPoint> dynamiteSpawnPoint = loadEntitySpawns(DYNAMITE_NAME);
 
         //load the tree spawns
-        ArrayList<SpawnPoint> treeSpawns03 = loadOBJSpawns(TREE_03_NAME, 3);
-        ArrayList<SpawnPoint> treeSpawns02 = loadOBJSpawns(TREE_02_NAME, 3);
-        ArrayList<SpawnPoint> treeSpawns01 = loadOBJSpawns(TREE_01_NAME, 3);
+        ArrayList<SpawnPoint> treeSpawns03 = loadOBJSpawns(TREE_TAG_03, 3);
+        ArrayList<SpawnPoint> treeSpawns02 = loadOBJSpawns(TREE_TAG_02, 2);
+        ArrayList<SpawnPoint> treeSpawns01 = loadOBJSpawns(TREE_TAG_01, 1);
 
 
         //create the config
         this.screenConfig = new ScreenConfig(TILE_SIZE, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
         this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint,monkSpawnPoint,tntSpawPoint);
-        this.ObjConfig = new ObjConfig(treeSpawns03, treeSpawns02, treeSpawns01);
+        this.ObjConfig = new ObjConfig(TREE_TAG_03, TREE_TAG_02, TREE_TAG_01, treeSpawns03, treeSpawns02, treeSpawns01);
         this.UIConfig = new UIConfig();
     }//end constructor
     //-------------------------------------------------------------
