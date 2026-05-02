@@ -98,7 +98,7 @@ public class GameModel {
         initializeNPC();
 
 
-
+        objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
         initializeLockedStairsConfig();
 
         initializeStairLocks();

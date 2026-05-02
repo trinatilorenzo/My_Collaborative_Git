@@ -1,9 +1,12 @@
 package main.CONFIG;
 
+import model.object.OBJ_Structure;
+import model.object.OBJ_Tree;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import view.UI.UI;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ public final class GameConfig {
 
     //STRING TAG
     private static final String ENTITY_GROUP_NAME = "entity";
+    private static final String BUILDINGS_GROUP_NAME = "buildings";
+    private static final String TREES_GROUP_NAME = "trees_";
     private static final String PLAYER_NAME = "player";
     private static final String MONK_NAME = "monk";
     private static final String TNT_NAME = "TNT_spawnPoint";
@@ -88,6 +93,7 @@ public final class GameConfig {
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
         this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint,monkSpawnPoint,tntSpawPoint);
         this.ObjConfig = new ObjConfig();
+        this.UIConfig = new UIConfig();
     }//end constructor
     //-------------------------------------------------------------
 
@@ -128,6 +134,7 @@ public final class GameConfig {
                 Element group = (Element) groupNode;
 
                 if (ENTITY_GROUP_NAME.equalsIgnoreCase(group.getAttribute("name"))) {
+
                     NodeList objects = group.getElementsByTagName("object");
 
                     for (int i = 0; i < objects.getLength(); i++) {
@@ -162,11 +169,11 @@ public final class GameConfig {
 
                 spawns.add(new SpawnPoint(x,y,startLayer));
 
-                        }
-                    }
-                }
             }
         }
+        return spawns;
+    }
+    //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     private ArrayList<SpawnPoint> loadOBJSpawns(String OBJ_GropupName, int startLayer) {
@@ -255,6 +262,9 @@ public final class GameConfig {
     public ObjConfig ObjConfig() {
         return ObjConfig;
     }
+    public UIConfig UIConfig() {return UIConfig;}
+    public String MAP_PATH() {return MAP_PATH;}
+    public String TILESET_PATH() {return TILESET_PATH;}
     public Document mapDoc(){return mapDoc;}; // TODO private?
 }
 //----------------------------------------------------------------------------------------------------------------------
