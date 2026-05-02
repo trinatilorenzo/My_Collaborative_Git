@@ -11,7 +11,7 @@ import java.awt.Rectangle;
     //TODO controlare funzionameto metodi + risoluzione bug del hit
 
 public class OBJ_Tree extends GameObject {
-    private ObjConfig objConfig = new ObjConfig();
+    private ObjConfig objConfig;
 
     private double chopTimer = 0; // Timer to track chopping animation progress
 
@@ -27,12 +27,12 @@ public class OBJ_Tree extends GameObject {
         this.objConfig = objConfig;
         this.worldX = worldX;
         this.worldY = worldY;
-        this.width = objConfig.TREE_SPRITE_WIDTH;
-        this.height = objConfig.TREE_SPRITE_HEIGHT;
-        this.name = objConfig.TREE_TAG;
+        this.width = objConfig.TREE_03_WIDTH;
+        this.height = objConfig.TREE_03_HEIGHT;
+        this.name = objConfig.TREE_TAG_03;
 
         // hitbox
-        this.solidArea = new Rectangle(objConfig.TREE_SPRITE_WIDTH/2 - (objConfig.TREE_HITBOX_WIDTH/2),
+        this.solidArea = new Rectangle(objConfig.TREE_03_WIDTH/2 - (objConfig.TREE_HITBOX_WIDTH/2),
                                        195, //TODO better
                                           objConfig.TREE_HITBOX_WIDTH,
                                           objConfig.TREE_HITBOX_HEIGHT);

@@ -1,5 +1,6 @@
 package model;
 
+import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.GameState;
@@ -11,7 +12,6 @@ import main.CONFIG.GameConfig;
 import model.CollisionChecker;
 import model.entity.Player;
 import model.entity.Monk;
-import model.object.ObjectManager;
 import model.object.GameObject;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
@@ -51,7 +51,7 @@ public class GameModel {
 
     // Map & OBJ
     private final GameMap worldGameMap;
-    private final ObjectManager objectManager;
+    private final List<GameObject> objects = new ArrayList<>();
 
     // Player & NPC
     //-------------------------------------------------------------
@@ -96,9 +96,8 @@ public class GameModel {
 
         player = new Player(GS.entityConfig());
         initializeNPC();
+        initialieOBJ();
 
-
-        objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
         initializeLockedStairsConfig();
 
         initializeStairLocks();
@@ -203,12 +202,32 @@ public class GameModel {
         //load the dynamite
         dynamiteEnemies = new ArrayList<>();
         projectiles = new ArrayList<>();
-
         for (SpawnPoint sp : gameConfig.entityConfig().DYNAMITE_SPAWNPOINT()) {
             for (int i = 0; i < gameConfig.entityConfig().DYNAMITE_FOR_SPAWNPOINT; i++) {
                 dynamiteEnemies.add(new EnemyDynamite(sp, gameConfig.entityConfig(), projectiles));
             }
         }
+    }
+
+    /**
+     * UTILITY METODH initialize OBJ by reading the spawn point from config file
+     */
+    //-------------------------------------------------------------
+    private void initialieOBJ(){
+        //load the first type of tree
+        for (SpawnPoint sp : gameConfig.ObjConfig().TREES_03_SPAWNPOINT()) {
+            objects.add(new OBJ_Tree(sp.x(), sp.y(), gameConfig.ObjConfig()));
+        }
+        // load the second type of tree
+        for (SpawnPoint sp : gameConfig.ObjConfig().TREES_02_SPAWNPOINT()) {
+            objects.add(new OBJ_Tree(sp.x(), sp.y(), gameConfig.ObjConfig()));
+
+        }
+        // load the third type of tree
+        for (SpawnPoint sp : gameConfig.ObjConfig().TREES_01_SPAWNPOINT()) {
+            objects.add(new OBJ_Tree(sp.x(), sp.y(), gameConfig.ObjConfig()));
+        }
+
     }
     //-------------------------------------------------------------
 
@@ -227,7 +246,7 @@ public class GameModel {
         }
         projectiles.removeIf(DynamiteProjectile::isExploded);
 
-        objectManager.update(deltaMs);
+
     }
 
     public boolean hasPendingTransientAnimations() {
@@ -248,11 +267,6 @@ public class GameModel {
             return true;
         }
 
-        for (GameObject obj : objectManager.getObjects()) {
-            if (obj instanceof OBJ_Tree tree && tree.getState() == TreeState.CHOPPING) {
-                return true;
-            }
-        }
 
         return false;
     }
@@ -440,7 +454,7 @@ public class GameModel {
     //TODO better timing and animation
     private void updateInteractions(InputState input, boolean monkCollision) {
 
-        for (GameObject obj : objectManager.getObjects()) {
+        for (GameObject obj : objects) {
 
             if (obj.isRemoved()) continue; // Skip removed objects
 
@@ -501,8 +515,7 @@ public class GameModel {
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
     public GameState getGameState() { return gameState; }
-    public List<GameObject> getObjects() { return objectManager.getObjects(); }
-    public ObjectManager getObjectManager() { return objectManager; }
+    public List<GameObject> getObjects() { return objects; }
     public boolean isDebugMode() { return debugMode; }
     public int getTILE_SIZE(){ return gameConfig.screenConfig().TILE_SIZE(); }
     public Monk getMonk() {

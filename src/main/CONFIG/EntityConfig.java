@@ -3,6 +3,10 @@ package main.CONFIG;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.MonkState;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 
@@ -101,5 +105,5 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int PROJECTILE_SPRITE_WIDTH = 64;
     public static final int PROJECTILE_SPRITE_HEIGHT = 64; 
     public static final int PROJECTILE_SIZE = 16;
- 
+
 }

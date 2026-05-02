@@ -27,7 +27,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/object/tree/Tree1.png");
 
         // Extract the tree sprite from the sprite sheet
-        leavesFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 8, TREE_SPRITE_WIDTH, TREE_SPRITE_HEIGHT);
+        leavesFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 8, TREE_03_WIDTH, TREE_03_HEIGHT);
         
         // Fallback frame used when the tree is chopped
         choppedFrame = SpriteLoader.loadSpriteSheet("/res/object/tree/Stump_1.png");

@@ -33,13 +33,15 @@ public final class GameConfig {
 
     //STRING TAG
     private static final String ENTITY_GROUP_NAME = "entity";
-    private static final String BUILDINGS_GROUP_NAME = "buildings";
-    private static final String TREES_GROUP_NAME = "trees_";
     private static final String PLAYER_NAME = "player";
     private static final String MONK_NAME = "monk";
     private static final String TNT_NAME = "TNT_spawnPoint";
     private static final String DYNAMITE_NAME = "Dynamite_spawnPoint";
     private static final String START_LAYER_PROP = "StartLayer";
+
+    private static final String TREE_03_NAME = "trees_03";
+    private static final String TREE_02_NAME = "trees_02";
+    private static final String TREE_01_NAME = "trees_01";
     //-------------------------------------------------------------
 
     // CONFIG
@@ -54,7 +56,7 @@ public final class GameConfig {
     private Document mapDoc;
     //-------------------------------------------------------------
 
-    /**
+    /*
      * GameConfig Constructor
      * @param mapFileName is the name of the map file with the extension
  *                        THE FILE MUST BE IN: "res/maps/mapFileName.tmx"
@@ -86,13 +88,17 @@ public final class GameConfig {
         // TODO load all the other spawn point
         ArrayList<SpawnPoint> dynamiteSpawnPoint = loadEntitySpawns(DYNAMITE_NAME);
 
+        //load the tree spawns
+        ArrayList<SpawnPoint> treeSpawns03 = loadOBJSpawns(TREE_03_NAME, 3);
+        ArrayList<SpawnPoint> treeSpawns02 = loadOBJSpawns(TREE_02_NAME, 3);
+        ArrayList<SpawnPoint> treeSpawns01 = loadOBJSpawns(TREE_01_NAME, 3);
 
 
         //create the config
         this.screenConfig = new ScreenConfig(TILE_SIZE, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
         this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint,monkSpawnPoint,tntSpawPoint);
-        this.ObjConfig = new ObjConfig();
+        this.ObjConfig = new ObjConfig(treeSpawns03, treeSpawns02, treeSpawns01);
         this.UIConfig = new UIConfig();
     }//end constructor
     //-------------------------------------------------------------
@@ -118,44 +124,11 @@ public final class GameConfig {
     }
     //-------------------------------------------------------------
 
+
     /**
      * UTILITY METODH Load the entity spawns of the entity from the map document
      */
     //-------------------------------------------------------------
-    /*  private ArrayList<SpawnPoint> loadEntitySpawns(String EntityName) {
-
-        ArrayList<SpawnPoint> spawns = new ArrayList<>();
-        NodeList groups = mapDoc.getElementsByTagName("objectgroup");
-
-        for (int g = 0; g < groups.getLength(); g++) {
-            Node groupNode = groups.item(g);
-
-            if (groupNode.getNodeType() == Node.ELEMENT_NODE) {
-                Element group = (Element) groupNode;
-
-                if (ENTITY_GROUP_NAME.equalsIgnoreCase(group.getAttribute("name"))) {
-
-                    NodeList objects = group.getElementsByTagName("object");
-
-                    for (int i = 0; i < objects.getLength(); i++) {
-                        Element obj = (Element) objects.item(i);
-                        if (EntityName.equalsIgnoreCase(obj.getAttribute("name"))){
-
-                            int x = (int) Math.round(Double.parseDouble(obj.getAttribute("x")));
-                            int y = (int) Math.round(Double.parseDouble(obj.getAttribute("y")));
-                            int startLayer = Integer.parseInt(getPropertyValue(obj, START_LAYER_PROP));
-
-
-                            spawns.add(new SpawnPoint(x,y,startLayer));
-
-                        }
-                    }
-                }
-            }
-        }
-
-        return spawns;
-    }*/ // old version
     private ArrayList<SpawnPoint> loadEntitySpawns(String EntityName) {
         ArrayList<SpawnPoint> spawns = new ArrayList<>();
         NodeList entityGroupList = loadElementGroup(ENTITY_GROUP_NAME);
@@ -175,19 +148,20 @@ public final class GameConfig {
     }
     //-------------------------------------------------------------
 
+    /**
+     * UTILITY METODH Load the entity spawns of the OBJ from the map document
+     */
     //-------------------------------------------------------------
     private ArrayList<SpawnPoint> loadOBJSpawns(String OBJ_GropupName, int startLayer) {
 
         ArrayList<SpawnPoint> spawns = new ArrayList<>();
-        NodeList objects = loadElementGroup(BUILDINGS_GROUP_NAME);
+        NodeList objects = loadElementGroup(OBJ_GropupName);
         for (int j = 0; j < objects.getLength(); j++) {
             Node node = objects.item(j);
             if (node.getNodeType() != Node.ELEMENT_NODE) continue;
 
             Element obj = (Element) node;
             if (!obj.hasAttribute("gid")) continue;
-
-            int width = (int) Math.round(Double.parseDouble(obj.getAttribute("width")));
             int height = (int) Math.round(Double.parseDouble(obj.getAttribute("height")));
 
             double x = Double.parseDouble(obj.getAttribute("x"));
@@ -201,8 +175,6 @@ public final class GameConfig {
         return spawns;
     }
     //-------------------------------------------------------------
-
-
 
     /**
      *UTILITY METODH used to get the nodelist of an element group
@@ -247,6 +219,7 @@ public final class GameConfig {
     }
     //-------------------------------------------------------------
 
+    private record OBJ_dim(int width, int height){};
 
     //GETTER
     //-------------------------------------------------------------
