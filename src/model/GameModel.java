@@ -17,7 +17,12 @@ import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.DynamiteProjectile;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import model.object.OBJ_Tree;
 
@@ -33,27 +38,52 @@ import java.awt.Rectangle;
 public class GameModel {
 
     private final GameConfig gameConfig;
+    //-------------------------------------------------------------
 
+    // Game status
+    private GameState gameState;
+    private boolean debugMode = false;
+    //-------------------------------------------------------------
+
+    // Collision
     private final CollisionChecker collisionChecker;
+    //-------------------------------------------------------------
 
+    // Map & OBJ
     private final GameMap worldGameMap;
     private final ObjectManager objectManager;
 
+    // Player & NPC
+    //-------------------------------------------------------------
     private final Player player;
-    private final Monk monk;
+    private Monk monk;
+    private List<EnemyTNT> tntEnemies;
+    private List<EnemyDynamite> dynamiteEnemies;
+    private List<DynamiteProjectile> projectiles;
+    //-------------------------------------------------------------
 
-    private GameState gameState;
-    private boolean debugMode = false;
+
+    // TODO da rivedere tuttta sta roba
+    private static final double STAIR_LOCKED_MSG_DURATION_MS = 2200.0;
+    private static final double STAIR_UNLOCKED_MSG_DURATION_MS = 2600.0;
+    private static final double STAIR_LOCKED_MSG_COOLDOWN_MS = 1200.0;
+
+    private record StairTile(int col, int row) {}
+
     private String currentDialogue = "";
     private int mainMenuSelection = 0;
     private int hoveredRibbon = -1;
     private int activeRibbon = -1;
     private boolean hoveredGameOverButton = false;
 
-    // TODO: TNT from file
-    private List<EnemyTNT> tntEnemies = new ArrayList<>();
-    private List<EnemyDynamite> dynamiteEnemies = new ArrayList<>();
-    private List<DynamiteProjectile> projectiles = new ArrayList<>();
+    // Level -> blocked stair tiles (tile coordinates) for that level.
+    // When that level is cleared, the collision tiles on (level - 1) are opened.
+    private final Map<Integer, List<StairTile>> lockedStairsByLevel = new HashMap<>();
+    private final Set<Integer> unlockedStairsLevels = new HashSet<>();
+
+    private String statusMessage = "";
+    private double statusMessageTimerMs = 0.0;
+    private double stairsLockedMessageCooldownMs = 0.0;
 
     /**
      * COSTRUCTOR
@@ -62,14 +92,16 @@ public class GameModel {
     public GameModel(GameConfig GS) {
         gameConfig = GS;
         worldGameMap = new GameMap(GS.mapConfig(), GS.mapDoc());
-        player = new Player(GS.entityConfig());
-
         collisionChecker = new CollisionChecker(this);
-        objectManager = new ObjectManager(GS.ObjConfig(), GS.mapDoc());
 
-        monk = new Monk(GS.entityConfig().MONK_START_X(), GS.entityConfig().MONK_START_Y(), GS.entityConfig());
+        player = new Player(GS.entityConfig());
+        initializeNPC();
 
-        initializeEnemies();
+
+
+        initializeLockedStairsConfig();
+
+        initializeStairLocks();
 
         gameState = GameState.MENU;
  
@@ -85,6 +117,7 @@ public class GameModel {
         if (gameState == GameState.PLAYING) {
             if (player.isDying() || player.isDead()) {
                 updateDeathSequence(deltaMs);
+                updateRuntimeMessages(deltaMs);
                 return;
             }
 
@@ -135,16 +168,46 @@ public class GameModel {
             // Remove exploded projectiles
             projectiles.removeIf(DynamiteProjectile::isExploded);
 
+            evaluateLevelUnlocks();
 
             if (player.getState() == PlayerState.WALKING) {
                 player.move();
             }
             updateInteractions(input, monkCollision);
 
-            objectManager.update(deltaMs);
+            updateRuntimeMessages(deltaMs);
 
 
 
+        }
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * UTILITY METODH initialize NPC by reading the spawn point from config file
+     */
+    //-------------------------------------------------------------
+    private void initializeNPC() {
+        //load the monk
+        monk = new Monk(gameConfig.entityConfig().MONK_START_X(),
+                        gameConfig.entityConfig().MONK_START_Y(),
+                        gameConfig.entityConfig());
+        //load the tnt
+        tntEnemies = new ArrayList<>();
+        for (SpawnPoint sp : gameConfig.entityConfig().TNT_SPAWNPOINT()) {
+            for (int i = 0; i < gameConfig.entityConfig().TNT_FOR_SPAWNPOINT; i++) {
+                tntEnemies.add(new EnemyTNT(sp, gameConfig.entityConfig()));
+            }
+        }
+
+        //load the dynamite
+        dynamiteEnemies = new ArrayList<>();
+        projectiles = new ArrayList<>();
+
+        for (SpawnPoint sp : gameConfig.entityConfig().DYNAMITE_SPAWNPOINT()) {
+            for (int i = 0; i < gameConfig.entityConfig().DYNAMITE_FOR_SPAWNPOINT; i++) {
+                dynamiteEnemies.add(new EnemyDynamite(sp, gameConfig.entityConfig(), projectiles));
+            }
         }
     }
     //-------------------------------------------------------------
@@ -201,24 +264,172 @@ public class GameModel {
         hoveredRibbon = -1;
         activeRibbon = -1;
         hoveredGameOverButton = false;
-        objectManager.reset(gameConfig.mapDoc());
-        initializeEnemies();
+        clearStatusMessage();
+        initializeNPC();
+        initializeStairLocks();
         gameState = GameState.PLAYING;
     }
 
-    private void initializeEnemies() {
-        projectiles = new ArrayList<>();
-        tntEnemies = new ArrayList<>();
-        dynamiteEnemies = new ArrayList<>();
 
-        for (SpawnPoint sp : gameConfig.entityConfig().TNT_SPAWNPOINT()) {
-            for (int i = 0; i < gameConfig.entityConfig().NPC_FOR_SPAWNPOINT; i++) {
-                tntEnemies.add(new EnemyTNT(sp, gameConfig.entityConfig()));
+    private void initializeLockedStairsConfig() {
+        // Layer 2 -> Layer 1 gate (existing map note)
+        lockedStairsByLevel.put(2, List.of(
+                new StairTile(42, 25),
+                new StairTile(43, 25),
+                new StairTile(44, 25)
+        ));
+
+        // Layer 3 -> Layer 2 gate (existing map note)
+        lockedStairsByLevel.put(3, List.of(
+                new StairTile(57, 43),
+                new StairTile(58, 43),
+                new StairTile(59, 43)
+        ));
+    }
+
+    private void initializeStairLocks() {
+        unlockedStairsLevels.clear();
+
+        for (Map.Entry<Integer, List<StairTile>> entry : lockedStairsByLevel.entrySet()) {
+            int level = entry.getKey();
+            int collisionLayerToClose = level - 1;
+            if (collisionLayerToClose < 0 || collisionLayerToClose >= worldGameMap.getGameLayerNum()) continue;
+
+            for (StairTile tile : entry.getValue()) {
+                worldGameMap.setCollisionTile(collisionLayerToClose, tile.row(), tile.col(), true);
+            }
+        }
+    }
+
+    private void evaluateLevelUnlocks() {
+        List<Integer> levels = new ArrayList<>(lockedStairsByLevel.keySet());
+        levels.sort(Comparator.reverseOrder());
+
+        for (int level : levels) {
+            if (unlockedStairsLevels.contains(level)) continue;
+            if (hasLivingEnemiesOnLayer(level)) continue;
+
+            unlockStairsForLevel(level);
+        }
+    }
+
+    private boolean hasLivingEnemiesOnLayer(int layer) {
+        for (EnemyTNT tnt : tntEnemies) {
+            if (!tnt.isExploded() && tnt.getCurrentLayer() == layer) {
+                return true;
+            }
+        }
+        for (EnemyDynamite dynamite : dynamiteEnemies) {
+            if (!dynamite.isDead() && dynamite.getCurrentLayer() == layer) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int getLivingEnemiesCountOnLayer(int layer) {
+        int count = 0;
+        for (EnemyTNT tnt : tntEnemies) {
+            if (!tnt.isExploded() && tnt.getCurrentLayer() == layer) {
+                count++;
+            }
+        }
+        for (EnemyDynamite dynamite : dynamiteEnemies) {
+            if (!dynamite.isDead() && dynamite.getCurrentLayer() == layer) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void unlockStairsForLevel(int level) {
+        List<StairTile> tiles = lockedStairsByLevel.get(level);
+        if (tiles == null || tiles.isEmpty()) {
+            unlockedStairsLevels.add(level);
+            return;
+        }
+
+        int collisionLayerToOpen = level - 1;
+        if (collisionLayerToOpen < 0 || collisionLayerToOpen >= worldGameMap.getGameLayerNum()) {
+            unlockedStairsLevels.add(level);
+            return;
+        }
+
+        for (StairTile tile : tiles) {
+            worldGameMap.setCollisionTile(collisionLayerToOpen, tile.row(), tile.col(), false);
+        }
+
+        unlockedStairsLevels.add(level);
+        showStatusMessage("Hai sconfitto tutti i mostri del livello " + level + ". Scale sbloccate!", STAIR_UNLOCKED_MSG_DURATION_MS);
+    }
+
+    private boolean isLockedStairTile(int level, int row, int col) {
+        List<StairTile> tiles = lockedStairsByLevel.get(level);
+        if (tiles == null || tiles.isEmpty()) return false;
+
+        for (StairTile tile : tiles) {
+            if (tile.row() == row && tile.col() == col) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void showLockedStairsMessage(int level) {
+        if (stairsLockedMessageCooldownMs > 0) return;
+
+        int remaining = getLivingEnemiesCountOnLayer(level);
+        showStatusMessage("Scale bloccate: elimina tutti i mostri del livello (" + remaining + " rimasti).", STAIR_LOCKED_MSG_DURATION_MS);
+        stairsLockedMessageCooldownMs = STAIR_LOCKED_MSG_COOLDOWN_MS;
+    }
+
+    private void showStatusMessage(String message, double durationMs) {
+        statusMessage = message;
+        statusMessageTimerMs = durationMs;
+    }
+
+    private void clearStatusMessage() {
+        statusMessage = "";
+        statusMessageTimerMs = 0.0;
+        stairsLockedMessageCooldownMs = 0.0;
+    }
+
+    private void updateRuntimeMessages(double deltaMs) {
+        if (statusMessageTimerMs > 0) {
+            statusMessageTimerMs -= deltaMs;
+            if (statusMessageTimerMs <= 0) {
+                statusMessage = "";
+                statusMessageTimerMs = 0.0;
             }
         }
 
-        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60 * 64, 40 * 64, 2), gameConfig.entityConfig(), projectiles));
-        dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60 * 64, 40 * 64, 2), gameConfig.entityConfig(), projectiles));
+        if (stairsLockedMessageCooldownMs > 0) {
+            stairsLockedMessageCooldownMs -= deltaMs;
+            if (stairsLockedMessageCooldownMs < 0) {
+                stairsLockedMessageCooldownMs = 0.0;
+            }
+        }
+    }
+
+    public void onPlayerBlockedByStairs(int currentLayer, int checkRow, int colLeft, int colRight) {
+        if (unlockedStairsLevels.contains(currentLayer)) {
+            return;
+        }
+
+        boolean blockedStairTile =
+                isLockedStairTile(currentLayer, checkRow, colLeft)
+                || isLockedStairTile(currentLayer, checkRow, colRight);
+
+        if (!blockedStairTile) {
+            return;
+        }
+
+        if (!hasLivingEnemiesOnLayer(currentLayer)) {
+            unlockStairsForLevel(currentLayer);
+            return;
+        }
+
+        showLockedStairsMessage(currentLayer);
     }
     //TODO controllare bene
 
@@ -307,6 +518,7 @@ public class GameModel {
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
+    public String getStatusMessage() { return statusMessage; }
     //---------------------------------
 
     // SETTER ----------------------

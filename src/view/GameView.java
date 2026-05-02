@@ -11,6 +11,7 @@ import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.object.OBJ_Tree;
+import model.object.OBJ_Structure;
 import model.entity.Player;
 import view.UI.UI;
 import view.renderer.entity.PlayerRender;
@@ -18,6 +19,7 @@ import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
 
 import view.renderer.object.TreeRenderer;
+import view.renderer.object.StructureRenderer;
 import view.renderer.object.ObjectRender;
 import view.renderer.object.RendererRegistry;
 import view.renderer.entity.DynamiteRender;
@@ -72,7 +74,7 @@ public class GameView extends JPanel {
 
         //  import the tileset Asset
         //TODO take only tilesetCOnfig
-        this.tileSet = new TileSet(GS.TILESET_PATH, GS.mapConfig().ORIGINAL_TILESIZE(), GS.mapConfig().MAX_TILESET_ROW, GS.mapConfig().MAX_TILESET_COL);
+        this.tileSet = new TileSet(GS.TILESET_PATH(), GS.mapConfig().ORIGINAL_TILESIZE(), GS.mapConfig().MAX_TILESET_ROW, GS.mapConfig().MAX_TILESET_COL);
 
         // import the player Render
         this.playerRender = new PlayerRender(GS.entityConfig());
@@ -86,6 +88,7 @@ public class GameView extends JPanel {
         // object renderers
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
+        rendererRegistry.register(OBJ_Structure.class, new StructureRenderer());
         
         //TODO: import other asset (object, npc, monster)
           
