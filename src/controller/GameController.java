@@ -16,6 +16,7 @@ import java.awt.Rectangle;
 public class GameController {
     private static final int MENU_ITEM_COUNT = 3;
     private static final int MENU_NEW_GAME_INDEX = 0;
+    private static final double GAME_OVER_DELAY_MS = 150.0;
 
     private final GameModel model;
     private final GameView view;
@@ -23,6 +24,7 @@ public class GameController {
     private final MouseHandler mouseHandler;
     private final GameLoop loop;
     private boolean renderOnceOnPause = true; // flag to control rendering when paused
+    private double deadStateElapsedMs = 0.0;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -62,25 +64,44 @@ public class GameController {
         if (model.getGameState() == GameState.MENU) {
             updateMainMenu(input);
             model.setDebugMode(input.debug());
+            deadStateElapsedMs = 0.0;
+            return;
+        }
+        if (model.getGameState() == GameState.GAME_OVER) {
+            updateGameOver(input);
+            model.setDebugMode(input.debug());
             return;
         }
 
-        // pause toggle edge-triggered
-        if (input.pause()) { 
+        if (model.getPlayer().isDying() || model.getPlayer().isDead()) {
+            model.setGameState(GameState.PLAYING);
+            renderOnceOnPause = true;
+        } else if (input.pause()) {
             model.setGameState(GameState.PAUSED);
         } else {
             model.setGameState(GameState.PLAYING);
             renderOnceOnPause = true;
         }
-            
 
-        // debug mode toggle edge-triggered
         model.setDebugMode(input.debug());
 
         model.update(input, deltaMs);
 
         if (model.getGameState() == GameState.PLAYING) {
             view.updateAnimations(deltaMs); // update animations only when playing
+            boolean readyForGameOver = model.getPlayer().isDeathAnimationCompleted()
+                    && !model.hasPendingTransientAnimations();
+
+            if (readyForGameOver) {
+                deadStateElapsedMs += deltaMs;
+            } else {
+                deadStateElapsedMs = 0.0;
+            }
+
+            if (deadStateElapsedMs >= GAME_OVER_DELAY_MS) {
+                model.setGameState(GameState.GAME_OVER);
+                deadStateElapsedMs = 0.0;
+            }
         }
 
     }
@@ -164,14 +185,30 @@ public class GameController {
 
     private void startNewGame() {
         model.setMainMenuSelection(0);
-        if (model.getGameState() == GameState.MENU) {
-            model.setGameState(GameState.PLAYING);
+        model.resetForNewGame();
+        renderOnceOnPause = true;
+        deadStateElapsedMs = 0.0;
+    }
+    //-------------------------------------------------------------
+    private void updateGameOver(InputState input) {
+        UI.GameOverLayout layout = view.getGameOverLayout();
+        Point mousePosition = mouseHandler.getMousePosition();
+
+        boolean hovered = contains(layout.newGameBounds(), mousePosition);
+        model.setHoveredGameOverButton(hovered);
+
+        boolean leftClicked = mouseHandler.consumeLeftClick();
+        if ((leftClicked && hovered) || input.menuConfirm()) {
+            startNewGame();
         }
     }
+
     //-------------------------------------------------------------
     // CONTROLL GAME VIEW
     public void render() { // called by the game loop every frame to render the view
-        if (model.getGameState() == GameState.PLAYING || model.getGameState() == GameState.MENU) {
+        if (model.getGameState() == GameState.PLAYING
+                || model.getGameState() == GameState.MENU
+                || model.getGameState() == GameState.GAME_OVER) {
             view.repaint();
         } else if (renderOnceOnPause) { // render once when paused to show the pause screen
             view.repaint();

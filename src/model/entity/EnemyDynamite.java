@@ -35,7 +35,7 @@ public class EnemyDynamite extends Entity {
         this.worldY = spawnPoint.y();
         this.currentLayer = 2; //TODO: set well
         this.globalProjectiles = globalProjectiles;
-        this.speed = entityConfig.DYNAMITE_SPEED;
+        this.speed = entityConfig.START_DYNAMITE_SPEED;
         this.detectionRadius = entityConfig.DYNAMITE_DETECTION_RADIUS;
 
         solidArea = new Rectangle(0, 0, entityConfig.DYNAMITE_HITBOX_WIDTH, entityConfig.DYNAMITE_HITBOX_HEIGHT);

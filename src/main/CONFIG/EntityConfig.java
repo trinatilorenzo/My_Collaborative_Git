@@ -3,6 +3,10 @@ package main.CONFIG;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.MonkState;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 
@@ -72,12 +76,12 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int TNT_HITBOX_WIDTH = 55;
     public static final int TNT_HITBOX_HEIGHT = 35;
 
-    public static final int NPC_FOR_SPAWNPOINT = 10;
+    public static final int TNT_FOR_SPAWNPOINT = 1;
     public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
     //-------------------------------------------------------------
     //EnemyDynamiteConfig
-    public static final int DYNAMITE_SPEED = 128;
+    public static final int START_DYNAMITE_SPEED = 128;
     public static final int DYNAMITE_DETECTION_RADIUS = 300;
     public static final int DYNAMITE_ATTACKING_RADIUS = 150;
     public static final int DYNAMITE_ATTACK_INTERVAL = 800; 
@@ -87,6 +91,12 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     public static final int DYNAMITE_HITBOX_WIDTH = 55;
     public static final int DYNAMITE_HITBOX_HEIGHT = 35;
+
+    public static final int DYNAMITE_FOR_SPAWNPOINT = 1;
+    public ArrayList<SpawnPoint> DYNAMITE_SPAWNPOINT() {return TntSpawnPoint;}
+    //-------------------------------------------------------------
+
+
     //Dynamite projectile Config
     public static final int PROJECTILE_THROW_SPEED = 100;
     public static final int PROJECTILE_THROW_HEIGHT = 300;
@@ -95,5 +105,5 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int PROJECTILE_SPRITE_WIDTH = 64;
     public static final int PROJECTILE_SPRITE_HEIGHT = 64; 
     public static final int PROJECTILE_SIZE = 16;
- 
+
 }

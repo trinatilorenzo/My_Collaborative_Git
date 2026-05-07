@@ -19,6 +19,8 @@ import java.awt.image.BufferedImage;
 //-------------------------------------------------------------------------------------------------------------------
 public class PlayerRender {
 
+    private static final int DEATH_FRAME_SIZE = 128;
+
     private AnimationManager animationManager;
     private final EntityConfig entityConfig;
 
@@ -42,6 +44,7 @@ public class PlayerRender {
         BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
         BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
         BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+        BufferedImage[] deathFrames = loadDeathFrames();
 
         animationManager = new AnimationManager();
         // frame duration in milliseconds
@@ -50,14 +53,36 @@ public class PlayerRender {
         animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 60, false));
         animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
         animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
+        animationManager.addAnimation("death", new Animation(deathFrames, 80, false));
     }
     //-------------------------------------------------------------
+
+    private BufferedImage[] loadDeathFrames() {
+        BufferedImage deadSheet = SpriteLoader.loadSpriteSheet("/res/player/Dead.png");
+        BufferedImage[] firstRow = SpriteLoader.getAnimationFrames(deadSheet, 0, 1, 7, DEATH_FRAME_SIZE, DEATH_FRAME_SIZE);
+        BufferedImage[] secondRow = SpriteLoader.getAnimationFrames(deadSheet, 1, 1, 4, DEATH_FRAME_SIZE, DEATH_FRAME_SIZE);
+
+        BufferedImage[] deathFrames = new BufferedImage[10];
+        System.arraycopy(firstRow, 1, deathFrames, 0, 6);
+        System.arraycopy(secondRow, 0, deathFrames, 6, 4);
+        return deathFrames;
+    }
 
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, Player player) {
         //TODO controllare se ci sono altri modi per le animazioni nella corsa
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
         //System.out.println("X: "+ player.getWorldX()/TILE_SIZE + "Y: "+ player.getWorldY()/TILE_SIZE);
+
+        if (player.getState() == PlayerState.DYING || player.getState() == PlayerState.DEAD) {
+            g2.drawImage(frame,
+                    player.getScreenX() - EntityConfig.PLAYER_RENDER_WIDTH / 2,
+                    player.getScreenY() - EntityConfig.PLAYER_RENDER_HEIGHT / 2,
+                    EntityConfig.PLAYER_RENDER_WIDTH,
+                    EntityConfig.PLAYER_RENDER_HEIGHT,
+                    null);
+            return;
+        }
 
         if (player.getFacing()!= Direction.RIGHT) {
             // Flip the image horizontally for left direction
@@ -103,6 +128,15 @@ public class PlayerRender {
                 if (animationManager.getCurrent().isFinished()) {
                     player.stopAttack();
                 }
+                break;
+            case DYING:
+                animationManager.playAnimation("death");
+                if (animationManager.getCurrent().isFinished()) {
+                    player.completeDeathAnimation();
+                }
+                break;
+            case DEAD:
+                animationManager.playAnimation("death");
                 break;
         }
         animationManager.update(deltaMs);

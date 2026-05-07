@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 public class GameObject {
 
     protected int worldX, worldY;
-    protected int width, height;
+    protected int width, height, layer;
     
     protected Rectangle solidArea;
     

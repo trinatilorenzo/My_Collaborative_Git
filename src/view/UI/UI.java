@@ -6,6 +6,8 @@ import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.entity.Player;
+import model.object.GameObject;
+import model.object.OBJ_Tree;
 import view.renderer.entity.DynamiteRender;
 import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.PlayerRender;
@@ -57,6 +59,7 @@ public class UI {
     private final BufferedImage ribbonYellowPressed;
     private final BufferedImage ribbonRedPressed;
     private final BufferedImage ribbonBluePressed;
+    private final ThreeSliceSprite ribbonBlueWide;
     private final BufferedImage[] menuClouds;
 
     // FPS counter (updated once per second)
@@ -88,6 +91,16 @@ public class UI {
         public Rectangle ribbonYellowBounds() { return ribbonYellowBounds; }
         public Rectangle ribbonRedBounds() { return ribbonRedBounds; }
         public Rectangle ribbonBlueBounds() { return ribbonBlueBounds; }
+    }
+
+    public static final class GameOverLayout {
+        private final Rectangle newGameBounds;
+
+        public GameOverLayout(Rectangle newGameBounds) {
+            this.newGameBounds = newGameBounds;
+        }
+
+        public Rectangle newGameBounds() { return newGameBounds; }
     }
 
 
@@ -141,6 +154,7 @@ public class UI {
         ribbonYellowPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right_Pressed.png");
         ribbonRedPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right_Pressed.png");
         ribbonBluePressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right_Pressed.png");
+        ribbonBlueWide = new ThreeSliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", 64, 64);
         menuClouds = new BufferedImage[]{
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_01.png")),
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_02.png")),
@@ -175,12 +189,19 @@ public class UI {
                 if (!gameModel.getCurrentDialogue().isEmpty()){
                     drawDialogueWindow();
                 }
+                if (!gameModel.getStatusMessage().isEmpty()) {
+                    drawStatusMessage();
+                }
                 break;
 
             case PAUSED :
                 // PAUSE STATE
                 drawPlayerLife();
                 drawPauseScreen();
+                break;
+
+            case GAME_OVER :
+                drawGameOverScreen();
                 break;
         }
 
@@ -223,7 +244,8 @@ public class UI {
                 tnt.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY()
                 );
             }
-            
+
+            drawTreeSolidAreas();
 
             // FPS overlay (updates every second)
             frames++;
@@ -239,6 +261,26 @@ public class UI {
             int xTile = (gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getSolidArea().x )/ screenConfig.TILE_SIZE();
             int yTile = (gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getSolidArea().y )/ screenConfig.TILE_SIZE();
             g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
+        }
+    }
+
+    private void drawTreeSolidAreas() {
+        Player player = gameModel.getPlayer();
+        for (GameObject obj : gameModel.getObjects()) {
+            if (!(obj instanceof OBJ_Tree tree)) continue;
+            if (!tree.isSolid() || tree.getSolidArea() == null) continue;
+
+            Rectangle solid = tree.getSolidArea();
+            int screenX = tree.getWorldX() - player.getWorldX() + player.getScreenX();
+            int screenY = tree.getWorldY() - player.getWorldY() + player.getScreenY();
+
+            int drawX = screenX + solid.x;
+            int drawY = screenY + solid.y;
+
+            g2.setColor(new Color(0, 255, 255, 80));
+            g2.fillRect(drawX, drawY, solid.width, solid.height);
+            g2.setColor(Color.CYAN);
+            g2.drawRect(drawX, drawY, solid.width, solid.height);
         }
     }
 
@@ -320,6 +362,15 @@ public class UI {
 
         return new MainMenuLayout(newGameBounds, continueBounds, settingsBounds,
                 ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds);
+    }
+
+    public GameOverLayout getGameOverLayout() {
+        int buttonWidth = 320;
+        int buttonHeight = 84;
+        int centerX = screenConfig.SCREEN_WIDTH() / 2;
+        int buttonY = screenConfig.SCREEN_HEIGHT() - buttonHeight - 56;
+        Rectangle newGameBounds = new Rectangle(centerX - (buttonWidth / 2), buttonY, buttonWidth, buttonHeight);
+        return new GameOverLayout(newGameBounds);
     }
 
     private void drawMainMenuOption(int x, int y, int width, int height, String label, boolean selected) {
@@ -462,6 +513,35 @@ public class UI {
 
     }
 
+    private void drawGameOverScreen() {
+        drawPlayerLife();
+
+        Composite oldComposite = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+        g2.setColor(new Color(8, 8, 8));
+        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
+        g2.setComposite(oldComposite);
+
+        int titleRibbonWidth = 520;
+        int titleRibbonHeight = 80;
+        int titleRibbonX = (screenConfig.SCREEN_WIDTH() - titleRibbonWidth) / 2;
+        int titleRibbonY = 72;
+        ribbonBlueWide.draw(g2, titleRibbonX, titleRibbonY, titleRibbonWidth, titleRibbonHeight);
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 70F));
+        String title = "GAME OVER";
+        Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(title, g2);
+        int textX = getXforCenteredText(title);
+        int textY = titleRibbonY + (int) Math.round((titleRibbonHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
+        g2.drawString(title, textX, textY);
+
+        GameOverLayout layout = getGameOverLayout();
+        Rectangle newGameBounds = layout.newGameBounds();
+        boolean highlighted = gameModel.isHoveredGameOverButton();
+        drawMainMenuOption(newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height, "New Game", highlighted);
+    }
+
     public int getXforCenteredText(String text) {
         int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
         int x = screenConfig.SCREEN_WIDTH() / 2 - length / 2;
@@ -507,6 +587,35 @@ public class UI {
         g2.dispose();
 
         return scaledImage;
+    }
+
+    private void drawStatusMessage() {
+        String message = gameModel.getStatusMessage();
+        if (message == null || message.isEmpty()) return;
+
+        int paddingX = 28;
+        int paddingY = 18;
+        int minWidth = screenConfig.SCREEN_WIDTH() / 3;
+
+        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 30F));
+        FontMetrics metrics = g2.getFontMetrics();
+        int textWidth = metrics.stringWidth(message);
+        int textHeight = metrics.getAscent();
+
+        int boxWidth = Math.max(minWidth, textWidth + (paddingX * 2));
+        int boxHeight = textHeight + (paddingY * 2);
+        int boxX = (screenConfig.SCREEN_WIDTH() - boxWidth) / 2;
+        int boxY = 38;
+
+        Composite oldComposite = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.82f));
+        g2.setColor(new Color(24, 24, 24));
+        g2.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 14, 14);
+        g2.setComposite(oldComposite);
+
+        g2.setColor(new Color(230, 230, 230));
+        g2.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 14, 14);
+        g2.drawString(message, boxX + paddingX, boxY + paddingY + textHeight - 3);
     }
 
 }

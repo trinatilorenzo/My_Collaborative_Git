@@ -171,7 +171,11 @@ public class CollisionChecker {
         if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
             if (entity instanceof Player){
                 //only update the player layer, other entities simply can't move on the stairs if they collide with them
+                int previousLayer = entity.getCurrentLayer();
                 updateEntityLayer(entity, bounds, checkRow, colLeft);
+                if (entity.getCurrentLayer() == previousLayer) {
+                    gameModel.onPlayerBlockedByStairs(previousLayer, checkRow, colLeft, colRight);
+                }
             }
 
             entity.setCollisionY(true);

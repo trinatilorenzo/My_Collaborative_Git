@@ -16,11 +16,12 @@ import javax.swing.JFrame;
 
 public class Main {
 
+
     public static void main(String[] args) {
 
         // load the game configuration from the XML file
         // this class is specific for our game and contains all the game's constants'
-        GameConfig GS = new GameConfig();
+        GameConfig GS = new GameConfig("MappaGiocoV4.tmx", "tileSet1.png");
 
         // MVC structure
         // Define the tre basic object Model View Controller
