@@ -523,8 +523,15 @@ public class GameModel {
 
     }
     //-------------------------------------------------------------
+    // State machine 
+    public void togglePause() {
+        if (gameState == GameState.PLAYING) {
+            gameState = GameState.PAUSED;
+        } else if (gameState == GameState.PAUSED) {
+            gameState = GameState.PLAYING;
+        }
+    }
 
-    //TODO ordine
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
