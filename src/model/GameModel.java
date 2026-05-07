@@ -7,7 +7,6 @@ import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
 import main.CONFIG.enu.TNTState;
 import main.CONFIG.GameConfig;
-import model.CollisionChecker;
 import model.entity.Player;
 import model.entity.Monk;
 import model.object.ObjectManager;
@@ -74,6 +73,8 @@ public class GameModel {
 
             }
         }
+
+        //TODO: handle enemy
         dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60*64, 40*64, 2), GS.entityConfig(), projectiles));
         dynamiteEnemies.add(new EnemyDynamite(new SpawnPoint(60*64, 40*64, 2), GS.entityConfig(), projectiles));
 
@@ -210,8 +211,15 @@ public class GameModel {
 
     }
     //-------------------------------------------------------------
+    // State machine 
+    public void togglePause() {
+        if (gameState == GameState.PLAYING) {
+            gameState = GameState.PAUSED;
+        } else if (gameState == GameState.PAUSED) {
+            gameState = GameState.PLAYING;
+        }
+    }
 
-    //TODO ordine
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }

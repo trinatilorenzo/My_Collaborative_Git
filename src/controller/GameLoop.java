@@ -31,11 +31,11 @@ public class GameLoop extends Thread {
         
         long lastTime = System.nanoTime(); // when the last frame was drawn
 
-        long lastFpsTime = lastTime; // when the last FPS was printed
+        long lastFpsTime = lastTime; // FPS DEBUG: when the last FPS was printed
         int drawCount = 0; // count frames drawn for debug
 
         while (running) {
-            // CORE CICLING LOOP (COLOCK TICK)
+            // CORE CICLING LOOP (CLOCK TICK)
             long currentTime = System.nanoTime(); // current time
             long deltaNs = currentTime - lastTime; // time since last frame
             int catchUp = 0; // how many updates we've done to catch up with the current time
@@ -46,7 +46,7 @@ public class GameLoop extends Thread {
 
                 lastTime += drawInterval;
                 deltaNs = currentTime - lastTime;
-                catchUp++;
+                catchUp++; // if we had to do multiple updates we skip rendering to catch up faster
             }
             controller.render();
 

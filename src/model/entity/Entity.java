@@ -12,14 +12,14 @@ public class Entity {
 
     // Position and movement
     protected static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
-
     protected int worldX, worldY; //center of the entity
-
     protected int speed; // PIXELS PER SECOND
     protected int dx, dy; // movement deltas per frame
     protected int intendedDx, intendedDy;
     protected Direction direction;
     protected int currentLayer;
+
+    // Health
     protected int life;
     protected int maxLife;
 
