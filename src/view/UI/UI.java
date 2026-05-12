@@ -48,8 +48,8 @@ public class UI {
     private final BufferedImage heartFull;
     private final BufferedImage heartHalf;
     private final BufferedImage heartBlank;
-    private final ThreeSliceSprite menuButton;
-    private final ThreeSliceSprite menuButtonSelected;
+    private final SliceSprite menuButton;
+    private final SliceSprite menuButtonSelected;
     private final BufferedImage menuLogo;
     private final BufferedImage settingsIcon;
     private final BufferedImage settingsIconPressed;
@@ -59,7 +59,7 @@ public class UI {
     private final BufferedImage ribbonYellowPressed;
     private final BufferedImage ribbonRedPressed;
     private final BufferedImage ribbonBluePressed;
-    private final ThreeSliceSprite ribbonBlueWide;
+    private final SliceSprite ribbonBlueWide;
     private final BufferedImage[] menuClouds;
 
     // FPS counter (updated once per second)
@@ -143,8 +143,8 @@ public class UI {
                 screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
         heartBlank = scaleImage(loadUiImage("src/res/UI/heart/heart_blank.png"),
                 screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
-        menuButton = new ThreeSliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png", 21, 21);
-        menuButtonSelected = new ThreeSliceSprite("src/res/UI/Buttons/Button_Hover_3Slides.png", 21, 21);
+        menuButton = new SliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png", 21, 21);
+        menuButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Hover_3Slides.png", 21, 21);
         menuLogo = loadUiImage("src/res/UI/Icons/logo_gioco.png");
         settingsIcon = scaleImage(loadUiImage("src/res/UI/Icons/Regular_02.png"), 56, 56);
         settingsIconPressed = scaleImage(loadUiImage("src/res/UI/Icons/Pressed_02.png"), 56, 56);
@@ -154,7 +154,7 @@ public class UI {
         ribbonYellowPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right_Pressed.png");
         ribbonRedPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right_Pressed.png");
         ribbonBluePressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right_Pressed.png");
-        ribbonBlueWide = new ThreeSliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", 64, 64);
+        ribbonBlueWide = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", 64, 64);
         menuClouds = new BufferedImage[]{
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_01.png")),
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_02.png")),
@@ -490,10 +490,10 @@ public class UI {
         g2.setColor(screenConfig.GAME_BG_COLOR());
         g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
 
-        ThreeSliceSprite pauseSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
+        SliceSprite pauseSprite = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
 
         int bannerWidth = 192 * 3; // desired logical width
-        int bannerHeight = pauseSprite.getHeight();
+        int bannerHeight = pauseSprite.getImageHeight();
 
         int bannerX = (screenConfig.SCREEN_WIDTH() - bannerWidth) / 2;
         int bannerY = (screenConfig.SCREEN_HEIGHT() - bannerHeight) / 2;
@@ -555,8 +555,8 @@ public class UI {
         int x = (screenConfig.SCREEN_WIDTH() - width) / 2;
         int y = screenConfig.SCREEN_HEIGHT() - height - screenConfig.TILE_SIZE();
 
-        // Disegno Banner (ThreeSliceSprite)
-        ThreeSliceSprite diagSprite = new ThreeSliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 64, 64);
+        // Disegno Banner (SliceSprite)
+        SliceSprite diagSprite = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 64, 64);
         diagSprite.draw(g2, x, y, width);
 
         // Testo
