@@ -7,7 +7,8 @@ import model.GameModel;
 import view.GameView;
 
 import java.awt.Cursor;
-import javax.swing.JFrame;
+import java.awt.Taskbar;
+import javax.swing.*;
 
 /**
  * This is the main class of the game.
@@ -18,6 +19,7 @@ public class Main {
 
 
     public static void main(String[] args) {
+
 
         // load the game configuration from the XML file
         // this class is specific for our game and contains all the game's constants'
@@ -36,6 +38,11 @@ public class Main {
         JFrame window = new JFrame("Tiny Swords Island");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // load the logo
+        ImageIcon logo = new ImageIcon(Main.class.getResource("/res/UI/Icons/logo_gioco.png"));
+        window.setIconImage(logo.getImage());
+        try {Taskbar.getTaskbar().setIconImage(logo.getImage());} catch (Exception ignored) {}
+
         //TODO: FINESTRA RIDIMENSIONABILE
         window.setResizable(true);
 
@@ -51,6 +58,8 @@ public class Main {
 
         window.setLocationRelativeTo(null);
         window.setVisible(true);
+        view.requestFocusInWindow();
+
         // ------------------------------------------------------------------------------------------------------------
 
         // start the game-loop in a separated thread
