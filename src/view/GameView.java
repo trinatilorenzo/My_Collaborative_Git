@@ -13,7 +13,9 @@ import model.entity.Monk;
 import model.object.OBJ_Tree;
 import model.object.OBJ_Structure;
 import model.entity.Player;
+import model.event.AudioEventType;
 import view.UI.UI;
+import view.audio.GameAudioManager;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
@@ -33,6 +35,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 
 /**
@@ -56,6 +59,7 @@ public class GameView extends JPanel {
     private UI ui_render;
     private RendererRegistry rendererRegistry;
     private Cursor customGameCursor;
+    private GameAudioManager audioManager;
 
 
     // COSTRUCTOR
@@ -89,6 +93,8 @@ public class GameView extends JPanel {
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
         rendererRegistry.register(OBJ_Structure.class, new StructureRenderer());
+        this.audioManager = new GameAudioManager();
+        this.audioManager.syncBackgroundMusic(model.getGameState());
         
         //TODO: import other asset (object, npc, monster)
           
@@ -291,6 +297,19 @@ public class GameView extends JPanel {
             if (renderer == null) continue;
             renderer.update(obj, deltaMs);
         }
+    }
+
+    public void onGameStateChanged(GameState gameState) {
+        audioManager.syncBackgroundMusic(gameState);
+    }
+
+    public void processAudioEvents() {
+        List<AudioEventType> events = model.consumeAudioEvents();
+        audioManager.playEvents(events);
+    }
+
+    public void shutdownAudio() {
+        audioManager.stopAll();
     }
 
 }

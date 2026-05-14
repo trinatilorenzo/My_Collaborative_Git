@@ -25,6 +25,7 @@ public class GameController {
     private final GameLoop loop;
     private boolean renderOnceOnPause = true; // flag to control rendering when paused
     private double deadStateElapsedMs = 0.0;
+    private GameState lastKnownState;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -35,6 +36,7 @@ public class GameController {
         this.keyHandler = new KeyHandler();
         this.mouseHandler = new MouseHandler();
         this.loop = new GameLoop(this);
+        this.lastKnownState = model.getGameState();
         
         view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
         view.addMouseListener(mouseHandler);
@@ -51,6 +53,7 @@ public class GameController {
     // STOP the game-loop thread
     public void stopGame(){
         loop.stopGameLoop();
+        view.shutdownAudio();
     }
     //-------------------------------------------------------------
 
@@ -65,11 +68,13 @@ public class GameController {
             updateMainMenu(input);
             model.setDebugMode(input.debug());
             deadStateElapsedMs = 0.0;
+            syncAudio();
             return;
         }
         if (model.getGameState() == GameState.GAME_OVER) {
             updateGameOver(input);
             model.setDebugMode(input.debug());
+            syncAudio();
             return;
         }
 
@@ -103,6 +108,8 @@ public class GameController {
                 deadStateElapsedMs = 0.0;
             }
         }
+
+        syncAudio();
 
     }
     //-------------------------------------------------------------
@@ -201,6 +208,15 @@ public class GameController {
         if ((leftClicked && hovered) || input.menuConfirm()) {
             startNewGame();
         }
+    }
+
+    private void syncAudio() {
+        GameState currentState = model.getGameState();
+        if (currentState != lastKnownState) {
+            view.onGameStateChanged(currentState);
+            lastKnownState = currentState;
+        }
+        view.processAudioEvents();
     }
 
     //-------------------------------------------------------------

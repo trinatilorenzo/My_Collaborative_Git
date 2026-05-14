@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 
+//TODO rivedere i vari metodi
 /**
  * Draws all in-game UI elements: HUD, menus, dialogue windows, and debug overlays.
  */
@@ -33,6 +34,7 @@ public class UI {
     // =========================================================================
     // Constants
     // =========================================================================
+
 
     /** Duration of the damage flash overlay in nanoseconds (0.5 s). */
     private static final long DAMAGE_FLASH_DURATION_NS = 1500_000_000L;
@@ -403,7 +405,7 @@ public class UI {
      * call to {@link #triggerDamageFlash()}.
      */
     //-------------------------------------------------------------
-    private boolean isDamageFlashActive() {
+    private boolean isDamageFlashActive() { //TODO rivedere la catena di attivazione del danno
         return damageFlashStartNano >= 0
                 && (System.nanoTime() - damageFlashStartNano) < DAMAGE_FLASH_DURATION_NS;
     }

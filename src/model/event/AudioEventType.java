@@ -1,0 +1,17 @@
+package model.event;
+
+public enum AudioEventType {
+    GAME_START,
+    PLAYER_ATTACK,
+    PLAYER_DAMAGED,
+    TREE_HIT,
+    ENEMY_HIT,
+    ENEMY_DEFEATED,
+    ENEMY_ALERT,
+    PROJECTILE_LAUNCHED,
+    TNT_EXPLOSION,
+    DIALOGUE_ADVANCE,
+    DIALOGUE_CLOSE,
+    STAIRS_LOCKED,
+    STAIRS_UNLOCKED
+}

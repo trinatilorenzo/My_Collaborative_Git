@@ -14,6 +14,7 @@ import model.object.GameObject;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.DynamiteProjectile;
+import model.event.AudioEventType;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -83,6 +84,7 @@ public class GameModel {
     private double statusMessageTimerMs = 0.0;
     private double stairsLockedMessageCooldownMs = 0.0;
     private boolean playerDamagedEventPending = false;
+    private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
     /**
      * COSTRUCTOR
@@ -114,6 +116,8 @@ public class GameModel {
 
         if (gameState == GameState.PLAYING) {
             int lifeBeforeUpdate = player.getLife();
+            int projectileCountBeforeUpdate = projectiles.size();
+            PlayerState playerStateBeforeUpdate = player.getState();
 
             if (player.isDying() || player.isDead()) {
                 updateDeathSequence(deltaMs);
@@ -122,6 +126,9 @@ public class GameModel {
             }
 
             player.update(input, deltaMs);
+            if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
+                emitAudioEvent(AudioEventType.PLAYER_ATTACK);
+            }
 
             collisionChecker.checkTile(player);
             collisionChecker.checkObjects(player);
@@ -129,10 +136,14 @@ public class GameModel {
             boolean monkCollision = collisionChecker.intersects(player, monk);
             
             for (EnemyTNT tnt : tntEnemies) {
+                TNTState previousState = tnt.getState();
                 if (tnt.getState() != TNTState.EXPLODED) {
                     collisionChecker.checkEntity(player, tnt);
                 }
                 tnt.update(player, deltaMs);
+                if (previousState != tnt.getState() && tnt.getState() == TNTState.EXPLODING) {
+                    emitAudioEvent(AudioEventType.TNT_EXPLOSION);
+                }
 
                 collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
@@ -144,8 +155,12 @@ public class GameModel {
             tntEnemies.removeIf(EnemyTNT::isExploded);
 
             for (EnemyDynamite dynamite : dynamiteEnemies){
+                DynamiteState previousState = dynamite.getState();
                 collisionChecker.checkEntity(player, dynamite);
                 dynamite.update(player, deltaMs);
+                if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
+                    emitAudioEvent(AudioEventType.ENEMY_ALERT);
+                }
 
                 collisionChecker.checkTile(dynamite);
                 collisionChecker.checkObjects(dynamite);
@@ -178,6 +193,10 @@ public class GameModel {
             updateRuntimeMessages(deltaMs);
             if (player.getLife() < lifeBeforeUpdate) {
                 playerDamagedEventPending = true;
+                emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
+            }
+            if (projectiles.size() > projectileCountBeforeUpdate) {
+                emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
             }
 
 
@@ -300,9 +319,11 @@ public class GameModel {
         activeRibbon = -1;
         hoveredGameOverButton = false;
         clearStatusMessage();
+        pendingAudioEvents.clear();
         initializeNPC();
         initializeStairLocks();
         gameState = GameState.PLAYING;
+        emitAudioEvent(AudioEventType.GAME_START);
     }
 
 
@@ -396,6 +417,7 @@ public class GameModel {
 
         unlockedStairsLevels.add(level);
         showStatusMessage("Hai sconfitto tutti i mostri del livello " + level + ". Scale sbloccate!", STAIR_UNLOCKED_MSG_DURATION_MS);
+        emitAudioEvent(AudioEventType.STAIRS_UNLOCKED);
     }
 
     private boolean isLockedStairTile(int level, int row, int col) {
@@ -416,6 +438,7 @@ public class GameModel {
         int remaining = getLivingEnemiesCountOnLayer(level);
         showStatusMessage("Scale bloccate: elimina tutti i mostri del livello (" + remaining + " rimasti).", STAIR_LOCKED_MSG_DURATION_MS);
         stairsLockedMessageCooldownMs = STAIR_LOCKED_MSG_COOLDOWN_MS;
+        emitAudioEvent(AudioEventType.STAIRS_LOCKED);
     }
 
     private void showStatusMessage(String message, double durationMs) {
@@ -474,44 +497,43 @@ public class GameModel {
     //-------------------------------------------------------------
     //TODO better timing and animation
     private void updateInteractions(InputState input, boolean monkCollision) {
+        if (player.getState() == PlayerState.ATTACKING) {
+            Rectangle attackArea = player.getAttackArea();
 
-        for (GameObject obj : objects) {
-
-            if (obj.isRemoved()) continue; // Skip removed objects
-
-            if (player.getState() == PlayerState.ATTACKING) {
-
-                Rectangle attackArea = player.getAttackArea();
-
-                if (obj instanceof OBJ_Tree) {
-                    OBJ_Tree tree = (OBJ_Tree) obj;
-
-                    // Se collide con l'area di attacco → colpisci
-                    if (attackArea.intersects(tree.getSolidWorldArea())) {
-                        tree.interact(); // qui hit() viene chiamato → chopped = true se health <= 0
-                    }
+            for (GameObject obj : objects) {
+                if (obj.isRemoved()) continue;
+                if (obj instanceof OBJ_Tree tree && attackArea.intersects(tree.getSolidWorldArea())) {
+                    tree.interact();
+                    emitAudioEvent(AudioEventType.TREE_HIT);
                 }
-
-                for (EnemyDynamite enemy : dynamiteEnemies) {
-                    if (attackArea.intersects(enemy.getSolidWorldArea())) {
-                        enemy.takeDamage();
-                    }
-                }
-
-                for (EnemyTNT tnt : tntEnemies) {
-                    if (attackArea.intersects(tnt.getSolidWorldArea())) {
-                        tnt.takeDamage();
-                    }
-                }
-
             }
 
+            for (EnemyDynamite enemy : dynamiteEnemies) {
+                if (!attackArea.intersects(enemy.getSolidWorldArea())) continue;
+                DynamiteState previousState = enemy.getState();
+                enemy.takeDamage();
+                emitAudioEvent(AudioEventType.ENEMY_HIT);
+                if (previousState != DynamiteState.DEAD && enemy.getState() == DynamiteState.DEAD) {
+                    emitAudioEvent(AudioEventType.ENEMY_DEFEATED);
+                }
+            }
+
+            for (EnemyTNT tnt : tntEnemies) {
+                if (!attackArea.intersects(tnt.getSolidWorldArea())) continue;
+                TNTState previousState = tnt.getState();
+                tnt.takeDamage();
+                emitAudioEvent(AudioEventType.ENEMY_HIT);
+                if (previousState != TNTState.EXPLODED && tnt.getState() == TNTState.EXPLODED) {
+                    emitAudioEvent(AudioEventType.ENEMY_DEFEATED);
+                }
+            }
         }
 
         // Monk interaction triggered by collision
         if (monkCollision && monk.getState() == MonkState.IDLE) {
             monk.activate();
             currentDialogue = monk.getCurrentDialogue();
+            emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
         }
 
         if (monk.getState() == MonkState.TALKING && input.interact()) {
@@ -519,9 +541,11 @@ public class GameModel {
 
             if (!monk.hasFinishedDialogue()) {
                 currentDialogue = monk.getCurrentDialogue();
+                emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
             } else {
                 currentDialogue = "";
                 monk.setState(MonkState.DISAPPEARING);
+                emitAudioEvent(AudioEventType.DIALOGUE_CLOSE);
             }
         }
 
@@ -560,6 +584,14 @@ public class GameModel {
         return projectiles;
     }
     public String getStatusMessage() { return statusMessage; }
+    public List<AudioEventType> consumeAudioEvents() {
+        if (pendingAudioEvents.isEmpty()) {
+            return List.of();
+        }
+        List<AudioEventType> snapshot = List.copyOf(pendingAudioEvents);
+        pendingAudioEvents.clear();
+        return snapshot;
+    }
     public boolean consumePlayerDamagedEvent() {
         boolean wasPending = playerDamagedEventPending;
         playerDamagedEventPending = false;
@@ -576,6 +608,10 @@ public class GameModel {
     public void setHoveredGameOverButton(boolean hoveredGameOverButton) { this.hoveredGameOverButton = hoveredGameOverButton; }
     //---------------------------------
 
+
+    private void emitAudioEvent(AudioEventType audioEventType) {
+        pendingAudioEvents.add(audioEventType);
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------
