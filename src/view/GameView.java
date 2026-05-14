@@ -159,6 +159,9 @@ public class GameView extends JPanel {
     //-------------------------------------------------------------
 
     public void updateAnimations(double deltaMs) {
+        if (model.consumePlayerDamagedEvent()) {
+            ui_render.triggerDamageFlash();
+        }
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
         monkRenderer.update(model.getMonk(), deltaMs);

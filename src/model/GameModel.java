@@ -82,6 +82,7 @@ public class GameModel {
     private String statusMessage = "";
     private double statusMessageTimerMs = 0.0;
     private double stairsLockedMessageCooldownMs = 0.0;
+    private boolean playerDamagedEventPending = false;
 
     /**
      * COSTRUCTOR
@@ -112,6 +113,8 @@ public class GameModel {
     public void update(InputState input, double deltaMs) {
 
         if (gameState == GameState.PLAYING) {
+            int lifeBeforeUpdate = player.getLife();
+
             if (player.isDying() || player.isDead()) {
                 updateDeathSequence(deltaMs);
                 updateRuntimeMessages(deltaMs);
@@ -173,6 +176,9 @@ public class GameModel {
             updateInteractions(input, monkCollision);
 
             updateRuntimeMessages(deltaMs);
+            if (player.getLife() < lifeBeforeUpdate) {
+                playerDamagedEventPending = true;
+            }
 
 
 
@@ -554,6 +560,11 @@ public class GameModel {
         return projectiles;
     }
     public String getStatusMessage() { return statusMessage; }
+    public boolean consumePlayerDamagedEvent() {
+        boolean wasPending = playerDamagedEventPending;
+        playerDamagedEventPending = false;
+        return wasPending;
+    }
     //---------------------------------
 
     // SETTER ----------------------

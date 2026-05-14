@@ -4,7 +4,6 @@ import model.GameModel;
 import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
-import model.entity.Monk;
 import model.entity.Player;
 import model.object.GameObject;
 import model.object.OBJ_Tree;
@@ -17,145 +16,151 @@ import main.CONFIG.ScreenConfig;
 import main.CONFIG.MapConfig;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
 import javax.imageio.ImageIO;
 
-//TODO sintassi commenti e revisione codice
+/**
+ * Draws all in-game UI elements: HUD, menus, dialogue windows, and debug overlays.
+ */
+//-------------------------------------------------------------------------------------------------------------------
 public class UI {
-    GameModel gameModel;
-    Graphics2D g2;
 
-    private PlayerRender playerRender;
-    private TNTRenderer tntRenderer;
-    private MonkRenderer monkRenderer;
-    private MapRender mapRender;
-    private DynamiteRender dynamiteRender;
-    private final ScreenConfig screenConfig;
-    private final MapConfig mapConfig;
+    // =========================================================================
+    // Constants
+    // =========================================================================
 
-    Font arial_40;
-    Font arial_80B;
+    /** Duration of the damage flash overlay in nanoseconds (0.5 s). */
+    private static final long DAMAGE_FLASH_DURATION_NS = 1500_000_000L;
 
-    Font DungeonFont;
-    Font MaruMonica;
+    // =========================================================================
+    // Dependencies
+    // =========================================================================
+
+    private final GameModel      gameModel;
+    private final ScreenConfig   screenConfig;
+    private final MapConfig      mapConfig;
+    private final PlayerRender   playerRender;
+    private final TNTRenderer    tntRenderer;
+    private final MonkRenderer   monkRenderer;
+    private final MapRender      mapRender;
+    private final DynamiteRender dynamiteRender;
+
+    // =========================================================================
+    // Active rendering context
+    // =========================================================================
+
+    private Graphics2D g2;
+
+    // =========================================================================
+    // Fonts
+    // =========================================================================
+
+    private final Font maruMonica;
+
+    // =========================================================================
+    // Assets — loaded once at construction time
+    // =========================================================================
 
     private final BufferedImage heartFull;
     private final BufferedImage heartHalf;
     private final BufferedImage heartBlank;
+
     private final SliceSprite menuButton;
     private final SliceSprite menuButtonSelected;
-    private final BufferedImage menuLogo;
-    private final BufferedImage settingsIcon;
-    private final BufferedImage settingsIconPressed;
-    private final BufferedImage ribbonYellow;
-    private final BufferedImage ribbonRed;
-    private final BufferedImage ribbonBlue;
-    private final BufferedImage ribbonYellowPressed;
-    private final BufferedImage ribbonRedPressed;
-    private final BufferedImage ribbonBluePressed;
     private final SliceSprite ribbonBlueWide;
+    private final SliceSprite pauseBanner;
+    private final SliceSprite dialogueBanner;
+
+    private final BufferedImage   menuLogo;
+    private final BufferedImage   settingsIcon;
+    private final BufferedImage   settingsIconPressed;
+    private final BufferedImage   ribbonYellow;
+    private final BufferedImage   ribbonRed;
+    private final BufferedImage   ribbonBlue;
+    private final BufferedImage   ribbonYellowPressed;
+    private final BufferedImage   ribbonRedPressed;
+    private final BufferedImage   ribbonBluePressed;
     private final BufferedImage[] menuClouds;
 
-    // FPS counter (updated once per second)
+    // =========================================================================
+    // FPS counter — updated once per second in debug mode
+    // =========================================================================
+
     private long fpsTimer = System.nanoTime();
-    private int frames = 0;
-    private int fps = 0;
+    private int  frames   = 0;
+    private int  fps      = 0;
 
-    public static final class MainMenuLayout {
-        private final Rectangle newGameBounds;
-        private final Rectangle continueBounds;
-        private final Rectangle settingsBounds;
-        private final Rectangle ribbonYellowBounds;
-        private final Rectangle ribbonRedBounds;
-        private final Rectangle ribbonBlueBounds;
+    // =========================================================================
+    // Damage flash state
+    // =========================================================================
 
-        public MainMenuLayout(Rectangle newGameBounds, Rectangle continueBounds, Rectangle settingsBounds,
-                              Rectangle ribbonYellowBounds, Rectangle ribbonRedBounds, Rectangle ribbonBlueBounds) {
-            this.newGameBounds = newGameBounds;
-            this.continueBounds = continueBounds;
-            this.settingsBounds = settingsBounds;
-            this.ribbonYellowBounds = ribbonYellowBounds;
-            this.ribbonRedBounds = ribbonRedBounds;
-            this.ribbonBlueBounds = ribbonBlueBounds;
-        }
+    private long damageFlashStartNano = -1L;
 
-        public Rectangle newGameBounds() { return newGameBounds; }
-        public Rectangle continueBounds() { return continueBounds; }
-        public Rectangle settingsBounds() { return settingsBounds; }
-        public Rectangle ribbonYellowBounds() { return ribbonYellowBounds; }
-        public Rectangle ribbonRedBounds() { return ribbonRedBounds; }
-        public Rectangle ribbonBlueBounds() { return ribbonBlueBounds; }
-    }
+    // =========================================================================
+    // Layout records
+    // =========================================================================
 
-    public static final class GameOverLayout {
-        private final Rectangle newGameBounds;
+    public record MainMenuLayout(Rectangle newGameBounds,
+                                 Rectangle continueBounds,
+                                 Rectangle settingsBounds,
+                                 Rectangle ribbonYellowBounds,
+                                 Rectangle ribbonRedBounds,
+                                 Rectangle ribbonBlueBounds) {}
 
-        public GameOverLayout(Rectangle newGameBounds) {
-            this.newGameBounds = newGameBounds;
-        }
+    public record GameOverLayout(Rectangle newGameBounds) {}
 
-        public Rectangle newGameBounds() { return newGameBounds; }
-    }
+    public record PauseMenuLayout(Rectangle resumeBounds,
+                                  Rectangle settingsBounds,
+                                  Rectangle quitBounds) {}
 
+    // =========================================================================
+    // Constructor
+    // =========================================================================
 
+    //-------------------------------------------------------------
     public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender,
-              ScreenConfig screenConfig, MapConfig mapConfig, TNTRenderer tntRenderer, MonkRenderer monkRenderer, DynamiteRender dynamiteRender) {
-        this.gameModel = gameModel;
-        this.playerRender = playerRender;
-        this.mapRender =  mapRender;
-        this.screenConfig = screenConfig;
-        this.mapConfig = mapConfig;
+              ScreenConfig screenConfig, MapConfig mapConfig,
+              TNTRenderer tntRenderer, MonkRenderer monkRenderer, DynamiteRender dynamiteRender) {
 
-        this.tntRenderer = tntRenderer;
-        this.monkRenderer = monkRenderer;
+        this.gameModel      = gameModel;
+        this.playerRender   = playerRender;
+        this.mapRender      = mapRender;
+        this.screenConfig   = screenConfig;
+        this.mapConfig      = mapConfig;
+        this.tntRenderer    = tntRenderer;
+        this.monkRenderer   = monkRenderer;
         this.dynamiteRender = dynamiteRender;
 
-        arial_40 = new Font ("Arial", Font. PLAIN, 40) ;
-        arial_80B = new Font ("Arial", Font. BOLD, 80);
+        maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
 
-        InputStream is = getClass().getResourceAsStream("/res/fonts/x12y16pxMaruMonica.ttf");
-        try {
-            MaruMonica = Font.createFont(Font.TRUETYPE_FONT, is);
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        int tileSize = screenConfig.TILE_SIZE();
+        heartFull  = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),  tileSize, tileSize);
+        heartHalf  = scaleImage(loadUiImage("src/res/UI/heart/heart_half.png"),  tileSize, tileSize);
+        heartBlank = scaleImage(loadUiImage("src/res/UI/heart/heart_blank.png"), tileSize, tileSize);
 
-        is = getClass().getResourceAsStream("/res/fonts/DungeonFont.ttf");
-        try {
-            DungeonFont = Font.createFont(Font.TRUETYPE_FONT, is);
-        } catch (FontFormatException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        heartFull = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),
-                screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
-        heartHalf = scaleImage(loadUiImage("src/res/UI/heart/heart_half.png"),
-                screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
-        heartBlank = scaleImage(loadUiImage("src/res/UI/heart/heart_blank.png"),
-                screenConfig.TILE_SIZE(), screenConfig.TILE_SIZE());
-        menuButton = new SliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png", 21, 21);
+        menuButton         = new SliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png",  21, 21);
         menuButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Hover_3Slides.png", 21, 21);
-        menuLogo = loadUiImage("src/res/UI/Icons/logo_gioco.png");
-        settingsIcon = scaleImage(loadUiImage("src/res/UI/Icons/Regular_02.png"), 56, 56);
+        ribbonBlueWide     = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png",  64, 64);
+        pauseBanner        = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png",    192 / 3, 192 / 3);
+        dialogueBanner     = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png",    64, 64);
+
+        menuLogo            = loadUiImage("src/res/UI/Icons/logo_gioco.png");
+        settingsIcon        = scaleImage(loadUiImage("src/res/UI/Icons/Regular_02.png"), 56, 56);
         settingsIconPressed = scaleImage(loadUiImage("src/res/UI/Icons/Pressed_02.png"), 56, 56);
-        ribbonYellow = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right.png");
-        ribbonRed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right.png");
-        ribbonBlue = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right.png");
+
+        ribbonYellow        = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right.png");
+        ribbonRed           = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right.png");
+        ribbonBlue          = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right.png");
         ribbonYellowPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Right_Pressed.png");
-        ribbonRedPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right_Pressed.png");
-        ribbonBluePressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right_Pressed.png");
-        ribbonBlueWide = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", 64, 64);
-        menuClouds = new BufferedImage[]{
+        ribbonRedPressed    = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Right_Pressed.png");
+        ribbonBluePressed   = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Right_Pressed.png");
+
+        menuClouds = new BufferedImage[] {
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_01.png")),
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_02.png")),
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_03.png")),
@@ -165,163 +170,75 @@ public class UI {
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_07.png")),
                 trimTransparentPadding(loadUiImage("src/res/UI/Clouds/Clouds_08.png"))
         };
-
-
     }
+    //-------------------------------------------------------------
 
+    // =========================================================================
+    // Public API
+    // =========================================================================
 
-    // This method is inside the GAME LOOP --> will be called 60 time per second ! be careful
+    /** Main draw entry-point — called once per frame from the game loop. */
+    //-------------------------------------------------------------
     public void draw(Graphics2D g2) {
         this.g2 = g2;
 
-        g2.setFont(arial_40);
-        g2.setColor(Color.white);
-
         switch (gameModel.getGameState()) {
+            case MENU      -> drawMainMenu();
+            case PLAYING   -> {
 
-            case MENU :
-                drawMainMenu();
-                break;
-
-            case PLAYING :
-                //PLAY STATE
                 drawPlayerLife();
-                if (!gameModel.getCurrentDialogue().isEmpty()){
-                    drawDialogueWindow();
-                }
-                if (!gameModel.getStatusMessage().isEmpty()) {
-                    drawStatusMessage();
-                }
-                break;
-
-            case PAUSED :
-                // PAUSE STATE
-                drawPlayerLife();
-                drawPauseScreen();
-                break;
-
-            case GAME_OVER :
-                drawGameOverScreen();
-                break;
+                if (!gameModel.getCurrentDialogue().isEmpty()) drawDialogueWindow();
+                if (!gameModel.getStatusMessage().isEmpty())   drawStatusMessage();
+            }
+            case PAUSED    -> { drawPlayerLife(); drawPauseScreen(); }
+            case GAME_OVER -> drawGameOverScreen();
         }
 
-        if (gameModel.isDebugMode()) {
-            playerRender.drawSolidArea(g2, gameModel.getPlayer());
-
-            mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
-            List<Object> renderList = new ArrayList<>();
-            renderList.add(gameModel.getPlayer());
-            renderList.add(gameModel.getMonk());
-            renderList.addAll(gameModel.getTntEnemies());
-            renderList.addAll(gameModel.getDynamiteEnemies());
-            renderList.addAll(gameModel.getProjectiles());
-
-            for (Object obj : renderList) {
-                if (obj instanceof Player p) {
-                    playerRender.drawSolidArea(g2, p);
-                }
-                if (obj instanceof Monk m) {
-                   // monkRenderer.drawSolidArea(g2, m);
-                }
-                if (obj instanceof EnemyDynamite ed) {
-                    int screenX = ed.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX();
-                    int screenY = ed.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY();
-
-                    dynamiteRender.drawSolidArea(g2, ed, screenX, screenY);
-                }
-                if (obj instanceof DynamiteProjectile proj) {
-
-                    int screenX = proj.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX();
-                    int screenY = proj.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY();
-
-                    dynamiteRender.drawProjectileSolidArea(g2, proj, screenX, screenY);
-                }
-            }
-
-        
-            for (EnemyTNT tnt : gameModel.getTntEnemies()) {
-                tntRenderer.drawSolidArea(g2, tnt, tnt.getWorldX() - gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getScreenX(),
-                tnt.getWorldY() - gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getScreenY()
-                );
-            }
-
-            drawTreeSolidAreas();
-
-            // FPS overlay (updates every second)
-            frames++;
-            long now = System.nanoTime();
-            if (now - fpsTimer >= 1_000_000_000L) {
-                fps = frames;
-                frames = 0;
-                fpsTimer = now;
-            }
-
-            g2.setColor(Color.YELLOW);
-            g2.setFont(new Font("Monospaced", Font.BOLD, 18));
-            int xTile = (gameModel.getPlayer().getWorldX() + gameModel.getPlayer().getSolidArea().x )/ screenConfig.TILE_SIZE();
-            int yTile = (gameModel.getPlayer().getWorldY() + gameModel.getPlayer().getSolidArea().y )/ screenConfig.TILE_SIZE();
-            g2.drawString("FPS: " + fps + " PLAYER X: "+xTile+", Y:"+yTile+" L: "+gameModel.getPlayer().getCurrentLayer(), 10, 18);
-        }
+        if (gameModel.isDebugMode()) drawDebugOverlay();
     }
+    //-------------------------------------------------------------
 
-    private void drawTreeSolidAreas() {
-        Player player = gameModel.getPlayer();
-        for (GameObject obj : gameModel.getObjects()) {
-            if (!(obj instanceof OBJ_Tree tree)) continue;
-            if (!tree.isSolid() || tree.getSolidArea() == null) continue;
-
-            Rectangle solid = tree.getSolidArea();
-            int screenX = tree.getWorldX() - player.getWorldX() + player.getScreenX();
-            int screenY = tree.getWorldY() - player.getWorldY() + player.getScreenY();
-
-            int drawX = screenX + solid.x;
-            int drawY = screenY + solid.y;
-
-            g2.setColor(new Color(0, 255, 255, 80));
-            g2.fillRect(drawX, drawY, solid.width, solid.height);
-            g2.setColor(Color.CYAN);
-            g2.drawRect(drawX, drawY, solid.width, solid.height);
-        }
+    /**
+     * Starts a 0.5-second red damage flash overlay.
+     * Call this from the model or player whenever the player receives damage.
+     * The overlay fades automatically; no reset is needed.
+     */
+    //-------------------------------------------------------------
+    public void triggerDamageFlash() {
+        damageFlashStartNano = System.nanoTime();
     }
+    //-------------------------------------------------------------
 
+    // =========================================================================
+    // Screen draw methods
+    // =========================================================================
+
+    //-------------------------------------------------------------
     private void drawMainMenu() {
-        g2.setColor(new Color(28, 30, 34));
-        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
-
-        int panelMarginX = 0;
-        int panelMarginY = 0;
-        int panelX = panelMarginX;
-        int panelY = panelMarginY;
-        int panelW = screenConfig.SCREEN_WIDTH() - (panelMarginX * 2);
-        int panelH = screenConfig.SCREEN_HEIGHT() - (panelMarginY * 2);
-
-        GradientPaint backgroundGradient = new GradientPaint(0, 0, new Color(39, 42, 46), screenConfig.SCREEN_WIDTH(), 0, new Color(22, 24, 28));
-        g2.setPaint(backgroundGradient);
-        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
+        int w = screenConfig.SCREEN_WIDTH();
+        int h = screenConfig.SCREEN_HEIGHT();
 
         g2.setColor(new Color(83, 189, 191));
-        g2.fillRect(panelX, panelY, panelW, panelH);
+        g2.fillRect(0, 0, w, h);
         g2.setColor(new Color(140, 224, 228));
-        g2.drawRect(panelX, panelY, panelW - 1, panelH - 1);
-        drawMenuClouds(panelX, panelY, panelW, panelH);
+        g2.drawRect(0, 0, w - 1, h - 1);
+        drawMenuClouds(0, 0, w, h);
 
-        int logoWidth = 500;
+        int logoWidth  = 500;
         int logoHeight = (int) (((double) menuLogo.getHeight() / menuLogo.getWidth()) * logoWidth);
-        int logoX = panelX + (panelW - logoWidth) / 2;
-        int logoY = panelY + 40;
-        g2.drawImage(menuLogo, logoX, logoY, logoWidth, logoHeight, null);
+        g2.drawImage(menuLogo, (w - logoWidth) / 2, 40, logoWidth, logoHeight, null);
 
-        MainMenuLayout layout = getMainMenuLayout();
-        int selectedItem = gameModel.getMainMenuSelection();
-        int hoveredRibbon = gameModel.getHoveredRibbon();
-        int activeRibbon = gameModel.getActiveRibbon();
+        MainMenuLayout layout       = getMainMenuLayout();
+        int selectedItem            = gameModel.getMainMenuSelection();
+        int hoveredRibbon           = gameModel.getHoveredRibbon();
+        int activeRibbon            = gameModel.getActiveRibbon();
 
-        Rectangle newGameBounds = layout.newGameBounds();
-        Rectangle continueBounds = layout.continueBounds();
-        Rectangle settingsBounds = layout.settingsBounds();
+        Rectangle newGameBounds      = layout.newGameBounds();
+        Rectangle continueBounds     = layout.continueBounds();
+        Rectangle settingsBounds     = layout.settingsBounds();
         Rectangle ribbonYellowBounds = layout.ribbonYellowBounds();
-        Rectangle ribbonRedBounds = layout.ribbonRedBounds();
-        Rectangle ribbonBlueBounds = layout.ribbonBlueBounds();
+        Rectangle ribbonRedBounds    = layout.ribbonRedBounds();
+        Rectangle ribbonBlueBounds   = layout.ribbonBlueBounds();
 
         g2.drawImage((hoveredRibbon == 0 || activeRibbon == 0) ? ribbonYellowPressed : ribbonYellow,
                 ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
@@ -330,265 +247,120 @@ public class UI {
         g2.drawImage((hoveredRibbon == 2 || activeRibbon == 2) ? ribbonBluePressed : ribbonBlue,
                 ribbonBlueBounds.x, ribbonBlueBounds.y, ribbonBlueBounds.width, ribbonBlueBounds.height, null);
 
-        drawMainMenuOption(newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height, "New Game", selectedItem == 0);
-        drawMainMenuOption(continueBounds.x, continueBounds.y, continueBounds.width, continueBounds.height, "Resume", selectedItem == 1);
+        drawMenuButton(newGameBounds.x,  newGameBounds.y,  newGameBounds.width,  newGameBounds.height,  "New Game", selectedItem == 0);
+        drawMenuButton(continueBounds.x, continueBounds.y, continueBounds.width, continueBounds.height, "Resume",   selectedItem == 1);
 
-        BufferedImage settingsToDraw = (selectedItem == 2) ? settingsIconPressed : settingsIcon;
-        g2.drawImage(settingsToDraw, settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
+        g2.drawImage((selectedItem == 2) ? settingsIconPressed : settingsIcon,
+                settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
     }
+    //-------------------------------------------------------------
 
-    public MainMenuLayout getMainMenuLayout() {
-        int buttonWidth = 420;
-        int buttonHeight = 96;
-        int centerX = screenConfig.SCREEN_WIDTH() / 2;
-        int firstY = (screenConfig.SCREEN_HEIGHT() / 2) + 58;
-        int verticalGap = 24;
-
-        Rectangle newGameBounds = new Rectangle(centerX - (buttonWidth / 2), firstY, buttonWidth, buttonHeight);
-        Rectangle continueBounds = new Rectangle(centerX - (buttonWidth / 2), firstY + buttonHeight + verticalGap, buttonWidth, buttonHeight);
-
-        int settingsSize = 56;
-        int settingsX = screenConfig.SCREEN_WIDTH() - settingsSize - 24;
-        int settingsY = 24;
-        Rectangle settingsBounds = new Rectangle(settingsX, settingsY, settingsSize, settingsSize);
-
-        int ribbonX = 20;
-        int ribbonY = 16;
-        int ribbonW = 64;
-        int ribbonH = 64;
-        Rectangle ribbonYellowBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
-        Rectangle ribbonRedBounds = new Rectangle(ribbonX, ribbonY + 52, ribbonW, ribbonH);
-        Rectangle ribbonBlueBounds = new Rectangle(ribbonX, ribbonY + 104, ribbonW, ribbonH);
-
-        return new MainMenuLayout(newGameBounds, continueBounds, settingsBounds,
-                ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds);
-    }
-
-    public GameOverLayout getGameOverLayout() {
-        int buttonWidth = 320;
-        int buttonHeight = 84;
-        int centerX = screenConfig.SCREEN_WIDTH() / 2;
-        int buttonY = screenConfig.SCREEN_HEIGHT() - buttonHeight - 56;
-        Rectangle newGameBounds = new Rectangle(centerX - (buttonWidth / 2), buttonY, buttonWidth, buttonHeight);
-        return new GameOverLayout(newGameBounds);
-    }
-
-    private void drawMainMenuOption(int x, int y, int width, int height, String label, boolean selected) {
-        if (selected) {
-            menuButtonSelected.draw(g2, x, y, width, height);
-        } else {
-            menuButton.draw(g2, x, y, width, height);
-        }
-
-        g2.setColor(Color.WHITE);
-        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 50F));
-        Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(label, g2);
-        int textX = x + (int) Math.round((width - textBounds.getWidth()) / 2.0 - textBounds.getX());
-
-        // The button sprite has a stronger bottom shadow; center text on the visual body area.
-        int contentY = y + 4;
-        int contentHeight = height - 35;
-        int textY = contentY + (int) Math.round((contentHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
-        g2.drawString(label, textX, textY);
-    }
-
-    private void drawMenuClouds(int panelX, int panelY, int panelW, int panelH) {
-        if (menuClouds == null || menuClouds.length == 0) {
-            return;
-        }
-
-        float[][] placements = {
-                {0.12f, 0.16f, 180f},
-                {0.29f, 0.24f, 140f},
-                {0.63f, 0.16f, 185f},
-                {0.82f, 0.26f, 135f},
-                {0.11f, 0.49f, 175f},
-                {0.89f, 0.88f, 130f},
-                {0.78f, 0.53f, 165f},
-                {0.28f, 0.72f, 205f}
-
-        };
-
-        Composite oldComposite = g2.getComposite();
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.86f));
-
-        for (int i = 0; i < placements.length; i++) {
-            BufferedImage cloud = menuClouds[i % menuClouds.length];
-            int drawWidth = Math.round(placements[i][2]);
-            int drawHeight = Math.max(1, Math.round(drawWidth * ((float) cloud.getHeight() / cloud.getWidth())));
-
-            int drawX = panelX + Math.round(placements[i][0] * panelW) - (drawWidth / 2);
-            int drawY = panelY + Math.round(placements[i][1] * panelH) - (drawHeight / 2);
-
-            g2.drawImage(cloud, drawX, drawY, drawWidth, drawHeight, null);
-        }
-
-        g2.setComposite(oldComposite);
-    }
-
-    private BufferedImage trimTransparentPadding(BufferedImage source) {
-        int minX = source.getWidth();
-        int minY = source.getHeight();
-        int maxX = -1;
-        int maxY = -1;
-
-        for (int y = 0; y < source.getHeight(); y++) {
-            for (int x = 0; x < source.getWidth(); x++) {
-                int alpha = (source.getRGB(x, y) >>> 24) & 0xFF;
-                if (alpha > 0) {
-                    if (x < minX) minX = x;
-                    if (y < minY) minY = y;
-                    if (x > maxX) maxX = x;
-                    if (y > maxY) maxY = y;
-                }
-            }
-        }
-
-        if (maxX < minX || maxY < minY) {
-            return source;
-        }
-        return source.getSubimage(minX, minY, (maxX - minX) + 1, (maxY - minY) + 1);
-    }
-
-    private BufferedImage loadUiImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Unable to load UI image: " + path, e);
-        }
-    }
-
-    private void drawPlayerLife() {
-        int playerLife = gameModel.getPlayer().getLife();
-        int maxLife = gameModel.getPlayer().getMaxLife();
-        int totalHearts = (maxLife + 1) / 2;
-
-        int heartWidth = heartFull.getWidth();
-        int heartHeight = heartFull.getHeight();
-        int x = 20;
-        int y = 20;
-        int spacing = Math.max(4, heartWidth / 6);
-
-        for (int i = 0; i < totalHearts; i++) {
-            int lifeForHeart = playerLife - (i * 2);
-            BufferedImage heartImage;
-
-            if (lifeForHeart >= 2) {
-                heartImage = heartFull;
-            } else if (lifeForHeart == 1) {
-                heartImage = heartHalf;
-            } else {
-                heartImage = heartBlank;
-            }
-
-            g2.drawImage(heartImage, x + (i * (heartWidth + spacing)), y, null);
-        }
-    }
-
+    //-------------------------------------------------------------
     private void drawPauseScreen() {
-        // BG
         g2.setColor(screenConfig.GAME_BG_COLOR());
         g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
 
-        SliceSprite pauseSprite = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 192/3, 192/3);
+        int bannerWidth  = 192 * 3;
+        int bannerHeight = pauseBanner.getImageHeight();
+        int bannerX      = (screenConfig.SCREEN_WIDTH()  - bannerWidth)  / 2;
+        int bannerY      = (screenConfig.SCREEN_HEIGHT() - bannerHeight) / 2;
+        pauseBanner.draw(g2, bannerX, bannerY, bannerWidth);
 
-        int bannerWidth = 192 * 3; // desired logical width
-        int bannerHeight = pauseSprite.getImageHeight();
-
-        int bannerX = (screenConfig.SCREEN_WIDTH() - bannerWidth) / 2;
-        int bannerY = (screenConfig.SCREEN_HEIGHT() - bannerHeight) / 2;
-
-        pauseSprite.draw(g2, bannerX, bannerY, bannerWidth);
-
-        // PAUSE TITLE
         g2.setColor(Color.WHITE);
-        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 80));
-        String text = "PAUSED";
-
-        int x = getXforCenteredText(text);
-        int y = screenConfig.SCREEN_HEIGHT() / 2;
-
-        g2.drawString(text, x, y);
-
-
+        g2.setFont(maruMonica.deriveFont(Font.BOLD, 80));
+        g2.drawString("PAUSED", getXforCenteredText("PAUSED"), screenConfig.SCREEN_HEIGHT() / 2);
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     private void drawGameOverScreen() {
         drawPlayerLife();
 
+        // Dark semi-transparent overlay
         Composite oldComposite = g2.getComposite();
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
         g2.setColor(new Color(8, 8, 8));
         g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
         g2.setComposite(oldComposite);
 
-        int titleRibbonWidth = 520;
+        // Title ribbon
+        int titleRibbonWidth  = 520;
         int titleRibbonHeight = 80;
-        int titleRibbonX = (screenConfig.SCREEN_WIDTH() - titleRibbonWidth) / 2;
-        int titleRibbonY = 72;
+        int titleRibbonX      = (screenConfig.SCREEN_WIDTH() - titleRibbonWidth) / 2;
+        int titleRibbonY      = 72;
         ribbonBlueWide.draw(g2, titleRibbonX, titleRibbonY, titleRibbonWidth, titleRibbonHeight);
 
+        // "GAME OVER" text centred inside the ribbon
         g2.setColor(Color.WHITE);
-        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 70F));
-        String title = "GAME OVER";
+        g2.setFont(maruMonica.deriveFont(Font.BOLD, 70F));
+        String      title      = "GAME OVER";
         Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(title, g2);
         int textX = getXforCenteredText(title);
         int textY = titleRibbonY + (int) Math.round((titleRibbonHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
         g2.drawString(title, textX, textY);
 
-        GameOverLayout layout = getGameOverLayout();
-        Rectangle newGameBounds = layout.newGameBounds();
-        boolean highlighted = gameModel.isHoveredGameOverButton();
-        drawMainMenuOption(newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height, "New Game", highlighted);
+        // Restart button
+        GameOverLayout layout        = getGameOverLayout();
+        Rectangle      newGameBounds = layout.newGameBounds();
+        drawMenuButton(newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
+                "New Game", gameModel.isHoveredGameOverButton());
     }
+    //-------------------------------------------------------------
 
-    public int getXforCenteredText(String text) {
-        int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        int x = screenConfig.SCREEN_WIDTH() / 2 - length / 2;
-        return x;
-    }
-
+    //-------------------------------------------------------------
     public void drawDialogueWindow() {
-       // Parametri finestra (Simile alla pausa ma in basso)
-        int width = screenConfig.SCREEN_WIDTH() - (screenConfig.TILE_SIZE() * 2);
+        int width  = screenConfig.SCREEN_WIDTH() - (screenConfig.TILE_SIZE() * 2);
         int height = screenConfig.TILE_SIZE() * 4;
-        int x = (screenConfig.SCREEN_WIDTH() - width) / 2;
-        int y = screenConfig.SCREEN_HEIGHT() - height - screenConfig.TILE_SIZE();
+        int x      = (screenConfig.SCREEN_WIDTH() - width) / 2;
+        int y      = screenConfig.SCREEN_HEIGHT() - height - screenConfig.TILE_SIZE();
 
-        // Disegno Banner (SliceSprite)
-        SliceSprite diagSprite = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png", 64, 64);
-        diagSprite.draw(g2, x, y, width);
+        dialogueBanner.draw(g2, x, y, width);
 
-        // Testo
-        g2.setColor(new Color(60, 40, 20)); // Colore scuro per pergamena
-        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 28F));
-        
-        int textX = x + 60;
-        int textY = y + 80;
-
-        // Disegno riga per riga (se usi \n nel testo)
         String dialogue = gameModel.getCurrentDialogue();
         if (dialogue == null || dialogue.isEmpty()) return;
 
+        // Dialogue text
+        g2.setColor(new Color(60, 40, 20));
+        g2.setFont(maruMonica.deriveFont(Font.BOLD, 28F));
+        int textX = x + 60;
+        int textY = y + 80;
         for (String line : dialogue.split("\n")) {
             g2.drawString(line, textX, textY);
             textY += 40;
         }
-        
-        // Indicatore per il giocatore
-        g2.setFont(MaruMonica.deriveFont(Font.ITALIC, 22F));
-        g2.drawString("Premi M per continuare...", x + width - 300, y + height - 130);
+
+        // "Press M to continue" hint
+        g2.setFont(maruMonica.deriveFont(Font.ITALIC, 22F));
+        g2.drawString("Press M to continue...", x + width - 300, y + height - 130);
     }
+    //-------------------------------------------------------------
 
-    public BufferedImage scaleImage(BufferedImage original, int width, int height ){
-        BufferedImage scaledImage = new BufferedImage(width, height, original.getType());
-        Graphics2D g2 = scaledImage.createGraphics(); // andrà a disegnarlo in scale image
-        g2.drawImage(original, 0, 0, width, height, null);
-        g2.dispose();
+    //-------------------------------------------------------------
+    private void drawPlayerLife() {
+        int playerLife  = gameModel.getPlayer().getLife();
+        int totalHearts = (gameModel.getPlayer().getMaxLife() + 1) / 2;
 
-        return scaledImage;
+        int heartWidth = heartFull.getWidth();
+        int spacing    = Math.max(4, heartWidth / 6);
+
+        for (int i = 0; i < totalHearts; i++) {
+            int           lifeForHeart = playerLife - (i * 2);
+            BufferedImage img          = (lifeForHeart >= 2) ? heartFull
+                    : (lifeForHeart == 1) ? heartHalf
+                      : heartBlank;
+            g2.drawImage(img, 20 + i * (heartWidth + spacing), 20, null);
+        }
+
+        // Draw the damage flash only if the 0.5 s window is still active.
+        if (isDamageFlashActive()) {
+            float elapsed = (System.nanoTime() - damageFlashStartNano) / (float) DAMAGE_FLASH_DURATION_NS;
+            float alpha   = 1.0f - Math.min(1.0f, elapsed); // linear fade-out
+            drawDamageOverlay(alpha);
+        }
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     private void drawStatusMessage() {
         String message = gameModel.getStatusMessage();
         if (message == null || message.isEmpty()) return;
@@ -597,25 +369,332 @@ public class UI {
         int paddingY = 18;
         int minWidth = screenConfig.SCREEN_WIDTH() / 3;
 
-        g2.setFont(MaruMonica.deriveFont(Font.BOLD, 30F));
-        FontMetrics metrics = g2.getFontMetrics();
-        int textWidth = metrics.stringWidth(message);
-        int textHeight = metrics.getAscent();
+        g2.setFont(maruMonica.deriveFont(Font.BOLD, 30F));
+        FontMetrics metrics    = g2.getFontMetrics();
+        int         textWidth  = metrics.stringWidth(message);
+        int         textHeight = metrics.getAscent();
 
-        int boxWidth = Math.max(minWidth, textWidth + (paddingX * 2));
+        int boxWidth  = Math.max(minWidth, textWidth + (paddingX * 2));
         int boxHeight = textHeight + (paddingY * 2);
-        int boxX = (screenConfig.SCREEN_WIDTH() - boxWidth) / 2;
-        int boxY = 38;
+        int boxX      = (screenConfig.SCREEN_WIDTH() - boxWidth) / 2;
+        int boxY      = 38;
 
+        // Semi-transparent dark background
         Composite oldComposite = g2.getComposite();
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.82f));
         g2.setColor(new Color(24, 24, 24));
         g2.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 14, 14);
         g2.setComposite(oldComposite);
 
+        // Border and text
         g2.setColor(new Color(230, 230, 230));
         g2.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 14, 14);
         g2.drawString(message, boxX + paddingX, boxY + paddingY + textHeight - 3);
     }
+    //-------------------------------------------------------------
+
+    // =========================================================================
+    // Damage overlay
+    // =========================================================================
+
+    /**
+     * Returns {@code true} while the damage flash window is open.
+     * The window expires {@value #DAMAGE_FLASH_DURATION_NS} ns after the last
+     * call to {@link #triggerDamageFlash()}.
+     */
+    //-------------------------------------------------------------
+    private boolean isDamageFlashActive() {
+        return damageFlashStartNano >= 0
+                && (System.nanoTime() - damageFlashStartNano) < DAMAGE_FLASH_DURATION_NS;
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Draws a red vignette + soft screen flash that fades out according to {@code alpha}.
+     *
+     * @param alpha master opacity in [0, 1]: 1 = fully visible (just hit), 0 = invisible (expired).
+     */
+    //-------------------------------------------------------------
+    private void drawDamageOverlay(float alpha) {
+        int w = screenConfig.SCREEN_WIDTH();
+        int h = screenConfig.SCREEN_HEIGHT();
+
+        Graphics2D g = (Graphics2D) g2.create();
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,    RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // 1) Subtle full-screen warm flash
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.10f * alpha));
+        g.setColor(new Color(255, 220, 220));
+        g.fillRect(0, 0, w, h);
+
+        // 2) Radial red vignette: transparent at centre, opaque at edges
+        float      radius = Math.max(w, h) * 0.62f;
+        Point2D    center = new Point2D.Float(w / 2f, h / 2f);
+        float[]    dist   = { 0.0f, 0.60f, 0.82f, 1.0f };
+        Color[]    colors = {
+                new Color(0,   0, 0, 0),
+                new Color(120, 0, 0, 0),
+                new Color(180, 0, 0, (int)(90  * alpha)),
+                new Color(120, 0, 0, (int)(190 * alpha))
+        };
+        g.setPaint(new RadialGradientPaint(center, radius, dist, colors));
+        g.setComposite(AlphaComposite.SrcOver);
+        g.fillRect(0, 0, w, h);
+
+        // 3) Thin red inner border
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f * alpha));
+        g.setStroke(new BasicStroke(10f));
+        g.setColor(new Color(190, 20, 20));
+        g.drawRect(0, 0, w, h);
+
+        g.dispose();
+    }
+    //-------------------------------------------------------------
+
+    // =========================================================================
+    // Layout computation
+    // =========================================================================
+
+    //-------------------------------------------------------------
+    public MainMenuLayout getMainMenuLayout() {
+        int buttonWidth  = 420;
+        int buttonHeight = 96;
+        int centerX      = screenConfig.SCREEN_WIDTH() / 2;
+        int firstY       = (screenConfig.SCREEN_HEIGHT() / 2) + 58;
+        int gap          = 24;
+
+        Rectangle newGameBounds  = new Rectangle(centerX - buttonWidth / 2, firstY,                      buttonWidth, buttonHeight);
+        Rectangle continueBounds = new Rectangle(centerX - buttonWidth / 2, firstY + buttonHeight + gap, buttonWidth, buttonHeight);
+
+        int settingsSize = 56;
+        Rectangle settingsBounds = new Rectangle(screenConfig.SCREEN_WIDTH() - settingsSize - 24, 24, settingsSize, settingsSize);
+
+        int ribbonX = 20;
+        int ribbonY = 16;
+        int ribbonW = 64;
+        int ribbonH = 64;
+        Rectangle ribbonYellowBounds = new Rectangle(ribbonX, ribbonY,        ribbonW, ribbonH);
+        Rectangle ribbonRedBounds    = new Rectangle(ribbonX, ribbonY + 52,   ribbonW, ribbonH);
+        Rectangle ribbonBlueBounds   = new Rectangle(ribbonX, ribbonY + 104,  ribbonW, ribbonH);
+
+        return new MainMenuLayout(newGameBounds, continueBounds, settingsBounds,
+                ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds);
+    }
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
+    public GameOverLayout getGameOverLayout() {
+        int buttonWidth  = 320;
+        int buttonHeight = 84;
+        int centerX      = screenConfig.SCREEN_WIDTH() / 2;
+        int buttonY      = screenConfig.SCREEN_HEIGHT() - buttonHeight - 56;
+        return new GameOverLayout(new Rectangle(centerX - buttonWidth / 2, buttonY, buttonWidth, buttonHeight));
+    }
+    //-------------------------------------------------------------
+
+    // =========================================================================
+    // Debug overlay
+    // =========================================================================
+
+    //-------------------------------------------------------------
+    private void drawDebugOverlay() {
+        playerRender.drawSolidArea(g2, gameModel.getPlayer());
+        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
+
+        for (EnemyDynamite ed : gameModel.getDynamiteEnemies()) {
+            dynamiteRender.drawSolidArea(g2, ed, screenX(ed.getWorldX()), screenY(ed.getWorldY()));
+        }
+        for (Object proj : gameModel.getProjectiles()) {
+            if (proj instanceof DynamiteProjectile dp) {
+                dynamiteRender.drawProjectileSolidArea(g2, dp, screenX(dp.getWorldX()), screenY(dp.getWorldY()));
+            }
+        }
+        for (EnemyTNT tnt : gameModel.getTntEnemies()) {
+            tntRenderer.drawSolidArea(g2, tnt, screenX(tnt.getWorldX()), screenY(tnt.getWorldY()));
+        }
+
+        drawTreeSolidAreas();
+        drawFpsOverlay();
+    }
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
+    private void drawFpsOverlay() {
+        frames++;
+        long now = System.nanoTime();
+        if (now - fpsTimer >= 1_000_000_000L) {
+            fps      = frames;
+            frames   = 0;
+            fpsTimer = now;
+        }
+
+        Player player = gameModel.getPlayer();
+        int xTile = (player.getWorldX() + player.getSolidArea().x) / screenConfig.TILE_SIZE();
+        int yTile = (player.getWorldY() + player.getSolidArea().y) / screenConfig.TILE_SIZE();
+
+        g2.setColor(Color.YELLOW);
+        g2.setFont(new Font("Monospaced", Font.BOLD, 18));
+        g2.drawString("FPS: " + fps
+                + "  PLAYER X: " + xTile + ", Y: " + yTile
+                + "  L: " + player.getCurrentLayer(), 10, 18);
+    }
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
+    private void drawTreeSolidAreas() {
+        for (GameObject obj : gameModel.getObjects()) {
+            if (!(obj instanceof OBJ_Tree tree)) continue;
+            if (!tree.isSolid() || tree.getSolidArea() == null) continue;
+
+            Rectangle solid = tree.getSolidArea();
+            int drawX = screenX(tree.getWorldX()) + solid.x;
+            int drawY = screenY(tree.getWorldY()) + solid.y;
+
+            g2.setColor(new Color(0, 255, 255, 80));
+            g2.fillRect(drawX, drawY, solid.width, solid.height);
+            g2.setColor(Color.CYAN);
+            g2.drawRect(drawX, drawY, solid.width, solid.height);
+        }
+    }
+    //-------------------------------------------------------------
+
+    // =========================================================================
+    // Private utility methods
+    // =========================================================================
+
+    //-------------------------------------------------------------
+    private void drawMenuClouds(int panelX, int panelY, int panelW, int panelH) {
+        if (menuClouds == null || menuClouds.length == 0) return;
+
+        // Each entry: { relativeX, relativeY, drawWidth }
+        float[][] placements = {
+                { 0.12f, 0.16f, 180f },
+                { 0.29f, 0.24f, 140f },
+                { 0.63f, 0.16f, 185f },
+                { 0.82f, 0.26f, 135f },
+                { 0.11f, 0.49f, 175f },
+                { 0.89f, 0.88f, 130f },
+                { 0.78f, 0.53f, 165f },
+                { 0.28f, 0.72f, 205f }
+        };
+
+        Composite oldComposite = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.86f));
+
+        for (int i = 0; i < placements.length; i++) {
+            BufferedImage cloud      = menuClouds[i % menuClouds.length];
+            int           drawWidth  = Math.round(placements[i][2]);
+            int           drawHeight = Math.max(1, Math.round(drawWidth * ((float) cloud.getHeight() / cloud.getWidth())));
+            int           drawX      = panelX + Math.round(placements[i][0] * panelW) - drawWidth  / 2;
+            int           drawY      = panelY + Math.round(placements[i][1] * panelH) - drawHeight / 2;
+            g2.drawImage(cloud, drawX, drawY, drawWidth, drawHeight, null);
+        }
+
+        g2.setComposite(oldComposite);
+    }
+    //-------------------------------------------------------------
+
+    /** Draws a menu button sprite with a horizontally and vertically centred label. */
+    //-------------------------------------------------------------
+    private void drawMenuButton(int x, int y, int width, int height, String label, boolean selected) {
+        (selected ? menuButtonSelected : menuButton).draw(g2, x, y, width, height);
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(maruMonica.deriveFont(Font.BOLD, 50F));
+        Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(label, g2);
+        int textX = x + (int) Math.round((width - textBounds.getWidth()) / 2.0 - textBounds.getX());
+
+        // The sprite has a heavier bottom shadow, so centre text on the visual body area.
+        int contentY      = y + 4;
+        int contentHeight = height - 35;
+        int textY = contentY + (int) Math.round((contentHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
+        g2.drawString(label, textX, textY);
+    }
+    //-------------------------------------------------------------
+
+    /** Returns the X coordinate at which {@code text} will be horizontally centred on screen. */
+    //-------------------------------------------------------------
+    public int getXforCenteredText(String text) {
+        int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
+        return screenConfig.SCREEN_WIDTH() / 2 - length / 2;
+    }
+    //-------------------------------------------------------------
+
+    /** Converts a world-space X coordinate to screen space relative to the player camera. */
+    //-------------------------------------------------------------
+    private int screenX(int worldX) {
+        Player p = gameModel.getPlayer();
+        return worldX - p.getWorldX() + p.getScreenX();
+    }
+    //-------------------------------------------------------------
+
+    /** Converts a world-space Y coordinate to screen space relative to the player camera. */
+    //-------------------------------------------------------------
+    private int screenY(int worldY) {
+        Player p = gameModel.getPlayer();
+        return worldY - p.getWorldY() + p.getScreenY();
+    }
+    //-------------------------------------------------------------
+
+    /** Returns a new {@link BufferedImage} that is a scaled copy of {@code original}. */
+    //-------------------------------------------------------------
+    public BufferedImage scaleImage(BufferedImage original, int width, int height) {
+        BufferedImage scaled = new BufferedImage(width, height, original.getType());
+        Graphics2D    g      = scaled.createGraphics();
+        g.drawImage(original, 0, 0, width, height, null);
+        g.dispose();
+        return scaled;
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Returns the tightest sub-image of {@code source} that contains all
+     * non-transparent pixels, stripping any empty transparent padding.
+     */
+    //-------------------------------------------------------------
+    private static BufferedImage trimTransparentPadding(BufferedImage source) {
+        int minX = source.getWidth(), minY = source.getHeight();
+        int maxX = -1,               maxY = -1;
+
+        for (int y = 0; y < source.getHeight(); y++) {
+            for (int x = 0; x < source.getWidth(); x++) {
+                if (((source.getRGB(x, y) >>> 24) & 0xFF) > 0) {
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+
+        if (maxX < minX || maxY < minY) return source;
+        return source.getSubimage(minX, minY, (maxX - minX) + 1, (maxY - minY) + 1);
+    }
+    //-------------------------------------------------------------
+
+    /** Loads an image from the given file-system path, throwing on failure. */
+    //-------------------------------------------------------------
+    private BufferedImage loadUiImage(String path) {
+        try {
+            return ImageIO.read(new File(path));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Unable to load UI image: " + path, e);
+        }
+    }
+    //-------------------------------------------------------------
+
+    /** Loads a TrueType font from the given classpath resource, throwing on failure. */
+    //-------------------------------------------------------------
+    private Font loadFont(String resourcePath) {
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            return Font.createFont(Font.TRUETYPE_FONT, is);
+        } catch (FontFormatException | IOException e) {
+            throw new RuntimeException("Unable to load font: " + resourcePath, e);
+        }
+    }
+    //-------------------------------------------------------------
 
 }
+//-------------------------------------------------------------------------------------------------------------------
+// end class UI
