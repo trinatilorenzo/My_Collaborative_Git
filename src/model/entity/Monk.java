@@ -6,6 +6,7 @@ import main.CONFIG.enu.MonkState;
 import java.awt.Rectangle;
 
 public class Monk extends Entity {
+    private static final double DISAPPEAR_DURATION_MS = 1650.0;
 
     //TODO caricamento delle variabili da file
 
@@ -13,6 +14,7 @@ public class Monk extends Entity {
     private MonkState state;
     private String[] dialogues;
     private int dialogueIndex = 0;
+    private double disappearElapsedMs = 0.0;
 
 
     // COSTRUCTOR
@@ -38,6 +40,7 @@ public class Monk extends Entity {
         if (state == MonkState.IDLE) {
             state = MonkState.TALKING;
             dialogueIndex = 0; // start from the first dialogue line
+            disappearElapsedMs = 0.0;
         }
     }
     //-------------------------------------------------------------
@@ -63,9 +66,12 @@ public class Monk extends Entity {
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
-    public void updateDisappearing() {
+    public void update(double deltaMs) {
         if (state == MonkState.DISAPPEARING) {
-            state = MonkState.DISAPPEARED;
+            disappearElapsedMs += deltaMs;
+            if (disappearElapsedMs >= DISAPPEAR_DURATION_MS) {
+                state = MonkState.DISAPPEARED;
+            }
         }
     }
     //-------------------------------------------------------------
@@ -84,7 +90,12 @@ public class Monk extends Entity {
     }
     public int getDialogueIndex() { return dialogueIndex; }
     public MonkState getState() { return state; }
-    public void setState(MonkState state) { this.state = state; }
+    public void setState(MonkState state) {
+        this.state = state;
+        if (state == MonkState.DISAPPEARING) {
+            disappearElapsedMs = 0.0;
+        }
+    }
     //-------------------------------------------------------------
 
     //SETTER
@@ -92,6 +103,7 @@ public class Monk extends Entity {
     public void resetDialogue() {
         state = MonkState.IDLE;
         dialogueIndex = 0;
+        disappearElapsedMs = 0.0;
     }
     //-------------------------------------------------------------
 }

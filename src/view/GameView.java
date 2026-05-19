@@ -108,6 +108,22 @@ public class GameView extends JPanel {
         return ui_render.getGameOverLayout();
     }
 
+    public void setMainMenuSelection(int selection) {
+        ui_render.setMainMenuSelection(selection);
+    }
+
+    public void setHoveredRibbon(int hoveredRibbon) {
+        ui_render.setHoveredRibbon(hoveredRibbon);
+    }
+
+    public void setActiveRibbon(int activeRibbon) {
+        ui_render.setActiveRibbon(activeRibbon);
+    }
+
+    public void setHoveredGameOverButton(boolean hovered) {
+        ui_render.setHoveredGameOverButton(hovered);
+    }
+
     private void applyCustomCursor() {
         try {
             BufferedImage cursorImage = null;
@@ -165,9 +181,6 @@ public class GameView extends JPanel {
     //-------------------------------------------------------------
 
     public void updateAnimations(double deltaMs) {
-        if (model.consumePlayerDamagedEvent()) {
-            ui_render.triggerDamageFlash();
-        }
         tileSet.updateAnimTile(deltaMs);
         playerRender.updateAnimations(model.getPlayer(), deltaMs);
         monkRenderer.update(model.getMonk(), deltaMs);
@@ -303,8 +316,17 @@ public class GameView extends JPanel {
         audioManager.syncBackgroundMusic(gameState);
     }
 
-    public void processAudioEvents() {
+    public void processGameEvents() {
         List<AudioEventType> events = model.consumeAudioEvents();
+        if (events.isEmpty()) {
+            return;
+        }
+        for (AudioEventType event : events) {
+            if (event == AudioEventType.PLAYER_DAMAGED) {
+                ui_render.triggerDamageFlash();
+                break;
+            }
+        }
         audioManager.playEvents(events);
     }
 

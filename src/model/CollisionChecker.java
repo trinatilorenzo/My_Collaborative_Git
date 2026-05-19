@@ -174,7 +174,7 @@ public class CollisionChecker {
                 int previousLayer = entity.getCurrentLayer();
                 updateEntityLayer(entity, bounds, checkRow, colLeft);
                 if (entity.getCurrentLayer() == previousLayer) {
-                    gameModel.onPlayerBlockedByStairs(previousLayer, checkRow, colLeft, colRight);
+
                 }
             }
 

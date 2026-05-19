@@ -29,6 +29,7 @@ public record ObjConfig(String TREE_TAG_03,
     // TREE 03
     public static final int TREE_03_WIDTH = 192; //TODO from file
     public static final int TREE_03_HEIGHT = 256;
+    public static final int TREE_03_HITBOX_OFFSET_Y = 195;
 
     public ArrayList<SpawnPoint> TREES_03_SPAWNPOINT() {return tree03SpawnPoint;}
     //-------------------------------------------------------------
@@ -36,6 +37,7 @@ public record ObjConfig(String TREE_TAG_03,
     // TREE 02
     public static final int TREE_02_WIDTH = 192;
     public static final int TREE_02_HEIGHT = 192;
+    public static final int TREE_02_HITBOX_OFFSET_Y = 135;
 
     public ArrayList<SpawnPoint> TREES_02_SPAWNPOINT() {return tree02SpawnPoint;}
     //-------------------------------------------------------------
@@ -43,6 +45,7 @@ public record ObjConfig(String TREE_TAG_03,
     // TREE 01
     public static final int TREE_01_WIDTH = 192;
     public static final int TREE_01_HEIGHT = 192;
+    public static final int TREE_01_HITBOX_OFFSET_Y = 135;
 
     public ArrayList<SpawnPoint> TREES_01_SPAWNPOINT() {return tree01SpawnPoint;}
     //-------------------------------------------------------------

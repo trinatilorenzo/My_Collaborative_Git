@@ -2,6 +2,7 @@ package model;
 
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
+import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerState;
@@ -15,13 +16,8 @@ import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.DynamiteProjectile;
 import model.event.AudioEventType;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 
 import model.object.OBJ_Tree;
 
@@ -35,13 +31,14 @@ import java.awt.Rectangle;
 */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
+    private static final double GAME_OVER_DELAY_MS = 150.0;
 
     private final GameConfig gameConfig;
     //-------------------------------------------------------------
 
     // Game status
     private GameState gameState;
-    private boolean debugMode = false;
+    private boolean debugMode;
     //-------------------------------------------------------------
 
     // Collision
@@ -50,40 +47,25 @@ public class GameModel {
 
     // Map & OBJ
     private final GameMap worldGameMap;
-    private final List<GameObject> objects = new ArrayList<>();
+    private List<GameObject> objects;
 
     // Player & NPC
     //-------------------------------------------------------------
-    private final Player player;
+    private Player player;
     private Monk monk;
     private List<EnemyTNT> tntEnemies;
     private List<EnemyDynamite> dynamiteEnemies;
     private List<DynamiteProjectile> projectiles;
     //-------------------------------------------------------------
 
+    // System Status
+    private String currentDialogue;
+    private String statusMessage;
+    private double statusMessageTimerMs;
+    //-------------------------------------------------------------
 
-    // TODO da rivedere tuttta sta roba
-    private static final double STAIR_LOCKED_MSG_DURATION_MS = 2200.0;
-    private static final double STAIR_UNLOCKED_MSG_DURATION_MS = 2600.0;
-    private static final double STAIR_LOCKED_MSG_COOLDOWN_MS = 1200.0;
+    private double deadStateElapsedMs;
 
-    private record StairTile(int col, int row) {}
-
-    private String currentDialogue = "";
-    private int mainMenuSelection = 0;
-    private int hoveredRibbon = -1;
-    private int activeRibbon = -1;
-    private boolean hoveredGameOverButton = false;
-
-    // Level -> blocked stair tiles (tile coordinates) for that level.
-    // When that level is cleared, the collision tiles on (level - 1) are opened.
-    private final Map<Integer, List<StairTile>> lockedStairsByLevel = new HashMap<>();
-    private final Set<Integer> unlockedStairsLevels = new HashSet<>();
-
-    private String statusMessage = "";
-    private double statusMessageTimerMs = 0.0;
-    private double stairsLockedMessageCooldownMs = 0.0;
-    private boolean playerDamagedEventPending = false;
     private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
     /**
@@ -95,183 +77,141 @@ public class GameModel {
         worldGameMap = new GameMap(GS.mapConfig(), GS.mapDoc());
         collisionChecker = new CollisionChecker(this);
 
-        player = new Player(GS.entityConfig());
-        initializeNPC();
-        initialieOBJ();
+        gameState = GameState.MENU; // Default game state is the menu state
+        debugMode = false; // Default debug mode is off
 
-        initializeLockedStairsConfig();
+        currentDialogue = "";
+        statusMessage = "";
+        statusMessageTimerMs = 0.0;
 
-        initializeStairLocks();
+        deadStateElapsedMs = 0.0;
 
-        gameState = GameState.MENU;
- 
     }
     //-------------------------------------------------------------
 
     /**
-     * Update the model status
+     * MAIN MATHOD OF THE CLASS
+     * Update the model status, Called by the controller every frame
      */
     //-------------------------------------------------------------
     public void update(InputState input, double deltaMs) {
 
-        if (gameState == GameState.PLAYING) {
-            int lifeBeforeUpdate = player.getLife();
-            int projectileCountBeforeUpdate = projectiles.size();
-            PlayerState playerStateBeforeUpdate = player.getState();
+        // MENU OR GAME OVERE --> No model update
+        if (gameState == GameState.MENU || gameState == GameState.GAME_OVER) {
+            return;
+        }
 
-            if (player.isDying() || player.isDead()) {
-                updateDeathSequence(deltaMs);
-                updateRuntimeMessages(deltaMs);
-                return;
-            }
+        updateSessionState(input); // TODO serve ?
 
-            player.update(input, deltaMs);
-            if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
-                emitAudioEvent(AudioEventType.PLAYER_ATTACK);
-            }
-
-            collisionChecker.checkTile(player);
-            collisionChecker.checkObjects(player);
-
-            boolean monkCollision = collisionChecker.intersects(player, monk);
-            
-            for (EnemyTNT tnt : tntEnemies) {
-                TNTState previousState = tnt.getState();
-                if (tnt.getState() != TNTState.EXPLODED) {
-                    collisionChecker.checkEntity(player, tnt);
-                }
-                tnt.update(player, deltaMs);
-                if (previousState != tnt.getState() && tnt.getState() == TNTState.EXPLODING) {
-                    emitAudioEvent(AudioEventType.TNT_EXPLOSION);
-                }
-
-                collisionChecker.checkTile(tnt);
-                collisionChecker.checkObjects(tnt);
-                if (tnt.getState() == TNTState.WANDER) {
-                    collisionChecker.checkEntity(tnt, player);
-                }
-                tnt.move();
-            }
-            tntEnemies.removeIf(EnemyTNT::isExploded);
-
-            for (EnemyDynamite dynamite : dynamiteEnemies){
-                DynamiteState previousState = dynamite.getState();
-                collisionChecker.checkEntity(player, dynamite);
-                dynamite.update(player, deltaMs);
-                if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
-                    emitAudioEvent(AudioEventType.ENEMY_ALERT);
-                }
-
-                collisionChecker.checkTile(dynamite);
-                collisionChecker.checkObjects(dynamite);
-                if (dynamite.getState() == DynamiteState.WANDER) {
-                    collisionChecker.checkEntity(dynamite, player);
-                }
-                dynamite.move();
-            }
-            dynamiteEnemies.removeIf(EnemyDynamite::isDead);
-
-            for (DynamiteProjectile proj : projectiles) {
-                proj.update(deltaMs);
-                collisionChecker.checkTile(proj);
-
-                if (collisionChecker.intersects(player, proj)){
-                    player.takeDamage();
-                    proj.explode();
-                }
-            }
-            // Remove exploded projectiles
-            projectiles.removeIf(DynamiteProjectile::isExploded);
-
-            evaluateLevelUnlocks();
-
-            if (player.getState() == PlayerState.WALKING) {
-                player.move();
-            }
-            updateInteractions(input, monkCollision);
-
+        if (gameState != GameState.PLAYING) {
             updateRuntimeMessages(deltaMs);
-            if (player.getLife() < lifeBeforeUpdate) {
-                playerDamagedEventPending = true;
-                emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
-            }
-            if (projectiles.size() > projectileCountBeforeUpdate) {
-                emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
-            }
-
-
-
+            return;
         }
+
+        if (player.isDying() || player.isDead()) {
+            updateDeathSequence(deltaMs);
+            updateRuntimeMessages(deltaMs);
+            updateGameOverCountdown(deltaMs);
+            return;
+        }
+
+        updatePlayingState(input, deltaMs);
     }
     //-------------------------------------------------------------
 
     /**
-     * UTILITY METODH initialize NPC by reading the spawn point from config file
+     * Start a new game from scratch
      */
     //-------------------------------------------------------------
-    private void initializeNPC() {
-        //load the monk
-        monk = new Monk(gameConfig.entityConfig().MONK_START_X(),
-                        gameConfig.entityConfig().MONK_START_Y(),
-                        gameConfig.entityConfig());
-        //load the tnt
-        tntEnemies = new ArrayList<>();
-        for (SpawnPoint sp : gameConfig.entityConfig().TNT_SPAWNPOINT()) {
-            for (int i = 0; i < gameConfig.entityConfig().TNT_FOR_SPAWNPOINT; i++) {
-                tntEnemies.add(new EnemyTNT(sp, gameConfig.entityConfig()));
-            }
-        }
+    public void initializeNewGame(){
 
-        //load the dynamite
-        dynamiteEnemies = new ArrayList<>();
+        player = new Player(gameConfig.entityConfig());
+
+        //initialize NPC
+        EntityConfig entityConfig = gameConfig.entityConfig();
+        monk = new Monk(entityConfig.MONK_START_X(), entityConfig.MONK_START_Y(), entityConfig);
+        tntEnemies = spawnTntEnemies(entityConfig);
         projectiles = new ArrayList<>();
-        for (SpawnPoint sp : gameConfig.entityConfig().DYNAMITE_SPAWNPOINT()) {
-            for (int i = 0; i < gameConfig.entityConfig().DYNAMITE_FOR_SPAWNPOINT; i++) {
-                dynamiteEnemies.add(new EnemyDynamite(sp, gameConfig.entityConfig(), projectiles));
+        dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles);
+
+        //initialize Objects
+        ObjConfig objC = gameConfig.ObjConfig();
+        objects = new ArrayList<>();
+
+        // first level tree
+        spawnTrees(objC.TREES_03_SPAWNPOINT(), objC.TREE_TAG_03(), objC.TREE_03_WIDTH, objC.TREE_03_HEIGHT, objC.TREE_03_HITBOX_OFFSET_Y, objC);
+        // second level tree
+        spawnTrees(objC.TREES_02_SPAWNPOINT(), objC.TREE_TAG_02(), objC.TREE_02_WIDTH, objC.TREE_02_HEIGHT, objC.TREE_02_HITBOX_OFFSET_Y, objC);
+        // third level tree
+        spawnTrees(objC.TREES_01_SPAWNPOINT(), objC.TREE_TAG_01(), objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT, objC.TREE_01_HITBOX_OFFSET_Y, objC);
+
+        // START THE GAME
+        gameState = GameState.PLAYING;
+        emitAudioEvent(AudioEventType.GAME_START);
+
+        // TODO non credo che questa roba sia necessaria
+        player.resetForNewGame();
+        monk.resetDialogue();
+        currentDialogue = "";
+        clearStatusMessage();
+        pendingAudioEvents.clear();
+        deadStateElapsedMs = 0.0;
+    }
+    /**
+     * HELPERS METHOD
+     */
+    private List<EnemyTNT> spawnTntEnemies(EntityConfig entityConfig) {
+        List<EnemyTNT> enemies = new ArrayList<>();
+        for (SpawnPoint spawnPoint : entityConfig.TNT_SPAWNPOINT()) {
+            for (int i = 0; i < entityConfig.TNT_FOR_SPAWNPOINT; i++) {
+                enemies.add(new EnemyTNT(spawnPoint, entityConfig));
             }
         }
+        return enemies;
     }
+    private List<EnemyDynamite> spawnDynamiteEnemies(EntityConfig entityConfig, List<DynamiteProjectile> projectileStore) {
+        List<EnemyDynamite> enemies = new ArrayList<>();
+        for (SpawnPoint spawnPoint : entityConfig.DYNAMITE_SPAWNPOINT()) {
+            for (int i = 0; i < entityConfig.DYNAMITE_FOR_SPAWNPOINT; i++) {
+                enemies.add(new EnemyDynamite(spawnPoint, entityConfig, projectileStore));
+            }
+        }
+        return enemies;
+    }
+    private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
+        for (SpawnPoint spawnPoint : spawnPoints) {
+            objects.add(new OBJ_Tree(
+                    treeTag,
+                    spawnPoint.x(), spawnPoint.y(), spawnPoint.layer(),
+                    treeWidth, treeHeight,
+                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig),
+                    objConfig
+            ));
+        }
+    }
+    private Rectangle createTreeSolidArea(int treeWidth, int hitboxOffsetY, ObjConfig objConfig) {
+        return new Rectangle(
+                treeWidth / 2 - (objConfig.TREE_HITBOX_WIDTH / 2),
+                hitboxOffsetY,
+                objConfig.TREE_HITBOX_WIDTH,
+                objConfig.TREE_HITBOX_HEIGHT
+        );
+    }
+    //end helpers -------------------------------------------------
+    //-------------------------------------------------------------
 
     /**
-     * UTILITY METODH initialize OBJ by reading the spawn point from config file
+     * Load a saved game from file
      */
     //-------------------------------------------------------------
-    private void initialieOBJ(){
-        ObjConfig objC = gameConfig.ObjConfig();
-        Rectangle solidArea = new Rectangle(objC.TREE_03_WIDTH/2 - (objC.TREE_HITBOX_WIDTH/2),
-                195, //TODO better
-                objC.TREE_HITBOX_WIDTH,
-                objC.TREE_HITBOX_HEIGHT);
-        //load the first type of tree
-        for (SpawnPoint sp : gameConfig.ObjConfig().TREES_03_SPAWNPOINT()) {
-            objects.add(new OBJ_Tree(objC.TREE_TAG_03(),
-                            sp.x(), sp.y(), sp.layer(),
-                            objC.TREE_03_WIDTH, objC.TREE_03_HEIGHT,solidArea,
-                            gameConfig.ObjConfig()));
-        }
-        Rectangle solidArea2 = new Rectangle(objC.TREE_02_WIDTH/2 - (objC.TREE_HITBOX_WIDTH/2),
-                135, //TODO better
-                objC.TREE_HITBOX_WIDTH,
-                objC.TREE_HITBOX_HEIGHT);
-        // load the second type of tree
-        for (SpawnPoint sp : gameConfig.ObjConfig().TREES_02_SPAWNPOINT()) {
-            objects.add(new OBJ_Tree(objC.TREE_TAG_02(),
-                    sp.x(), sp.y(), sp.layer(),
-                    objC.TREE_02_WIDTH, objC.TREE_02_HEIGHT,solidArea2,
-                    gameConfig.ObjConfig()));
-        }
-        // load the third type of tree
-        for (SpawnPoint sp : gameConfig.ObjConfig().TREES_01_SPAWNPOINT()) {
-            objects.add(new OBJ_Tree(objC.TREE_TAG_01(),
-                    sp.x(), sp.y(), sp.layer(),
-                    objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT,solidArea2,
-                    gameConfig.ObjConfig()));
-        }
-
+    private void loadSavedGame(){
+        //TODO load saved game
     }
     //-------------------------------------------------------------
+
 
     private void updateDeathSequence(double deltaMs) {
+        monk.update(deltaMs);
         // Keep only finite transitions running; do not start new gameplay logic.
         for (EnemyTNT tnt : tntEnemies) {
             if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
@@ -287,6 +227,100 @@ public class GameModel {
         projectiles.removeIf(DynamiteProjectile::isExploded);
 
 
+    }
+
+    private void updatePlayingState(InputState input, double deltaMs) {
+        int lifeBeforeUpdate = player.getLife();
+        int projectileCountBeforeUpdate = projectiles.size();
+
+        boolean monkCollision = updatePlayerPhase(input, deltaMs);
+        updateEnemiesPhase(deltaMs);
+        updateProjectilesPhase(deltaMs);
+
+        if (player.getState() == PlayerState.WALKING) {
+            player.move();
+        }
+        updateInteractions(input, monkCollision);
+        monk.update(deltaMs);
+
+        updateRuntimeMessages(deltaMs);
+        updateGameOverCountdown(deltaMs);
+        updatePostFrameEvents(lifeBeforeUpdate, projectileCountBeforeUpdate);
+    }
+
+    private boolean updatePlayerPhase(InputState input, double deltaMs) {
+        PlayerState playerStateBeforeUpdate = player.getState();
+        player.update(input, deltaMs);
+        if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
+            emitAudioEvent(AudioEventType.PLAYER_ATTACK);
+        }
+
+        collisionChecker.checkTile(player);
+        collisionChecker.checkObjects(player);
+        return collisionChecker.intersects(player, monk);
+    }
+
+    private void updateEnemiesPhase(double deltaMs) {
+        for (EnemyTNT tnt : tntEnemies) {
+            TNTState previousState = tnt.getState();
+            if (tnt.getState() != TNTState.EXPLODED) {
+                collisionChecker.checkEntity(player, tnt);
+            }
+            tnt.update(player, deltaMs);
+            if (previousState != tnt.getState() && tnt.getState() == TNTState.EXPLODING) {
+                emitAudioEvent(AudioEventType.TNT_EXPLOSION);
+            }
+            if (previousState != tnt.getState() && tnt.getState() == TNTState.TRIGGERED) {
+                emitAudioEvent(AudioEventType.TNT_TRIGGERED);
+            }
+
+            collisionChecker.checkTile(tnt);
+            collisionChecker.checkObjects(tnt);
+            if (tnt.getState() == TNTState.WANDER) {
+                collisionChecker.checkEntity(tnt, player);
+            }
+            tnt.move();
+        }
+        tntEnemies.removeIf(EnemyTNT::isExploded);
+
+        for (EnemyDynamite dynamite : dynamiteEnemies) {
+            DynamiteState previousState = dynamite.getState();
+            collisionChecker.checkEntity(player, dynamite);
+            dynamite.update(player, deltaMs);
+            if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
+                emitAudioEvent(AudioEventType.ENEMY_ALERT);
+            }
+
+            collisionChecker.checkTile(dynamite);
+            collisionChecker.checkObjects(dynamite);
+            if (dynamite.getState() == DynamiteState.WANDER) {
+                collisionChecker.checkEntity(dynamite, player);
+            }
+            dynamite.move();
+        }
+        dynamiteEnemies.removeIf(EnemyDynamite::isDead);
+    }
+
+    private void updateProjectilesPhase(double deltaMs) {
+        for (DynamiteProjectile proj : projectiles) {
+            proj.update(deltaMs);
+            collisionChecker.checkTile(proj);
+
+            if (collisionChecker.intersects(player, proj)) {
+                player.takeDamage();
+                proj.explode();
+            }
+        }
+        projectiles.removeIf(DynamiteProjectile::isExploded);
+    }
+
+    private void updatePostFrameEvents(int lifeBeforeUpdate, int projectileCountBeforeUpdate) {
+        if (player.getLife() < lifeBeforeUpdate) {
+            emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
+        }
+        if (projectiles.size() > projectileCountBeforeUpdate) {
+            emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
+        }
     }
 
     public boolean hasPendingTransientAnimations() {
@@ -311,135 +345,9 @@ public class GameModel {
         return false;
     }
 
-    public void resetForNewGame() {
-        player.resetForNewGame();
-        monk.resetDialogue();
-        currentDialogue = "";
-        hoveredRibbon = -1;
-        activeRibbon = -1;
-        hoveredGameOverButton = false;
-        clearStatusMessage();
-        pendingAudioEvents.clear();
-        initializeNPC();
-        initializeStairLocks();
-        gameState = GameState.PLAYING;
-        emitAudioEvent(AudioEventType.GAME_START);
-    }
 
 
-    private void initializeLockedStairsConfig() {
-        // Layer 2 -> Layer 1 gate (existing map note)
-        lockedStairsByLevel.put(2, List.of(
-                new StairTile(42, 25),
-                new StairTile(43, 25),
-                new StairTile(44, 25)
-        ));
 
-        // Layer 3 -> Layer 2 gate (existing map note)
-        lockedStairsByLevel.put(3, List.of(
-                new StairTile(57, 43),
-                new StairTile(58, 43),
-                new StairTile(59, 43)
-        ));
-    }
-
-    private void initializeStairLocks() {
-        unlockedStairsLevels.clear();
-
-        for (Map.Entry<Integer, List<StairTile>> entry : lockedStairsByLevel.entrySet()) {
-            int level = entry.getKey();
-            int collisionLayerToClose = level - 1;
-            if (collisionLayerToClose < 0 || collisionLayerToClose >= worldGameMap.getGameLayerNum()) continue;
-
-            for (StairTile tile : entry.getValue()) {
-                worldGameMap.setCollisionTile(collisionLayerToClose, tile.row(), tile.col(), true);
-            }
-        }
-    }
-
-    private void evaluateLevelUnlocks() {
-        List<Integer> levels = new ArrayList<>(lockedStairsByLevel.keySet());
-        levels.sort(Comparator.reverseOrder());
-
-        for (int level : levels) {
-            if (unlockedStairsLevels.contains(level)) continue;
-            if (hasLivingEnemiesOnLayer(level)) continue;
-
-            unlockStairsForLevel(level);
-        }
-    }
-
-    private boolean hasLivingEnemiesOnLayer(int layer) {
-        for (EnemyTNT tnt : tntEnemies) {
-            if (!tnt.isExploded() && tnt.getCurrentLayer() == layer) {
-                return true;
-            }
-        }
-        for (EnemyDynamite dynamite : dynamiteEnemies) {
-            if (!dynamite.isDead() && dynamite.getCurrentLayer() == layer) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private int getLivingEnemiesCountOnLayer(int layer) {
-        int count = 0;
-        for (EnemyTNT tnt : tntEnemies) {
-            if (!tnt.isExploded() && tnt.getCurrentLayer() == layer) {
-                count++;
-            }
-        }
-        for (EnemyDynamite dynamite : dynamiteEnemies) {
-            if (!dynamite.isDead() && dynamite.getCurrentLayer() == layer) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private void unlockStairsForLevel(int level) {
-        List<StairTile> tiles = lockedStairsByLevel.get(level);
-        if (tiles == null || tiles.isEmpty()) {
-            unlockedStairsLevels.add(level);
-            return;
-        }
-
-        int collisionLayerToOpen = level - 1;
-        if (collisionLayerToOpen < 0 || collisionLayerToOpen >= worldGameMap.getGameLayerNum()) {
-            unlockedStairsLevels.add(level);
-            return;
-        }
-
-        for (StairTile tile : tiles) {
-            worldGameMap.setCollisionTile(collisionLayerToOpen, tile.row(), tile.col(), false);
-        }
-
-        unlockedStairsLevels.add(level);
-        showStatusMessage("Hai sconfitto tutti i mostri del livello " + level + ". Scale sbloccate!", STAIR_UNLOCKED_MSG_DURATION_MS);
-        emitAudioEvent(AudioEventType.STAIRS_UNLOCKED);
-    }
-
-    private boolean isLockedStairTile(int level, int row, int col) {
-        List<StairTile> tiles = lockedStairsByLevel.get(level);
-        if (tiles == null || tiles.isEmpty()) return false;
-
-        for (StairTile tile : tiles) {
-            if (tile.row() == row && tile.col() == col) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void showLockedStairsMessage(int level) {
-        if (stairsLockedMessageCooldownMs > 0) return;
-
-        int remaining = getLivingEnemiesCountOnLayer(level);
-        showStatusMessage("Scale bloccate: elimina tutti i mostri del livello (" + remaining + " rimasti).", STAIR_LOCKED_MSG_DURATION_MS);
-        stairsLockedMessageCooldownMs = STAIR_LOCKED_MSG_COOLDOWN_MS;
-        emitAudioEvent(AudioEventType.STAIRS_LOCKED);
-    }
 
     private void showStatusMessage(String message, double durationMs) {
         statusMessage = message;
@@ -449,7 +357,6 @@ public class GameModel {
     private void clearStatusMessage() {
         statusMessage = "";
         statusMessageTimerMs = 0.0;
-        stairsLockedMessageCooldownMs = 0.0;
     }
 
     private void updateRuntimeMessages(double deltaMs) {
@@ -460,35 +367,29 @@ public class GameModel {
                 statusMessageTimerMs = 0.0;
             }
         }
+    }
 
-        if (stairsLockedMessageCooldownMs > 0) {
-            stairsLockedMessageCooldownMs -= deltaMs;
-            if (stairsLockedMessageCooldownMs < 0) {
-                stairsLockedMessageCooldownMs = 0.0;
-            }
+    private void updateSessionState(InputState input) {
+        if (player.isDying() || player.isDead()) {
+            gameState = GameState.PLAYING;
+            return;
+        }
+        gameState = input.pause() ? GameState.PAUSED : GameState.PLAYING;
+    }
+
+    private void updateGameOverCountdown(double deltaMs) {
+        boolean readyForGameOver = player.isDeathAnimationCompleted() && !hasPendingTransientAnimations();
+        if (readyForGameOver) {
+            deadStateElapsedMs += deltaMs;
+        } else {
+            deadStateElapsedMs = 0.0;
+        }
+        if (deadStateElapsedMs >= GAME_OVER_DELAY_MS) {
+            gameState = GameState.GAME_OVER;
+            deadStateElapsedMs = 0.0;
         }
     }
 
-    public void onPlayerBlockedByStairs(int currentLayer, int checkRow, int colLeft, int colRight) {
-        if (unlockedStairsLevels.contains(currentLayer)) {
-            return;
-        }
-
-        boolean blockedStairTile =
-                isLockedStairTile(currentLayer, checkRow, colLeft)
-                || isLockedStairTile(currentLayer, checkRow, colRight);
-
-        if (!blockedStairTile) {
-            return;
-        }
-
-        if (!hasLivingEnemiesOnLayer(currentLayer)) {
-            unlockStairsForLevel(currentLayer);
-            return;
-        }
-
-        showLockedStairsMessage(currentLayer);
-    }
     //TODO controllare bene
 
     /**
@@ -553,15 +454,6 @@ public class GameModel {
 
     }
     //-------------------------------------------------------------
-    // State machine 
-    public void togglePause() {
-        if (gameState == GameState.PLAYING) {
-            gameState = GameState.PAUSED;
-        } else if (gameState == GameState.PAUSED) {
-            gameState = GameState.PLAYING;
-        }
-    }
-
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
@@ -576,14 +468,11 @@ public class GameModel {
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
-    public int getMainMenuSelection() { return mainMenuSelection; }
-    public int getHoveredRibbon() { return hoveredRibbon; }
-    public int getActiveRibbon() { return activeRibbon; }
-    public boolean isHoveredGameOverButton() { return hoveredGameOverButton; }
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
     public String getStatusMessage() { return statusMessage; }
+
     public List<AudioEventType> consumeAudioEvents() {
         if (pendingAudioEvents.isEmpty()) {
             return List.of();
@@ -592,20 +481,10 @@ public class GameModel {
         pendingAudioEvents.clear();
         return snapshot;
     }
-    public boolean consumePlayerDamagedEvent() {
-        boolean wasPending = playerDamagedEventPending;
-        playerDamagedEventPending = false;
-        return wasPending;
-    }
     //---------------------------------
 
     // SETTER ----------------------
-    public void setGameState(GameState gameState) { this.gameState = gameState; }
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
-    public void setMainMenuSelection(int mainMenuSelection) { this.mainMenuSelection = mainMenuSelection; }
-    public void setHoveredRibbon(int hoveredRibbon) { this.hoveredRibbon = hoveredRibbon; }
-    public void setActiveRibbon(int activeRibbon) { this.activeRibbon = activeRibbon; }
-    public void setHoveredGameOverButton(boolean hoveredGameOverButton) { this.hoveredGameOverButton = hoveredGameOverButton; }
     //---------------------------------
 
 

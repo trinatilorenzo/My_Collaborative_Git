@@ -1,16 +1,24 @@
 package view.audio;
 
+import javazoom.jl.decoder.JavaLayerException;
+import javazoom.jl.player.JavaSoundAudioDevice;
 import javazoom.jl.player.Player;
 
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.SourceDataLine;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.DoubleSupplier;
 
 public class AudioPlayer {
     private Thread musicThread;
     private volatile Player currentMusicPlayer;
     private String currentMusicPath;
     private volatile int musicSession = 0;
+    private volatile double musicVolume = 0.65;
+    private volatile double sfxVolume = 0.4;
 
     // --- Stato per la sequenza controllata ---
     private volatile String[] sequencePaths;
@@ -34,7 +42,7 @@ public class AudioPlayer {
         int session = ++musicSession;
         musicThread = new Thread(() -> {
             while (session == musicSession) {
-                playTrack(resourcePath, true, session);
+                playTrack(resourcePath, true, session, () -> musicVolume);
             }
         }, "music-loop");
         musicThread.setDaemon(true);
@@ -48,29 +56,25 @@ public class AudioPlayer {
     public void playOnce(String resourcePath) {
         if (resourcePath == null || resourcePath.isBlank()) return;
 
-        Thread sfxThread = new Thread(() -> playTrack(resourcePath, false, -1), "sfx-once");
+        Thread sfxThread = new Thread(
+                () -> playTrack(resourcePath, false, -1, () -> sfxVolume),
+                "sfx-once"
+        );
         sfxThread.setDaemon(true);
         sfxThread.start();
     }
 
     // =========================================================
     //  SEQUENZA AUTOMATICA
-    //  Riproduce tutti i suoni uno dopo l'altro senza intervento esterno.
     // =========================================================
 
-    /**
-     * Avvia la riproduzione automatica dell'array di suoni in ordine.
-     * Ogni traccia parte solo quando la precedente è terminata.
-     * Non bloccante: il lavoro viene svolto su un thread dedicato.
-     */
     public void playSequence(String[] resourcePaths) {
         if (resourcePaths == null || resourcePaths.length == 0) return;
 
         Thread seqThread = new Thread(() -> {
             for (String path : resourcePaths) {
                 if (path == null || path.isBlank()) continue;
-                // playTrack è sincrono: ritorna solo a fine riproduzione
-                playTrack(path, false, -1);
+                playTrack(path, false, -1, () -> sfxVolume);
             }
         }, "sfx-sequence-auto");
 
@@ -80,54 +84,32 @@ public class AudioPlayer {
 
     // =========================================================
     //  SEQUENZA CONTROLLATA
-    //  Carichi la sequenza una volta, poi chiami playNext()
-    //  ogni volta che vuoi avanzare al suono successivo.
     // =========================================================
 
-    /**
-     * Carica una sequenza di suoni da riprodurre in modo controllato.
-     * Resetta l'indice e annulla l'eventuale attesa in corso.
-     */
     public void loadSequence(String[] resourcePaths) {
         if (resourcePaths == null) return;
         sequencePaths = resourcePaths.clone();
         sequenceIndex = 0;
-        // latch già a 0 → nessuna traccia in corso, playNext() non aspetta
         trackLatch = new CountDownLatch(0);
     }
 
-    /**
-     * @return true se ci sono ancora tracce da riprodurre nella sequenza caricata.
-     */
     public boolean hasNext() {
         return sequencePaths != null && sequenceIndex < sequencePaths.length;
     }
 
-    /**
-     * Aspetta che la traccia corrente (se presente) sia terminata,
-     * poi avvia la successiva nella sequenza caricata con {@link #loadSequence}.
-     *
-     * @return true se una nuova traccia è stata avviata, false se la sequenza è esaurita.
-     * @throws InterruptedException se il thread viene interrotto durante l'attesa.
-     */
     public boolean playNext() throws InterruptedException {
         if (!hasNext()) return false;
-
-        // Aspetta la fine della traccia precedente
         trackLatch.await();
-
-        // Ricontrollo dopo l'attesa (la sequenza potrebbe essere stata resettata)
         if (!hasNext()) return false;
 
         String path = sequencePaths[sequenceIndex++];
 
-        // Nuovo latch: verrà abbassato quando questa traccia finisce
         CountDownLatch latch = new CountDownLatch(1);
         trackLatch = latch;
 
         Thread t = new Thread(() -> {
-            playTrack(path, false, -1);
-            latch.countDown(); // segnala che la traccia è finita
+            playTrack(path, false, -1, () -> sfxVolume);
+            latch.countDown();
         }, "sfx-seq-step");
         t.setDaemon(true);
         t.start();
@@ -154,10 +136,30 @@ public class AudioPlayer {
     }
 
     // =========================================================
+    //  VOLUME
+    // =========================================================
+
+    public void setMusicVolume(double volume) {
+        musicVolume = clampVolume(volume);
+    }
+
+    public void setSfxVolume(double volume) {
+        sfxVolume = clampVolume(volume);
+    }
+
+    public double getMusicVolume() {
+        return musicVolume;
+    }
+
+    public double getSfxVolume() {
+        return sfxVolume;
+    }
+
+    // =========================================================
     //  CORE (sincrono, blocca fino a fine riproduzione)
     // =========================================================
 
-    private void playTrack(String resourcePath, boolean isMusic, int session) {
+    private void playTrack(String resourcePath, boolean isMusic, int session, DoubleSupplier volumeSupplier) {
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
             if (is == null) {
                 System.err.println("Audio non trovato: " + resourcePath);
@@ -165,7 +167,8 @@ public class AudioPlayer {
             }
 
             try (BufferedInputStream bis = new BufferedInputStream(is)) {
-                Player player = new Player(bis);
+                VolumeAudioDevice audioDevice = new VolumeAudioDevice(volumeSupplier);
+                Player player = new Player(bis, audioDevice);
 
                 if (isMusic) {
                     if (session != musicSession) {
@@ -175,7 +178,7 @@ public class AudioPlayer {
                     currentMusicPlayer = player;
                 }
 
-                player.play(); // blocca fino a fine traccia
+                player.play();
             }
         } catch (Exception e) {
             System.err.println("Errore audio su " + resourcePath + ": " + e.getMessage());
@@ -183,6 +186,82 @@ public class AudioPlayer {
             if (isMusic && session == musicSession) {
                 currentMusicPlayer = null;
             }
+        }
+    }
+
+    private static double clampVolume(double value) {
+        if (value < 0.0) return 0.0;
+        if (value > 1.0) return 1.0;
+        return value;
+    }
+
+    /**
+     * AudioDevice JLayer con controllo volume tramite MASTER_GAIN.
+     * Se la line non espone il controllo, la riproduzione continua comunque.
+     */
+    private static final class VolumeAudioDevice extends JavaSoundAudioDevice {
+        private static final Field SOURCE_FIELD;
+
+        static {
+            try {
+                SOURCE_FIELD = JavaSoundAudioDevice.class.getDeclaredField("source");
+                SOURCE_FIELD.setAccessible(true);
+            } catch (Exception e) {
+                throw new IllegalStateException("Impossibile inizializzare il controllo volume", e);
+            }
+        }
+
+        private final DoubleSupplier volumeSupplier;
+        private FloatControl gainControl;
+        private double lastAppliedVolume = -1.0;
+
+        private VolumeAudioDevice(DoubleSupplier volumeSupplier) {
+            this.volumeSupplier = volumeSupplier;
+        }
+
+        @Override
+        protected void createSource() throws JavaLayerException {
+            super.createSource();
+            bindGainControl();
+            applyVolumeIfNeeded();
+        }
+
+        @Override
+        protected void writeImpl(short[] samples, int offs, int len) throws JavaLayerException {
+            applyVolumeIfNeeded();
+            super.writeImpl(samples, offs, len);
+        }
+
+        private void bindGainControl() {
+            try {
+                SourceDataLine sourceLine = (SourceDataLine) SOURCE_FIELD.get(this);
+                if (sourceLine != null && sourceLine.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                    gainControl = (FloatControl) sourceLine.getControl(FloatControl.Type.MASTER_GAIN);
+                }
+            } catch (Exception ignored) {
+                gainControl = null;
+            }
+        }
+
+        private void applyVolumeIfNeeded() {
+            if (gainControl == null) return;
+
+            double requested = clampVolume(volumeSupplier.getAsDouble());
+            if (Math.abs(requested - lastAppliedVolume) < 0.001) return;
+
+            lastAppliedVolume = requested;
+
+            float minDb = gainControl.getMinimum();
+            float maxDb = gainControl.getMaximum();
+
+            float targetDb = requested <= 0.0001
+                    ? minDb
+                    : (float) (20.0 * Math.log10(requested));
+
+            if (targetDb < minDb) targetDb = minDb;
+            if (targetDb > maxDb) targetDb = maxDb;
+
+            gainControl.setValue(targetDb);
         }
     }
 }

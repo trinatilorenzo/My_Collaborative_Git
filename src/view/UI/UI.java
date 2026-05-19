@@ -102,6 +102,10 @@ public class UI {
     // =========================================================================
 
     private long damageFlashStartNano = -1L;
+    private int mainMenuSelection = 0;
+    private int hoveredRibbon = -1;
+    private int activeRibbon = -1;
+    private boolean hoveredGameOverButton = false;
 
     // =========================================================================
     // Layout records
@@ -211,6 +215,22 @@ public class UI {
     }
     //-------------------------------------------------------------
 
+    public void setMainMenuSelection(int mainMenuSelection) {
+        this.mainMenuSelection = mainMenuSelection;
+    }
+
+    public void setHoveredRibbon(int hoveredRibbon) {
+        this.hoveredRibbon = hoveredRibbon;
+    }
+
+    public void setActiveRibbon(int activeRibbon) {
+        this.activeRibbon = activeRibbon;
+    }
+
+    public void setHoveredGameOverButton(boolean hoveredGameOverButton) {
+        this.hoveredGameOverButton = hoveredGameOverButton;
+    }
+
     // =========================================================================
     // Screen draw methods
     // =========================================================================
@@ -231,9 +251,9 @@ public class UI {
         g2.drawImage(menuLogo, (w - logoWidth) / 2, 40, logoWidth, logoHeight, null);
 
         MainMenuLayout layout       = getMainMenuLayout();
-        int selectedItem            = gameModel.getMainMenuSelection();
-        int hoveredRibbon           = gameModel.getHoveredRibbon();
-        int activeRibbon            = gameModel.getActiveRibbon();
+        int selectedItem            = mainMenuSelection;
+        int hoveredRibbon           = this.hoveredRibbon;
+        int activeRibbon            = this.activeRibbon;
 
         Rectangle newGameBounds      = layout.newGameBounds();
         Rectangle continueBounds     = layout.continueBounds();
@@ -305,7 +325,7 @@ public class UI {
         GameOverLayout layout        = getGameOverLayout();
         Rectangle      newGameBounds = layout.newGameBounds();
         drawMenuButton(newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
-                "New Game", gameModel.isHoveredGameOverButton());
+                "New Game", hoveredGameOverButton);
     }
     //-------------------------------------------------------------
 

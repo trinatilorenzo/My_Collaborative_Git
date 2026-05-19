@@ -17,8 +17,9 @@ import java.util.ArrayList;
 //----------------------------------------------------------------------------------------------------------------------
 public record EntityConfig(ScreenConfig screenConfig,
                            SpawnPoint playerSpawnPoint,
-                          SpawnPoint monkSpawnPoint,
-                          ArrayList<SpawnPoint> TntSpawnPoint) {
+                           SpawnPoint monkSpawnPoint,
+                           ArrayList<SpawnPoint> TntSpawnPoint,
+                           ArrayList<SpawnPoint> DynamiteSpawnPoint ) {
 
     //TODO load from somwere
     public static final int SPRITE_WIDTH = 192;
@@ -76,7 +77,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int TNT_HITBOX_WIDTH = 55;
     public static final int TNT_HITBOX_HEIGHT = 35;
 
-    public static final int TNT_FOR_SPAWNPOINT = 1;
+    public static final int TNT_FOR_SPAWNPOINT = 10;
     public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
     //-------------------------------------------------------------
@@ -93,7 +94,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int DYNAMITE_HITBOX_HEIGHT = 35;
 
     public static final int DYNAMITE_FOR_SPAWNPOINT = 1;
-    public ArrayList<SpawnPoint> DYNAMITE_SPAWNPOINT() {return TntSpawnPoint;}
+    public ArrayList<SpawnPoint> DYNAMITE_SPAWNPOINT() {return DynamiteSpawnPoint;}
     //-------------------------------------------------------------
 
 

@@ -21,6 +21,7 @@ public class Player extends Entity {
     private Direction facingDirection;
     private EntityConfig entityConfig;
     private boolean deathAnimationCompleted;
+    private boolean attackLatch;
 
 
     // COSTRUCTOR
@@ -55,6 +56,7 @@ public class Player extends Entity {
         maxLife = 6;
         life = maxLife;
         deathAnimationCompleted = false;
+        attackLatch = false;
     }
     //-------------------------------------------------------------
 
@@ -120,12 +122,18 @@ public class Player extends Entity {
      */
     //-------------------------------------------------------------
     private void updateState(InputState input, boolean isMoving) {
+        // sblocca quando rilasci SPACE
+        if (!input.attack()) {
+            attackLatch = false;
+        }
+
         if (state == PlayerState.ATTACKING) {
             return;
         }
 
-        if (input.attack()) {
+        if (input.attack() && !attackLatch) {
             state = PlayerState.ATTACKING;
+            attackLatch = true;
         } else if (isMoving) {
             state = PlayerState.WALKING;
         } else {

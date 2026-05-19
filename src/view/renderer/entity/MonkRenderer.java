@@ -58,9 +58,6 @@ public class MonkRenderer {
         }
 
         animationManager.update(deltaMs);
-        if (monk.getState() == MonkState.DISAPPEARING && animationManager.getCurrent().isFinished()) {
-            monk.updateDisappearing();
-        }
     }
 
 

@@ -97,11 +97,16 @@ public final class GameConfig {
         //create the config
         this.screenConfig = new ScreenConfig(TILE_SIZE, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
-        this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint,monkSpawnPoint,tntSpawPoint);
+        this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint,monkSpawnPoint,tntSpawPoint,dynamiteSpawnPoint);
         this.ObjConfig = new ObjConfig(TREE_TAG_03, TREE_TAG_02, TREE_TAG_01, treeSpawns03, treeSpawns02, treeSpawns01);
         this.UIConfig = new UIConfig();
     }//end constructor
     //-------------------------------------------------------------
+
+
+
+
+
 
 
     /**

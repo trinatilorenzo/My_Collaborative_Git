@@ -53,7 +53,6 @@ public class Main {
             view.setCursor(customCursor);
             window.setCursor(customCursor);
         }
-
         //window.addKeyListener(controller);
 
         window.setLocationRelativeTo(null);
