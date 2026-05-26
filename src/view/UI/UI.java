@@ -38,6 +38,8 @@ public class UI {
 
     /** Duration of the damage flash overlay in nanoseconds (0.5 s). */
     private static final long DAMAGE_FLASH_DURATION_NS = 1500_000_000L;
+    private static final int DAMAGE_ALPHA_STEPS = 24;
+    private static final float[] DAMAGE_GRADIENT_DIST = { 0.0f, 0.60f, 0.82f, 1.0f };
 
     // =========================================================================
     // Dependencies
@@ -106,6 +108,10 @@ public class UI {
     private int hoveredRibbon = -1;
     private int activeRibbon = -1;
     private boolean hoveredGameOverButton = false;
+    private BufferedImage damageOverlayCache;
+    private int damageOverlayCacheWidth = -1;
+    private int damageOverlayCacheHeight = -1;
+    private int damageOverlayAlphaStep = -1;
 
     // =========================================================================
     // Layout records
@@ -441,36 +447,62 @@ public class UI {
         int w = screenConfig.SCREEN_WIDTH();
         int h = screenConfig.SCREEN_HEIGHT();
 
-        Graphics2D g = (Graphics2D) g2.create();
-        g.setRenderingHint(RenderingHints.KEY_RENDERING,    RenderingHints.VALUE_RENDER_QUALITY);
+        int alphaStep = Math.max(0, Math.min(DAMAGE_ALPHA_STEPS, Math.round(alpha * DAMAGE_ALPHA_STEPS)));
+        if (damageOverlayCache == null
+                || damageOverlayCacheWidth != w
+                || damageOverlayCacheHeight != h
+                || damageOverlayAlphaStep != alphaStep) {
+            rebuildDamageOverlayCache(w, h, alphaStep / (float) DAMAGE_ALPHA_STEPS);
+        }
+        g2.drawImage(damageOverlayCache, 0, 0, null);
+    }
+    //-------------------------------------------------------------
+
+    private void rebuildDamageOverlayCache(int w, int h, float alpha) {
+        damageOverlayCache = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        damageOverlayCacheWidth = w;
+        damageOverlayCacheHeight = h;
+        damageOverlayAlphaStep = Math.round(alpha * DAMAGE_ALPHA_STEPS);
+
+        Graphics2D g = damageOverlayCache.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        final Color warmFlashColor = new Color(255, 220, 220);
+        final Color borderColor = new Color(190, 20, 20);
+        final BasicStroke borderStroke = new BasicStroke(10f);
+
+        long startNs = System.nanoTime();
         // 1) Subtle full-screen warm flash
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.10f * alpha));
-        g.setColor(new Color(255, 220, 220));
+        g.setColor(warmFlashColor);
         g.fillRect(0, 0, w, h);
 
         // 2) Radial red vignette: transparent at centre, opaque at edges
         float      radius = Math.max(w, h) * 0.62f;
         Point2D    center = new Point2D.Float(w / 2f, h / 2f);
-        float[]    dist   = { 0.0f, 0.60f, 0.82f, 1.0f };
         Color[]    colors = {
                 new Color(0,   0, 0, 0),
                 new Color(120, 0, 0, 0),
                 new Color(180, 0, 0, (int)(90  * alpha)),
                 new Color(120, 0, 0, (int)(190 * alpha))
         };
-        g.setPaint(new RadialGradientPaint(center, radius, dist, colors));
+        g.setPaint(new RadialGradientPaint(center, radius, DAMAGE_GRADIENT_DIST, colors));
         g.setComposite(AlphaComposite.SrcOver);
         g.fillRect(0, 0, w, h);
 
         // 3) Thin red inner border
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35f * alpha));
-        g.setStroke(new BasicStroke(10f));
-        g.setColor(new Color(190, 20, 20));
+        g.setStroke(borderStroke);
+        g.setColor(borderColor);
         g.drawRect(0, 0, w, h);
 
         g.dispose();
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000L;
+        if (gameModel.isDebugMode() && elapsedMs >= 4) {
+            System.out.println("[UI] damage overlay cache rebuilt in " + elapsedMs + "ms (alphaStep="
+                    + damageOverlayAlphaStep + ", " + w + "x" + h + ")");
+        }
     }
     //-------------------------------------------------------------
 
