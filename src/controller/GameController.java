@@ -14,9 +14,6 @@ import java.awt.Rectangle;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {
-    private static final int MENU_ITEM_COUNT = 3;
-    private static final int MENU_NEW_GAME_INDEX = 0;
-
     private final GameModel model;
     private final GameView view;
     private final KeyHandler keyHandler;
@@ -24,10 +21,7 @@ public class GameController {
     private final GameLoop loop;
     private boolean renderOnceOnPause = true; // flag to control rendering when paused
     private GameState lastKnownState;
-    private int mainMenuSelection = 0;
-    private int hoveredRibbon = -1;
-    private int activeRibbon = -1;
-    private boolean hoveredGameOverButton = false;
+    private boolean attackLatch;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -39,13 +33,12 @@ public class GameController {
         this.mouseHandler = new MouseHandler();
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
+        this.attackLatch = false;
         
         view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
         view.addMouseListener(mouseHandler);
         view.addMouseMotionListener(mouseHandler);
         view.setFocusable(true); // ensure the view can receive keyboard focus
-        publishMenuUiState();
-        publishGameOverUiState();
     }
     //-------------------------------------------------------------
 
@@ -66,7 +59,8 @@ public class GameController {
      */
     public void update(double deltaMs) { //called by the game loop every frame with a fixed delta time
 
-        InputState input = keyHandler.getInputState();
+        InputState rawInput = keyHandler.getInputState();
+        InputState input = adaptAttackInput(rawInput);
 
         if (model.getGameState() == GameState.MENU) {
             updateMainMenu(input);
@@ -94,59 +88,75 @@ public class GameController {
 
     }
     //-------------------------------------------------------------
+    private InputState adaptAttackInput(InputState rawInput) {
+        boolean attackPressedThisFrame = rawInput.attack() && !attackLatch;
+
+        if (!rawInput.attack()) {
+            attackLatch = false;
+        } else if (attackPressedThisFrame) {
+            attackLatch = true;
+        }
+
+        return new InputState(
+                rawInput.up(),
+                rawInput.down(),
+                rawInput.left(),
+                rawInput.right(),
+                attackPressedThisFrame,
+                rawInput.pause(),
+                rawInput.debug(),
+                rawInput.interact(),
+                rawInput.menuPrevious(),
+                rawInput.menuNext(),
+                rawInput.menuConfirm()
+        );
+    }
+
     private void updateMainMenu(InputState input) {
         UI.MainMenuLayout layout = view.getMainMenuLayout();
         Point mousePosition = mouseHandler.getMousePosition();
-        int selection = mainMenuSelection;
+        int selection = model.getMainMenuSelection();
         selection = selectionFromMouse(layout, mousePosition, selection);
-        hoveredRibbon = hoveredRibbonFromMouse(layout, mousePosition);
+        model.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
+        model.selectMainMenuItem(selection);
 
         if (input.menuPrevious()) {
-            selection = (selection - 1 + MENU_ITEM_COUNT) % MENU_ITEM_COUNT;
+            model.selectPreviousMainMenuItem();
         }
         if (input.menuNext()) {
-            selection = (selection + 1) % MENU_ITEM_COUNT;
+            model.selectNextMainMenuItem();
         }
-
-        mainMenuSelection = selection;
 
         boolean leftClicked = mouseHandler.consumeLeftClick();
         if (leftClicked && layout.newGameBounds().contains(mousePosition)) {
-            startNewGame();
+            model.handleMainMenuButtonClick(0);
             return;
         }
         if (leftClicked && layout.continueBounds().contains(mousePosition)) {
-            mainMenuSelection = 1;
-            publishMenuUiState();
+            model.handleMainMenuButtonClick(1);
             return;
         }
         if (leftClicked && layout.settingsBounds().contains(mousePosition)) {
-            mainMenuSelection = 2;
-            publishMenuUiState();
+            model.handleMainMenuButtonClick(2);
             return;
         }
         if (leftClicked && layout.ribbonYellowBounds().contains(mousePosition)) {
-            activeRibbon = 0;
-            publishMenuUiState();
+            model.setActiveRibbon(0);
             return;
         }
         if (leftClicked && layout.ribbonRedBounds().contains(mousePosition)) {
-            activeRibbon = 1;
-            publishMenuUiState();
+            model.setActiveRibbon(1);
             return;
         }
         if (leftClicked && layout.ribbonBlueBounds().contains(mousePosition)) {
-            activeRibbon = 2;
-            publishMenuUiState();
+            model.setActiveRibbon(2);
             return;
         }
 
-        if (input.menuConfirm() && selection == MENU_NEW_GAME_INDEX) {
-            startNewGame();
+        if (input.menuConfirm()) {
+            model.handleMainMenuConfirm();
             return;
         }
-
-        publishMenuUiState();
     }
 
     private int selectionFromMouse(UI.MainMenuLayout layout, Point mousePosition, int fallback) {
@@ -180,13 +190,7 @@ public class GameController {
     }
 
     private void startNewGame() {
-        mainMenuSelection = 0;
-        hoveredRibbon = -1;
-        activeRibbon = -1;
-        hoveredGameOverButton = false;
-        publishMenuUiState();
-        publishGameOverUiState();
-        model.initializeNewGame();
+        model.requestNewGame();
         renderOnceOnPause = true;
     }
     //-------------------------------------------------------------
@@ -194,11 +198,10 @@ public class GameController {
         UI.GameOverLayout layout = view.getGameOverLayout();
         Point mousePosition = mouseHandler.getMousePosition();
 
-        hoveredGameOverButton = contains(layout.newGameBounds(), mousePosition);
-        publishGameOverUiState();
+        model.setHoveredGameOverButton(contains(layout.newGameBounds(), mousePosition));
 
         boolean leftClicked = mouseHandler.consumeLeftClick();
-        if ((leftClicked && hoveredGameOverButton) || input.menuConfirm()) {
+        if ((leftClicked && model.isHoveredGameOverButton()) || input.menuConfirm()) {
             startNewGame();
         }
     }
@@ -210,16 +213,6 @@ public class GameController {
             lastKnownState = currentState;
         }
         view.processGameEvents();
-    }
-
-    private void publishMenuUiState() {
-        view.setMainMenuSelection(mainMenuSelection);
-        view.setHoveredRibbon(hoveredRibbon);
-        view.setActiveRibbon(activeRibbon);
-    }
-
-    private void publishGameOverUiState() {
-        view.setHoveredGameOverButton(hoveredGameOverButton);
     }
 
     //-------------------------------------------------------------

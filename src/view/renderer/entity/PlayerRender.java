@@ -23,6 +23,7 @@ public class PlayerRender {
 
     private AnimationManager animationManager;
     private final EntityConfig entityConfig;
+    private PlayerState previousState = PlayerState.IDLE;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -107,7 +108,10 @@ public class PlayerRender {
 
     //-------------------------------------------------------------
     public void updateAnimations(Player player, double deltaMs) {
-        switch (player.getState()) {
+        PlayerState currentState = player.getState();
+        boolean attackJustStarted = currentState == PlayerState.ATTACKING && previousState != PlayerState.ATTACKING;
+
+        switch (currentState) {
             case IDLE:
                 animationManager.playAnimation("idle");
                 break;
@@ -124,9 +128,14 @@ public class PlayerRender {
                     animationManager.playAnimation("attack_right");
                 }
 
+                // Restart attack clip on every new attack cycle, even if it's the same animation as before.
+                if (attackJustStarted) {
+                    animationManager.getCurrent().reset();
+                }
+
                 // When attack animation finishes, release the attack state
                 if (animationManager.getCurrent().isFinished()) {
-                    player.stopAttack();
+                    player.completeAttackAnimation();
                 }
                 break;
             case DYING:
@@ -140,6 +149,7 @@ public class PlayerRender {
                 break;
         }
         animationManager.update(deltaMs);
+        previousState = player.getState();
     }
     //-------------------------------------------------------------
 

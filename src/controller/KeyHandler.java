@@ -80,6 +80,7 @@ public class KeyHandler implements KeyListener {
                 menuNext,
                 menuConfirm
         );
+
         interact = false; // Reset interact after returning the state, so it only triggers once per key press
         menuPrevious = false;
         menuNext = false;

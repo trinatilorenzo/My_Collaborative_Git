@@ -32,6 +32,7 @@ import java.awt.Rectangle;
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
     private static final double GAME_OVER_DELAY_MS = 150.0;
+    private static final int MAIN_MENU_ITEM_COUNT = 3;
 
     private final GameConfig gameConfig;
     //-------------------------------------------------------------
@@ -59,14 +60,18 @@ public class GameModel {
     //-------------------------------------------------------------
 
     // System Status
-    private String currentDialogue;
-    private String statusMessage;
+    private String currentDialogue; // diaologue currently displayed to the player
+    private String statusMessage; // status message to be displayed for a short time
     private double statusMessageTimerMs;
     //-------------------------------------------------------------
 
     private double deadStateElapsedMs;
 
     private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
+    private int mainMenuSelection;
+    private int hoveredRibbon;
+    private int activeRibbon;
+    private boolean hoveredGameOverButton;
 
     /**
      * COSTRUCTOR
@@ -85,37 +90,8 @@ public class GameModel {
         statusMessageTimerMs = 0.0;
 
         deadStateElapsedMs = 0.0;
+        resetMenuUiState();
 
-    }
-    //-------------------------------------------------------------
-
-    /**
-     * MAIN MATHOD OF THE CLASS
-     * Update the model status, Called by the controller every frame
-     */
-    //-------------------------------------------------------------
-    public void update(InputState input, double deltaMs) {
-
-        // MENU OR GAME OVERE --> No model update
-        if (gameState == GameState.MENU || gameState == GameState.GAME_OVER) {
-            return;
-        }
-
-        updateSessionState(input); // TODO serve ?
-
-        if (gameState != GameState.PLAYING) {
-            updateRuntimeMessages(deltaMs);
-            return;
-        }
-
-        if (player.isDying() || player.isDead()) {
-            updateDeathSequence(deltaMs);
-            updateRuntimeMessages(deltaMs);
-            updateGameOverCountdown(deltaMs);
-            return;
-        }
-
-        updatePlayingState(input, deltaMs);
     }
     //-------------------------------------------------------------
 
@@ -124,6 +100,7 @@ public class GameModel {
      */
     //-------------------------------------------------------------
     public void initializeNewGame(){
+        resetMenuUiState();
 
         player = new Player(gameConfig.entityConfig());
 
@@ -147,15 +124,6 @@ public class GameModel {
 
         // START THE GAME
         gameState = GameState.PLAYING;
-        emitAudioEvent(AudioEventType.GAME_START);
-
-        // TODO non credo che questa roba sia necessaria
-        player.resetForNewGame();
-        monk.resetDialogue();
-        currentDialogue = "";
-        clearStatusMessage();
-        pendingAudioEvents.clear();
-        deadStateElapsedMs = 0.0;
     }
     /**
      * HELPERS METHOD
@@ -200,40 +168,57 @@ public class GameModel {
     //end helpers -------------------------------------------------
     //-------------------------------------------------------------
 
+
     /**
-     * Load a saved game from file
+     * MAIN MATHOD OF THE CLASS
+     * Update the model status, Called by the controller every frame
      */
     //-------------------------------------------------------------
-    private void loadSavedGame(){
-        //TODO load saved game
+    public void update(InputState input, double deltaMs) {
+
+        // TODO scriverlo più leggibile
+        // MENU
+        if (gameState == GameState.MENU){
+            return; // --> No model update
+        }
+        //GAME OVER
+        if (gameState == GameState.GAME_OVER) {
+            return; // --> No model update
+        }
+
+        // PAUSE
+        updateState(input); // TODO serve ?
+
+        if (gameState != GameState.PLAYING) {
+            updateRuntimeMessages(deltaMs);
+            return;
+        }
+
+        // DEATH
+        if (player.isDying() || player.isDead()) {
+            updateDeathSequence(deltaMs);
+            updateRuntimeMessages(deltaMs);
+            updateGameOverCountdown(deltaMs);
+            return;
+        }
+
+        // PLAYING
+        updatePlayingState(input, deltaMs);
     }
     //-------------------------------------------------------------
 
 
-    private void updateDeathSequence(double deltaMs) {
-        monk.update(deltaMs);
-        // Keep only finite transitions running; do not start new gameplay logic.
-        for (EnemyTNT tnt : tntEnemies) {
-            if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
-                tnt.update(player, deltaMs);
-            }
-        }
-        tntEnemies.removeIf(EnemyTNT::isExploded);
-
-        for (DynamiteProjectile proj : projectiles) {
-            proj.update(deltaMs);
-            collisionChecker.checkTile(proj);
-        }
-        projectiles.removeIf(DynamiteProjectile::isExploded);
-
-
-    }
-
+    // ALL THE UPDATE METHOD
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void updatePlayingState(InputState input, double deltaMs) {
+
+        //save condition before update
         int lifeBeforeUpdate = player.getLife();
         int projectileCountBeforeUpdate = projectiles.size();
 
         boolean monkCollision = updatePlayerPhase(input, deltaMs);
+
         updateEnemiesPhase(deltaMs);
         updateProjectilesPhase(deltaMs);
 
@@ -246,11 +231,14 @@ public class GameModel {
         updateRuntimeMessages(deltaMs);
         updateGameOverCountdown(deltaMs);
         updatePostFrameEvents(lifeBeforeUpdate, projectileCountBeforeUpdate);
-    }
 
+    }
+    //-------------------------------------------------------------
     private boolean updatePlayerPhase(InputState input, double deltaMs) {
+
         PlayerState playerStateBeforeUpdate = player.getState();
         player.update(input, deltaMs);
+
         if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
             emitAudioEvent(AudioEventType.PLAYER_ATTACK);
         }
@@ -259,7 +247,7 @@ public class GameModel {
         collisionChecker.checkObjects(player);
         return collisionChecker.intersects(player, monk);
     }
-
+    //-------------------------------------------------------------
     private void updateEnemiesPhase(double deltaMs) {
         for (EnemyTNT tnt : tntEnemies) {
             TNTState previousState = tnt.getState();
@@ -300,103 +288,7 @@ public class GameModel {
         }
         dynamiteEnemies.removeIf(EnemyDynamite::isDead);
     }
-
-    private void updateProjectilesPhase(double deltaMs) {
-        for (DynamiteProjectile proj : projectiles) {
-            proj.update(deltaMs);
-            collisionChecker.checkTile(proj);
-
-            if (collisionChecker.intersects(player, proj)) {
-                player.takeDamage();
-                proj.explode();
-            }
-        }
-        projectiles.removeIf(DynamiteProjectile::isExploded);
-    }
-
-    private void updatePostFrameEvents(int lifeBeforeUpdate, int projectileCountBeforeUpdate) {
-        if (player.getLife() < lifeBeforeUpdate) {
-            emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
-        }
-        if (projectiles.size() > projectileCountBeforeUpdate) {
-            emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
-        }
-    }
-
-    public boolean hasPendingTransientAnimations() {
-        if (player.isDying()) {
-            return true;
-        }
-        if (monk.getState() == MonkState.DISAPPEARING) {
-            return true;
-        }
-
-        for (EnemyTNT tnt : tntEnemies) {
-            if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
-                return true;
-            }
-        }
-
-        if (!projectiles.isEmpty()) {
-            return true;
-        }
-
-
-        return false;
-    }
-
-
-
-
-
-    private void showStatusMessage(String message, double durationMs) {
-        statusMessage = message;
-        statusMessageTimerMs = durationMs;
-    }
-
-    private void clearStatusMessage() {
-        statusMessage = "";
-        statusMessageTimerMs = 0.0;
-    }
-
-    private void updateRuntimeMessages(double deltaMs) {
-        if (statusMessageTimerMs > 0) {
-            statusMessageTimerMs -= deltaMs;
-            if (statusMessageTimerMs <= 0) {
-                statusMessage = "";
-                statusMessageTimerMs = 0.0;
-            }
-        }
-    }
-
-    private void updateSessionState(InputState input) {
-        if (player.isDying() || player.isDead()) {
-            gameState = GameState.PLAYING;
-            return;
-        }
-        gameState = input.pause() ? GameState.PAUSED : GameState.PLAYING;
-    }
-
-    private void updateGameOverCountdown(double deltaMs) {
-        boolean readyForGameOver = player.isDeathAnimationCompleted() && !hasPendingTransientAnimations();
-        if (readyForGameOver) {
-            deadStateElapsedMs += deltaMs;
-        } else {
-            deadStateElapsedMs = 0.0;
-        }
-        if (deadStateElapsedMs >= GAME_OVER_DELAY_MS) {
-            gameState = GameState.GAME_OVER;
-            deadStateElapsedMs = 0.0;
-        }
-    }
-
-    //TODO controllare bene
-
-    /**
-     * Interactions with objects
-     */
     //-------------------------------------------------------------
-    //TODO better timing and animation
     private void updateInteractions(InputState input, boolean monkCollision) {
         if (player.getState() == PlayerState.ATTACKING) {
             Rectangle attackArea = player.getAttackArea();
@@ -454,6 +346,185 @@ public class GameModel {
 
     }
     //-------------------------------------------------------------
+    private void updateProjectilesPhase(double deltaMs) {
+        for (DynamiteProjectile proj : projectiles) {
+            proj.update(deltaMs);
+            collisionChecker.checkTile(proj);
+
+            if (collisionChecker.intersects(player, proj)) {
+                player.takeDamage();
+                proj.explode();
+            }
+        }
+        projectiles.removeIf(DynamiteProjectile::isExploded);
+    }
+    //-------------------------------------------------------------
+    private void updatePostFrameEvents(int lifeBeforeUpdate, int projectileCountBeforeUpdate) {
+        if (player.getLife() < lifeBeforeUpdate) {
+            emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
+        }
+        if (projectiles.size() > projectileCountBeforeUpdate) {
+            emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
+        }
+    }
+    //-------------------------------------------------------------
+    private void updateDeathSequence(double deltaMs) {
+        monk.update(deltaMs);
+        // Keep only finite transitions running; do not start new gameplay logic.
+        for (EnemyTNT tnt : tntEnemies) {
+            if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
+                tnt.update(player, deltaMs);
+            }
+        }
+        tntEnemies.removeIf(EnemyTNT::isExploded);
+
+        for (DynamiteProjectile proj : projectiles) {
+            proj.update(deltaMs);
+            collisionChecker.checkTile(proj);
+        }
+        projectiles.removeIf(DynamiteProjectile::isExploded);
+    }
+    //-------------------------------------------------------------
+    private void updateState(InputState input) {
+        if (player.isDying() || player.isDead()) {
+            gameState = GameState.PLAYING;
+            return;
+        }
+        if(input.pause()){
+            gameState = GameState.PAUSED;
+        }else {
+            gameState = GameState.PLAYING;
+        }
+    }
+    //-------------------------------------------------------------
+    private void updateGameOverCountdown(double deltaMs) {
+        boolean readyForGameOver = player.isDeathAnimationCompleted() && !hasPendingTransientAnimations();
+        if (readyForGameOver) {
+            deadStateElapsedMs += deltaMs;
+        } else {
+            deadStateElapsedMs = 0.0;
+        }
+        if (deadStateElapsedMs >= GAME_OVER_DELAY_MS) {
+            gameState = GameState.GAME_OVER;
+            deadStateElapsedMs = 0.0;
+        }
+    }
+    //-------------------------------------------------------------
+    private void updateRuntimeMessages(double deltaMs) {
+        if (statusMessageTimerMs > 0) {
+            statusMessageTimerMs -= deltaMs;
+            if (statusMessageTimerMs <= 0) {
+                statusMessage = "";
+                statusMessageTimerMs = 0.0;
+            }
+        }
+    }
+    //-------------------------------------------------------------
+    //end updates method ------------------------------------------
+
+
+    /**
+     * Load a saved game from file
+     */
+    //-------------------------------------------------------------
+    private void loadSavedGame(){
+        //TODO load saved game
+    }
+    //-------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+    public boolean hasPendingTransientAnimations() {
+        if (player.isDying()) {
+            return true;
+        }
+        if (monk.getState() == MonkState.DISAPPEARING) {
+            return true;
+        }
+
+        for (EnemyTNT tnt : tntEnemies) {
+            if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
+                return true;
+            }
+        }
+
+        if (!projectiles.isEmpty()) {
+            return true;
+        }
+
+
+        return false;
+    }
+
+
+
+
+
+    private void showStatusMessage(String message, double durationMs) {
+        statusMessage = message;
+        statusMessageTimerMs = durationMs;
+    }
+
+    private void clearStatusMessage() {
+        statusMessage = "";
+        statusMessageTimerMs = 0.0;
+    }
+
+
+    public void selectMainMenuItem(int selection) {
+        mainMenuSelection = Math.max(0, Math.min(MAIN_MENU_ITEM_COUNT - 1, selection));
+    }
+
+    public void selectPreviousMainMenuItem() {
+        mainMenuSelection = (mainMenuSelection - 1 + MAIN_MENU_ITEM_COUNT) % MAIN_MENU_ITEM_COUNT;
+    }
+
+    public void selectNextMainMenuItem() {
+        mainMenuSelection = (mainMenuSelection + 1) % MAIN_MENU_ITEM_COUNT;
+    }
+
+    public void confirmMainMenuSelection() {
+        if (mainMenuSelection == 0) {
+            initializeNewGame();
+        }
+    }
+
+    public void handleMainMenuButtonClick(int buttonIndex) {
+        selectMainMenuItem(buttonIndex);
+        if (buttonIndex == 0) {
+            initializeNewGame();
+        }
+    }
+
+    public void handleMainMenuConfirm() {
+        confirmMainMenuSelection();
+    }
+
+    public void requestNewGame() {
+        initializeNewGame();
+    }
+
+    public void setHoveredRibbon(int hoveredRibbon) {
+        this.hoveredRibbon = hoveredRibbon;
+    }
+
+    public void setActiveRibbon(int activeRibbon) {
+        this.activeRibbon = activeRibbon;
+    }
+
+    public void setHoveredGameOverButton(boolean hoveredGameOverButton) {
+        this.hoveredGameOverButton = hoveredGameOverButton;
+    }
+
+
+    //-------------------------------------------------------------
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
@@ -472,6 +543,10 @@ public class GameModel {
         return projectiles;
     }
     public String getStatusMessage() { return statusMessage; }
+    public int getMainMenuSelection() { return mainMenuSelection; }
+    public int getHoveredRibbon() { return hoveredRibbon; }
+    public int getActiveRibbon() { return activeRibbon; }
+    public boolean isHoveredGameOverButton() { return hoveredGameOverButton; }
 
     public List<AudioEventType> consumeAudioEvents() {
         if (pendingAudioEvents.isEmpty()) {
@@ -490,6 +565,13 @@ public class GameModel {
 
     private void emitAudioEvent(AudioEventType audioEventType) {
         pendingAudioEvents.add(audioEventType);
+    }
+
+    private void resetMenuUiState() {
+        mainMenuSelection = 0;
+        hoveredRibbon = -1;
+        activeRibbon = -1;
+        hoveredGameOverButton = false;
     }
 
 }

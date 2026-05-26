@@ -8,20 +8,21 @@ import main.CONFIG.enu.PlayerState;
 
 import java.awt.Rectangle;
 
-
-
 /**
  * The PLAYER CLASS represents the main player character in the game, extending the base Entity class.
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class Player extends Entity {
 
-    protected int screenX, screenY;
+    private final EntityConfig entityConfig; //settings
+
+    protected int screenX, screenY; // position on the screen
+
     private PlayerState state;
     private Direction facingDirection;
-    private EntityConfig entityConfig;
+
     private boolean deathAnimationCompleted;
-    private boolean attackLatch;
+    private boolean attackAnimationCompleted;
 
 
     // COSTRUCTOR
@@ -31,7 +32,7 @@ public class Player extends Entity {
         this.entityConfig = entityConfig;
 
         // Initialize the player's solid area for collision detection
-        solidArea = new Rectangle(0,0, entityConfig.PLAYER_HITBOX_WIDTH, entityConfig.PLAYER_HITBOX_HEIGHT);
+        solidArea = new Rectangle(0,0, EntityConfig.PLAYER_HITBOX_WIDTH, EntityConfig.PLAYER_HITBOX_HEIGHT);
         initializeDefaultValues();
 
     }
@@ -49,34 +50,36 @@ public class Player extends Entity {
         screenY = entityConfig.SCREEN_POSY();
 
         // Initialize movement values
-        speed = entityConfig.START_PLAYER_SPEED;
-        direction = entityConfig.START_FACING;
-        facingDirection = entityConfig.START_FACING;
+        speed = EntityConfig.START_PLAYER_SPEED;
+        direction = EntityConfig.START_FACING;
+        facingDirection = EntityConfig.START_FACING;
         state = PlayerState.IDLE;
         maxLife = 6;
         life = maxLife;
         deathAnimationCompleted = false;
-        attackLatch = false;
+        attackAnimationCompleted = true;
     }
     //-------------------------------------------------------------
 
     /**
      * Updates the player's state and movement each frame based on input
      */
-
     //-------------------------------------------------------------
     public void update(InputState input, double deltaMs) {
         super.update(); // reset dx, dy, collisions
 
+        // player DEAD no update
         if (state == PlayerState.DYING || state == PlayerState.DEAD) {
             return;
         }
 
+
         boolean isMoving = false;
-        // Durante l'attacco non aggiorniamo il movimento: resta fermo finché l'animazione non termina
         if (state != PlayerState.ATTACKING) {
+            // move the player only if he is not attacking
             isMoving = updateMovement(input, deltaMs);
         }
+        // update the player's state
         updateState(input, isMoving);
     }
     //-------------------------------------------------------------
@@ -113,8 +116,6 @@ public class Player extends Entity {
 
         return moveX != 0 || moveY != 0;
     }
-
-
     //-------------------------------------------------------------
 
     /**
@@ -122,18 +123,14 @@ public class Player extends Entity {
      */
     //-------------------------------------------------------------
     private void updateState(InputState input, boolean isMoving) {
-        // sblocca quando rilasci SPACE
-        if (!input.attack()) {
-            attackLatch = false;
-        }
-
+        // While an attack animation is running, keep the state locked until renderer closes it.
         if (state == PlayerState.ATTACKING) {
             return;
         }
 
-        if (input.attack() && !attackLatch) {
+        if (input.attack()) {
             state = PlayerState.ATTACKING;
-            attackLatch = true;
+            attackAnimationCompleted = false;
         } else if (isMoving) {
             state = PlayerState.WALKING;
         } else {
@@ -146,8 +143,8 @@ public class Player extends Entity {
     //----------------------------------------------
     public Rectangle getAttackArea() {
         Rectangle attackArea = new Rectangle();
-        attackArea.width = solidArea.width + entityConfig.RANGE_ATTACK;
-        attackArea.height = solidArea.height + entityConfig.RANGE_ATTACK;
+        attackArea.width = solidArea.width + EntityConfig.RANGE_ATTACK;
+        attackArea.height = solidArea.height + EntityConfig.RANGE_ATTACK;
         // worldX/Y = center of solid area
         int hitboxLeft = worldX - solidArea.width / 2;
         int hitboxTop = worldY - solidArea.height / 2;
@@ -172,32 +169,47 @@ public class Player extends Entity {
         }
         return attackArea;
     }
-
     //--------------------------------------------------------------
-    // Methods to reduce a life 
+
+    /**
+     * Reduce the player's life by 1 hp.
+     * If the player's life reaches 0, it is considered dead.
+     */
+    //--------------------------------------------------------------
     public void takeDamage() {
-        if (state == PlayerState.DYING || state == PlayerState.DEAD) {
-            return;
-        }
-        life -= 1;
+        life --;
+        // the player is dying
         if (life <= 0) {
             life = 0;
             state = PlayerState.DYING;
             deathAnimationCompleted = false;
         }
     }
+    //--------------------------------------------------------------
 
+    /**
+     * set the end of death and player state to dead
+     */
+    //--------------------------------------------------------------
     public void completeDeathAnimation() {
         if (state == PlayerState.DYING) {
             state = PlayerState.DEAD;
             deathAnimationCompleted = true;
         }
     }
+    //--------------------------------------------------------------
 
-    public void resetForNewGame() {
-        initializeDefaultValues();
+    /**
+     * set the end of attack and player state to idle
+     */
+    //--------------------------------------------------------------
+    public void completeAttackAnimation() {
+        if (state == PlayerState.ATTACKING) {
+            state = PlayerState.IDLE;
+            attackAnimationCompleted = true;
+        }
     }
-
+    //--------------------------------------------------------------
 
     // GETTER ----------------------
     public PlayerState getState() {
@@ -221,6 +233,9 @@ public class Player extends Entity {
     public boolean isDeathAnimationCompleted() {
         return deathAnimationCompleted;
     }
+    public boolean isAttackAnimationCompleted() {
+        return attackAnimationCompleted;
+    }
     //---------------------------------
 
     // SETTER ----------------------
@@ -229,12 +244,13 @@ public class Player extends Entity {
         if (state == PlayerState.DYING) {
             deathAnimationCompleted = false;
         }
+        if (state == PlayerState.ATTACKING) {
+            attackAnimationCompleted = false;
+        } else {
+            attackAnimationCompleted = true;
+        }
     }
-    public void stopAttack() {
-        state = PlayerState.IDLE;
-    }
-
-        public void setScreenPosition(int screenX, int screenY) {
+    public void setScreenPosition(int screenX, int screenY) {
         this.screenX = screenX;
         this.screenY = screenY;
     }

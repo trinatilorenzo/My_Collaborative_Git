@@ -11,7 +11,7 @@ public record ScreenConfig(int ORIGINAL_TILESIZE, Color GAME_BG_COLOR) {
 
     //GAME LOOP
     public static final int FPS = 120;
-    public static final int MAX_FRAME_SKIP = 10;
+    public static final int MAX_FRAME_SKIP = 20;
 
     //SCREEN SIZE
     public static final int SCALE = 1;
