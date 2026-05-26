@@ -32,9 +32,14 @@ public class Entity {
     protected boolean collisionX = false;
     protected boolean collisionY = false;
 
+    /**
+     * COSTRUCTOR
+     */
+    //-------------------------------------------------------------
     public Entity(EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
     }
+    //-------------------------------------------------------------
 
     /**
      * Resets per-frame movement state. Called at the start of each update.

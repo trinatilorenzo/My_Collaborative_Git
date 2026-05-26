@@ -10,7 +10,6 @@ import model.entity.Player;
 
 import static main.CONFIG.enu.Direction.*;
 
-
 /**
  * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
  * within the game world collides with the game's tilemap, objects, or other entities.
@@ -18,11 +17,17 @@ import static main.CONFIG.enu.Direction.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class CollisionChecker {
 
-    private final GameModel gameModel;
+    private final GameModel gameModel; // dependency from the class
+
+    /**
+     * the enty bounds is the way to represent the area of the entity inside the model
+     * it is the basics value to check the collision between the entity and the game world
+     */
     private record EntityBounds(int leftX, int rightX, int topY, int bottomY, int layer) {
 
+        //methods to create the bounds of the entity
         static EntityBounds of(Entity entity) {
-            // worldX/Y = center of solid area
+            // worldX & worldY = center of solid area
             int leftX = entity.getWorldX() - entity.getSolidArea().width / 2;
             int rightX = entity.getWorldX() + entity.getSolidArea().width / 2 - 1;
             int topY = entity.getWorldY() - entity.getSolidArea().height / 2;
@@ -31,7 +36,9 @@ public class CollisionChecker {
         }
     }
 
-    // COSTRUCTOR
+    /**
+     * COSTRUCTOR
+     */
     //-------------------------------------------------------------
     public CollisionChecker(GameModel model) {
         this.gameModel = model;
@@ -42,7 +49,7 @@ public class CollisionChecker {
     /**
      * Checks for potential collisions between the given entity and the game world tiles
      */
-    //-------------------------------------------------------------
+    //----------------------------------------------------------------------------
     public void checkTile(Entity entity) {
 
         EntityBounds bounds = EntityBounds.of(entity);
@@ -51,6 +58,93 @@ public class CollisionChecker {
         checkAxisY(entity, bounds);
     }
     //-------------------------------------------------------------
+    private void checkAxisX(Entity entity, EntityBounds bounds) {
+        int dx = entity.getDx();
+        if (dx == 0) return; // not moving
+
+        //anticipate the entity movement (move left or right)
+        int projectedLeftCol = (bounds.leftX + dx) / gameModel.getTILE_SIZE();
+        int projectedRightCol = (bounds.rightX + dx) / gameModel.getTILE_SIZE();
+        int rowTop = bounds.topY / gameModel.getTILE_SIZE();
+        int rowBottom = bounds.bottomY / gameModel.getTILE_SIZE();
+
+        int checkCol;
+        if (dx < 0) {
+            //moving left --> check left column
+            checkCol = projectedLeftCol;
+        } else {
+            //moving right --> check right column
+            checkCol = projectedRightCol;
+        }
+
+        if (isCollision(bounds.layer, rowTop, checkCol) || isCollision(bounds.layer, rowBottom, checkCol)) {
+            entity.setCollisionX(true);
+        }
+    }
+    //-------------------------------------------------------------
+    private void checkAxisY(Entity entity, EntityBounds bounds) {
+        int dy = entity.getDy();
+        if (dy == 0) return; // not moving
+
+        //anticipate the entity movement (move up or down)
+        int colLeft = bounds.leftX / gameModel.getTILE_SIZE();
+        int colRight = bounds.rightX / gameModel.getTILE_SIZE();
+        int projectedTopRow = (bounds.topY + dy) / gameModel.getTILE_SIZE();
+        int projectedBottomRow = (bounds.bottomY + dy) / gameModel.getTILE_SIZE();
+
+
+        int checkRow;
+        if (dy < 0) {
+            //moving up --> check the top row
+            checkRow = projectedTopRow;
+        }else{
+            //moving down --> check the bottom row
+            checkRow = projectedBottomRow;
+        }
+
+        if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
+            // check if the entity is on the stairs and update the layer
+            if (entity instanceof Player){
+                //only update the player layer, other entities simply can't move on the stairs
+                entity.setCollisionY(true);
+                updateEntityLayer(entity, bounds, checkRow, colLeft);
+                return;
+            }
+            entity.setCollisionY(true);
+        }
+    }
+    //-------------------------------------------------------------
+    private void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
+        if (entity.getDx()!=0) return; // Only update layer on vertical movement
+        if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {
+            // move level down
+            entity.setLayer(entity.getCurrentLayer() - 1);
+            entity.setCollisionY(false);
+        }
+        if (!isCollision(bounds.layer + 1, checkRow, colLeft)&& entity.getDirection() != DOWN) {
+            // move level up
+            entity.setLayer(entity.getCurrentLayer() + 1);
+            entity.setCollisionY(false);
+        }
+    }
+    //-------------------------------------------------------------
+    //Checks if a collision occurs at the specified layer, row, and column within the game world.
+    //-------------------------------------------------------------
+    private boolean isCollision(int layer, int row, int col) {
+        if (isOutOfBounds(row, col)) {
+            return true;
+        }
+        return gameModel.getWorldMap().hasCollision(layer, row, col); // just check the collision map
+    }
+    //-------------------------------------------------------------
+    private boolean isOutOfBounds(int row, int col) {
+        return row < 0 || col < 0
+                || row >= gameModel.getWorldMap().getMaxMapRow()
+                || col >= gameModel.getWorldMap().getMaxMapCol();
+    }
+    //-------------------------------------------------------------
+    // end checkTile -------------------------------------------------------------
+
 
     /**
      * Checks collisions between an entity and solid objects in the world.
@@ -85,25 +179,25 @@ public class CollisionChecker {
                 entity.setCollisionY(true);
             }
 
-            if (entity.isCollisionX() && entity.isCollisionY()) {
+            if (entity.isCollisionX() || entity.isCollisionY()) {
                 break; // both axes blocked; further checks unnecessary
             }
         }
     }
     //-------------------------------------------------------------
 
-    // TODO vedere meglio
+
     /**
      * Checks collision between two entities (mover blocked by obstacle).
      * Sets mover's collision flags per axis.
      */
     //-------------------------------------------------------------
     public boolean checkEntity(Entity mover, Entity obstacle) {
-        if (obstacle == null) return false;
         if (mover.getCurrentLayer() != obstacle.getCurrentLayer()) return false;
 
         EntityBounds m = EntityBounds.of(mover);
         EntityBounds o = EntityBounds.of(obstacle);
+
         int dx = mover.getDx();
         int dy = mover.getDy();
         boolean collided = false;
@@ -124,106 +218,9 @@ public class CollisionChecker {
     }
     //-------------------------------------------------------------
 
-    private void checkAxisX(Entity entity, EntityBounds bounds) {
-        int dx = entity.getDx();
-        if (dx == 0) return; // not moving
-
-        //anticipate the entity movement (move left or right)
-        int projectedLeftCol = (bounds.leftX + dx) / gameModel.getTILE_SIZE();
-        int projectedRightCol = (bounds.rightX + dx) / gameModel.getTILE_SIZE();
-        int rowTop = bounds.topY / gameModel.getTILE_SIZE();
-        int rowBottom = bounds.bottomY / gameModel.getTILE_SIZE();
-
-        int checkCol;
-        if (dx < 0) {
-            //moving left --> check left column
-            checkCol = projectedLeftCol;
-        } else {
-            //moving right --> check right column
-            checkCol = projectedRightCol;
-        }
-
-        if (isCollision(bounds.layer, rowTop, checkCol) || isCollision(bounds.layer, rowBottom, checkCol)) {
-                entity.setCollisionX(true);
-        }
-    }
-
-    private void checkAxisY(Entity entity, EntityBounds bounds) {
-        int dy = entity.getDy();
-        if (dy == 0) return; // not moving
-
-        //anticipate the entity movement (move up or down)
-        int colLeft = bounds.leftX / gameModel.getTILE_SIZE();
-        int colRight = bounds.rightX / gameModel.getTILE_SIZE();
-        int projectedTopRow = (bounds.topY + dy) / gameModel.getTILE_SIZE();
-        int projectedBottomRow = (bounds.bottomY + dy) / gameModel.getTILE_SIZE();
-
-
-        int checkRow;
-        if (dy < 0) {
-            //moving up --> check the top row
-            checkRow = projectedTopRow;
-        }else{
-            //moving down --> check the bottom row
-            checkRow = projectedBottomRow;
-        }
-
-        if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
-            if (entity instanceof Player){
-                //only update the player layer, other entities simply can't move on the stairs if they collide with them
-                int previousLayer = entity.getCurrentLayer();
-                updateEntityLayer(entity, bounds, checkRow, colLeft);
-                if (entity.getCurrentLayer() == previousLayer) {
-
-                }
-            }
-
-            entity.setCollisionY(true);
-
-
-        }
-    }
-
-    //-------------------------------------------------------------
-
-
-    //TODO debug del metodo + blocco scale
-    public void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
-        if (entity.getDx()!=0) return; // Only update layer on vertical movement
-        if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {
-            // move level down
-            entity.setLayer(entity.getCurrentLayer() - 1);
-        }
-        if (!isCollision(bounds.layer + 1, checkRow, colLeft)&& entity.getDirection() != DOWN) {
-            // move level up
-            entity.setLayer(entity.getCurrentLayer() + 1);
-        }
-    }
-    //-------------------------------------------------------------
-
     /**
-     * Checks if a collision occurs at the specified layer, row, and column
-     * within the game world.
+     * UTILITY METHODS Checks if two rectangles overlap
      */
-    //-------------------------------------------------------------
-    private boolean isCollision(int layer, int row, int col) {
-        if (isOutOfBounds(row, col)) {
-            return true;
-        }
-        return gameModel.getWorldMap().hasCollision(layer, row, col);
-    }
-    //-------------------------------------------------------------
-
-    /**
-     * check if the entity is out of the map
-     */
-
-    //-------------------------------------------------------------
-    private boolean isOutOfBounds(int row, int col) {
-        return row < 0 || col < 0
-                || row >= gameModel.getWorldMap().getMaxMapRow()
-                || col >= gameModel.getWorldMap().getMaxMapCol();
-    }
     //-------------------------------------------------------------
     private boolean overlaps(int left, int right, int top, int bottom,
                              int objLeft, int objRight, int objTop, int objBottom) {
@@ -232,24 +229,20 @@ public class CollisionChecker {
         return overlapX && overlapY;
     }
     //-------------------------------------------------------------
+
+
+    //GETTERS
+    //-------------------------------------------------------------
     public boolean intersects(Entity a, Entity b) {
-    if (a.getCurrentLayer() != b.getCurrentLayer()) return false;
+        if (a.getCurrentLayer() != b.getCurrentLayer()) return false;
 
-    int aLeft = a.getWorldX() - a.getSolidArea().width / 2;
-    int aTop  = a.getWorldY() - a.getSolidArea().height / 2;
+        EntityBounds r1 = EntityBounds.of(a);
+        EntityBounds r2 = EntityBounds.of(b);
 
-    int bLeft = b.getWorldX() - b.getSolidArea().width / 2;
-    int bTop  = b.getWorldY() - b.getSolidArea().height / 2;
+        return overlaps(r1.leftX, r1.rightX, r1.topY, r1.bottomY,
+                r2.leftX, r2.rightX, r2.topY, r2.bottomY);
+    }
+    //-------------------------------------------------------------
 
-    Rectangle r1 = new Rectangle(aLeft, aTop,
-            a.getSolidArea().width,
-            a.getSolidArea().height);
-
-    Rectangle r2 = new Rectangle(bLeft, bTop,
-            b.getSolidArea().width,
-            b.getSolidArea().height);
-
-    return r1.intersects(r2);
-}
 }
 //-------------------------------------------------------------------------------------------------------------------
