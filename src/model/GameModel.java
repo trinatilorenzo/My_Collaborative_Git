@@ -217,7 +217,7 @@ public class GameModel {
         int lifeBeforeUpdate = player.getLife();
         int projectileCountBeforeUpdate = projectiles.size();
 
-        boolean monkCollision = updatePlayerPhase(input, deltaMs);
+        updatePlayerPhase(input, deltaMs);
 
         updateEnemiesPhase(deltaMs);
         updateProjectilesPhase(deltaMs);
@@ -225,8 +225,8 @@ public class GameModel {
         if (player.getState() == PlayerState.WALKING) {
             player.move();
         }
-        updateInteractions(input, monkCollision);
-        monk.update(deltaMs);
+        monk.update(player, deltaMs);
+        updateInteractions(input);
 
         updateRuntimeMessages(deltaMs);
         updateGameOverCountdown(deltaMs);
@@ -234,7 +234,7 @@ public class GameModel {
 
     }
     //-------------------------------------------------------------
-    private boolean updatePlayerPhase(InputState input, double deltaMs) {
+    private void updatePlayerPhase(InputState input, double deltaMs) {
 
         PlayerState playerStateBeforeUpdate = player.getState();
         player.update(input, deltaMs);
@@ -245,7 +245,6 @@ public class GameModel {
 
         collisionChecker.checkTile(player);
         collisionChecker.checkObjects(player);
-        return collisionChecker.intersects(player, monk);
     }
     //-------------------------------------------------------------
     private void updateEnemiesPhase(double deltaMs) {
@@ -289,7 +288,7 @@ public class GameModel {
         dynamiteEnemies.removeIf(EnemyDynamite::isDead);
     }
     //-------------------------------------------------------------
-    private void updateInteractions(InputState input, boolean monkCollision) {
+    private void updateInteractions(InputState input) {
         if (player.getState() == PlayerState.ATTACKING) {
             Rectangle attackArea = player.getAttackArea();
 
@@ -322,15 +321,17 @@ public class GameModel {
             }
         }
 
-        // Monk interaction triggered by collision
-        if (monkCollision && monk.getState() == MonkState.IDLE) {
-            monk.activate();
+        if (monk.getState() == MonkState.IDLE) {
+            currentDialogue = "";
+        }
+
+        if (monk.getState() == MonkState.TALKING && currentDialogue.isEmpty()) {
             currentDialogue = monk.getCurrentDialogue();
             emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
         }
 
         if (monk.getState() == MonkState.TALKING && input.interact()) {
-            monk.advanceDialogue();
+            monk.nextDialogue();
 
             if (!monk.hasFinishedDialogue()) {
                 currentDialogue = monk.getCurrentDialogue();
@@ -369,7 +370,7 @@ public class GameModel {
     }
     //-------------------------------------------------------------
     private void updateDeathSequence(double deltaMs) {
-        monk.update(deltaMs);
+        monk.update(player, deltaMs);
         // Keep only finite transitions running; do not start new gameplay logic.
         for (EnemyTNT tnt : tntEnemies) {
             if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {

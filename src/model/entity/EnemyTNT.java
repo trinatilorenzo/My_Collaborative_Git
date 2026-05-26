@@ -28,7 +28,7 @@ public class EnemyTNT extends Entity{
     private boolean hasDealtDamage = false; // Flag to ensure damage is applied only once per explosion
 
     public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
-
+        super(entityConfig);
         this.entityConfig = entityConfig;
         this.worldX = spawnPoint.x();
         this.worldY = spawnPoint.y();

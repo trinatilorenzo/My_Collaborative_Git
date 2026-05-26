@@ -1,5 +1,7 @@
 package model.entity;
+import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.TNTState;
 
 import java.awt.Rectangle;
 
@@ -9,6 +11,8 @@ import java.awt.Rectangle;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class Entity {
+    // Settings
+    protected EntityConfig entityConfig;
 
     // Position and movement
     protected static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
@@ -27,6 +31,10 @@ public class Entity {
     protected Rectangle solidArea;
     protected boolean collisionX = false;
     protected boolean collisionY = false;
+
+    public Entity(EntityConfig entityConfig) {
+        this.entityConfig = entityConfig;
+    }
 
     /**
      * Resets per-frame movement state. Called at the start of each update.
@@ -72,6 +80,7 @@ public class Entity {
         }
     }
     //-------------------------------------------------------------
+
 
     // GETTER ----------------------
     public boolean isCollisionX() {

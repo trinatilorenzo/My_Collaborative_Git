@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 
 /**
- * PLAYER SETTINGS
+ * ALL'ENTITY SETTINGS
  */
 //----------------------------------------------------------------------------------------------------------------------
 public record EntityConfig(ScreenConfig screenConfig,
@@ -48,7 +48,6 @@ public record EntityConfig(ScreenConfig screenConfig,
     //NPCConfig
     //-------------------------------------------------------------
     public static MonkState MONK_DEFAULT_STATE = MonkState.IDLE;
-    public static String MONK_TAG = "Monk";
     public int MONK_START_X(){return monkSpawnPoint().x();}
     public int MONK_START_Y(){return monkSpawnPoint().y();}
     public int MONK_START_LAYER(){return monkSpawnPoint().layer();}
@@ -58,6 +57,10 @@ public record EntityConfig(ScreenConfig screenConfig,
             "Da quando i goblin hanno invaso l'isola, la pace è stata spezzata e il tesoro dell'isola è stato rubato.",
             "Recupera il tesoro e riporta l'armonia. Buona fortuna!"
     };
+
+    public static final double  MONK_DISAPPEAR_DURATION_MS = 1650.0;
+    public static final int MONK_ACTIVATION_RADIUS = 160;
+    public static final double MONK_RESPAWN_DURATION_MS = 10000.0;
 
     //-------------------------------------------------------------
     //TNTConfig

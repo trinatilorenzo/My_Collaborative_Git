@@ -20,6 +20,7 @@ public class DynamiteProjectile extends Entity{
 
     //CONSTRUCTOR
     public DynamiteProjectile(double startX, double startY, double targetX, double targetY, EntityConfig entityConfig){
+        super(entityConfig);
         this.worldXDouble = startX;
         this.worldYDouble = startY;
         

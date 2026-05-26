@@ -11,10 +11,8 @@ import java.awt.Rectangle;
 /**
  * The PLAYER CLASS represents the main player character in the game, extending the base Entity class.
  */
-//-------------------------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------
 public class Player extends Entity {
-
-    private final EntityConfig entityConfig; //settings
 
     protected int screenX, screenY; // position on the screen
 
@@ -25,11 +23,12 @@ public class Player extends Entity {
     private boolean attackAnimationCompleted;
 
 
-    // COSTRUCTOR
+    /**
+     * COSTRUCTOR
+     */
     //-------------------------------------------------------------
     public Player(EntityConfig entityConfig) {
-        //get the entityConfig
-        this.entityConfig = entityConfig;
+        super(entityConfig);
 
         // Initialize the player's solid area for collision detection
         solidArea = new Rectangle(0,0, EntityConfig.PLAYER_HITBOX_WIDTH, EntityConfig.PLAYER_HITBOX_HEIGHT);

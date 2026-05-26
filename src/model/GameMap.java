@@ -11,8 +11,8 @@ import java.util.List;
 
 /**
  * MAP CLASS <-- all the map layer
- * It supports graphical layers for visual
- * representation and game layers for collision and gameplay logic.
+ * It supports graphical layers for visual representation
+ *  and game layers for collision and gameplay logic.
  */
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -26,7 +26,20 @@ public class GameMap {
     private final int[][][] mapLayer; // [level][row][col]
     private final boolean[][][] collisionMap; // [level][row][col]
 
-    // constructor
+    // a record use to convert an array list to a fixed size array
+
+    //-------------------------------------------------------------
+    private record LoadedMapData(
+            //MapLayer[] graphicLayers,
+            int[][][] mapLayer,
+            boolean[][][] collisionMap
+    ) {}
+    //-------------------------------------------------------------
+
+
+    /**
+     * COSTRUCTOR
+     */
     //-------------------------------------------------------------
     public GameMap(MapConfig mapConfig, Document mapDoc) {
         this.mConf = mapConfig;
@@ -39,16 +52,6 @@ public class GameMap {
         this.GRAPHIC_LAYER_NUM = mapLayer.length;
         this.GAME_LAYER_NUM = collisionMap.length;
     }
-
-    /**
-     * a record use to convert an array list to a fixed size array
-     */
-    //-------------------------------------------------------------
-    private record LoadedMapData(
-            //MapLayer[] graphicLayers,
-            int[][][] mapLayer,
-            boolean[][][] collisionMap
-    ) {}
     //-------------------------------------------------------------
 
     /**
@@ -80,14 +83,12 @@ public class GameMap {
                 collisionList.toArray(new boolean[collisionList.size()][][]));
 
     }
-    //-------------------------------------------------------------
-
-
     /**
-     *Loads a single collision layer from the provided XML data.
+     * HELPERS METHOD
      */
+    //Loads a single collision layer from the provided XML data.
     //-------------------------------------------------------------
-    public boolean[][] buildCollisionLayer(Element dataElement){
+    private boolean[][] buildCollisionLayer(Element dataElement){
         boolean[][] collisionMap = new boolean[mConf.MAX_WORLD_ROW()][mConf.MAX_WORLD_COL()];
 
         String[] num = dataElement.getTextContent().trim().strip().replaceAll("[^0-9,]", "").split(",");
@@ -101,10 +102,9 @@ public class GameMap {
         return collisionMap;
     }
     //-------------------------------------------------------------
-
     // load the tile id into the array by reading the csv map file
     //-------------------------------------------------------------
-    public int[][] buildMapLayer(Element dataElement){
+    private int[][] buildMapLayer(Element dataElement){
         int[][] layerMap = new int[mConf.MAX_WORLD_ROW()][mConf.MAX_WORLD_COL()];
 
         String[] num = dataElement.getTextContent().trim().strip().replaceAll("[^0-9,]", "").split(",");
@@ -117,6 +117,7 @@ public class GameMap {
         }
         return layerMap;
     }
+    // end helpers ------------------------------------------------
     //-------------------------------------------------------------
 
     /**
@@ -148,11 +149,9 @@ public class GameMap {
     public int getGraphicLayerNum() {
         return GRAPHIC_LAYER_NUM;
     }
-
     public int getGameLayerNum() {
         return GAME_LAYER_NUM;
     }
-
     //---------------------------------
 
     // SETTER ----------------------

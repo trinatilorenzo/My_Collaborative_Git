@@ -5,81 +5,164 @@ import main.CONFIG.enu.MonkState;
 
 import java.awt.Rectangle;
 
+/**
+ * The MONK CLASS represents a npc character in the game, extending the base Entity class.
+ */
+//-------------------------------------------------------------------------------------------------------------------
 public class Monk extends Entity {
-    private static final double DISAPPEAR_DURATION_MS = 1650.0;
 
-    //TODO caricamento delle variabili da file
-
-    private EntityConfig entityConfig;
+    //state
     private MonkState state;
+    private double disappearElapsedMs;
+    private double respawnElapsedMs;
+    //dialogues
     private String[] dialogues;
-    private int dialogueIndex = 0;
-    private double disappearElapsedMs = 0.0;
+    private int dialogueIndex;
 
-
-    // COSTRUCTOR
+    /**
+     * COSTRUCTOR
+     */
     //-------------------------------------------------------------
     public Monk(int worldX, int worldY, EntityConfig entityConfig) {
-        this.entityConfig = entityConfig;
-        this.state = entityConfig.MONK_DEFAULT_STATE;
+        super(entityConfig);
 
+        initializeDefaultValues(worldX, worldY);
+    }
+    //-------------------------------------------------------------
+    private void initializeDefaultValues(int worldX, int worldY) {
+        this.state = EntityConfig.MONK_DEFAULT_STATE; // state (idle)
+        //position on map
         this.worldX = worldX;
         this.worldY = worldY;
         this.currentLayer = entityConfig.MONK_START_LAYER();
-
-        solidArea = new Rectangle(0, 0, entityConfig.HITBOX_WIDTH, entityConfig.HITBOX_HEIGHT);
-
-        this.dialogues = entityConfig.MONK_DIALOUGES;
-
+        //solid area
+        solidArea = new Rectangle(0, 0, EntityConfig.HITBOX_WIDTH, EntityConfig.HITBOX_HEIGHT);
+        //dialogues
+        this.dialogues = EntityConfig.MONK_DIALOUGES;
+        this.dialogueIndex = 0;
+        //state
+        this.disappearElapsedMs = 0.0;
+        this.respawnElapsedMs = 0.0;
     }
     //-------------------------------------------------------------
 
-
+    /**
+     * Update the monk's state
+     * * called every frame *
+     */
     //-------------------------------------------------------------
-    public void activate() {
-        if (state == MonkState.IDLE) {
-            state = MonkState.TALKING;
-            dialogueIndex = 0; // start from the first dialogue line
-            disappearElapsedMs = 0.0;
+    public void update(Player player, double deltaMs) {
+
+        // make the monk disappear
+        if (state == MonkState.DISAPPEARING) {
+            disappearElapsedMs += deltaMs;
+            if (disappearElapsedMs >= EntityConfig.MONK_DISAPPEAR_DURATION_MS) {
+                state = MonkState.DISAPPEARED;
+                respawnElapsedMs = 0.0;
+            }
+            return;
+        }
+
+        // respawn after a cooldown
+        if (state == MonkState.DISAPPEARED) {
+            respawnElapsedMs += deltaMs;
+            if (respawnElapsedMs >= EntityConfig.MONK_RESPAWN_DURATION_MS) {
+                resetDialogue();
+            }
+            return;
+        }
+        checkPlayerProximity(player);
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Checks if the player is within the detection radius
+     */
+    //-------------------------------------------------------------
+    private void checkPlayerProximity(Player player) {
+        int distanceX = player.worldX - worldX;
+        int distanceY = player.worldY - worldY;
+        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+        if (distance < entityConfig.MONK_ACTIVATION_RADIUS) {
+            talk();
+        } else {
+            stopTalking();
         }
     }
     //-------------------------------------------------------------
 
+    //SETTER
+    //---------------------------------------------------------------------------
+    /**
+     * Start the monk talking
+     */
+    //-------------------------------------------------------------
+    public void talk() {
+        if (state == MonkState.IDLE) {
+            state = MonkState.TALKING;
+            disappearElapsedMs = 0.0;
+        }
+    }
+    //-------------------------------------------------------------
+    /**
+     * Start the monk talking from first time
+     */
+    //-------------------------------------------------------------
+    public void stopTalking() {
+        if (state == MonkState.TALKING) {
+            state = MonkState.IDLE;
+        }
+    }
+    //-------------------------------------------------------------
+    /**
+     * monk interacts changing his state from idle to talking
+     */
     //-------------------------------------------------------------
     public void interact() {
         if (state == MonkState.IDLE){
             state = MonkState.TALKING;
-        };
+        }
     }
     //-------------------------------------------------------------
+    /**
+     *  increment the dialogue index
+     */
+    //-------------------------------------------------------------
+    public void nextDialogue() {
+        dialogueIndex++;
+    }
+    //-------------------------------------------------------------
+    /**
+     * reset the monk's state to the initial state
+     */
+    //-------------------------------------------------------------
+    public void resetDialogue() {
+        state = MonkState.IDLE;
+        dialogueIndex = 0;
+        disappearElapsedMs = 0.0;
+        respawnElapsedMs = 0.0;
+    }
+    //-------------------------------------------------------------
+    public void setState(MonkState state) {
+        this.state = state;
+        if (state == MonkState.DISAPPEARING) {
+            disappearElapsedMs = 0.0;
+        }
+    }
+    //end seter -----------------------------------------------------------------
 
-
+    //GETTER
+    //---------------------------------------------------------------------------
+    /**
+     * Is true when the monk reaches the end of the dialogue
+     */
     //-------------------------------------------------------------
     public boolean hasFinishedDialogue() {
         return dialogueIndex >= dialogues.length;
     }
     //-------------------------------------------------------------
-    //-------------------------------------------------------------
-    public void advanceDialogue() {
-        dialogueIndex++;
-    }
-    //-------------------------------------------------------------
-
-    //-------------------------------------------------------------
-    public void update(double deltaMs) {
-        if (state == MonkState.DISAPPEARING) {
-            disappearElapsedMs += deltaMs;
-            if (disappearElapsedMs >= DISAPPEAR_DURATION_MS) {
-                state = MonkState.DISAPPEARED;
-            }
-        }
-    }
-    //-------------------------------------------------------------
-
-
-
-
-    //GETTER
+    /** Return the text of the current dialogue */
     //-------------------------------------------------------------
     public String getCurrentDialogue() {
         if (dialogueIndex < dialogues.length) {
@@ -88,22 +171,10 @@ public class Monk extends Entity {
             return null; // No more dialogues
         }
     }
-    public int getDialogueIndex() { return dialogueIndex; }
+    //-------------------------------------------------------------
     public MonkState getState() { return state; }
-    public void setState(MonkState state) {
-        this.state = state;
-        if (state == MonkState.DISAPPEARING) {
-            disappearElapsedMs = 0.0;
-        }
-    }
-    //-------------------------------------------------------------
+    // end getter ---------------------------------------------------------------
 
-    //SETTER
-    //-------------------------------------------------------------
-    public void resetDialogue() {
-        state = MonkState.IDLE;
-        dialogueIndex = 0;
-        disappearElapsedMs = 0.0;
-    }
-    //-------------------------------------------------------------
+
 }
+//-------------------------------------------------------------------------------------------------------------------

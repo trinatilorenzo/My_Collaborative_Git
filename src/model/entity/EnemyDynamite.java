@@ -30,6 +30,7 @@ public class EnemyDynamite extends Entity {
     
     //CONSTRUCTOR
     public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig, List<DynamiteProjectile> globalProjectiles) {
+        super(entityConfig);
         this.entityConfig = entityConfig;
         this.worldX = spawnPoint.x();
         this.worldY = spawnPoint.y();
