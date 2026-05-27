@@ -4,80 +4,109 @@ import java.awt.Rectangle;
 
 import main.CONFIG.EntityConfig;
 
-public class DynamiteProjectile extends Entity{
-    private double worldXDouble, worldYDouble;
-    private double velocityX, velocityY;
-    private double angle = 0;
+/**
+ * Projectile launched by EnemyDynamite.
+ */
+//----------------------------------------------------------------------------------------------------------------------
+public class DynamiteProjectile extends Entity {
 
-    private double gravity = 800; // px/s^2
+    //Physics
+    private static final double GRAVITY = 800.0; // px/s^2
 
-    private boolean exploded = false;
+    //movement
+    private final double velocityX;
+    private final double initialVelocityY;
+    private double angle;
 
-    private double timer = 0;
-    private final double flightTime = 1.2; // Il tempo (in secondi) che la dinamite impiega per colpire il punto target
+    private final int launchX;
+    private final int launchY;
+    private final int targetX;
+    private final int targetY;
+    private final double flightTime;
 
-    private EntityConfig entityConfig;
+    //state
+    private boolean exploded;
+    private double timer;
 
-    //CONSTRUCTOR
-    public DynamiteProjectile(double startX, double startY, double targetX, double targetY, EntityConfig entityConfig){
+    /**
+     * CONSTRUCTOR
+     */
+    //-------------------------------------------------------------
+    public DynamiteProjectile(int startX, int startY, int targetX, int targetY, int layer, EntityConfig entityConfig) {
         super(entityConfig);
-        this.worldXDouble = startX;
-        this.worldYDouble = startY;
-        
-        this.worldX = (int) startX;
-        this.worldY = (int) startY;
 
-        this.currentLayer = 2; 
+        this.worldX = startX;
+        this.worldY = startY;
 
-        this.entityConfig = entityConfig;
-        
-        this.solidArea = new Rectangle(0, 0, entityConfig.PROJECTILE_SIZE, entityConfig.PROJECTILE_SIZE); //TODO: aggiustare 
+        this.launchX = worldX;
+        this.launchY = worldY;
 
-        double dx = targetX - startX;
-        double dy = targetY - startY;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.currentLayer = layer;
+
+        this.solidArea = new Rectangle(0, 0, EntityConfig.PROJECTILE_SIZE, EntityConfig.PROJECTILE_SIZE);
+
+        this.flightTime = EntityConfig.PROJECTILE_AIR_TIME / 1000.0;
+
+        double dx = targetX - worldX;
+        double dy = targetY - worldY;
 
         this.velocityX = dx / flightTime;
-        this.velocityY = (dy - 0.5 * gravity * (flightTime * flightTime)) / flightTime;
-
+        this.initialVelocityY = (dy - 0.5 * GRAVITY * flightTime * flightTime) / flightTime;
     }
+    //-------------------------------------------------------------
 
-    //-------------------------------------------------------------------------------------------------
+
+    /**
+     * Update the projectile's position and state
+     * use the basic parabolic motion folmulas to move the projectile
+     */
+    //-------------------------------------------------------------
     public void update(double deltaMs) {
-
         if (exploded) return;
 
-        double dt = deltaMs / 1000.0;
-        timer += dt;
+        timer = Math.min(timer + deltaMs / 1000.0, flightTime);
 
-        // gravità
-        velocityY += gravity * dt;
-
-        // movimento
-        worldXDouble += velocityX * dt;
-        worldYDouble += velocityY * dt;
-
+        // x = vx*t
+        worldX = launchX + (int) Math.round(velocityX * timer);
+        // y = vy0*t + 1/2*a*t^2
+        worldY = launchY + (int) Math.round(initialVelocityY * timer + 0.5 * GRAVITY * timer * timer);
+        // angle = atan2(vy,vx)
+        double velocityY = initialVelocityY + GRAVITY * timer;
         angle = Math.atan2(velocityY, velocityX);
 
-        this.worldX = (int)worldXDouble;
-        this.worldY = (int)worldYDouble;
+        if (timer >= flightTime) {
+            // projectile has reached the target cause in
+            // flight time interval should reach the target
 
-        // esplosione a tempo
-        if (timer > flightTime) {
+            // be sure tho set the final position
+            worldX = targetX;
+            worldY = targetY;
+
+            // is the end time to explode
             explode();
         }
 
     }
+    //-------------------------------------------------------------
 
+    //GETTER
+    //-------------------------------------------------------------
+    public boolean isExploded() {
+        return exploded;
+    }
+    public double getAngle() {
+        return angle;
+    }
+    //-------------------------------------------------------------
+
+    //SETTER
+    //-------------------------------------------------------------
     public void explode() {
         exploded = true;
     }
+    //-------------------------------------------------------------
 
-    //-----------------------------------------------------------------------
-    //GETTER
-    public boolean isExploded(){
-        return exploded;
-    }
-    public double getAngle(){
-        return angle;
-    }
 }
+//----------------------------------------------------------------------------------------------------------------------
