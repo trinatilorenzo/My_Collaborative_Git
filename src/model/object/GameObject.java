@@ -2,7 +2,6 @@ package model.object;
 
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
-
 import java.awt.Rectangle;
 
 /**
@@ -38,8 +37,7 @@ public abstract class GameObject {
         return worldBoundsInstance;
     }
 
-<<<<<<< HEAD
-    // Standard Getters
+    // GETTERS AND SETTERS --------------------------------------------------
     public String getName() { return name; }
     public int getWorldX() { return worldX; }
     public int getWorldY() { return worldY; }
@@ -50,36 +48,3 @@ public abstract class GameObject {
     public void setRemoved(boolean removed) { this.removed = removed; }
     public Rectangle getSolidArea() { return solidArea; }
 }
-=======
-    // GETTER
-    public boolean isSolid() {
-        return solid;
-    }
-    public boolean isRemoved() {
-        return removed;
-    }
-    public Rectangle getSolidArea() {
-        return solidArea;
-    }
-    public Rectangle getSolidWorldArea() {
-        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
-    }
-    public String getName() {
-        return name;
-    }
-    public int getWorldX() {
-        return worldX;
-    }
-    public int getWorldY() {
-        return worldY;
-    }
-    public int getWidth() {
-        return width;
-    }
-    public int getHeight() {
-        return height;
-    }
-
-}
-//-------------------------------------------------------------------------------------------------------------------
->>>>>>> bac3b41036aa45cbb8eab6f76da91da96e35b486

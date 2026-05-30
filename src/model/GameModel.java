@@ -129,8 +129,16 @@ public class GameModel {
     }
     private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
-            objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
-                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig)
+            // Estraiamo x, y e layer direttamente dallo spawnPoint prima di passarli a OBJ_Tree
+            objects.add(new OBJ_Tree(
+                    treeTag,
+                    spawnPoint.x(),
+                    spawnPoint.y(),
+                    spawnPoint.layer(),
+                    treeWidth,
+                    treeHeight,
+                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig),
+                    objConfig
             ));
         }
     }
@@ -180,12 +188,6 @@ public class GameModel {
         updatePlayer(input, deltaMs);
         updateEnemies(deltaMs);
         updateMonk(input);
-
-        for (GameObject obj : objects) {
-            if (!obj.isRemoved()) {
-                obj.update(deltaMs);
-            }
-        }
 
         if (player.getState() == PlayerState.WALKING) {
             player.move();
@@ -415,18 +417,7 @@ public class GameModel {
      * Returns true while finite transition animations are still running.
      */
     //-------------------------------------------------------------
-    private void loadSavedGame(){
-        //TODO load saved game
-    }
-    //-------------------------------------------------------------
-
-    public boolean hasPendingTransientAnimations() {
-        if (player.isDying()) {
-            return true;
-        }
-        if (monk.getState() == MonkState.DISAPPEARING) {
-            return true;
-        }
+    private boolean hasPendingTransientAnimations() {
 
         for (EnemyTNT tnt : tntEnemies) {
             if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {

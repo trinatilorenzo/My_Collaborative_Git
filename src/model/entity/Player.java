@@ -246,6 +246,11 @@ public class Player extends Entity {
             attackAnimationCompleted = true;
         }
     }
+
+    // SETTER ----------------------
+    public void setAttackDamageApplied(boolean applied) { 
+        this.attackDamageApplied = applied; 
+    }
     //---------------------------------
 
 
