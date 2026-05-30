@@ -1,7 +1,6 @@
 package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
-import main.CONFIG.enu.DynamiteState;
 import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
 import view.Animation.Animation;
@@ -12,11 +11,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamiteRender {
     private final ConcurrentHashMap<EnemyDynamite, AnimationManager> managerByEnemy;
+    private final ConcurrentHashMap<EnemyDynamite, Integer> lastAttackCountByEnemy;
+    private final ConcurrentHashMap<EnemyDynamite, Boolean> attackAnimationActiveByEnemy;
     private final EntityConfig entityConfig;
 
     private BufferedImage[] wanderFrames;
@@ -30,6 +30,8 @@ public class DynamiteRender {
         this.entityConfig = entityConfig;
         loadAnimations();
         managerByEnemy = new ConcurrentHashMap<>();
+        lastAttackCountByEnemy = new ConcurrentHashMap<>();
+        attackAnimationActiveByEnemy = new ConcurrentHashMap<>();
     }
 
     //-------------------------------------------------------------
@@ -47,7 +49,7 @@ public class DynamiteRender {
         return managerByEnemy.computeIfAbsent(dynamite, k -> {
             AnimationManager manager = new AnimationManager();
             manager.addAnimation("wander", new Animation(wanderFrames, 90, true));
-            manager.addAnimation("attack", new Animation(attackFrames, 100, true));
+            manager.addAnimation("attack", new Animation(attackFrames, 100, false));
             manager.playAnimation("wander"); // Stato iniziale
             return manager;
         });
@@ -56,12 +58,20 @@ public class DynamiteRender {
     //-------------------------------------------------------------
     public void update(EnemyDynamite enemy, double deltaMs) {
         AnimationManager manager = getManager(enemy);
-        if (enemy.getState() == DynamiteState.WANDER || enemy.getState() == DynamiteState.CHASING) {
-            manager.playAnimation("wander");
-        } else if (enemy.getState() == DynamiteState.ATTACKING) {
+
+        int previousAttackCount = lastAttackCountByEnemy.getOrDefault(enemy, 0);
+        if (enemy.getAttackCount() != previousAttackCount) {
             manager.playAnimation("attack");
+            lastAttackCountByEnemy.put(enemy, enemy.getAttackCount());
+            attackAnimationActiveByEnemy.put(enemy, true);
         }
+
         manager.update(deltaMs);
+
+        if (Boolean.TRUE.equals(attackAnimationActiveByEnemy.get(enemy)) && manager.getCurrent().isFinished()) {
+            manager.playAnimation("wander");
+            attackAnimationActiveByEnemy.put(enemy, false);
+        }
     }
 
     //-------------------------------------------------------------
@@ -92,6 +102,8 @@ public class DynamiteRender {
     //-------------------------------------------------------------
     public void removeEnemy(EnemyDynamite enemy) {
         managerByEnemy.remove(enemy);
+        lastAttackCountByEnemy.remove(enemy);
+        attackAnimationActiveByEnemy.remove(enemy);
     }
 
     //-------------------------------------------------------------
@@ -129,22 +141,42 @@ public class DynamiteRender {
 
     // DEBUG
 //-------------------------------------------------------------
-public void drawSolidArea(Graphics2D g2, EnemyDynamite enemy, int screenX, int screenY) {
+//DEBUG METOD
+    //-------------------------------------------------------------
+    public void drawSolidArea(Graphics2D g2, EnemyDynamite enemyDynamite, int screenX, int screenY) {
 
-    Rectangle solid = enemy.getSolidArea();
+        Rectangle solid = enemyDynamite.getSolidArea();
 
-    int drawX = screenX - solid.width / 2;
-    int drawY = screenY - solid.height / 2;
+        int drawX = screenX - solid.width / 2;
+        int drawY = screenY - solid.height / 2;
 
-    // Fill semi-transparent
-    g2.setColor(new Color(255, 0, 0, 80));
-    g2.fillRect(drawX, drawY, solid.width, solid.height);
+        // semi-trasparente rosso
+        g2.setColor(new Color(255, 0, 0, 80));
+        g2.fillRect(drawX, drawY, solid.width, solid.height);
 
-    // Border
-    g2.setColor(Color.RED);
-    g2.drawRect(drawX, drawY, solid.width, solid.height);
-}
+        // bordo rosso
+        g2.setColor(Color.RED);
+        g2.drawRect(drawX, drawY, solid.width, solid.height);
 
+        // draw explosion area (centered on sprite center, consistent with explode())
+        int centerX = screenX;
+        int centerY = screenY;
+
+        g2.setColor(new Color(93, 255, 0, 80));
+        int r = entityConfig.DYNAMITE_ATTACKING_RADIUS;
+        g2.fillOval(centerX - r, centerY - r, 2 * r, 2 * r);
+
+        g2.setColor(Color.GREEN);
+        g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
+
+        // draw detection area (centered on sprite center, consistent with checkPlayerProximity())
+        g2.setColor(new Color(0, 84, 255, 80));
+        r = entityConfig.DYNAMITE_DETECTION_RADIUS;
+        g2.fillOval(centerX - r, centerY - r, 2 * r, 2 * r);
+
+        g2.setColor(Color.BLUE);
+        g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
+    }
 //-------------------------------------------------------------
 public void drawProjectileSolidArea(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
 

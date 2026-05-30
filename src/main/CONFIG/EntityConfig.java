@@ -1,7 +1,10 @@
 package main.CONFIG;
 
 import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.MonkState;
+import main.CONFIG.enu.TNTState;
+
 import java.util.ArrayList;
 
 
@@ -64,9 +67,15 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     //-------------------------------------------------------------
     //TNTConfig
-    public static final int START_TNT_SPEED = 128;
+    public static TNTState TNT_DEFAULT_STATE = TNTState.WANDER;
+    public static final int START_TNT_SPEED = 128; // pixels per second
+    public static final int TNT_MAX_LIFE = 1;
     public static final int TNT_DETECTION_RADIUS = 80;
     public static final int TNT_EXPLOSION_RADIUS = 100;
+
+    public static final long TNT_EXPLOSION_DELAY = 1000;
+    public static final int TNT_EXPLOSION_DURATION = 300;
+    public static final double TNT_MOVEINTERVAL = 1000; // Change direction every 1 second
 
     public static final int TNT_SPRITE_WIDTH = 128;
     public static final int TNT_SPRITE_HEIGHT = 128;
@@ -79,10 +88,14 @@ public record EntityConfig(ScreenConfig screenConfig,
 
     //-------------------------------------------------------------
     //EnemyDynamiteConfig
-    public static final int START_DYNAMITE_SPEED = 128;
-    public static final int DYNAMITE_DETECTION_RADIUS = 300;
+    public static final DynamiteState DYNAMITE_DEFAULT_STATE = DynamiteState.WANDER;
+    public static final int START_DYNAMITE_SPEED = 256; // pixels per second
+    public static final int DYNAMITE_MAX_LIFE = 1;
+
+    public static final int DYNAMITE_DETECTION_RADIUS = 400;
     public static final int DYNAMITE_ATTACKING_RADIUS = 150;
-    public static final int DYNAMITE_ATTACK_INTERVAL = 800; 
+    public static final int DYNAMITE_ATTACK_INTERVAL = 500; // time between attacks
+    public static final double DYNAMITE_MOVEINTERVAL = 1000; // Change random direction every 1 second
 
     public static final int DYNAMITE_SPRITE_WIDTH = 192;
     public static final int DYNAMITE_SPRITE_HEIGHT = 192;
@@ -98,7 +111,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     //Dynamite projectile Config
     public static final int PROJECTILE_THROW_SPEED = 100;
     public static final int PROJECTILE_THROW_HEIGHT = 300;
-    public static final int PROJECTILE_FUSE_TIME = 2000; // ms
+    public static final int PROJECTILE_AIR_TIME = 1500; // ms
     public static final int PROJECTILE_EXPLOSION_RADIUS = 50;
     public static final int PROJECTILE_SPRITE_WIDTH = 64;
     public static final int PROJECTILE_SPRITE_HEIGHT = 64; 

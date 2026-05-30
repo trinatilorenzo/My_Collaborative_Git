@@ -1,151 +1,203 @@
 package model.entity;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.List;
-
 import main.CONFIG.EntityConfig;
 import main.CONFIG.SpawnPoint;
+import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.DynamiteState;
-import main.CONFIG.enu.TNTState;
 
+
+/**
+ * The EnemyDynamite CLASS an NPC that trows dynamite at the player and follow him
+ */
+//-------------------------------------------------------------------------------------------------------------------
 public class EnemyDynamite extends Entity {
 
-    private DynamiteState state = DynamiteState.WANDER;
-    private List<DynamiteProjectile> globalProjectiles;
-    private EntityConfig entityConfig;
-    private int health = 1;
-    private double attackTimer = 0;
-    private double moveTimer = 0; // Timer to control wandering movement
+    //state
+    private DynamiteState state;
 
-    private double dirX = 0; //save the current direction of TNT
-    private double dirY = 0;
+    //movement
+    private Direction facingDirection;
+    private double moveTimer; // Timer to control wandering movement
+    private double attackCooldownMs;
 
-    private final double moveInterval = 1000; // Change direction every 1 second
+    //weapon
+    private final List<DynamiteProjectile> globalProjectiles;
+    private int attackCount;
 
-    private double detectionRadius; // Radius within which the dynamite detects the player
 
-    private boolean facingRight = true;
-    
-    //CONSTRUCTOR
+    /**
+     * CONSTRUCTOR
+     */
+    //-------------------------------------------------------------
     public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig, List<DynamiteProjectile> globalProjectiles) {
         super(entityConfig);
-        this.entityConfig = entityConfig;
+
+        initializeDefaultValues(spawnPoint);
+        this.globalProjectiles = globalProjectiles;
+    }
+    //-------------------------------------------------------------
+    public void initializeDefaultValues(SpawnPoint spawnPoint){
+        this.state = EntityConfig.DYNAMITE_DEFAULT_STATE;
+
         this.worldX = spawnPoint.x();
         this.worldY = spawnPoint.y();
-        this.currentLayer = 2; //TODO: set well
-        this.globalProjectiles = globalProjectiles;
-        this.speed = entityConfig.START_DYNAMITE_SPEED;
-        this.detectionRadius = entityConfig.DYNAMITE_DETECTION_RADIUS;
+        this.currentLayer = spawnPoint.layer();
 
-        solidArea = new Rectangle(0, 0, entityConfig.DYNAMITE_HITBOX_WIDTH, entityConfig.DYNAMITE_HITBOX_HEIGHT);
+        this.speed = EntityConfig.START_DYNAMITE_SPEED;
+        this.life = EntityConfig.DYNAMITE_MAX_LIFE;
+
+        solidArea = new Rectangle(0, 0, EntityConfig.DYNAMITE_HITBOX_WIDTH, EntityConfig.DYNAMITE_HITBOX_HEIGHT);
+
+        this.facingDirection = EntityConfig.START_FACING;
+        this.moveTimer=0;
+        this.attackCooldownMs = 0;
+        this.attackCount = 0;
     }
+    //-------------------------------------------------------------
 
+
+    /**
+     * Updates the enemy state and movement
+     */
+    //------------------------------------------------------------------------
     public void update(Player player, double deltaMs) {
         super.update(); // Reset movement and collision states
+
+        if (attackCooldownMs > 0) {
+            attackCooldownMs -= deltaMs;
+        }
+
+        checkPlayerProximity(player);
+
         switch (state) {
             case WANDER:
                 wander(deltaMs);
-                checkPlayerProximity(player);
+                facePlayer(player);
                 break;
 
             case CHASING:
                 chasePlayer(player, deltaMs);
-                checkPlayerProximity(player);
+                facePlayer(player);
                 break;
             
             case ATTACKING:
-                attackTimer += deltaMs;
-                if (attackTimer >= entityConfig.DYNAMITE_ATTACK_INTERVAL) { // Attack every 2 seconds
+                facePlayer(player);
+                if (attackCooldownMs <= 0) {
                     attack(player);
-                    attackTimer = 0;
+                    attackCooldownMs = EntityConfig.DYNAMITE_ATTACK_INTERVAL;
                 }
-                checkPlayerProximity(player);
                 break;
             
         }
-        
-        
-    }  
-
-    //-------------------------------------------------------------------------------
-    // CHeck if the player is near the enemy
-    private void checkPlayerProximity(Player player) {
-        int distanceX = player.worldX - worldX;
-        int distanceY = player.worldY - worldY;
-        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-        if (distance < entityConfig.DYNAMITE_ATTACKING_RADIUS) {
-            state = DynamiteState.ATTACKING;
-            //triggerTimer = 0;
-        } else if (distance < entityConfig.DYNAMITE_DETECTION_RADIUS){
-            state = DynamiteState.CHASING;
-        } else {
-            state = DynamiteState.WANDER;
-        }
     }
-    
-    //-------------------------------------------------------------------------------
-    /* Wander randomly within a small area */
+    //-------------------------------------------------------------
+    /**
+     *  Simple "AI" methods to wander around the map
+     *  Move randomly up and down, left and right, and stay still
+     *  by a random number for TNT_MOVEINTERVAL
+     */
     private void wander(double deltaMs) {
-        // Simple random movement logic 
+        //save the current direction
+        double dirX =  0, dirY = 0;
+
         moveTimer += deltaMs;
 
-        if (moveTimer >= moveInterval) {
+        if (moveTimer >= EntityConfig.DYNAMITE_MOVEINTERVAL) {
+            // The direction is a random position in a circle radius 1;
             double angle = Math.random() * 2 * Math.PI;
             dirX = Math.cos(angle);
             dirY = Math.sin(angle);
             moveTimer = 0;
         }
-        double dist = speed * (deltaMs / 1000.0);
-
-        dx = (int) Math.round(dirX * dist);
-        dy = (int) Math.round(dirY * dist);
-
-        facingRight = dirX >= 0;
+        setMove(dirX,dirY,deltaMs);
 
     }
+    //-------------------------------------------------------------
+    /**
+     * Checks if the player is within the detection radius
+     * and triggers the attack or the chase state if so
+     */
+    private void checkPlayerProximity(Player player) {
+        int distanceX = player.worldX - worldX;
+        int distanceY = player.worldY - worldY;
+        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-    //-------------------------------------------------------------------------------
-    /* Chase the player */
+        if (distance < EntityConfig.DYNAMITE_ATTACKING_RADIUS) {
+            state = DynamiteState.ATTACKING;
+        } else if (distance < EntityConfig.DYNAMITE_DETECTION_RADIUS){
+            state = DynamiteState.CHASING;
+        } else {
+            state = DynamiteState.WANDER;
+        }
+    }
+    //-------------------------------------------------------------
+    /**
+     * Set the direction to follow the player
+     */
     private void chasePlayer(Player player, double deltaMs) {
-        double dxPlayer = player.getWorldX() - worldX;
-        double dyPlayer = player.getWorldY() - worldY;
+        //save the current direction
+        double dirX = 0, dirY = 0;
+
+        // distance from the player
+        double dxPlayer = player.getWorldX() - worldX; //distance in x
+        double dyPlayer = player.getWorldY() - worldY; //distance in y
         double distance = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
         if (distance > 0) {
-            dirX = (dxPlayer / distance); //normalization
+            //normalization to convert the distance to a direction
+            dirX = (dxPlayer / distance);
             dirY = (dyPlayer / distance);
         }
 
+        setMove(dirX,dirY,deltaMs);
+
+    }
+    //-------------------------------------------------------------
+    private void facePlayer(Player player) {
+        if (player.getWorldX() >= worldX ){
+            facingDirection = Direction.RIGHT;
+        }else {
+            facingDirection = Direction.LEFT;
+        }
+    }
+    //-------------------------------------------------------------
+    private void setMove(double dirX, double dirY, double deltaMs){
         double dist = speed * (deltaMs/1000.0);
 
         dx = (int) Math.round(dirX * dist);
         dy = (int) Math.round(dirY * dist);
 
-        facingRight = dirX>=0;
-        
     }
-
-    /* Attack by launching a projectile towards the player */
-    private void attack(Player player) {
-        DynamiteProjectile proj = new DynamiteProjectile(worldX, worldY, player.getWorldX(), player.getWorldY(), entityConfig);
-        globalProjectiles.add(proj);
-    }
-
     //-------------------------------------------------------------
-    // Method to apply damage to the EnemyDynamite
-    public void takeDamage() {
-        if (state == DynamiteState.DEAD) return; // Already dead
-        health--;
-        if (health <= 0) {
-            state = DynamiteState.DEAD;
+    /**
+     * Attack by launching a projectile towards the player
+     */
+    private void attack(Player player) {
+        int distanceX = player.getWorldX() - worldX;
+        int distanceY = player.getWorldY() - worldY;
+        double distanceSquared = (double) distanceX * distanceX + (double) distanceY * distanceY;
+        double maxRadiusSquared = (double) EntityConfig.DYNAMITE_ATTACKING_RADIUS * EntityConfig.DYNAMITE_ATTACKING_RADIUS;
+        if (distanceSquared > maxRadiusSquared) {
+            return;
         }
+        DynamiteProjectile proj = new DynamiteProjectile(
+                worldX,
+                worldY,
+                player.getWorldX(),
+                player.getWorldY(),
+                player.getCurrentLayer(),
+                entityConfig
+        );
+        globalProjectiles.add(proj);
+        attackCount++;
     }
+    //-------------------------------------------------------------
+    // end update -------------------------------------------------------------
 
 
     //GETTER
+    //-------------------------------------------------------------
     public DynamiteState getState(){
         return state;
     }
@@ -153,7 +205,26 @@ public class EnemyDynamite extends Entity {
         return state==DynamiteState.DEAD;
     }
     public boolean isFacingRight(){
-        return facingRight;
+        return facingDirection==Direction.RIGHT;
     }
-    
+    public int getAttackCount() {
+        return attackCount;
+    }
+    //-------------------------------------------------------------
+
+    //SETTER
+    //-------------------------------------------------------------
+    /**
+     *  Method to apply damage to the Entity
+     */
+    public void takeDamage() {
+        if (state == DynamiteState.DEAD) return; // Already dead
+        life --;
+        if (life <= 0) {
+            state = DynamiteState.DEAD;
+        }
+    }
+    //-------------------------------------------------------------
+
 }
+//-------------------------------------------------------------------------------------------------------------------

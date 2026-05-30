@@ -4,5 +4,6 @@ public enum TNTState {
     WANDER,
     TRIGGERED,
     EXPLODING,
+    HIT,
     EXPLODED
 }

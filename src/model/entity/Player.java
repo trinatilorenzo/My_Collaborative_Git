@@ -5,7 +5,6 @@ import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.PlayerState;
 
-
 import java.awt.Rectangle;
 
 /**
