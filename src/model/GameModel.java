@@ -148,12 +148,8 @@ public class GameModel {
     }
     private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
-            objects.add(new OBJ_Tree(
-                    treeTag,
-                    spawnPoint.x(), spawnPoint.y(), spawnPoint.layer(),
-                    treeWidth, treeHeight,
-                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig),
-                    objConfig
+            objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
+                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig)
             ));
         }
     }

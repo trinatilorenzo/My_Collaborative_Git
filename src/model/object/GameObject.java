@@ -1,23 +1,39 @@
 package model.object;
 
+import main.CONFIG.ObjConfig;
+import main.CONFIG.SpawnPoint;
+
 import java.awt.Rectangle;
 
-//TODO usare la stessa sintassi dei commenti
-
 /**
- * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world, providing common properties such as position, collision handling, and rendering information.
+ * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world,
+ * providing common properties such as position, collision handling, and rendering information.
  */
+//-------------------------------------------------------------------------------------------------------------------
 public class GameObject {
+    protected ObjConfig objConfig;
 
-    protected int worldX, worldY;
-    protected int width, height, layer;
+    protected String name;
+    protected int worldX, worldY, layer; //position
+    protected int width, height; // visual size
     
-    protected Rectangle solidArea;
+    protected Rectangle solidArea; // dimension
     
     protected boolean solid;
     protected boolean removed;
 
-    protected String name;
+    public GameObject(ObjConfig objConfig, String name, SpawnPoint spawnPoint, int width, int height, Rectangle solidArea, Boolean solid){
+        this.objConfig = objConfig;
+        worldX = spawnPoint.x();
+        worldY = spawnPoint.y();
+        layer = spawnPoint.layer();
+
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.solidArea = solidArea;
+        this.solid = solid;
+    }
 
     public void interact() {
         // Default interaction behavior (can be overridden by subclasses)
@@ -37,6 +53,9 @@ public class GameObject {
     public Rectangle getSolidArea() {
         return solidArea;
     }
+    public Rectangle getSolidWorldArea() {
+        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+    }
     public String getName() {
         return name;
     }
@@ -54,3 +73,4 @@ public class GameObject {
     }
 
 }
+//-------------------------------------------------------------------------------------------------------------------

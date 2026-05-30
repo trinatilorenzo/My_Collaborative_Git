@@ -11,7 +11,6 @@ import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.object.OBJ_Tree;
-import model.object.OBJ_Structure;
 import model.entity.Player;
 import model.event.AudioEventType;
 import view.UI.UI;
@@ -92,7 +91,7 @@ public class GameView extends JPanel {
         // object renderers
         this.rendererRegistry = new RendererRegistry();
         rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        rendererRegistry.register(OBJ_Structure.class, new StructureRenderer());
+        rendererRegistry.register(GameObject.class, new StructureRenderer());
         this.audioManager = new GameAudioManager();
         this.audioManager.syncBackgroundMusic(model.getGameState());
         
