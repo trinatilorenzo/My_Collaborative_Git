@@ -553,9 +553,12 @@ public class UI {
 
     //-------------------------------------------------------------
     private void drawDebugOverlay() {
-        playerRender.drawSolidArea(g2, gameModel.getPlayer());
-        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
+        int pScreenX = screenConfig.SCREEN_WIDTH() / 2 - (screenConfig.TILE_SIZE() / 2);
+        int pScreenY = screenConfig.SCREEN_HEIGHT() / 2 - (screenConfig.TILE_SIZE() / 2);
+        playerRender.drawSolidArea(g2, gameModel.getPlayer(), pScreenX, pScreenY);        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
 
+        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
+        
         for (EnemyDynamite ed : gameModel.getDynamiteEnemies()) {
             dynamiteRender.drawSolidArea(g2, ed, screenX(ed.getWorldX()), screenY(ed.getWorldY()));
         }
@@ -675,22 +678,17 @@ public class UI {
     }
     //-------------------------------------------------------------
 
-    /** Converts a world-space X coordinate to screen space relative to the player camera. */
-    //-------------------------------------------------------------
     private int screenX(int worldX) {
         Player p = gameModel.getPlayer();
-        return worldX - p.getWorldX() + p.getScreenX();
+        int pScreenX = screenConfig.SCREEN_WIDTH() / 2 - (screenConfig.TILE_SIZE() / 2);
+        return worldX - p.getWorldX() + pScreenX;
     }
-    //-------------------------------------------------------------
 
-    /** Converts a world-space Y coordinate to screen space relative to the player camera. */
-    //-------------------------------------------------------------
     private int screenY(int worldY) {
         Player p = gameModel.getPlayer();
-        return worldY - p.getWorldY() + p.getScreenY();
+        int pScreenY = screenConfig.SCREEN_HEIGHT() / 2 - (screenConfig.TILE_SIZE() / 2);
+        return worldY - p.getWorldY() + pScreenY;
     }
-    //-------------------------------------------------------------
-
     /** Returns a new {@link BufferedImage} that is a scaled copy of {@code original}. */
     //-------------------------------------------------------------
     public BufferedImage scaleImage(BufferedImage original, int width, int height) {

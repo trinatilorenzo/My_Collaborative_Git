@@ -2,55 +2,47 @@ package model.object;
 
 import java.awt.Rectangle;
 
-//TODO usare la stessa sintassi dei commenti
-
 /**
- * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world, providing common properties such as position, collision handling, and rendering information.
+ * Base abstract class for all world objects.
+ * Holds minimal shared spatial and collision data.
  */
-public class GameObject {
+public abstract class GameObject {
 
     protected int worldX, worldY;
     protected int width, height, layer;
-    
     protected Rectangle solidArea;
+    protected final Rectangle worldBoundsInstance = new Rectangle();
     
     protected boolean solid;
     protected boolean removed;
-
     protected String name;
 
-    public void interact() {
-        // Default interaction behavior (can be overridden by subclasses)
+    public GameObject(String name, int worldX, int worldY, int width, int height, Rectangle solidArea) {
+        this.name = name;
+        this.worldX = worldX;
+        this.worldY = worldY;
+        this.width = width;
+        this.height = height;
+        this.solidArea = solidArea != null ? solidArea : new Rectangle(0, 0, width, height);
+        this.solid = true;
+        this.removed = false;
     }
 
-    public void update(double deltaMs){
-        // Default update behavior (can be overridden by subclasses)
+    public abstract void update(double deltaMs);
+
+    public Rectangle getSolidWorldArea() {
+        worldBoundsInstance.setBounds(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+        return worldBoundsInstance;
     }
 
-    // GETTER
-    public boolean isSolid() {
-        return solid;
-    }
-    public boolean isRemoved() {
-        return removed;
-    }
-    public Rectangle getSolidArea() {
-        return solidArea;
-    }
-    public String getName() {
-        return name;
-    }
-    public int getWorldX() {
-        return worldX;
-    }
-    public int getWorldY() {
-        return worldY;
-    }
-    public int getWidth() {
-        return width;
-    }
-    public int getHeight() {
-        return height;
-    }
-
+    // Standard Getters
+    public String getName() { return name; }
+    public int getWorldX() { return worldX; }
+    public int getWorldY() { return worldY; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public boolean isSolid() { return solid; }
+    public boolean isRemoved() { return removed; }
+    public void setRemoved(boolean removed) { this.removed = removed; }
+    public Rectangle getSolidArea() { return solidArea; }
 }

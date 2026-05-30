@@ -11,16 +11,16 @@ public class OBJ_Structure extends GameObject {
     private final String spritePath;
 
     public OBJ_Structure(int worldX, int worldY, int width, int height, String spritePath) {
-        this.worldX = worldX;
-        this.worldY = worldY;
-        this.width = width;
-        this.height = height;
+        // Pass essential data up to the GameObject base constructor
+        super("structure", worldX, worldY, width, height, new Rectangle(0, 0, width, height));
+        
         this.spritePath = spritePath;
-        this.name = "structure";
-
-        // Requested: solid area equals image/rendered size.
-        this.solidArea = new Rectangle(0, 0, width, height);
         this.solid = true;
+    }
+
+    @Override
+    public void update(double deltaMs) {
+        // Static objects do not require runtime logic updates
     }
 
     public String getSpritePath() {

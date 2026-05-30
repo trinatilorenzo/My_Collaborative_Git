@@ -13,8 +13,6 @@ import java.awt.Rectangle;
     //-------------------------------------------------------------------------------------------------------------------
 public class Player extends Entity {
 
-    protected int screenX, screenY; // position on the screen
-
     private PlayerState state;
     private Direction facingDirection;
 
@@ -44,8 +42,8 @@ public class Player extends Entity {
         currentLayer = entityConfig.START_WORLD_LAYER();
 
         // Screen position
-        screenX = entityConfig.SCREEN_POSX();
-        screenY = entityConfig.SCREEN_POSY();
+        //screenX = entityConfig.SCREEN_POSX();
+        //screenY = entityConfig.SCREEN_POSY();
 
         // Initialize movement values
         speed = EntityConfig.START_PLAYER_SPEED;
@@ -216,12 +214,6 @@ public class Player extends Entity {
     public Direction getFacing() {
         return facingDirection;
     }
-    public int getScreenX() {
-        return screenX;
-    }
-    public int getScreenY() {
-        return screenY;
-    }
     public boolean isDying() {
         return state == PlayerState.DYING;
     }
@@ -247,10 +239,6 @@ public class Player extends Entity {
         } else {
             attackAnimationCompleted = true;
         }
-    }
-    public void setScreenPosition(int screenX, int screenY) {
-        this.screenX = screenX;
-        this.screenY = screenY;
     }
     //---------------------------------
 }

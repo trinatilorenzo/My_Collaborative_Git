@@ -10,6 +10,8 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+import main.CONFIG.EntityConfig;
+
 import static main.CONFIG.ObjConfig.*;
 import static main.CONFIG.enu.TreeState.*;
 
@@ -75,6 +77,11 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
 
     @Override
     public void update(OBJ_Tree tree, double deltaMs) {
+        if (tree.isRemoved()) {
+            managerByTree.remove(tree);
+            return;
+        }
+
         AnimationManager animationManager = getManager(tree);
         animationManager.playAnimation("tree_idle");
 
@@ -85,6 +92,7 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
         }
 
         tree.update(deltaMs);
+
     }
 
     @Override
@@ -93,7 +101,6 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
 
         int drawX = screenX + tree.getShakeOffsetX();
         int drawY = screenY + tree.getShakeOffsetY();
-
         switch (tree.getState()) {
             case CHOPPED -> {
                 BufferedImage choppedFrame = getChoppedFrameByName(tree.getName());

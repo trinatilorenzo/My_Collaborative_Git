@@ -80,11 +80,12 @@ public class Monk extends Entity {
      */
     //-------------------------------------------------------------
     private void checkPlayerProximity(Player player) {
-        int distanceX = player.worldX - worldX;
-        int distanceY = player.worldY - worldY;
-        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-        if (distance < entityConfig.MONK_ACTIVATION_RADIUS) {
+        long distanceX = player.worldX - worldX;
+        long distanceY = player.worldY - worldY;
+        long distanceSq = (distanceX * distanceX + distanceY * distanceY);
+        double radius = entityConfig.MONK_ACTIVATION_RADIUS;
+        double radiusSq = radius * radius;
+        if (distanceSq < radiusSq) {
             talk();
         } else {
             stopTalking();

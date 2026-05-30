@@ -1,8 +1,6 @@
 package model.entity;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
-import main.CONFIG.enu.TNTState;
-
 import java.awt.Rectangle;
 
 /**
@@ -29,6 +27,8 @@ public class Entity {
 
     // Hitbox and collision
     protected Rectangle solidArea;
+    protected final Rectangle worldBoundsInstance = new Rectangle();
+
     protected boolean collisionX = false;
     protected boolean collisionY = false;
 
@@ -86,7 +86,6 @@ public class Entity {
     }
     //-------------------------------------------------------------
 
-
     // GETTER ----------------------
     public boolean isCollisionX() {
         return collisionX;
@@ -121,16 +120,19 @@ public class Entity {
     public Rectangle getSolidArea() {
         return solidArea;
     }
+    public int getLife() {return life;}
+    public int getMaxLife() {return maxLife;}
+
+    
     public Rectangle getSolidWorldArea() {
-        return new Rectangle(
+        worldBoundsInstance.setBounds(
             worldX - solidArea.width / 2,
             worldY - solidArea.height / 2,
             solidArea.width,
             solidArea.height
         );
+        return worldBoundsInstance;
     }
-    public int getLife() {return life;}
-    public int getMaxLife() {return maxLife;}
     //---------------------------------
 
     // SETTER ----------------------

@@ -76,26 +76,18 @@ public class DynamiteRender {
 
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, EnemyDynamite enemy, int screenX, int screenY) {
-
         AnimationManager manager = getManager(enemy);
         BufferedImage frame = manager.getCurrent().getCurrentFrame();
+        
+        int width = EntityConfig.DYNAMITE_SPRITE_WIDTH;
+        int height = entityConfig.DYNAMITE_SPRITE_HEIGHT;
+        int drawX = screenX - width / 2;
+        int drawY = screenY - height / 2;
+
         if (!enemy.isFacingRight()){
-            // Flip the image
-            g2.drawImage(frame,
-                    screenX + EntityConfig.DYNAMITE_SPRITE_WIDTH / 2,
-                    screenY - EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2,
-                    -EntityConfig.DYNAMITE_SPRITE_WIDTH,
-                    EntityConfig.DYNAMITE_SPRITE_HEIGHT,
-                    null);
-        }else{
-            g2.drawImage(
-                    frame,
-                    screenX - entityConfig.DYNAMITE_SPRITE_WIDTH / 2,
-                    screenY - entityConfig.DYNAMITE_SPRITE_HEIGHT / 2,
-                    entityConfig.DYNAMITE_SPRITE_WIDTH,
-                    entityConfig.DYNAMITE_SPRITE_HEIGHT,
-                    null
-            );
+            g2.drawImage(frame, drawX + width, drawY, -width, height, null);
+        } else {
+            g2.drawImage(frame, drawX, drawY, width, height, null);
         }
     }
 
@@ -108,90 +100,55 @@ public class DynamiteRender {
 
     //-------------------------------------------------------------
     public void drawProjectile(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
-
-        BufferedImage frame = projectileFrames[0]; // oppure animazione futura
+        BufferedImage frame = projectileFrames[0]; // Espandibile con animazione in futuro
 
         int w = entityConfig.PROJECTILE_SPRITE_WIDTH;
         int h = entityConfig.PROJECTILE_SPRITE_HEIGHT;
-
         double angle = proj.getAngle();
 
-        // salva trasformazione corrente
         java.awt.geom.AffineTransform old = g2.getTransform();
-
-        // trasla al centro del proiettile
         g2.translate(screenX, screenY);
-
-        // ruota
         g2.rotate(angle);
-
-        // disegna centrato
-        g2.drawImage(
-            frame,
-            -w / 2,
-            -h / 2,
-            w,
-            h,
-            null
-        );
-
-        // ripristina trasformazione
+        g2.drawImage(frame, -w / 2, -h / 2, w, h, null);
         g2.setTransform(old);
     }
 
-    // DEBUG
-//-------------------------------------------------------------
-//DEBUG METOD
+    //DEBUG METOD
     //-------------------------------------------------------------
     public void drawSolidArea(Graphics2D g2, EnemyDynamite enemyDynamite, int screenX, int screenY) {
-
         Rectangle solid = enemyDynamite.getSolidArea();
-
         int drawX = screenX - solid.width / 2;
         int drawY = screenY - solid.height / 2;
 
-        // semi-trasparente rosso
         g2.setColor(new Color(255, 0, 0, 80));
         g2.fillRect(drawX, drawY, solid.width, solid.height);
-
-        // bordo rosso
         g2.setColor(Color.RED);
         g2.drawRect(drawX, drawY, solid.width, solid.height);
 
-        // draw explosion area (centered on sprite center, consistent with explode())
-        int centerX = screenX;
-        int centerY = screenY;
-
+        // Attack Radius
         g2.setColor(new Color(93, 255, 0, 80));
         int r = entityConfig.DYNAMITE_ATTACKING_RADIUS;
-        g2.fillOval(centerX - r, centerY - r, 2 * r, 2 * r);
-
+        g2.fillOval(screenX - r, screenY - r, 2 * r, 2 * r);
         g2.setColor(Color.GREEN);
-        g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
+        g2.drawOval(screenX - r, screenY - r, 2 * r, 2 * r);
 
-        // draw detection area (centered on sprite center, consistent with checkPlayerProximity())
+        // Detection Radius
         g2.setColor(new Color(0, 84, 255, 80));
         r = entityConfig.DYNAMITE_DETECTION_RADIUS;
-        g2.fillOval(centerX - r, centerY - r, 2 * r, 2 * r);
-
+        g2.fillOval(screenX - r, screenY - r, 2 * r, 2 * r);
         g2.setColor(Color.BLUE);
-        g2.drawOval(centerX - r, centerY - r, 2 * r, 2 * r);
+        g2.drawOval(screenX - r, screenY - r, 2 * r, 2 * r);
     }
-//-------------------------------------------------------------
-public void drawProjectileSolidArea(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
 
-    Rectangle solid = proj.getSolidArea();
+    public void drawProjectileSolidArea(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
+        Rectangle solid = proj.getSolidArea();
+        int drawX = screenX - solid.width / 2;
+        int drawY = screenY - solid.height / 2;
 
-    int drawX = screenX - solid.width / 2;
-    int drawY = screenY - solid.height / 2;
-
-    // Fill semi-transparent
-    g2.setColor(new Color(255, 165, 0, 80)); // arancione per distinguerlo
-    g2.fillRect(drawX, drawY, solid.width, solid.height);
-
-    // Border
-    g2.setColor(Color.ORANGE);
-    g2.drawRect(drawX, drawY, solid.width, solid.height);
+        g2.setColor(new Color(255, 165, 0, 80)); 
+        g2.fillRect(drawX, drawY, solid.width, solid.height);
+        g2.setColor(Color.ORANGE);
+        g2.drawRect(drawX, drawY, solid.width, solid.height);
+    }
 }
 
-}

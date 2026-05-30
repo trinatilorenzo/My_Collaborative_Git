@@ -222,6 +222,12 @@ public class GameModel {
         updateEnemiesPhase(deltaMs);
         updateProjectilesPhase(deltaMs);
 
+        for (GameObject obj : objects) {
+            if (!obj.isRemoved()) {
+                obj.update(deltaMs);
+            }
+        }
+
         if (player.getState() == PlayerState.WALKING) {
             player.move();
         }
@@ -295,7 +301,7 @@ public class GameModel {
             for (GameObject obj : objects) {
                 if (obj.isRemoved()) continue;
                 if (obj instanceof OBJ_Tree tree && attackArea.intersects(tree.getSolidWorldArea())) {
-                    tree.interact();
+                    tree.hit();
                     emitAudioEvent(AudioEventType.TREE_HIT);
                 }
             }
@@ -432,15 +438,6 @@ public class GameModel {
         //TODO load saved game
     }
     //-------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 
     public boolean hasPendingTransientAnimations() {
         if (player.isDying()) {

@@ -20,6 +20,7 @@ public class EnemyDynamite extends Entity {
     private Direction facingDirection;
     private double moveTimer; // Timer to control wandering movement
     private double attackCooldownMs;
+    private double dirX =  0, dirY = 0;
 
     //weapon
     private final List<DynamiteProjectile> globalProjectiles;
@@ -88,6 +89,8 @@ public class EnemyDynamite extends Entity {
                     attackCooldownMs = EntityConfig.DYNAMITE_ATTACK_INTERVAL;
                 }
                 break;
+            case DEAD : 
+                break;
             
         }
     }
@@ -99,7 +102,6 @@ public class EnemyDynamite extends Entity {
      */
     private void wander(double deltaMs) {
         //save the current direction
-        double dirX =  0, dirY = 0;
 
         moveTimer += deltaMs;
 
@@ -119,13 +121,16 @@ public class EnemyDynamite extends Entity {
      * and triggers the attack or the chase state if so
      */
     private void checkPlayerProximity(Player player) {
-        int distanceX = player.worldX - worldX;
-        int distanceY = player.worldY - worldY;
-        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        long distanceX = player.worldX - worldX;
+        long distanceY = player.worldY - worldY;
+        long distanceSq = distanceX * distanceX + distanceY * distanceY;
 
-        if (distance < EntityConfig.DYNAMITE_ATTACKING_RADIUS) {
+        double attackRadSq = (double) EntityConfig.DYNAMITE_ATTACKING_RADIUS * EntityConfig.DYNAMITE_ATTACKING_RADIUS;
+        double detectRadSq = (double) EntityConfig.DYNAMITE_DETECTION_RADIUS * EntityConfig.DYNAMITE_DETECTION_RADIUS;
+        
+        if (distanceSq < attackRadSq) {
             state = DynamiteState.ATTACKING;
-        } else if (distance < EntityConfig.DYNAMITE_DETECTION_RADIUS){
+        } else if (distanceSq < detectRadSq){
             state = DynamiteState.CHASING;
         } else {
             state = DynamiteState.WANDER;
@@ -136,9 +141,6 @@ public class EnemyDynamite extends Entity {
      * Set the direction to follow the player
      */
     private void chasePlayer(Player player, double deltaMs) {
-        //save the current direction
-        double dirX = 0, dirY = 0;
-
         // distance from the player
         double dxPlayer = player.getWorldX() - worldX; //distance in x
         double dyPlayer = player.getWorldY() - worldY; //distance in y
@@ -192,8 +194,19 @@ public class EnemyDynamite extends Entity {
         globalProjectiles.add(proj);
         attackCount++;
     }
-    //-------------------------------------------------------------
     // end update -------------------------------------------------------------
+    
+    /**
+     *  Method to apply damage to the Entity
+     */
+    public void takeDamage() {
+        if (state == DynamiteState.DEAD) return; // Already dead
+        life --;
+        if (life <= 0) {
+            state = DynamiteState.DEAD;
+        }
+    }
+    //-------------------------------------------------------------
 
 
     //GETTER
@@ -209,20 +222,6 @@ public class EnemyDynamite extends Entity {
     }
     public int getAttackCount() {
         return attackCount;
-    }
-    //-------------------------------------------------------------
-
-    //SETTER
-    //-------------------------------------------------------------
-    /**
-     *  Method to apply damage to the Entity
-     */
-    public void takeDamage() {
-        if (state == DynamiteState.DEAD) return; // Already dead
-        life --;
-        if (life <= 0) {
-            state = DynamiteState.DEAD;
-        }
     }
     //-------------------------------------------------------------
 

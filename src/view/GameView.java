@@ -182,7 +182,7 @@ public class GameView extends JPanel {
 
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
-        playerRender.updateAnimations(model.getPlayer(), deltaMs);
+        playerRender.update(model.getPlayer(), deltaMs);
         monkRenderer.update(model.getMonk(), deltaMs);
         for (EnemyTNT tnt : model.getTntEnemies()) {
             tntRenderer.update(tnt, deltaMs);
@@ -200,6 +200,10 @@ public class GameView extends JPanel {
     private void drawEntities(Graphics2D g2) {
         Player player = model.getPlayer();
         Monk monk = model.getMonk();
+
+        // Player's coordinates
+        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
 
         // List to hold all entities for sorting
         java.util.List<Object> renderList = new java.util.ArrayList<>();
@@ -232,16 +236,16 @@ public class GameView extends JPanel {
         for (Object obj : renderList) {
 
             if (obj instanceof Player p) {
-                playerRender.draw(g2, p);
+                playerRender.draw(g2, p, pScreenX, pScreenY);
             }
-            if (obj instanceof Monk m) {
-                int screenX = m.getWorldX() - player.getWorldX() + player.getScreenX();
-                int screenY = m.getWorldY() - player.getWorldY() + player.getScreenY();
+            else if (obj instanceof Monk m) {
+                int screenX = m.getWorldX() - player.getWorldX() + pScreenX;
+                int screenY = m.getWorldY() - player.getWorldY() + pScreenY;
                 monkRenderer.draw(g2, m, screenX, screenY);
             }
             else if (obj instanceof EnemyTNT tnt) {
-                int screenX = tnt.getWorldX() - player.getWorldX() + player.getScreenX();
-                int screenY = tnt.getWorldY() - player.getWorldY() + player.getScreenY();
+                int screenX = tnt.getWorldX() - player.getWorldX() + pScreenX;
+                int screenY = tnt.getWorldY() - player.getWorldY() + pScreenY;
 
                 int halfW = EntityConfig.TNT_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.TNT_SPRITE_HEIGHT / 2;
@@ -253,8 +257,8 @@ public class GameView extends JPanel {
                 tntRenderer.draw(g2, tnt, screenX, screenY);
             }
             else if (obj instanceof EnemyDynamite enemyDynamite) {
-                int screenX = enemyDynamite.getWorldX() - player.getWorldX() + player.getScreenX();
-                int screenY = enemyDynamite.getWorldY() - player.getWorldY() + player.getScreenY();
+                int screenX = enemyDynamite.getWorldX() - player.getWorldX() + pScreenX;
+                int screenY = enemyDynamite.getWorldY() - player.getWorldY() + pScreenY;
                 int halfW = EntityConfig.DYNAMITE_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
                 if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
@@ -264,8 +268,8 @@ public class GameView extends JPanel {
                 dynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
             }
             else if (obj instanceof DynamiteProjectile proj) {
-                int screenX = proj.getWorldX() - player.getWorldX() + player.getScreenX();
-                int screenY = proj.getWorldY() - player.getWorldY() + player.getScreenY();
+                int screenX = proj.getWorldX() - player.getWorldX() + pScreenX;
+                int screenY = proj.getWorldY() - player.getWorldY() + pScreenY;
 
                 int halfW = EntityConfig.PROJECTILE_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.PROJECTILE_SPRITE_HEIGHT / 2;
@@ -284,8 +288,8 @@ public class GameView extends JPanel {
 
                 if (renderer == null) continue; 
 
-                int screenX = o.getWorldX() - player.getWorldX() + player.getScreenX();
-                int screenY = o.getWorldY() - player.getWorldY() + player.getScreenY();
+                int screenX = o.getWorldX() - player.getWorldX() + pScreenX;
+                int screenY = o.getWorldY() - player.getWorldY() + pScreenY;
 
                 // culling: draw only if visible on screen
                 if (screenX + o.getWidth() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||

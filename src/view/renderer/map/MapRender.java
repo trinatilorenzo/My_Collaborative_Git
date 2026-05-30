@@ -33,11 +33,17 @@ public class MapRender {
      */
     // -----------------------------------------------------
     void drawLayer(int layer, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2){
+        // player position in the screen
+        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
 
-        int leftCol = Math.max(0, (player.getWorldX() - player.getScreenX())/ screenCfg.TILE_SIZE());
-        int rightCol = Math.min(gameMap.getMaxMapCol()-1, player.getWorldX() + (screenCfg.SCREEN_WIDTH() - player.getScreenX()) / screenCfg.TILE_SIZE() );
-        int topRow = Math.max(0, (player.getWorldY() - player.getScreenY()) / screenCfg.TILE_SIZE() );
-        int bottomRow = Math.min(gameMap.getMaxMapRow()-1, (player.getWorldY() + (screenCfg.SCREEN_HEIGHT() - player.getScreenY())) / screenCfg.TILE_SIZE() );
+        int leftCol = Math.max(0, (player.getWorldX() - pScreenX)/ screenCfg.TILE_SIZE());
+        int rightCol = Math.min(gameMap.getMaxMapCol()-1, (player.getWorldX() + (screenCfg.SCREEN_WIDTH() - pScreenX)) / screenCfg.TILE_SIZE() );
+        int topRow = Math.max(0, (player.getWorldY() - pScreenY) / screenCfg.TILE_SIZE() );
+        int bottomRow = Math.min(gameMap.getMaxMapRow()-1, (player.getWorldY() + (screenCfg.SCREEN_HEIGHT() - pScreenY)) / screenCfg.TILE_SIZE() );
+
+        int camOffsetX = -player.getWorldX() + pScreenX;
+        int camOffsetY = -player.getWorldY() + pScreenY;
 
         for (int i = topRow; i<= bottomRow; i++){
             for (int j = leftCol; j<= rightCol; j++){
@@ -45,7 +51,7 @@ public class MapRender {
                 int tileID = gameMap.getMapTile(layer, i, j);// get the tile id to know witch tile to render
 
                 if (tileID != -1){//-1 = trasparente
-                    drawTile(tileSet.getTileIdToDraw(tileID), i, j, tileSet, player, g2);
+                    drawTile(tileSet.getTileIdToDraw(tileID), i, j, tileSet, camOffsetX, camOffsetY, g2);
                 }
             }
         }
@@ -58,13 +64,13 @@ public class MapRender {
      * Draw a single tile
      */
     // -----------------------------------------------------
-    void drawTile(int tileId, int row, int col, TileSet tileSet, Player player, Graphics2D g2) {
+    void drawTile(int tileId, int row, int col, TileSet tileSet, int camOffsetX, int camOffsetY, Graphics2D g2) {
 
         int worldX = col * screenCfg.TILE_SIZE();
         int worldY = row * screenCfg.TILE_SIZE();
 
-        int screenX = worldX - player.getWorldX() + player.getScreenX();
-        int screenY = worldY - player.getWorldY() + player.getScreenY();
+        int screenX = worldX + camOffsetX;
+        int screenY = worldY + camOffsetY;
 
         int dx2 = screenX + screenCfg.TILE_SIZE();
         int dy2 = screenY + screenCfg.TILE_SIZE();
@@ -97,21 +103,24 @@ public class MapRender {
                 new Color(255, 97, 0, 80)    // layer 3
         };
 
-        int camOffsetX = -player.getWorldX() + player.getScreenX();
-        int camOffsetY = -player.getWorldY() + player.getScreenY();
+        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
+
+        int camOffsetX = -player.getWorldX() + pScreenX;
+        int camOffsetY = -player.getWorldY() + pScreenY;
 
         Stroke originalStroke = g2.getStroke();
         Font originalFont = g2.getFont();
+int leftCol = Math.max(0, (player.getWorldX() - pScreenX) / screenCfg.TILE_SIZE());
+        int rightCol = Math.min(gameMap.getMaxMapCol() - 1, (player.getWorldX() + (screenCfg.SCREEN_WIDTH() - pScreenX)) / screenCfg.TILE_SIZE());
+        int topRow = Math.max(0, (player.getWorldY() - pScreenY) / screenCfg.TILE_SIZE());
+        int bottomRow = Math.min(gameMap.getMaxMapRow() - 1, (player.getWorldY() + (screenCfg.SCREEN_HEIGHT() - pScreenY)) / screenCfg.TILE_SIZE());
 
-        g2.setStroke(new BasicStroke(1));
-        g2.setFont(new Font("Arial", Font.BOLD, 10));
-
-        for (int row = 0; row < gameMap.getMaxMapRow(); row++) {
-            for (int col = 0; col < gameMap.getMaxMapCol(); col++) {
+        for (int row = topRow; row <= bottomRow; row++) {
+            for (int col = leftCol; col <= rightCol; col++) {
 
                 int visibleLayer = -1;
 
-                // Cerca il layer più alto calpestabile
                 for (int layer = gameMap.getGraphicLayerNum() - 1; layer >= 0; layer--) {
                     if (!gameMap.hasCollision(layer, row, col)) {
                         visibleLayer = layer;
@@ -123,11 +132,6 @@ public class MapRender {
 
                 int screenX = col * screenCfg.TILE_SIZE() + camOffsetX;
                 int screenY = row * screenCfg.TILE_SIZE() + camOffsetY;
-
-                if (screenX + screenCfg.TILE_SIZE() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                        screenY + screenCfg.TILE_SIZE() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
-                    continue;
-                }
 
                 Color fill = visibleLayer < layerColors.length
                         ? layerColors[visibleLayer]
@@ -147,10 +151,9 @@ public class MapRender {
                 g2.drawRect(screenX, screenY, screenCfg.TILE_SIZE(), screenCfg.TILE_SIZE());
 
                 g2.setColor(Color.WHITE);
-                g2.drawString(col+" , "+ row + "\nL" + visibleLayer , screenX + 2, screenY + 12);
+                g2.drawString(col + " , " + row + "\nL" + visibleLayer, screenX + 2, screenY + 12);
             }
         }
-
         g2.setStroke(originalStroke);
         g2.setFont(originalFont);
     }

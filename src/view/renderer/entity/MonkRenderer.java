@@ -44,22 +44,18 @@ public class MonkRenderer {
         animationManager.addAnimation("monk_talking", new Animation(talkingFrames, 200, true));
         animationManager.addAnimation("monk_disappear", new Animation(disappearFrames, 150, false));
     }
-//TODO make it better
+
     public void update(Monk monk, double deltaMs) {
         if (monk.getState() == MonkState.DISAPPEARED) return;
 
-        // Scegli quale animazione far girare
-        if (monk.getState() == MonkState.IDLE) {
-            animationManager.playAnimation("monk_idle");
-        } else if (monk.getState() == MonkState.TALKING) {
-            animationManager.playAnimation("monk_talking");
-        } else if (monk.getState() == MonkState.DISAPPEARING) {
-            animationManager.playAnimation("monk_disappear");
+        switch (monk.getState()) {
+            case IDLE -> animationManager.playAnimation("monk_idle");
+            case TALKING -> animationManager.playAnimation("monk_talking");
+            case DISAPPEARING -> animationManager.playAnimation("monk_disappear");
         }
 
         animationManager.update(deltaMs);
     }
-
 
     public void draw(Graphics2D g2, Monk monk, int screenX, int screenY) {
         if (monk.getState() == MonkState.DISAPPEARED) return;

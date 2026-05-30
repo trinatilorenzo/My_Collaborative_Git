@@ -15,8 +15,8 @@ public class EnemyTNT extends Entity{
 
     //state
     private TNTState state;
-    private long triggerTimer;
-    private long explosionTimer;
+    private double triggerTimer;
+    private double explosionTimer;
 
     //movement
     private double moveTimer; // Timer to control wandering movement
@@ -33,7 +33,7 @@ public class EnemyTNT extends Entity{
     //--------------------------------------------------------------
     public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
         super(entityConfig);
-
+        random = new Random();
         initializeDefaultValues(spawnPoint);
     }
     //--------------------------------------------------------------
@@ -49,7 +49,6 @@ public class EnemyTNT extends Entity{
 
         solidArea = new Rectangle(0, 0, EntityConfig.TNT_HITBOX_WIDTH, EntityConfig.TNT_HITBOX_HEIGHT);
 
-        random = new Random();
         moveTimer = 0;
         dirX = 0;
         dirY = 0;
@@ -69,6 +68,8 @@ public class EnemyTNT extends Entity{
                 wander(deltaMs);
                 checkPlayerProximity(player);
                 break;
+            case HIT: 
+                state = TNTState.WANDER;
             case TRIGGERED: 
                 triggerTimer += deltaMs;
                 if (triggerTimer >= EntityConfig.TNT_EXPLOSION_DELAY) {
@@ -128,11 +129,11 @@ public class EnemyTNT extends Entity{
      */
     //-------------------------------------------------------------
     private void checkPlayerProximity(Player player) {
-        int distanceX = player.worldX - worldX;
-        int distanceY = player.worldY - worldY;
-        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-        if (distance < EntityConfig.TNT_DETECTION_RADIUS) {
+        long distanceX = player.worldX - worldX;
+        long distanceY = player.worldY - worldY;
+        long distanceSq = distanceX * distanceX + distanceY * distanceY;
+        double radiusSq = (double) EntityConfig.TNT_DETECTION_RADIUS * EntityConfig.TNT_DETECTION_RADIUS;
+        if (distanceSq < radiusSq) {
             state = TNTState.TRIGGERED;
             triggerTimer = 0;
         }
@@ -145,29 +146,19 @@ public class EnemyTNT extends Entity{
     private void explode(Player player) {
         if (hasDealtDamage) return; // Ensure damage is applied only once per explosion
 
-        int distanceX = player.worldX - worldX;
-        int distanceY = player.worldY - worldY;
-        double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        long distanceX = player.worldX - worldX;
+        long distanceY = player.worldY - worldY;
+        long distanceSq = distanceX * distanceX + distanceY * distanceY;
+        double radiusSq = (double) EntityConfig.TNT_EXPLOSION_RADIUS * EntityConfig.TNT_EXPLOSION_RADIUS;
 
-        if (distance < EntityConfig.TNT_EXPLOSION_RADIUS) {
+        if (distanceSq < radiusSq) {
             player.takeDamage();
             hasDealtDamage = true; // Set flag to prevent further damage
         }
     }
     //-------------------------------------------------------------
     //end update -------------------------------------------------------------
-
-
-    // GETTERS
-    //-------------------------------------------------------------
-    public TNTState getState() {
-        return state;
-    }
-    public boolean isExploded() {
-        return state==TNTState.EXPLODED;
-    }
-    //-------------------------------------------------------------
-    //SETTERS
+    
     /**
      *  Method to apply damage to the TNT
      */
@@ -180,7 +171,16 @@ public class EnemyTNT extends Entity{
             state = TNTState.EXPLODED;
         }
     }
-    //-------------------------------------------------------------
 
+    // GETTERS
+    //-------------------------------------------------------------
+    public TNTState getState() {
+        return state;
+    }
+    public boolean isExploded() {
+        return state==TNTState.EXPLODED;
+    }
+    //-------------------------------------------------------------
+   
 }
 //-------------------------------------------------------------------------------------------------------------------

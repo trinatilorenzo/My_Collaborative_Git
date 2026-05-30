@@ -83,13 +83,13 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int TNT_HITBOX_WIDTH = 55;
     public static final int TNT_HITBOX_HEIGHT = 35;
 
-    public static final int TNT_FOR_SPAWNPOINT = 10;
+    public static final int TNT_FOR_SPAWNPOINT = 5;
     public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
     //-------------------------------------------------------------
     //EnemyDynamiteConfig
     public static final DynamiteState DYNAMITE_DEFAULT_STATE = DynamiteState.WANDER;
-    public static final int START_DYNAMITE_SPEED = 256; // pixels per second
+    public static final int START_DYNAMITE_SPEED = 128; // pixels per second
     public static final int DYNAMITE_MAX_LIFE = 1;
 
     public static final int DYNAMITE_DETECTION_RADIUS = 400;
