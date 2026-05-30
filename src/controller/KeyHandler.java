@@ -7,46 +7,45 @@ import java.awt.event.KeyListener;
 //  Manage input from keyboard
 //-------------------------------------------------------------------------------------------------------------------
 public class KeyHandler implements KeyListener {
-    private boolean up, down, left, right ;
-    private boolean attack;
-    private boolean interact = false; 
+    private volatile boolean up, down, left, right ;
+    private volatile boolean attack;
+    private volatile boolean interact = false; 
 
-    private boolean debugToggle = false;
-    private boolean pauseToggle = false;
-    private boolean menuPrevious = false;
-    private boolean menuNext = false;
-    private boolean menuConfirm = false;
+    private volatile boolean debugToggle = false;
+    private volatile boolean pauseToggle = false;
+    private volatile boolean menuPrevious = false;
+    private volatile boolean menuNext = false;
+    private volatile boolean menuConfirm = false;
+
+    private boolean pausePressed = false;
+    private boolean debugPressed = false;
 
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W -> {
-                up = true;
-                menuPrevious = true;
-            }
-            case KeyEvent.VK_S -> {
-                down = true;
-                menuNext = true;
-            }
-            case KeyEvent.VK_A -> {
-                left = true;
-                menuPrevious = true;
-            }
-            case KeyEvent.VK_D -> {
-                right = true;
-                menuNext = true;
-            }
+            case KeyEvent.VK_W -> { up = true; menuPrevious = true; }
+            case KeyEvent.VK_S -> { down = true; menuNext = true; }
+            case KeyEvent.VK_A -> { left = true; menuPrevious = true; }
+            case KeyEvent.VK_D -> { right = true; menuNext = true; }
             case KeyEvent.VK_UP, KeyEvent.VK_LEFT -> menuPrevious = true;
             case KeyEvent.VK_DOWN, KeyEvent.VK_RIGHT -> menuNext = true;
-            case KeyEvent.VK_SPACE -> {
-                attack = true;
-                menuConfirm = true;
-            }
+            case KeyEvent.VK_SPACE -> { attack = true; menuConfirm = true; }
             case KeyEvent.VK_ENTER -> menuConfirm = true;
-            case KeyEvent.VK_P -> pauseToggle = !pauseToggle;
-            case KeyEvent.VK_F3 -> debugToggle = !debugToggle;
             case KeyEvent.VK_M -> interact = true;
-        }
+
+            // Anti repetition toggle
+            case KeyEvent.VK_P -> {
+                if (!pausePressed) {
+                    pauseToggle = !pauseToggle;
+                    pausePressed = true;
+                }
+            }
+            case KeyEvent.VK_F3 -> {
+                if (!debugPressed) {
+                    debugToggle = !debugToggle;
+                    debugPressed = true;
+                }
+            }}
     }
 
     @Override
@@ -58,15 +57,15 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_D -> right = false;
             case KeyEvent.VK_SPACE -> attack = false;
             case KeyEvent.VK_M -> interact = false;
+            case KeyEvent.VK_P -> pausePressed = false;
+            case KeyEvent.VK_F3 -> debugPressed = false;
         }
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
+    public void keyTyped(KeyEvent e) {}
 
-    }
-
-    public InputState getInputState() { // translates the keyboard state into the game's input state, it's a bridge between controller and model
+    public synchronized InputState getInputState() { // translates the keyboard state into the game's input state, it's a bridge between controller and model
         InputState state = new InputState(
                 up,
                 down,

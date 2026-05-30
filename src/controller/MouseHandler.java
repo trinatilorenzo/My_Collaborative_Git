@@ -6,33 +6,17 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 public class MouseHandler implements MouseListener, MouseMotionListener {
-    private int mouseX;
-    private int mouseY;
-    private boolean leftClickPending;
+    private volatile int mouseX;
+    private volatile int mouseY;
+    private volatile boolean leftClickPending;
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             mouseX = e.getX();
             mouseY = e.getY();
             leftClickPending = true;
         }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
     }
 
     @Override
@@ -51,9 +35,15 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
         return new Point(mouseX, mouseY);
     }
 
-    public boolean consumeLeftClick() {
+    public synchronized boolean consumeLeftClick() {
         boolean clicked = leftClickPending;
         leftClickPending = false;
         return clicked;
     }
+
+    // Not used
+    @Override public void mouseClicked(MouseEvent e) {}
+    @Override public void mouseReleased(MouseEvent e) {}
+    @Override public void mouseEntered(MouseEvent e) {}
+    @Override public void mouseExited(MouseEvent e) {}
 }
