@@ -2,6 +2,7 @@ package model.object;
 
 import java.awt.Rectangle;
 import main.CONFIG.ObjConfig;
+import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.TreeState;
 
 /**
@@ -31,7 +32,34 @@ public class OBJ_Tree extends GameObject {
             chopTimer = objConfig.CHOP_ANIMATION_DURATION_MS;
         }
     }
+    //-------------------------------------------------------------
 
+
+    /**
+     * Update the tree's state
+     * * called every frame *
+     */
+    //-------------------------------------------------------------
+    @Override
+    public void update(double deltaMs) {
+        // No update needed in other states
+
+        if (state == TreeState.CHOPPING) {
+            chopTimer -= deltaMs;
+
+            if(chopTimer <= 0) {
+                state = TreeState.IDLE;
+                if(health <= 0){
+                    solid = false;
+                    state = TreeState.CHOPPED;
+                }
+            }
+        }
+    }
+    //-------------------------------------------------------------
+
+
+    //-------------------------------------------------------------
     @Override
     public void update(double deltaMs) {
         if (state != TreeState.CHOPPING) return;
@@ -42,6 +70,8 @@ public class OBJ_Tree extends GameObject {
             this.state = TreeState.CHOPPED;
         }
     }
+    //-------------------------------------------------------------
+
 
     /**
      * Visual shake effect offset during the chopping phase.
@@ -49,6 +79,13 @@ public class OBJ_Tree extends GameObject {
     public int getShakeOffsetX() {
         return (state == TreeState.CHOPPING) ? (int) (Math.random() * 5 - 2) : 0;
     }
+    //-------------------------------------------------------------
+
+    //SETTER
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
+
 
     public int getShakeOffsetY() {
         return (state == TreeState.CHOPPING) ? (int) (Math.random() * 5 - 2) : 0;

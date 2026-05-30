@@ -19,6 +19,8 @@ public class Player extends Entity {
     private boolean deathAnimationCompleted;
     private boolean attackAnimationCompleted;
 
+    private boolean attackDamageApplied;
+
 
     /**
      * COSTRUCTOR
@@ -54,6 +56,7 @@ public class Player extends Entity {
         life = maxLife;
         deathAnimationCompleted = false;
         attackAnimationCompleted = true;
+        attackDamageApplied = false;
     }
     //-------------------------------------------------------------
 
@@ -127,6 +130,7 @@ public class Player extends Entity {
         if (input.attack()) {
             state = PlayerState.ATTACKING;
             attackAnimationCompleted = false;
+            attackDamageApplied = false;
         } else if (isMoving) {
             state = PlayerState.WALKING;
         } else {
@@ -135,7 +139,6 @@ public class Player extends Entity {
     }
     //-------------------------------------------------------------
 
-    //TODO VEDERE BENE IL METODO
     //----------------------------------------------
     public Rectangle getAttackArea() {
         Rectangle attackArea = new Rectangle();
@@ -226,6 +229,9 @@ public class Player extends Entity {
     public boolean isAttackAnimationCompleted() {
         return attackAnimationCompleted;
     }
+    public boolean isAttackDamageApplied() {
+        return attackDamageApplied;
+    }
     //---------------------------------
 
     // SETTER ----------------------
@@ -241,5 +247,8 @@ public class Player extends Entity {
         }
     }
     //---------------------------------
+
+
+
 }
 //-------------------------------------------------------------------------------------------------------------------

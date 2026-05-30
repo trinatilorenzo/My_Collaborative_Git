@@ -1,7 +1,5 @@
 package main.CONFIG;
 
-import model.object.OBJ_Structure;
-import model.object.OBJ_Tree;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

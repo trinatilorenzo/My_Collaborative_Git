@@ -1,29 +1,24 @@
 package model;
 
+import controller.InputState;
+import main.CONFIG.EntityConfig;
+import main.CONFIG.GameConfig;
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
-import main.CONFIG.EntityConfig;
+import main.CONFIG.UIConfig;
 import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.GameState;
-import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.MonkState;
+import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.TNTState;
-import main.CONFIG.GameConfig;
-import model.entity.Player;
-import model.entity.Monk;
-import model.object.GameObject;
-import model.entity.EnemyDynamite;
-import model.entity.EnemyTNT;
-import model.entity.DynamiteProjectile;
+import model.entity.*;
 import model.event.AudioEventType;
-
-import java.util.*;
-
+import model.object.GameObject;
 import model.object.OBJ_Tree;
 
-import controller.InputState;
-
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ALL THE GAME MODEL STAFF HERE
@@ -31,9 +26,6 @@ import java.awt.Rectangle;
 */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel {
-    private static final double GAME_OVER_DELAY_MS = 150.0;
-    private static final int MAIN_MENU_ITEM_COUNT = 3;
-
     private final GameConfig gameConfig;
     //-------------------------------------------------------------
 
@@ -59,19 +51,14 @@ public class GameModel {
     private List<DynamiteProjectile> projectiles;
     //-------------------------------------------------------------
 
-    // System Status
-    private String currentDialogue; // diaologue currently displayed to the player
-    private String statusMessage; // status message to be displayed for a short time
-    private double statusMessageTimerMs;
+    // Dialogue
+    private String currentDialogue; // dialogue currently displayed to the player
     //-------------------------------------------------------------
 
     private double deadStateElapsedMs;
 
+    //Audio events
     private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
-    private int mainMenuSelection;
-    private int hoveredRibbon;
-    private int activeRibbon;
-    private boolean hoveredGameOverButton;
 
     /**
      * COSTRUCTOR
@@ -86,11 +73,7 @@ public class GameModel {
         debugMode = false; // Default debug mode is off
 
         currentDialogue = "";
-        statusMessage = "";
-        statusMessageTimerMs = 0.0;
-
         deadStateElapsedMs = 0.0;
-        resetMenuUiState();
 
     }
     //-------------------------------------------------------------
@@ -100,8 +83,6 @@ public class GameModel {
      */
     //-------------------------------------------------------------
     public void initializeNewGame(){
-        resetMenuUiState();
-
         player = new Player(gameConfig.entityConfig());
 
         //initialize NPC
@@ -148,12 +129,8 @@ public class GameModel {
     }
     private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
-            objects.add(new OBJ_Tree(
-                    treeTag,
-                    spawnPoint.x(), spawnPoint.y(), spawnPoint.layer(),
-                    treeWidth, treeHeight,
-                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig),
-                    objConfig
+            objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
+                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig)
             ));
         }
     }
@@ -176,51 +153,33 @@ public class GameModel {
     //-------------------------------------------------------------
     public void update(InputState input, double deltaMs) {
 
-        // TODO scriverlo più leggibile
-        // MENU
-        if (gameState == GameState.MENU){
-            return; // --> No model update
-        }
-        //GAME OVER
-        if (gameState == GameState.GAME_OVER) {
-            return; // --> No model update
-        }
-
-        // PAUSE
-        updateState(input); // TODO serve ?
-
-        if (gameState != GameState.PLAYING) {
-            updateRuntimeMessages(deltaMs);
-            return;
+        switch (gameState) {
+            case MENU:
+                // no update for menu state
+                break;
+            case PLAYING:
+                updatePlayingState(input, deltaMs);
+                break;
+            case PAUSED:
+                updateState(input);
+                break;
+            case GAME_OVER:
+                // no update for game over state
+                break;
         }
 
-        // DEATH
-        if (player.isDying() || player.isDead()) {
-            updateDeathSequence(deltaMs);
-            updateRuntimeMessages(deltaMs);
-            updateGameOverCountdown(deltaMs);
-            return;
-        }
-
-        // PLAYING
-        updatePlayingState(input, deltaMs);
     }
     //-------------------------------------------------------------
-
 
     // ALL THE UPDATE METHOD
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void updatePlayingState(InputState input, double deltaMs) {
 
-        //save condition before update
         int lifeBeforeUpdate = player.getLife();
-        int projectileCountBeforeUpdate = projectiles.size();
-
-        updatePlayerPhase(input, deltaMs);
-
-        updateEnemiesPhase(deltaMs);
-        updateProjectilesPhase(deltaMs);
+        updatePlayer(input, deltaMs);
+        updateEnemies(deltaMs);
+        updateMonk(input);
 
         for (GameObject obj : objects) {
             if (!obj.isRemoved()) {
@@ -231,129 +190,82 @@ public class GameModel {
         if (player.getState() == PlayerState.WALKING) {
             player.move();
         }
-        monk.update(player, deltaMs);
-        updateInteractions(input);
 
-        updateRuntimeMessages(deltaMs);
-        updateGameOverCountdown(deltaMs);
-        updatePostFrameEvents(lifeBeforeUpdate, projectileCountBeforeUpdate);
+        monk.update(player, deltaMs);
+        updateInteractions();
+
+        updateEvents(lifeBeforeUpdate);
 
     }
     //-------------------------------------------------------------
-    private void updatePlayerPhase(InputState input, double deltaMs) {
-
+    private void updatePlayer(InputState input, double deltaMs) {
         PlayerState playerStateBeforeUpdate = player.getState();
-        player.update(input, deltaMs);
 
-        if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
-            emitAudioEvent(AudioEventType.PLAYER_ATTACK);
+        // DEATH
+        if (player.isDying() || player.isDead()) {
+            updateGameOverCountdown(deltaMs);
+            updateDeathSequence(deltaMs);
+            return;
         }
+
+        player.update(input, deltaMs);
 
         collisionChecker.checkTile(player);
         collisionChecker.checkObjects(player);
+
+        //Audio ----------------------
+        if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
+            emitAudioEvent(AudioEventType.PLAYER_ATTACK);
+        }
+        //----------------------------
     }
     //-------------------------------------------------------------
-    private void updateEnemiesPhase(double deltaMs) {
+    private void updateEnemies(double deltaMs) {
+        // Update TNT
         for (EnemyTNT tnt : tntEnemies) {
             TNTState previousState = tnt.getState();
             if (tnt.getState() != TNTState.EXPLODED) {
+
+                tnt.update(player, deltaMs);
                 collisionChecker.checkEntity(player, tnt);
+                collisionChecker.checkTile(tnt);
+                collisionChecker.checkObjects(tnt);
+                tnt.move();
             }
-            tnt.update(player, deltaMs);
+
+            //Audio ----------------------
             if (previousState != tnt.getState() && tnt.getState() == TNTState.EXPLODING) {
                 emitAudioEvent(AudioEventType.TNT_EXPLOSION);
             }
             if (previousState != tnt.getState() && tnt.getState() == TNTState.TRIGGERED) {
                 emitAudioEvent(AudioEventType.TNT_TRIGGERED);
             }
-
-            collisionChecker.checkTile(tnt);
-            collisionChecker.checkObjects(tnt);
-            if (tnt.getState() == TNTState.WANDER) {
-                collisionChecker.checkEntity(tnt, player);
-            }
-            tnt.move();
+            //----------------------------
         }
         tntEnemies.removeIf(EnemyTNT::isExploded);
 
+        // Update Dynamite
         for (EnemyDynamite dynamite : dynamiteEnemies) {
             DynamiteState previousState = dynamite.getState();
-            collisionChecker.checkEntity(player, dynamite);
-            dynamite.update(player, deltaMs);
-            if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
-                emitAudioEvent(AudioEventType.ENEMY_ALERT);
+            if (dynamite.getState() != DynamiteState.DEAD){
+
+                dynamite.update(player, deltaMs);
+                collisionChecker.checkEntity(player, dynamite);
+                collisionChecker.checkTile(dynamite);
+                collisionChecker.checkObjects(dynamite);
+                dynamite.move();
+
+                //Audio ----------------------
+                if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
+                    emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
+                }
+                //----------------------------
             }
 
-            collisionChecker.checkTile(dynamite);
-            collisionChecker.checkObjects(dynamite);
-            if (dynamite.getState() == DynamiteState.WANDER) {
-                collisionChecker.checkEntity(dynamite, player);
-            }
-            dynamite.move();
         }
         dynamiteEnemies.removeIf(EnemyDynamite::isDead);
-    }
-    //-------------------------------------------------------------
-    private void updateInteractions(InputState input) {
-        if (player.getState() == PlayerState.ATTACKING) {
-            Rectangle attackArea = player.getAttackArea();
 
-            for (GameObject obj : objects) {
-                if (obj.isRemoved()) continue;
-                if (obj instanceof OBJ_Tree tree && attackArea.intersects(tree.getSolidWorldArea())) {
-                    tree.hit();
-                    emitAudioEvent(AudioEventType.TREE_HIT);
-                }
-            }
-
-            for (EnemyDynamite enemy : dynamiteEnemies) {
-                if (!attackArea.intersects(enemy.getSolidWorldArea())) continue;
-                DynamiteState previousState = enemy.getState();
-                enemy.takeDamage();
-                emitAudioEvent(AudioEventType.ENEMY_HIT);
-                if (previousState != DynamiteState.DEAD && enemy.getState() == DynamiteState.DEAD) {
-                    emitAudioEvent(AudioEventType.ENEMY_DEFEATED);
-                }
-            }
-
-            for (EnemyTNT tnt : tntEnemies) {
-                if (!attackArea.intersects(tnt.getSolidWorldArea())) continue;
-                TNTState previousState = tnt.getState();
-                tnt.takeDamage();
-                emitAudioEvent(AudioEventType.ENEMY_HIT);
-                if (previousState != TNTState.EXPLODED && tnt.getState() == TNTState.EXPLODED) {
-                    emitAudioEvent(AudioEventType.ENEMY_DEFEATED);
-                }
-            }
-        }
-
-        if (monk.getState() == MonkState.IDLE) {
-            currentDialogue = "";
-        }
-
-        if (monk.getState() == MonkState.TALKING && currentDialogue.isEmpty()) {
-            currentDialogue = monk.getCurrentDialogue();
-            emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
-        }
-
-        if (monk.getState() == MonkState.TALKING && input.interact()) {
-            monk.nextDialogue();
-
-            if (!monk.hasFinishedDialogue()) {
-                currentDialogue = monk.getCurrentDialogue();
-                emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
-            } else {
-                currentDialogue = "";
-                monk.setState(MonkState.DISAPPEARING);
-                emitAudioEvent(AudioEventType.DIALOGUE_CLOSE);
-            }
-        }
-
-        //TODO: gestione attacco player danno
-
-    }
-    //-------------------------------------------------------------
-    private void updateProjectilesPhase(double deltaMs) {
+        // Dynamite projectiles
         for (DynamiteProjectile proj : projectiles) {
             proj.update(deltaMs);
             collisionChecker.checkTile(proj);
@@ -362,16 +274,95 @@ public class GameModel {
                 player.takeDamage();
                 proj.explode();
             }
+
+            //Audio ----------------------
+            if (proj.isExploded()) {
+                emitAudioEvent(AudioEventType.PROJECTILE_EXPLODED);
+            }
+            //----------------------------
         }
         projectiles.removeIf(DynamiteProjectile::isExploded);
     }
     //-------------------------------------------------------------
-    private void updatePostFrameEvents(int lifeBeforeUpdate, int projectileCountBeforeUpdate) {
+    private void updateInteractions() {
+
+        //Player attack with sword
+        if (player.getState() == PlayerState.ATTACKING) {
+            Rectangle attackArea = player.getAttackArea();
+
+            // TNT -------------------
+            for (EnemyTNT tnt : tntEnemies) {
+                if (!player.isAttackDamageApplied() && attackArea.intersects(tnt.getSolidWorldArea())) {
+                    tnt.takeDamage();
+                    player.setAttackDamageApplied(true);
+                    //Audio ----------------------
+                    emitAudioEvent(AudioEventType.ENEMY_HIT);
+                }
+            }
+            // -------------------
+
+            // Dynamite -------------------
+            for (EnemyDynamite dynamite : dynamiteEnemies) {
+                if (!player.isAttackDamageApplied() && attackArea.intersects(dynamite.getSolidWorldArea())) {
+                    dynamite.takeDamage();
+                    player.setAttackDamageApplied(true);
+                    //Audio ----------------------
+                    emitAudioEvent(AudioEventType.ENEMY_HIT);
+                }
+            }
+            // -------------------
+
+            //Tree -----------
+            for (GameObject obj : objects) {
+                if (obj.isRemoved()) continue;
+                if (obj instanceof OBJ_Tree tree
+                        && !player.isAttackDamageApplied()
+                        && attackArea.intersects(tree.getSolidWorldArea())) {
+
+                    player.setAttackDamageApplied(true);
+                    tree.interact();
+
+                    //Audio ----------------------
+                    emitAudioEvent(AudioEventType.TREE_HIT);
+                }
+            }
+            // -------------------
+        }
+    }
+    //-------------------------------------------------------------
+    private void updateMonk(InputState input) {
+        // Monk Talking ----------------------
+
+        if (monk.getState() == MonkState.IDLE) {
+            currentDialogue = "";
+        }
+
+        if (monk.getState() == MonkState.TALKING && currentDialogue.isEmpty()) {
+            currentDialogue = monk.getCurrentDialogue();
+            // Audio ----------
+            emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
+        }
+
+        if (monk.getState() == MonkState.TALKING && input.interact()) {
+            monk.nextDialogue();
+
+            if (!monk.hasFinishedDialogue()) {
+                currentDialogue = monk.getCurrentDialogue();
+                // Audio ----------
+                emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
+            } else {
+                currentDialogue = "";
+                monk.setState(MonkState.DISAPPEARING);
+                // Audio ----------
+                emitAudioEvent(AudioEventType.DIALOGUE_CLOSE);
+            }
+        }
+        // ----------------------------------
+    }
+    //-------------------------------------------------------------
+    private void updateEvents(int lifeBeforeUpdate) {
         if (player.getLife() < lifeBeforeUpdate) {
             emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
-        }
-        if (projectiles.size() > projectileCountBeforeUpdate) {
-            emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
         }
     }
     //-------------------------------------------------------------
@@ -392,6 +383,19 @@ public class GameModel {
         projectiles.removeIf(DynamiteProjectile::isExploded);
     }
     //-------------------------------------------------------------
+    private void updateGameOverCountdown(double deltaMs) {
+        boolean readyForGameOver = player.isDeathAnimationCompleted() && !hasPendingTransientAnimations();
+        if (readyForGameOver) {
+            deadStateElapsedMs += deltaMs;
+        } else {
+            deadStateElapsedMs = 0.0;
+        }
+        if (deadStateElapsedMs >= UIConfig.GAME_OVER_DELAY_MS) {
+            gameState = GameState.GAME_OVER;
+            deadStateElapsedMs = 0.0;
+        }
+    }
+    //-------------------------------------------------------------
     private void updateState(InputState input) {
         if (player.isDying() || player.isDead()) {
             gameState = GameState.PLAYING;
@@ -404,34 +408,11 @@ public class GameModel {
         }
     }
     //-------------------------------------------------------------
-    private void updateGameOverCountdown(double deltaMs) {
-        boolean readyForGameOver = player.isDeathAnimationCompleted() && !hasPendingTransientAnimations();
-        if (readyForGameOver) {
-            deadStateElapsedMs += deltaMs;
-        } else {
-            deadStateElapsedMs = 0.0;
-        }
-        if (deadStateElapsedMs >= GAME_OVER_DELAY_MS) {
-            gameState = GameState.GAME_OVER;
-            deadStateElapsedMs = 0.0;
-        }
-    }
-    //-------------------------------------------------------------
-    private void updateRuntimeMessages(double deltaMs) {
-        if (statusMessageTimerMs > 0) {
-            statusMessageTimerMs -= deltaMs;
-            if (statusMessageTimerMs <= 0) {
-                statusMessage = "";
-                statusMessageTimerMs = 0.0;
-            }
-        }
-    }
-    //-------------------------------------------------------------
     //end updates method ------------------------------------------
 
 
     /**
-     * Load a saved game from file
+     * Returns true while finite transition animations are still running.
      */
     //-------------------------------------------------------------
     private void loadSavedGame(){
@@ -457,72 +438,28 @@ public class GameModel {
             return true;
         }
 
-
         return false;
     }
-
-
-
-
-
-    private void showStatusMessage(String message, double durationMs) {
-        statusMessage = message;
-        statusMessageTimerMs = durationMs;
-    }
-
-    private void clearStatusMessage() {
-        statusMessage = "";
-        statusMessageTimerMs = 0.0;
-    }
-
-
-    public void selectMainMenuItem(int selection) {
-        mainMenuSelection = Math.max(0, Math.min(MAIN_MENU_ITEM_COUNT - 1, selection));
-    }
-
-    public void selectPreviousMainMenuItem() {
-        mainMenuSelection = (mainMenuSelection - 1 + MAIN_MENU_ITEM_COUNT) % MAIN_MENU_ITEM_COUNT;
-    }
-
-    public void selectNextMainMenuItem() {
-        mainMenuSelection = (mainMenuSelection + 1) % MAIN_MENU_ITEM_COUNT;
-    }
-
-    public void confirmMainMenuSelection() {
-        if (mainMenuSelection == 0) {
-            initializeNewGame();
-        }
-    }
-
-    public void handleMainMenuButtonClick(int buttonIndex) {
-        selectMainMenuItem(buttonIndex);
-        if (buttonIndex == 0) {
-            initializeNewGame();
-        }
-    }
-
-    public void handleMainMenuConfirm() {
-        confirmMainMenuSelection();
-    }
-
-    public void requestNewGame() {
-        initializeNewGame();
-    }
-
-    public void setHoveredRibbon(int hoveredRibbon) {
-        this.hoveredRibbon = hoveredRibbon;
-    }
-
-    public void setActiveRibbon(int activeRibbon) {
-        this.activeRibbon = activeRibbon;
-    }
-
-    public void setHoveredGameOverButton(boolean hoveredGameOverButton) {
-        this.hoveredGameOverButton = hoveredGameOverButton;
-    }
-
-
     //-------------------------------------------------------------
+
+    /**
+     * Audio event emitter
+      */
+    //-------------------------------------------------------------
+    private void emitAudioEvent(AudioEventType audioEventType) {
+        pendingAudioEvents.add(audioEventType);
+    }
+    public List<AudioEventType> consumeAudioEvents() {
+        if (pendingAudioEvents.isEmpty()) {
+            return List.of();
+        }
+        List<AudioEventType> snapshot = List.copyOf(pendingAudioEvents);
+        pendingAudioEvents.clear();
+        return snapshot;
+    }
+    //-------------------------------------------------------------
+
+
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
@@ -540,37 +477,12 @@ public class GameModel {
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
-    public String getStatusMessage() { return statusMessage; }
-    public int getMainMenuSelection() { return mainMenuSelection; }
-    public int getHoveredRibbon() { return hoveredRibbon; }
-    public int getActiveRibbon() { return activeRibbon; }
-    public boolean isHoveredGameOverButton() { return hoveredGameOverButton; }
-
-    public List<AudioEventType> consumeAudioEvents() {
-        if (pendingAudioEvents.isEmpty()) {
-            return List.of();
-        }
-        List<AudioEventType> snapshot = List.copyOf(pendingAudioEvents);
-        pendingAudioEvents.clear();
-        return snapshot;
-    }
     //---------------------------------
 
     // SETTER ----------------------
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
     //---------------------------------
 
-
-    private void emitAudioEvent(AudioEventType audioEventType) {
-        pendingAudioEvents.add(audioEventType);
-    }
-
-    private void resetMenuUiState() {
-        mainMenuSelection = 0;
-        hoveredRibbon = -1;
-        activeRibbon = -1;
-        hoveredGameOverButton = false;
-    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------
