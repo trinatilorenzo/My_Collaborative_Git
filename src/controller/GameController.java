@@ -1,5 +1,6 @@
 package controller;
 
+import main.CONFIG.UIConfig;
 import model.GameModel;
 import view.GameView;
 import main.CONFIG.enu.GameState;
@@ -22,6 +23,7 @@ public class GameController {
     private boolean renderOnceOnPause = true; // flag to control rendering when paused
     private GameState lastKnownState;
     private boolean attackLatch;
+    private int mainMenuSelection;
 
     // COSTRUCTOR
     //-------------------------------------------------------------
@@ -34,6 +36,7 @@ public class GameController {
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
         this.attackLatch = false;
+        this.mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
         
         view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
         view.addMouseListener(mouseHandler);
@@ -115,46 +118,49 @@ public class GameController {
     private void updateMainMenu(InputState input) {
         UI.MainMenuLayout layout = view.getMainMenuLayout();
         Point mousePosition = mouseHandler.getMousePosition();
-        int selection = model.getMainMenuSelection();
-        selection = selectionFromMouse(layout, mousePosition, selection);
-        model.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
-        model.selectMainMenuItem(selection);
+        mainMenuSelection = selectionFromMouse(layout, mousePosition, mainMenuSelection);
+        view.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
 
         if (input.menuPrevious()) {
-            model.selectPreviousMainMenuItem();
+            selectPreviousMainMenuItem();
         }
         if (input.menuNext()) {
-            model.selectNextMainMenuItem();
+            selectNextMainMenuItem();
         }
+        view.setMainMenuSelection(mainMenuSelection);
 
         boolean leftClicked = mouseHandler.consumeLeftClick();
-        if (leftClicked && layout.newGameBounds().contains(mousePosition)) {
-            model.handleMainMenuButtonClick(0);
+        if (leftClicked && contains(layout.newGameBounds(), mousePosition)) {
+            selectMainMenuItem(0);
+            view.setMainMenuSelection(mainMenuSelection);
+            startNewGame();
             return;
         }
-        if (leftClicked && layout.continueBounds().contains(mousePosition)) {
-            model.handleMainMenuButtonClick(1);
+        if (leftClicked && contains(layout.continueBounds(), mousePosition)) {
+            selectMainMenuItem(1);
+            view.setMainMenuSelection(mainMenuSelection);
             return;
         }
-        if (leftClicked && layout.settingsBounds().contains(mousePosition)) {
-            model.handleMainMenuButtonClick(2);
+        if (leftClicked && contains(layout.settingsBounds(), mousePosition)) {
+            selectMainMenuItem(2);
+            view.setMainMenuSelection(mainMenuSelection);
             return;
         }
-        if (leftClicked && layout.ribbonYellowBounds().contains(mousePosition)) {
-            model.setActiveRibbon(0);
+        if (leftClicked && contains(layout.ribbonYellowBounds(), mousePosition)) {
+            setActiveRibbon(0);
             return;
         }
-        if (leftClicked && layout.ribbonRedBounds().contains(mousePosition)) {
-            model.setActiveRibbon(1);
+        if (leftClicked && contains(layout.ribbonRedBounds(), mousePosition)) {
+            setActiveRibbon(1);
             return;
         }
-        if (leftClicked && layout.ribbonBlueBounds().contains(mousePosition)) {
-            model.setActiveRibbon(2);
+        if (leftClicked && contains(layout.ribbonBlueBounds(), mousePosition)) {
+            setActiveRibbon(2);
             return;
         }
 
         if (input.menuConfirm()) {
-            model.handleMainMenuConfirm();
+            confirmMainMenuSelection();
             return;
         }
     }
@@ -186,11 +192,37 @@ public class GameController {
         if (contains(layout.ribbonBlueBounds(), mousePosition)) {
             return 2;
         }
-        return -1;
+        return UIConfig.MENU_NO_SELECTION;
+    }
+
+    private void selectMainMenuItem(int selection) {
+        mainMenuSelection = Math.max(0, Math.min(UIConfig.MAIN_MENU_ITEM_COUNT - 1, selection));
+    }
+
+    private void selectPreviousMainMenuItem() {
+        mainMenuSelection = (mainMenuSelection - 1 + UIConfig.MAIN_MENU_ITEM_COUNT) % UIConfig.MAIN_MENU_ITEM_COUNT;
+    }
+
+    private void selectNextMainMenuItem() {
+        mainMenuSelection = (mainMenuSelection + 1) % UIConfig.MAIN_MENU_ITEM_COUNT;
+    }
+
+    private void confirmMainMenuSelection() {
+        if (mainMenuSelection == 0) {
+            startNewGame();
+        }
+    }
+
+    private void setActiveRibbon(int activeRibbon) {
+        view.setActiveRibbon(activeRibbon);
     }
 
     private void startNewGame() {
-        model.requestNewGame();
+        model.initializeNewGame();
+        mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+        view.setMainMenuSelection(mainMenuSelection);
+        view.setHoveredRibbon(UIConfig.MENU_NO_SELECTION);
+        view.setActiveRibbon(UIConfig.MENU_NO_SELECTION);
         renderOnceOnPause = true;
     }
     //-------------------------------------------------------------
@@ -198,10 +230,11 @@ public class GameController {
         UI.GameOverLayout layout = view.getGameOverLayout();
         Point mousePosition = mouseHandler.getMousePosition();
 
-        model.setHoveredGameOverButton(contains(layout.newGameBounds(), mousePosition));
+        boolean hoveredGameOverButton = contains(layout.newGameBounds(), mousePosition);
+        view.setHoveredGameOverButton(hoveredGameOverButton);
 
         boolean leftClicked = mouseHandler.consumeLeftClick();
-        if ((leftClicked && model.isHoveredGameOverButton()) || input.menuConfirm()) {
+        if ((leftClicked && hoveredGameOverButton) || input.menuConfirm()) {
             startNewGame();
         }
     }

@@ -71,14 +71,19 @@ public class EnemyDynamite extends Entity {
         checkPlayerProximity(player);
 
         switch (state) {
+            case DEAD:
+                System.out.println("Dynamite DEAD");
+                break;
             case WANDER:
                 wander(deltaMs);
                 facePlayer(player);
+
                 break;
 
             case CHASING:
                 chasePlayer(player, deltaMs);
                 facePlayer(player);
+
                 break;
             
             case ATTACKING:
@@ -88,7 +93,6 @@ public class EnemyDynamite extends Entity {
                     attackCooldownMs = EntityConfig.DYNAMITE_ATTACK_INTERVAL;
                 }
                 break;
-            
         }
     }
     //-------------------------------------------------------------
@@ -174,6 +178,8 @@ public class EnemyDynamite extends Entity {
      * Attack by launching a projectile towards the player
      */
     private void attack(Player player) {
+        if (player.isDying() || player.isDead()) return; // no attack a dead player
+
         int distanceX = player.getWorldX() - worldX;
         int distanceY = player.getWorldY() - worldY;
         double distanceSquared = (double) distanceX * distanceX + (double) distanceY * distanceY;
@@ -218,8 +224,7 @@ public class EnemyDynamite extends Entity {
      *  Method to apply damage to the Entity
      */
     public void takeDamage() {
-        if (state == DynamiteState.DEAD) return; // Already dead
-        life --;
+        life--;
         if (life <= 0) {
             state = DynamiteState.DEAD;
         }

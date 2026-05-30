@@ -90,7 +90,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     //EnemyDynamiteConfig
     public static final DynamiteState DYNAMITE_DEFAULT_STATE = DynamiteState.WANDER;
     public static final int START_DYNAMITE_SPEED = 256; // pixels per second
-    public static final int DYNAMITE_MAX_LIFE = 1;
+    public static final int DYNAMITE_MAX_LIFE = 3;
 
     public static final int DYNAMITE_DETECTION_RADIUS = 400;
     public static final int DYNAMITE_ATTACKING_RADIUS = 150;

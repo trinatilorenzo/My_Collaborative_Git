@@ -14,6 +14,7 @@ import view.renderer.entity.TNTRenderer;
 import view.renderer.map.MapRender;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.MapConfig;
+import main.CONFIG.UIConfig;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -104,9 +105,9 @@ public class UI {
     // =========================================================================
 
     private long damageFlashStartNano = -1L;
-    private int mainMenuSelection = 0;
-    private int hoveredRibbon = -1;
-    private int activeRibbon = -1;
+    private int mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+    private int hoveredRibbon = UIConfig.MENU_NO_SELECTION;
+    private int activeRibbon = UIConfig.MENU_NO_SELECTION;
     private boolean hoveredGameOverButton = false;
     private BufferedImage damageOverlayCache;
     private int damageOverlayCacheWidth = -1;
@@ -200,7 +201,6 @@ public class UI {
 
                 drawPlayerLife();
                 if (!gameModel.getCurrentDialogue().isEmpty()) drawDialogueWindow();
-                if (!gameModel.getStatusMessage().isEmpty())   drawStatusMessage();
             }
             case PAUSED    -> { drawPlayerLife(); drawPauseScreen(); }
             case GAME_OVER -> drawGameOverScreen();
@@ -385,39 +385,6 @@ public class UI {
             float alpha   = 1.0f - Math.min(1.0f, elapsed); // linear fade-out
             drawDamageOverlay(alpha);
         }
-    }
-    //-------------------------------------------------------------
-
-    //-------------------------------------------------------------
-    private void drawStatusMessage() {
-        String message = gameModel.getStatusMessage();
-        if (message == null || message.isEmpty()) return;
-
-        int paddingX = 28;
-        int paddingY = 18;
-        int minWidth = screenConfig.SCREEN_WIDTH() / 3;
-
-        g2.setFont(maruMonica.deriveFont(Font.BOLD, 30F));
-        FontMetrics metrics    = g2.getFontMetrics();
-        int         textWidth  = metrics.stringWidth(message);
-        int         textHeight = metrics.getAscent();
-
-        int boxWidth  = Math.max(minWidth, textWidth + (paddingX * 2));
-        int boxHeight = textHeight + (paddingY * 2);
-        int boxX      = (screenConfig.SCREEN_WIDTH() - boxWidth) / 2;
-        int boxY      = 38;
-
-        // Semi-transparent dark background
-        Composite oldComposite = g2.getComposite();
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.82f));
-        g2.setColor(new Color(24, 24, 24));
-        g2.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 14, 14);
-        g2.setComposite(oldComposite);
-
-        // Border and text
-        g2.setColor(new Color(230, 230, 230));
-        g2.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 14, 14);
-        g2.drawString(message, boxX + paddingX, boxY + paddingY + textHeight - 3);
     }
     //-------------------------------------------------------------
 

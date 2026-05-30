@@ -45,8 +45,11 @@ public class OBJ_Tree extends GameObject {
             chopTimer -= deltaMs;
 
             if(chopTimer <= 0) {
-                solid = false;
-                state = TreeState.CHOPPED;
+                state = TreeState.IDLE;
+                if(health <= 0){
+                    solid = false;
+                    state = TreeState.CHOPPED;
+                }
             }
         }
     }
@@ -72,9 +75,8 @@ public class OBJ_Tree extends GameObject {
         }
 
         health --;
-        if(health <= 0) { // If health is depleted, start chopping animation
-            startChopping();
-        }
+        startChopping();
+
     }
     //-------------------------------------------------------------
 
