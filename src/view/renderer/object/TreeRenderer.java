@@ -99,8 +99,16 @@ public class TreeRenderer extends ObjectRender<OBJ_Tree> {
     public void draw(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
         AnimationManager animationManager = getManager(tree);
 
-        int drawX = screenX + tree.getShakeOffsetX();
-        int drawY = screenY + tree.getShakeOffsetY();
+        int shakeOffsetX = 0;
+        int shakeOffsetY = 0;
+
+        if (tree.getState() == CHOPPING) {
+            shakeOffsetX = (int) (Math.random() * 5 - 2); // Valori tra -2 e 2
+            shakeOffsetY = (int) (Math.random() * 5 - 2); // Valori tra -2 e 2
+        }
+
+        int drawX = screenX + shakeOffsetX;
+        int drawY = screenY + shakeOffsetY;
         switch (tree.getState()) {
             case CHOPPED -> {
                 BufferedImage choppedFrame = getChoppedFrameByName(tree.getName());

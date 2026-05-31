@@ -129,16 +129,8 @@ public class GameModel {
     }
     private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
-            // Estraiamo x, y e layer direttamente dallo spawnPoint prima di passarli a OBJ_Tree
-            objects.add(new OBJ_Tree(
-                    treeTag,
-                    spawnPoint.x(),
-                    spawnPoint.y(),
-                    spawnPoint.layer(),
-                    treeWidth,
-                    treeHeight,
-                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig),
-                    objConfig
+            objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
+                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig)
             ));
         }
     }
@@ -191,6 +183,11 @@ public class GameModel {
 
         if (player.getState() == PlayerState.WALKING) {
             player.move();
+        }
+        for (GameObject obj : objects) {
+            if (!obj.isRemoved()) {
+                obj.update(deltaMs);
+            }
         }
 
         monk.update(player, deltaMs);

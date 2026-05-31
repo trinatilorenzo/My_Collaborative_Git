@@ -1,70 +1,111 @@
 package model.object;
-
-import java.awt.Rectangle;
 import main.CONFIG.ObjConfig;
+import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.TreeState;
+import java.awt.Rectangle;
 
 /**
- * Represents an interactive tree that can be chopped by the player.
+ * The OBJ_TREE CLASS represents a tree object in the game world,
+ * it extends the base GameObject class and includes properties specific to trees.
  */
+//-------------------------------------------------------------------------------------------------------------------
+    //TODO controlare funzionameto metodi + risoluzione bug del hit
+
 public class OBJ_Tree extends GameObject {
 
-    private final ObjConfig objConfig;
-    private TreeState state = TreeState.IDLE;
     private int health;
-    private double chopTimer = 0;
+    private TreeState state;
 
-    public OBJ_Tree(String name, int worldX, int worldY, int layer, int width, int height, Rectangle solidArea, ObjConfig objConfig) {
-        super(name, worldX, worldY, width, height, solidArea);
-        this.layer = layer;
-        this.objConfig = objConfig;
-        this.solid = objConfig.TREE_SOLID;
-        this.health = objConfig.TREE_HEALTH;
-    }
-
-    public void hit() {
-        if (state == TreeState.CHOPPED || state == TreeState.CHOPPING) return;
-
-        health--;
-        if (health <= 0) {
-            state = TreeState.CHOPPING;
-            chopTimer = objConfig.CHOP_ANIMATION_DURATION_MS;
-        }
-    }
-
-    public void interact() {
-        hit();
-    }
+    //
+    private double chopTimer = 0; // Timer to track chopping progress
 
     /**
-     * Update the tree's state (called every frame)
+     * COSTRUCTOR
      */
+    //-------------------------------------------------------------
+    public OBJ_Tree(ObjConfig objConfig, String name, SpawnPoint spawnPoint, int width, int height, Rectangle solidArea) {
+        super(objConfig, name, spawnPoint, width, height, solidArea, ObjConfig.TREE_SOLID);
+
+        this.health = ObjConfig.TREE_HEALTH;
+        this.state = TreeState.IDLE;
+    }
+    //-------------------------------------------------------------
+
+
+    /**
+     * Update the tree's state
+     * * called every frame *
+     */
+    //-------------------------------------------------------------
     @Override
     public void update(double deltaMs) {
+        // No update needed in other states
         if (state == TreeState.CHOPPING) {
             chopTimer -= deltaMs;
 
-            if (chopTimer <= 0) {
-                if (health <= 0) {
-                    this.solid = false;
-                    this.state = TreeState.CHOPPED;
+            if(chopTimer <= 0) {
+                if(health <= 0){
+                    solid = false;
+                    state = TreeState.CHOPPED;
                 } else {
                     this.state = TreeState.IDLE;
                 }
             }
         }
     }
+    //-------------------------------------------------------------
+
+
+    //-------------------------------------------------------------
+    @Override
+    public void interact(){
+        // The player can call this method when interacting with the tree
+        hit();
+    }
+    //-------------------------------------------------------------
+
 
     /**
-     * Visual shake effect offset during the chopping phase.
+     * Called when the player hits the tree.
      */
-    public int getShakeOffsetX() {
-        return (state == TreeState.CHOPPING) ? (int) (Math.random() * 5 - 2) : 0;
-    }
+    //-------------------------------------------------------------
+    private void hit() {
+        if(state == TreeState.CHOPPED || state == TreeState.CHOPPING){
+            return; // If already chopped, no further interaction
+        }
 
-    public int getShakeOffsetY() {
-        return (state == TreeState.CHOPPING) ? (int) (Math.random() * 5 - 2) : 0;
-    }
+        health --;
+        startChopping();
 
-    public TreeState getState() { return state; }
+    }
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
+    private void startChopping() {
+        state = TreeState.CHOPPING;
+        chopTimer = ObjConfig.CHOP_ANIMATION_DURATION_MS;
+    }
+    //-------------------------------------------------------------
+
+
+
+    //GETTER
+    //-------------------------------------------------------------
+    public TreeState getState() {
+        return state;
+    }
+    public Rectangle getSolidWorldArea() { //called by game model to check attack collision with the tree, since the solidArea is relative to the object position we need to get the world coordinates of the solid area
+
+        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+
+    }
+    //-------------------------------------------------------------
+
+    //SETTER
+    //-------------------------------------------------------------
+
+    //-------------------------------------------------------------
+
+
 }
+//-------------------------------------------------------------------------------------------------------------------

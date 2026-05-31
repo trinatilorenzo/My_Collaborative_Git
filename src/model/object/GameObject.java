@@ -2,49 +2,75 @@ package model.object;
 
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
+
 import java.awt.Rectangle;
 
 /**
- * Base abstract class for all world objects.
- * Holds minimal shared spatial and collision data.
+ * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world,
+ * providing common properties such as position, collision handling, and rendering information.
  */
-public abstract class GameObject {
+//-------------------------------------------------------------------------------------------------------------------
+public class GameObject {
+    protected ObjConfig objConfig;
 
-    protected int worldX, worldY;
-    protected int width, height, layer;
-    protected Rectangle solidArea;
-    protected final Rectangle worldBoundsInstance = new Rectangle();
+    protected String name;
+    protected int worldX, worldY, layer; //position
+    protected int width, height; // visual size
+    
+    protected Rectangle solidArea; // dimension
     
     protected boolean solid;
     protected boolean removed;
-    protected String name;
 
-    public GameObject(String name, int worldX, int worldY, int width, int height, Rectangle solidArea) {
+    public GameObject(ObjConfig objConfig, String name, SpawnPoint spawnPoint, int width, int height, Rectangle solidArea, Boolean solid){
+        this.objConfig = objConfig;
+        worldX = spawnPoint.x();
+        worldY = spawnPoint.y();
+        layer = spawnPoint.layer();
+
         this.name = name;
-        this.worldX = worldX;
-        this.worldY = worldY;
         this.width = width;
         this.height = height;
-        this.solidArea = solidArea != null ? solidArea : new Rectangle(0, 0, width, height);
-        this.solid = true;
-        this.removed = false;
+        this.solidArea = solidArea;
+        this.solid = solid;
     }
 
-    public abstract void update(double deltaMs);
+    public void interact() {
+        // Default interaction behavior (can be overridden by subclasses)
+    }
 
+    public void update(double deltaMs){
+        // Default update behavior (can be overridden by subclasses)
+    }
+
+    // GETTER
+    public boolean isSolid() {
+        return solid;
+    }
+    public boolean isRemoved() {
+        return removed;
+    }
+    public Rectangle getSolidArea() {
+        return solidArea;
+    }
     public Rectangle getSolidWorldArea() {
-        worldBoundsInstance.setBounds(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
-        return worldBoundsInstance;
+        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+    }
+    public String getName() {
+        return name;
+    }
+    public int getWorldX() {
+        return worldX;
+    }
+    public int getWorldY() {
+        return worldY;
+    }
+    public int getWidth() {
+        return width;
+    }
+    public int getHeight() {
+        return height;
     }
 
-    // GETTERS AND SETTERS --------------------------------------------------
-    public String getName() { return name; }
-    public int getWorldX() { return worldX; }
-    public int getWorldY() { return worldY; }
-    public int getWidth() { return width; }
-    public int getHeight() { return height; }
-    public boolean isSolid() { return solid; }
-    public boolean isRemoved() { return removed; }
-    public void setRemoved(boolean removed) { this.removed = removed; }
-    public Rectangle getSolidArea() { return solidArea; }
 }
+//-------------------------------------------------------------------------------------------------------------------
