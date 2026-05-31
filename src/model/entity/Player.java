@@ -43,10 +43,6 @@ public class Player extends Entity {
         worldY = entityConfig.START_WORLD_Y() ;
         currentLayer = entityConfig.START_WORLD_LAYER();
 
-        // Screen position
-        //screenX = entityConfig.SCREEN_POSX();
-        //screenY = entityConfig.SCREEN_POSY();
-
         // Initialize movement values
         speed = EntityConfig.START_PLAYER_SPEED;
         direction = EntityConfig.START_FACING;
@@ -91,7 +87,7 @@ public class Player extends Entity {
     private boolean updateMovement(InputState input, double deltaMs) {
         //speed is pixel per second
         //deltaMs is the time elapsed since the last frame
-        double distance = speed * (deltaMs / 1000.0); //distance is the distance to move in the current frame
+        double distance = speed * (deltaMs / 1000.0); //distance to move in the current frame
 
         double moveX = 0;
         double moveY = 0;
@@ -104,7 +100,7 @@ public class Player extends Entity {
         intendedDx = (int) Math.round(moveX);
         intendedDy = (int) Math.round(moveY);
 
-        // Normalizza per mantenere la stessa velocità anche in diagonale (fattore 1/sqrt(2))
+        // Normalize to mantain same speed in diagonal movements
         if (moveX != 0 && moveY != 0) {
             moveX *= DIAGONAL_FACTOR;
             moveY *= DIAGONAL_FACTOR;

@@ -33,7 +33,7 @@ public class Entity {
     protected boolean collisionY = false;
 
     /**
-     * COSTRUCTOR
+     * CONSTRUCTOR
      */
     //-------------------------------------------------------------
     public Entity(EntityConfig entityConfig) {

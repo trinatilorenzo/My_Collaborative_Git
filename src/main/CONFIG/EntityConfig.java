@@ -117,4 +117,24 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int PROJECTILE_SPRITE_HEIGHT = 64; 
     public static final int PROJECTILE_SIZE = 16;
 
+
+    // EnemyTorch
+    public static final int    TORCH_MAX_LIFE                = 6;
+    public static final int    TORCH_BASE_SPEED              = 120;       // px/s
+    public static final int    TORCH_HITBOX_WIDTH            = 32;
+    public static final int    TORCH_HITBOX_HEIGHT           = 32;
+    public static final double TORCH_DETECTION_RADIUS        = 400.0;
+    public static final double TORCH_ATTACK_RADIUS           = 160.0;
+    public static final double TORCH_CHARGE_DURATION_MS      = 900.0;
+    public static final double TORCH_COOLDOWN_DURATION_MS    = 1800.0;
+    public static final double TORCH_STUN_DURATION_MS        = 1200.0;
+    public static final double TORCH_COOLDOWN_SPEED_FACTOR   = 0.35;     // fraction of normal speed
+    public static final double TORCH_JITTER_INTERVAL_MS      = 300.0;
+    public static final double TORCH_JITTER_MAX_RADIANS      = 0.3;      // ~17°
+    public static final double TORCH_PATROL_INTERVAL         = 1200.0;
+    
+    // TorchVortex
+    public static final double VORTEX_EXPAND_SPEED           = 200.0;    // px/s
+    public static final double VORTEX_MAX_RADIUS             = 350.0;
+
 }

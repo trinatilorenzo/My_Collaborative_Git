@@ -124,8 +124,8 @@ public class EnemyDynamite extends Entity {
      * and triggers the attack or the chase state if so
      */
     private void checkPlayerProximity(Player player) {
-        long distanceX = player.worldX - worldX;
-        long distanceY = player.worldY - worldY;
+        long distanceX = player.getWorldX() - worldX;
+        long distanceY = player.getWorldY() - worldY;
         long distanceSq = distanceX * distanceX + distanceY * distanceY;
 
         double attackRadSq = (double) EntityConfig.DYNAMITE_ATTACKING_RADIUS * EntityConfig.DYNAMITE_ATTACKING_RADIUS;

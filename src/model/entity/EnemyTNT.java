@@ -28,7 +28,7 @@ public class EnemyTNT extends Entity{
 
 
     /**
-     * COSTRUCTOR
+     * CONSTRUCTOR
      */
     //--------------------------------------------------------------
     public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
@@ -70,6 +70,7 @@ public class EnemyTNT extends Entity{
                 break;
             case HIT: 
                 state = TNTState.WANDER;
+                break;
             case TRIGGERED: 
                 triggerTimer += deltaMs;
                 if (triggerTimer >= EntityConfig.TNT_EXPLOSION_DELAY) {
@@ -129,8 +130,8 @@ public class EnemyTNT extends Entity{
      */
     //-------------------------------------------------------------
     private void checkPlayerProximity(Player player) {
-        long distanceX = player.worldX - worldX;
-        long distanceY = player.worldY - worldY;
+        long distanceX = player.getWorldX() - worldX;
+        long distanceY = player.getWorldY() - worldY;
         long distanceSq = distanceX * distanceX + distanceY * distanceY;
         double radiusSq = (double) EntityConfig.TNT_DETECTION_RADIUS * EntityConfig.TNT_DETECTION_RADIUS;
         if (distanceSq < radiusSq) {
@@ -146,8 +147,8 @@ public class EnemyTNT extends Entity{
     private void explode(Player player) {
         if (hasDealtDamage) return; // Ensure damage is applied only once per explosion
 
-        long distanceX = player.worldX - worldX;
-        long distanceY = player.worldY - worldY;
+        long distanceX = player.getWorldX()- worldX;
+        long distanceY = player.getWorldY() - worldY;
         long distanceSq = distanceX * distanceX + distanceY * distanceY;
         double radiusSq = (double) EntityConfig.TNT_EXPLOSION_RADIUS * EntityConfig.TNT_EXPLOSION_RADIUS;
 
