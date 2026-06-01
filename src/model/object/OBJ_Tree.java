@@ -9,7 +9,6 @@ import java.awt.Rectangle;
  * it extends the base GameObject class and includes properties specific to trees.
  */
 //-------------------------------------------------------------------------------------------------------------------
-    //TODO controlare funzionameto metodi + risoluzione bug del hit
 
 public class OBJ_Tree extends GameObject {
 

@@ -9,15 +9,13 @@ import main.CONFIG.enu.TorchState;
 /**
  * The EnemyTorch class represents a enemy that fight against the player
  */
+//-------------------------------------------------------------------------------------------------------------------
 public class EnemyTorch extends Entity {
 
     private TorchState state;
     private double stateTimer;
     private double attackCooldownMs;
     private Direction facingDirection;
-
-    
-    private int comboStep = 0;
 
     private boolean attackAnimationCompleted;
     private boolean attackDamageApplied;
@@ -67,11 +65,11 @@ public class EnemyTorch extends Entity {
             case APPROACH:
                 double dist = getDistanceToPlayer(player);
                 if (dist < EntityConfig.TORCH_MELEE_RANGE) {
-                    // Troppo vicino! Passa alla guardia o attacca
+                    // if too close, start attacking
                     state = Math.random() > 0.5 ? TorchState.GUARD : TorchState.ATTACK_COMBO;
                     stateTimer = 0;
                 } else if (dist > EntityConfig.TORCH_DASH_RANGE_TRIGGER && attackCooldownMs <= 0) {
-                    // Il player scappa? Carica il Dash!
+                    // if player is far enough, start dash
                     state = TorchState.DASH;
                     stateTimer = 0;
                 } else {
@@ -80,7 +78,7 @@ public class EnemyTorch extends Entity {
                 break;
 
             case GUARD:
-                // Rimane fermo in guardia per 1.5 secondi, poi attacca o avanza
+                //Stay in guard mode for 1.5 seconds
                 if (stateTimer >= 1500) {
                     state = TorchState.ATTACK_COMBO;
                     stateTimer = 0;
@@ -88,17 +86,17 @@ public class EnemyTorch extends Entity {
                 break;
 
             case ATTACK_COMBO:
-                // Esegue una combo (gestita poi dal Renderer per i frame)
+                // Execute a combo attack (the rendere will play the animation)
                 executeComboLogic(player);
                 break;
 
             case DASH:
-                // Scatto fulmineo in avanti verso la posizione del player
+                // fast run towards player
                 executeDashLogic(player, deltaMs);
                 break;
 
             case RECOVERY:
-                // Fermo e vulnerabile. Non fa nulla per 1 secondo.
+                // stil in recovery mode for 1 second (vurneable by palayer)
                 if (stateTimer >= 1000) {
                     state = TorchState.APPROACH;
                     attackCooldownMs = 2000; // Cooldown prima del prossimo attacco pesante
@@ -111,11 +109,16 @@ public class EnemyTorch extends Entity {
         }
         System.out.println("Torch State: " + state + " | Life: " + life);
     }
+    //-------------------------------------------------------------
 
+    /**
+    * UTILITY METHODS
+     */
+    //-------------------------------------------------------------
     public void takeDamage() {
         if (state == TorchState.DEAD) return;
 
-        // SE È IN GUARDIA, IL GIOCATORE VIENE RESPINTO (Knockback) O NON FA DANNO
+        // knock back
         if (state == TorchState.GUARD) {
             // Qui potresti triggerare un evento audio di "Scudo/Parata" 
             System.out.println("Torch ha parato il colpo!");
@@ -127,13 +130,15 @@ public class EnemyTorch extends Entity {
             this.state = TorchState.DEAD;
         }
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private double getDistanceToPlayer(Player player) {
         long dx = player.getWorldX() - worldX;
         long dy = player.getWorldY() - worldY;
         return Math.sqrt(dx * dx + dy * dy);
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void moveTowardsPlayer(Player player, double deltaMs) {
         double dxPlayer = player.getWorldX() - worldX;
         double dyPlayer = player.getWorldY() - worldY;
@@ -145,12 +150,13 @@ public class EnemyTorch extends Entity {
             dy = (int) Math.round((dyPlayer / distance) * dist);
         }
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void facePlayer(Player player) {
         this.facingDirection = (player.getWorldX() >= worldX) ? Direction.RIGHT : Direction.LEFT;
     }
-
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void executeDashLogic(Player player, double deltaMs) {
         // Aumenta temporaneamente la velocità per fare uno scatto
         // Se colpisce il player fa danno, poi passa in RECOVERY
@@ -159,7 +165,8 @@ public class EnemyTorch extends Entity {
             stateTimer = 0;
         }
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void executeComboLogic(Player player) {
 
         if (!attackDamageApplied) {
@@ -172,11 +179,13 @@ public class EnemyTorch extends Entity {
         }
 
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private boolean attackHitsPlayer(Player player) {
         return getDistanceToPlayer(player) < EntityConfig.TORCH_MELEE_RANGE;
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     public void completeAttackAnimation() {
         // Questo metodo viene chiamato dal Renderer quando l'animazione di attacco finisce
         if (state == TorchState.ATTACK_COMBO) {
@@ -186,10 +195,19 @@ public class EnemyTorch extends Entity {
         state = TorchState.RECOVERY;
         stateTimer = 0;
     }}
+    //-------------------------------------------------------------
+    // end utility methods ---------------------------------------
 
-    // Getters per il Renderer
+    // GETTERS
+    //-------------------------------------------------------------
     public TorchState getState() { return state; }
+    //-------------------------------------------------------------
+
+    //SETTERS
+    //-------------------------------------------------------------
     public boolean isFacingRight() { return facingDirection == Direction.RIGHT; }
     public boolean isDead() { return state == TorchState.DEAD; }
+    //-------------------------------------------------------------
 
 }
+//-------------------------------------------------------------------------------------------------------------------
