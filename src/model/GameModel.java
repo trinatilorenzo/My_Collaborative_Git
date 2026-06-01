@@ -93,10 +93,10 @@ public class GameModel {
         tntEnemies = spawnTntEnemies(entityConfig);
         projectiles = new ArrayList<>();
         dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles);
-        //torchEnemies = spawnTorchEnemies(entityConfig); TODO: mostro dal file
+        torchEnemies = spawnTorchEnemies(entityConfig);
         //DEBUG ENEMY TORCH
-        torchEnemies = new ArrayList<>();
-        torchEnemies.add(new EnemyTorch(new SpawnPoint(1960, 1350, 3), entityConfig));
+        //torchEnemies = new ArrayList<>();
+        //torchEnemies.add(new EnemyTorch(new SpawnPoint(1960, 1350, 3), entityConfig));
         //initialize Objects
         ObjConfig objC = gameConfig.ObjConfig();
         objects = new ArrayList<>();
@@ -138,6 +138,15 @@ public class GameModel {
         for (SpawnPoint spawnPoint : entityConfig.DYNAMITE_SPAWNPOINT()) {
             for (int i = 0; i < entityConfig.DYNAMITE_FOR_SPAWNPOINT; i++) {
                 enemies.add(new EnemyDynamite(spawnPoint, entityConfig, projectileStore));
+            }
+        }
+        return enemies;
+    }
+    private List<EnemyTorch> spawnTorchEnemies(EntityConfig entityConfig) {
+        List<EnemyTorch> enemies = new ArrayList<>();
+        for (SpawnPoint spawnPoint : entityConfig.TORCH_SPAWNPOINT()) {
+            for (int i = 0; i < entityConfig.TORCH_FOR_SPAWNPOINT; i++) {
+                enemies.add(new EnemyTorch(spawnPoint, entityConfig));
             }
         }
         return enemies;

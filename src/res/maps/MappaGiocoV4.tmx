@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="72" nextobjectid="489">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="72" nextobjectid="491">
  <tileset firstgid="1" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/TILE_SET.tsx"/>
  <tileset firstgid="801" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/tilset_obj.tsx"/>
  <layer id="45" name="wawew" width="100" height="80">
@@ -1378,7 +1378,7 @@
    </properties>
    <point/>
   </object>
-  <object id="354" name="Dynamite_spawnPoint" x="2757.16" y="1447.56">
+  <object id="354" name="Dynamite_spawnPoint" x="2356.63" y="2420.27">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
@@ -1393,6 +1393,18 @@
   <object id="359" name="Dynamite_spawnPoint" x="4598.89" y="2606.75">
    <properties>
     <property name="StartLayer" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="489" name="Torch_spawnPoint" x="4154.93" y="3794.01">
+   <properties>
+    <property name="StartLayer" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="490" name="Torch_spawnPoint" x="2882.92" y="1412.85">
+   <properties>
+    <property name="StartLayer" type="int" value="1"/>
    </properties>
    <point/>
   </object>

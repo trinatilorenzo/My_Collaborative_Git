@@ -16,7 +16,8 @@ public record EntityConfig(ScreenConfig screenConfig,
                            SpawnPoint playerSpawnPoint,
                            SpawnPoint monkSpawnPoint,
                            ArrayList<SpawnPoint> TntSpawnPoint,
-                           ArrayList<SpawnPoint> DynamiteSpawnPoint
+                           ArrayList<SpawnPoint> DynamiteSpawnPoint,
+                           ArrayList<SpawnPoint> TorchSpawnPoint
                            ) {
 
         //TODO load from somwere
@@ -130,6 +131,6 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int TORCH_SPRITE_WIDTH = 192;      // px
         public static final int TORCH_SPRITE_HEIGHT = 192;      // px
         public static final int TORCH_FOR_SPAWNPOINT = 1;
-        //public SpawnPoint TORCH_SPAWNPOINT() {return TorchSpawnPoint;} 
+        public ArrayList<SpawnPoint> TORCH_SPAWNPOINT() {return TorchSpawnPoint;}
 
 }

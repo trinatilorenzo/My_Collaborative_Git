@@ -36,7 +36,7 @@ public final class GameConfig {
     private static final String TNT_NAME = "TNT_spawnPoint";
     private static final String DYNAMITE_NAME = "Dynamite_spawnPoint";
     private static final String START_LAYER_PROP = "StartLayer";
-    //private static final String TORCH_NAME = "Torch_spawnPoint";
+    private static final String TORCH_NAME = "Torch_spawnPoint";
 
     private static final String TREE_TAG_03 = "trees_03";
     private static final String TREE_TAG_02 = "trees_02";
@@ -91,7 +91,7 @@ public final class GameConfig {
         ArrayList<SpawnPoint> tntSpawPoint = loadEntitySpawns(TNT_NAME);
         // TODO load all the other spawn point
         ArrayList<SpawnPoint> dynamiteSpawnPoint = loadEntitySpawns(DYNAMITE_NAME);
-        //SpawnPoint torchSpawnPoint = loadEntitySpawns(TORCH_NAME).get(0);
+        ArrayList<SpawnPoint> torchSpawnPoint = loadEntitySpawns(TORCH_NAME);
 
         //load the tree spawns
         ArrayList<SpawnPoint> treeSpawns03 = loadOBJSpawns(TREE_TAG_03, 3);
@@ -107,7 +107,7 @@ public final class GameConfig {
         //create the config
         this.screenConfig = new ScreenConfig(TILE_SIZE, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
-        this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint, monkSpawnPoint, tntSpawPoint, dynamiteSpawnPoint);//, torchSpawnPoint);
+        this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint, monkSpawnPoint, tntSpawPoint, dynamiteSpawnPoint, torchSpawnPoint);
         this.ObjConfig = new ObjConfig(
                 TREE_TAG_03,
                 TREE_TAG_02,
