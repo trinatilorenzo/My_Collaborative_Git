@@ -11,6 +11,7 @@ import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.MonkState;
 import main.CONFIG.enu.PlayerState;
 import main.CONFIG.enu.TNTState;
+import main.CONFIG.enu.TorchState;
 import model.entity.*;
 import model.event.AudioEventType;
 import model.object.GameObject;
@@ -49,6 +50,7 @@ public class GameModel {
     private List<EnemyTNT> tntEnemies;
     private List<EnemyDynamite> dynamiteEnemies;
     private List<DynamiteProjectile> projectiles;
+    private List<EnemyTorch> torchEnemies;
     //-------------------------------------------------------------
 
     // Dialogue
@@ -91,7 +93,10 @@ public class GameModel {
         tntEnemies = spawnTntEnemies(entityConfig);
         projectiles = new ArrayList<>();
         dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles);
-
+        //torchEnemies = spawnTorchEnemies(entityConfig); TODO: mostro dal file
+        //DEBUG ENEMY TORCH
+        torchEnemies = new ArrayList<>();
+        torchEnemies.add(new EnemyTorch(new SpawnPoint(1960, 1350, 3), entityConfig));
         //initialize Objects
         ObjConfig objC = gameConfig.ObjConfig();
         objects = new ArrayList<>();
@@ -281,6 +286,25 @@ public class GameModel {
             //----------------------------
         }
         projectiles.removeIf(DynamiteProjectile::isExploded);
+
+        // Update Torch
+        for (EnemyTorch torch : torchEnemies) {
+            TorchState previousState = torch.getState();
+            if (torch.getState() != TorchState.DEAD){
+
+                torch.update(player, deltaMs);
+                collisionChecker.checkEntity(player, torch);
+                collisionChecker.checkTile(torch);
+                collisionChecker.checkObjects(torch);
+                torch.move();
+
+                //Audio ----------------------
+              
+                //----------------------------
+            }
+
+        }
+        torchEnemies.removeIf(EnemyTorch::isDead);
     }
     //-------------------------------------------------------------
     private void updateInteractions() {
@@ -304,6 +328,17 @@ public class GameModel {
             for (EnemyDynamite dynamite : dynamiteEnemies) {
                 if (!player.isAttackDamageApplied() && attackArea.intersects(dynamite.getSolidWorldArea())) {
                     dynamite.takeDamage();
+                    player.setAttackDamageApplied(true);
+                    //Audio ----------------------
+                    emitAudioEvent(AudioEventType.ENEMY_HIT);
+                }
+            }
+            // -------------------
+
+            // Torch -------------------
+            for (EnemyTorch torch : torchEnemies) {
+                if (!player.isAttackDamageApplied() && attackArea.intersects(torch.getSolidWorldArea())) {
+                    torch.takeDamage();
                     player.setAttackDamageApplied(true);
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.ENEMY_HIT);
@@ -380,6 +415,9 @@ public class GameModel {
             collisionChecker.checkTile(proj);
         }
         projectiles.removeIf(DynamiteProjectile::isExploded);
+
+        // TO DO: capire cosa fa questo metodo e implemntare per altri enemy
+
     }
     //-------------------------------------------------------------
     private void updateGameOverCountdown(double deltaMs) {
@@ -465,6 +503,7 @@ public class GameModel {
     public List<DynamiteProjectile> getProjectiles(){
         return projectiles;
     }
+    public List<EnemyTorch> getTorchEnemies() { return torchEnemies; }
     //---------------------------------
 
     // SETTER ----------------------

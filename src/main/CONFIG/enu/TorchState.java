@@ -1,8 +1,4 @@
 package main.CONFIG.enu;
 
-public enum TorchState {
-    WANDER, 
-    CHARGE,
-    VORTEX,
-    DEAD
-}
+public enum TorchState { APPROACH, GUARD, ATTACK_COMBO, DASH, RECOVERY, DEAD }
+

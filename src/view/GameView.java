@@ -12,6 +12,7 @@ import model.entity.EnemyTNT;
 import model.entity.Monk;
 import model.object.OBJ_Tree;
 import model.entity.Player;
+import model.entity.EnemyTorch;
 import model.event.AudioEventType;
 import view.UI.UI;
 import view.audio.GameAudioManager;
@@ -26,6 +27,7 @@ import view.renderer.object.RendererRegistry;
 import view.renderer.entity.DynamiteRender;
 import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.TNTRenderer;
+import view.renderer.entity.TorchRenderer;
 
 import javax.swing.*;
 import javax.imageio.ImageIO;
@@ -55,6 +57,7 @@ public class GameView extends JPanel {
     private MonkRenderer monkRenderer;
     private TNTRenderer tntRenderer;
     private DynamiteRender dynamiteRender;
+    private TorchRenderer torchRenderer;
     private UI ui_render;
     private RendererRegistry rendererRegistry;
     private Cursor customGameCursor;
@@ -84,7 +87,7 @@ public class GameView extends JPanel {
         this.monkRenderer = new MonkRenderer(GS.entityConfig());
         this.tntRenderer = new TNTRenderer(GS.entityConfig());
         this.dynamiteRender = new DynamiteRender(GS.entityConfig());
-
+        this.torchRenderer = new TorchRenderer(GS.entityConfig());
         //import the UI
         this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender);
 
@@ -189,6 +192,9 @@ public class GameView extends JPanel {
         for (EnemyDynamite enemyDynamite : model.getDynamiteEnemies()){
             dynamiteRender.update(enemyDynamite, deltaMs);
         }
+        for (EnemyTorch enemyTorch : model.getTorchEnemies()) {
+            torchRenderer.update(enemyTorch, deltaMs);
+        }
         updateObjectAnimations(deltaMs);
 
 
@@ -213,6 +219,7 @@ public class GameView extends JPanel {
         renderList.addAll(model.getDynamiteEnemies());
         renderList.addAll(model.getProjectiles());
         renderList.addAll(model.getObjects());
+        renderList.addAll(model.getTorchEnemies());
 
         // Sort for "bottom_y"
         renderList.sort(java.util.Comparator.comparingInt(obj -> {
@@ -228,6 +235,8 @@ public class GameView extends JPanel {
                 return ed.getWorldY() + ed.getSolidArea().height / 2;
             } else if (obj instanceof DynamiteProjectile d) {
                 return d.getWorldY() + d.getSolidArea().height/2;
+            } else if (obj instanceof EnemyTorch torch) {
+                return torch.getWorldY() + torch.getSolidArea().height / 2;
             }
             return 0;
         }));
@@ -280,6 +289,20 @@ public class GameView extends JPanel {
 
                 dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
             }
+            else if (obj instanceof EnemyTorch torch) {
+                int screenX = torch.getWorldX() - player.getWorldX() + pScreenX;
+                int screenY = torch.getWorldY() - player.getWorldY() + pScreenY;
+
+                int halfW = EntityConfig.TORCH_SPRITE_WIDTH / 2;
+                int halfH = EntityConfig.TORCH_SPRITE_HEIGHT / 2;
+
+                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
+                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                    continue;
+                }
+
+                torchRenderer.draw(g2, torch, screenX, screenY);
+             }
             else if (obj instanceof GameObject o) {
                 @SuppressWarnings("unchecked")
                 ObjectRender<GameObject> renderer =
