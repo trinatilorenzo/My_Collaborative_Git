@@ -89,7 +89,7 @@ public record EntityConfig(ScreenConfig screenConfig,
     //-------------------------------------------------------------
     //EnemyDynamiteConfig
     public static final DynamiteState DYNAMITE_DEFAULT_STATE = DynamiteState.WANDER;
-    public static final int START_DYNAMITE_SPEED = 256; // pixels per second
+    public static final int START_DYNAMITE_SPEED = 128; // pixels per second
     public static final int DYNAMITE_MAX_LIFE = 3;
 
     public static final int DYNAMITE_DETECTION_RADIUS = 400;
@@ -109,7 +109,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
 
     //Dynamite projectile Config
-    public static final int PROJECTILE_THROW_SPEED = 100;
+    public static final int PROJECTILE_THROW_SPEED = 80;
     public static final int PROJECTILE_THROW_HEIGHT = 300;
     public static final int PROJECTILE_AIR_TIME = 1500; // ms
     public static final int PROJECTILE_EXPLOSION_RADIUS = 50;
@@ -118,23 +118,14 @@ public record EntityConfig(ScreenConfig screenConfig,
     public static final int PROJECTILE_SIZE = 16;
 
 
-    // EnemyTorch
-    public static final int    TORCH_MAX_LIFE                = 6;
-    public static final int    TORCH_BASE_SPEED              = 120;       // px/s
-    public static final int    TORCH_HITBOX_WIDTH            = 32;
-    public static final int    TORCH_HITBOX_HEIGHT           = 32;
-    public static final double TORCH_DETECTION_RADIUS        = 400.0;
-    public static final double TORCH_ATTACK_RADIUS           = 160.0;
-    public static final double TORCH_CHARGE_DURATION_MS      = 900.0;
-    public static final double TORCH_COOLDOWN_DURATION_MS    = 1800.0;
-    public static final double TORCH_STUN_DURATION_MS        = 1200.0;
-    public static final double TORCH_COOLDOWN_SPEED_FACTOR   = 0.35;     // fraction of normal speed
-    public static final double TORCH_JITTER_INTERVAL_MS      = 300.0;
-    public static final double TORCH_JITTER_MAX_RADIANS      = 0.3;      // ~17°
-    public static final double TORCH_PATROL_INTERVAL         = 1200.0;
-    
-    // TorchVortex
-    public static final double VORTEX_EXPAND_SPEED           = 200.0;    // px/s
-    public static final double VORTEX_MAX_RADIUS             = 350.0;
-
+    // Enemy Torch Config
+    public static final int    TORCH_MAX_LIFE              = 6;
+    public static final int    TORCH_BASE_SPEED            = 110;      // px/s
+    public static final int    TORCH_HITBOX_WIDTH          = 28;
+    public static final int    TORCH_HITBOX_HEIGHT         = 28;
+    public static final int    TORCH_RANGE_ATTACK          = 40;       // px, leggermente > RANGE_ATTACK del player
+    public static final double TORCH_ATTACK_RADIUS         = 55.0;     // > RANGE_ATTACK, < player può schivare
+    public static final double TORCH_ATTACK_COOLDOWN_MS    = 1400.0;
+    public static final double TORCH_JITTER_INTERVAL_MS    = 350.0;
+    public static final double TORCH_JITTER_MAX_RADIANS    = 0.25;
 }

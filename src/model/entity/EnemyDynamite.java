@@ -46,7 +46,8 @@ public class EnemyDynamite extends Entity {
         this.currentLayer = spawnPoint.layer();
 
         this.speed = EntityConfig.START_DYNAMITE_SPEED;
-        this.life = EntityConfig.DYNAMITE_MAX_LIFE;
+        this.maxLife = EntityConfig.DYNAMITE_MAX_LIFE;
+        this.life = maxLife;
 
         solidArea = new Rectangle(0, 0, EntityConfig.DYNAMITE_HITBOX_WIDTH, EntityConfig.DYNAMITE_HITBOX_HEIGHT);
 

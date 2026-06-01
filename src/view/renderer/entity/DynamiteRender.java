@@ -89,6 +89,24 @@ public class DynamiteRender {
         } else {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
+
+        // Draw life bar
+        if (enemy.getLife() < enemy.getMaxLife()) {
+            int barWidth = width/2; 
+            int barHeight = 6;
+            int barX = screenX - barWidth / 2;
+            int barY = drawY - barHeight - 2;
+            double healthPercent = (double) enemy.getLife() / enemy.getMaxLife();
+            if (healthPercent < 0) healthPercent = 0;
+            int currentBarWidth = (int) (barWidth * healthPercent);
+            g2.setColor(Color.BLACK);
+            g2.fillRect(barX, barY, barWidth, barHeight);
+            g2.setColor(Color.RED);
+            g2.fillRect(barX, barY, currentBarWidth, barHeight);  
+            g2.setColor(new Color(50, 50, 50));
+            g2.drawRect(barX, barY, barWidth, barHeight);
+
+        }
     }
 
     //-------------------------------------------------------------
