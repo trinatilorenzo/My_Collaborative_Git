@@ -89,7 +89,7 @@ public class GameView extends JPanel {
         this.dynamiteRender = new DynamiteRender(GS.entityConfig());
         this.torchRenderer = new TorchRenderer(GS.entityConfig());
         //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender);
+        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender, torchRenderer);
 
         // object renderers
         this.rendererRegistry = new RendererRegistry();

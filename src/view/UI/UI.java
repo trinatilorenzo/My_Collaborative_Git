@@ -4,6 +4,7 @@ import model.GameModel;
 import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
+import model.entity.EnemyTorch;
 import model.entity.Player;
 import model.object.GameObject;
 import model.object.OBJ_Tree;
@@ -11,6 +12,7 @@ import view.renderer.entity.DynamiteRender;
 import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.PlayerRender;
 import view.renderer.entity.TNTRenderer;
+import view.renderer.entity.TorchRenderer;
 import view.renderer.map.MapRender;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.MapConfig;
@@ -49,11 +51,12 @@ public class UI {
     private final GameModel      gameModel;
     private final ScreenConfig   screenConfig;
     private final MapConfig      mapConfig;
-    private final PlayerRender   playerRender;
+    private final PlayerRender   playerRenderer;
     private final TNTRenderer    tntRenderer;
     private final MonkRenderer   monkRenderer;
     private final MapRender      mapRender;
-    private final DynamiteRender dynamiteRender;
+    private final DynamiteRender dynamiteRenderer;
+    private final TorchRenderer  torchRenderer;
 
     // =========================================================================
     // Active rendering context
@@ -136,18 +139,19 @@ public class UI {
     // =========================================================================
 
     //-------------------------------------------------------------
-    public UI(GameModel gameModel, PlayerRender playerRender, MapRender mapRender,
+    public UI(GameModel gameModel, PlayerRender playerRenderer, MapRender mapRender,
               ScreenConfig screenConfig, MapConfig mapConfig,
-              TNTRenderer tntRenderer, MonkRenderer monkRenderer, DynamiteRender dynamiteRender) {
+              TNTRenderer tntRenderer, MonkRenderer monkRenderer, DynamiteRender dynamiteRenderer, TorchRenderer torchRenderer) {
 
         this.gameModel      = gameModel;
-        this.playerRender   = playerRender;
+        this.playerRenderer   = playerRenderer;
         this.mapRender      = mapRender;
         this.screenConfig   = screenConfig;
         this.mapConfig      = mapConfig;
         this.tntRenderer    = tntRenderer;
         this.monkRenderer   = monkRenderer;
-        this.dynamiteRender = dynamiteRender;
+        this.dynamiteRenderer = dynamiteRenderer;
+        this.torchRenderer = torchRenderer;
 
         maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
 
@@ -522,20 +526,23 @@ public class UI {
     private void drawDebugOverlay() {
         int pScreenX = screenConfig.SCREEN_WIDTH() / 2 - (screenConfig.TILE_SIZE() / 2);
         int pScreenY = screenConfig.SCREEN_HEIGHT() / 2 - (screenConfig.TILE_SIZE() / 2);
-        playerRender.drawSolidArea(g2, gameModel.getPlayer(), pScreenX, pScreenY);        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
+        playerRenderer.drawSolidArea(g2, gameModel.getPlayer(), pScreenX, pScreenY);        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
 
         mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
         
         for (EnemyDynamite ed : gameModel.getDynamiteEnemies()) {
-            dynamiteRender.drawSolidArea(g2, ed, screenX(ed.getWorldX()), screenY(ed.getWorldY()));
+            dynamiteRenderer.drawSolidArea(g2, ed, screenX(ed.getWorldX()), screenY(ed.getWorldY()));
         }
         for (Object proj : gameModel.getProjectiles()) {
             if (proj instanceof DynamiteProjectile dp) {
-                dynamiteRender.drawProjectileSolidArea(g2, dp, screenX(dp.getWorldX()), screenY(dp.getWorldY()));
+                dynamiteRenderer.drawProjectileSolidArea(g2, dp, screenX(dp.getWorldX()), screenY(dp.getWorldY()));
             }
         }
         for (EnemyTNT tnt : gameModel.getTntEnemies()) {
             tntRenderer.drawSolidArea(g2, tnt, screenX(tnt.getWorldX()), screenY(tnt.getWorldY()));
+        }
+        for (EnemyTorch torch : gameModel.getTorchEnemies()) {
+            torchRenderer.drawSolidArea(g2, torch, screenX(torch.getWorldX()), screenY(torch.getWorldY()));
         }
 
         drawTreeSolidAreas();

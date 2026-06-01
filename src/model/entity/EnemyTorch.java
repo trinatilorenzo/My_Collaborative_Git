@@ -6,6 +6,9 @@ import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.TorchState;
 
+/**
+ * The EnemyTorch class represents a enemy that fight against the player
+ */
 public class EnemyTorch extends Entity {
 
     private TorchState state;
@@ -15,35 +18,50 @@ public class EnemyTorch extends Entity {
 
     
     private int comboStep = 0;
-    private boolean isBlocking = false;
 
+    private boolean attackAnimationCompleted;
+    private boolean attackDamageApplied;
+
+    /**
+     * COSTRUCTOR
+     */
+    //-------------------------------------------------------------
     public EnemyTorch(SpawnPoint spawnPoint, EntityConfig entityConfig) {
         super(entityConfig);
         initializeDefaultValues(spawnPoint);
     }
+    //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     public void initializeDefaultValues(SpawnPoint spawnPoint) {
         this.state = TorchState.APPROACH;
         this.worldX = spawnPoint.x();
         this.worldY = spawnPoint.y();
         this.currentLayer = spawnPoint.layer();
         
-        // Statistiche più alte del Dynamite per renderlo un mini-boss
-        this.speed = EntityConfig.TORCH_START_SPEED; // Es: più veloce del Dynamite
-        this.life = EntityConfig.TORCH_MAX_LIFE;    // Es: 10 o 15 vite invece di 3
+        this.speed = EntityConfig.TORCH_START_SPEED; 
+        this.life = EntityConfig.TORCH_MAX_LIFE; 
+        this.maxLife = EntityConfig.TORCH_MAX_LIFE; 
         
-        // Hitbox per le collisioni del corpo
+        this.attackAnimationCompleted = true;
+        this.attackDamageApplied = false;
+       
         solidArea = new Rectangle(0, 0, EntityConfig.TORCH_HITBOX_WIDTH, EntityConfig.TORCH_HITBOX_HEIGHT);
     }
+    //-------------------------------------------------------------
 
+
+    /**
+     * Updates the enemy state and movement
+     */
+    //-------------------------------------------------------------
     public void update(Player player, double deltaMs) {
         super.update();
 
         if (attackCooldownMs > 0) attackCooldownMs -= deltaMs;
         stateTimer += deltaMs;
 
-        // Faccia sempre il giocatore
-        facePlayer(player);
+        facePlayer(player); // Face always the player 
 
         switch (state) {
             case APPROACH:
@@ -62,10 +80,8 @@ public class EnemyTorch extends Entity {
                 break;
 
             case GUARD:
-                this.isBlocking = true;
                 // Rimane fermo in guardia per 1.5 secondi, poi attacca o avanza
                 if (stateTimer >= 1500) {
-                    this.isBlocking = false;
                     state = TorchState.ATTACK_COMBO;
                     stateTimer = 0;
                 }
@@ -93,13 +109,14 @@ public class EnemyTorch extends Entity {
             case DEAD:
                 break;
         }
+        System.out.println("Torch State: " + state + " | Life: " + life);
     }
 
     public void takeDamage() {
         if (state == TorchState.DEAD) return;
 
         // SE È IN GUARDIA, IL GIOCATORE VIENE RESPINTO (Knockback) O NON FA DANNO
-        if (this.isBlocking) {
+        if (state == TorchState.GUARD) {
             // Qui potresti triggerare un evento audio di "Scudo/Parata" 
             System.out.println("Torch ha parato il colpo!");
             return; 
@@ -133,13 +150,6 @@ public class EnemyTorch extends Entity {
         this.facingDirection = (player.getWorldX() >= worldX) ? Direction.RIGHT : Direction.LEFT;
     }
 
-    private void executeComboLogic(Player player) {
-        // Logica per infliggere danno melee se il player è nel raggio d'azione
-        // Finita la combo, passa in RECOVERY
-        System.out.println("Torch attacca con la spada infuocata!");
-        state = TorchState.RECOVERY;
-        stateTimer = 0;
-    }
 
     private void executeDashLogic(Player player, double deltaMs) {
         // Aumenta temporaneamente la velocità per fare uno scatto
@@ -150,11 +160,32 @@ public class EnemyTorch extends Entity {
         }
     }
 
+    private void executeComboLogic(Player player) {
+
+        if (!attackDamageApplied) {
+
+            if (attackHitsPlayer(player)) {
+                player.takeDamage();
+            }
+
+            attackDamageApplied = true;
+        }
+
+    }
+
+    private boolean attackHitsPlayer(Player player) {
+        return getDistanceToPlayer(player) < EntityConfig.TORCH_MELEE_RANGE;
+    }
+
     public void completeAttackAnimation() {
         // Questo metodo viene chiamato dal Renderer quando l'animazione di attacco finisce
-        this.comboStep = 0; // Resetta la combo dopo l'attacco
-        state = TorchState.RECOVERY; // Torna in recovery dopo l'attacco
-    }
+        if (state == TorchState.ATTACK_COMBO) {
+
+        attackAnimationCompleted = true;
+
+        state = TorchState.RECOVERY;
+        stateTimer = 0;
+    }}
 
     // Getters per il Renderer
     public TorchState getState() { return state; }

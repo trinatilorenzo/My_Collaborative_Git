@@ -20,7 +20,7 @@ public class Monk extends Entity {
     private int dialogueIndex;
 
     /**
-     * COSTRUCTOR
+     * CONSTRUCTOR
      */
     //-------------------------------------------------------------
     public Monk(int worldX, int worldY, EntityConfig entityConfig) {
@@ -28,6 +28,8 @@ public class Monk extends Entity {
 
         initializeDefaultValues(worldX, worldY);
     }
+    //-------------------------------------------------------------
+
     //-------------------------------------------------------------
     private void initializeDefaultValues(int worldX, int worldY) {
         this.state = EntityConfig.MONK_DEFAULT_STATE; // state (idle)
@@ -48,7 +50,7 @@ public class Monk extends Entity {
 
     /**
      * Update the monk's state
-     * * called every frame *
+     * called every frame
      */
     //-------------------------------------------------------------
     public void update(Player player, double deltaMs) {

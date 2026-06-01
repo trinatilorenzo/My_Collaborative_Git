@@ -92,10 +92,10 @@ public class DynamiteRender {
 
         // Draw life bar
         if (enemy.getLife() < enemy.getMaxLife()) {
-            int barWidth = width/2; 
+            int barWidth = width / 2; 
             int barHeight = 6;
             int barX = screenX - barWidth / 2;
-            int barY = drawY - barHeight - 2;
+            int barY = drawY - barHeight - 5;
             double healthPercent = (double) enemy.getLife() / enemy.getMaxLife();
             if (healthPercent < 0) healthPercent = 0;
             int currentBarWidth = (int) (barWidth * healthPercent);

@@ -13,13 +13,13 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * TorchRenderer gestisce il rendering visivo e le animazioni dell'Enemy Torch,
- * inclusa la barra della salute dinamica sopra la testa.
+ * The TorchRenderer class is responsible for rendering the Torch Enemy entity,
+ * managing its animations, drawing the dynamic health bar, and rendering debug hitboxes.
  */
 public class TorchRenderer {
 
     private final EntityConfig entityConfig;
-    // Mappa per tenere traccia dei manager delle animazioni per ogni istanza di EnemyTorch (in caso ce ne fossero più di una)
+    // ConcurrentHashMaps to handle multiple instances of EnemyTorch safely
     private final ConcurrentHashMap<EnemyTorch, AnimationManager> managerByEnemy;
     private final ConcurrentHashMap<EnemyTorch, TorchState> previousStateByEnemy;
 
@@ -29,7 +29,7 @@ public class TorchRenderer {
     private BufferedImage[] attackDownFrames;
     private BufferedImage[] attackUpFrames;
 
-    // COSTRUTTORE
+    // CONSTRUCTOR
     //-------------------------------------------------------------
     public TorchRenderer(EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
@@ -40,10 +40,10 @@ public class TorchRenderer {
 
     //-------------------------------------------------------------
     private void loadAnimations() {
-        // Carica la sprite sheet dedicata a Torch (Assicurati che il percorso sia corretto)
+        // Loads the sprite sheet dedicated to the Torch enemy
         BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_Torch/Torch_Yellow.png");
 
-        // Estrae i frame usando le stesse righe della struttura del Player
+        // Extracts animation frames using the same row structure as the Player
         idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 7, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
         walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
         attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 1, 6, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
@@ -60,7 +60,7 @@ public class TorchRenderer {
             manager.addAnimation("attack_right", new Animation(attackRightFrames, 60, false));
             manager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
             manager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
-            manager.playAnimation("idle");
+            manager.playAnimation("idle"); // Initial state
             return manager;
         });
     }
@@ -74,20 +74,16 @@ public class TorchRenderer {
         boolean attackJustStarted = (currentState == TorchState.ATTACK_COMBO || currentState == TorchState.DASH) 
                                     && (previousState != TorchState.ATTACK_COMBO && previousState != TorchState.DASH);
 
-        // Mappatura degli stati logici del duello sulle animazioni grafiche
+        // Map logical AI duel states to visual animations
         switch (currentState) {
-            case GUARD -> {
-                // Durante la parata usa il primo frame dell'attacco o l'idle a seconda della sprite sheet
+            case GUARD, RECOVERY -> {
+                // Uses idle frames during guard/recovery states (fatigue or blocking stance)
                 manager.playAnimation("idle"); 
-            }
-            case RECOVERY -> {
-                // Affaticato: usa l'idle (o un'animazione di stanchezza se presente)
-                manager.playAnimation("idle");
             }
             case APPROACH -> manager.playAnimation("walk");
             
             case ATTACK_COMBO, DASH -> {
-                // Direziona l'attacco in base a dove sta guardando il mostro
+                // Directional attack rendering based on where the enemy is facing
                 if (torch.getDirection() == Direction.DOWN) {
                     manager.playAnimation("attack_down");
                 } else if (torch.getDirection() == Direction.UP) {
@@ -100,13 +96,13 @@ public class TorchRenderer {
                     manager.getCurrent().reset();
                 }
 
-                // Quando l'animazione di attacco finisce, comunica al modello di cambiare stato
+                // Notify the model when the attack animation finishes to cycle back states
                 if (manager.getCurrent().isFinished()) {
                     torch.completeAttackAnimation();
                 }
             }
             case DEAD -> {
-                // Se hai dei deathFrames inseriscili qui, altrimenti si ferma sull'ultimo frame dell'attacco/idle
+                // Handle death frames here if implemented in the future
             }
         }
 
@@ -119,47 +115,70 @@ public class TorchRenderer {
         AnimationManager manager = getManager(torch);
         BufferedImage frame = manager.getCurrent().getCurrentFrame();
 
-        int width = entityConfig.TORCH_SPRITE_WIDTH;
-        int height = entityConfig.TORCH_SPRITE_HEIGHT;
+        int width = entityConfig.TORCH_SPRITE_WIDTH * 2;
+        int height = entityConfig.TORCH_SPRITE_HEIGHT * 2;
         int drawX = screenX - width / 2;
         int drawY = screenY - height / 2;
 
-        // Specchia l'immagine orizzontalmente se guarda a sinistra (se la sprite base guarda a destra)
+        // Flip image horizontally if facing left (assuming base sprite faces right)
         if (!torch.isFacingRight()) {
             g2.drawImage(frame, drawX + width, drawY, -width, height, null);
         } else {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
 
-        // BARRA DELLA VITA DINAMICA (Appare solo dopo il primo colpo subito)
+        // DYNAMIC HEALTH BAR (Appears only after taking the first hit)
         if (torch.getLife() < torch.getMaxLife() && !torch.isDead()) {
-            drawHealthBar(g2, torch, screenX, drawY);
+            int barWidth = 100; 
+            int barHeight = 6;
+            int barX = screenX - barWidth / 2;
+            int barY = screenY - barHeight - 30; // Positions bar safely above the head
+
+            double lifePercent = (double) torch.getLife() / torch.getMaxLife();
+            if (lifePercent < 0) lifePercent = 0;
+
+            int currentBarWidth = (int) (barWidth * lifePercent);
+            
+            // Background (Black outline box)
+            g2.setColor(Color.BLACK);
+            g2.fillRect(barX, barY, barWidth, barHeight);
+            
+            // Health fill (Fiery Orange/Red color)
+            g2.setColor(new Color(255, 69, 0)); 
+            g2.fillRect(barX, barY, currentBarWidth, barHeight);
+            
+            // Border trim
+            g2.setColor(new Color(30, 30, 30));
+            g2.drawRect(barX, barY, barWidth, barHeight);
         }
     }
 
+    // DEBUG METHOD: Renders body hitboxes and AI logic detection radiuses
     //-------------------------------------------------------------
-    private void drawHealthBar(Graphics2D g2, EnemyTorch torch, int screenX, int enemyTopY) {
-        int barWidth = 45; // Leggermente più grande per il mini-boss
-        int barHeight = 6;
-        int barX = screenX - barWidth / 2;
-        int barY = enemyTopY - barHeight - 10; // 10 pixel sopra la testa
+    public void drawSolidArea(Graphics2D g2, EnemyTorch torch, int screenX, int screenY) {
+        // 1. Body Hitbox (Solid Area)
+        Rectangle solid = torch.getSolidArea();
+        int drawX = screenX - solid.width / 2;
+        int drawY = screenY - solid.height / 2;
 
-        double lifePercent = (double) torch.getLife() / torch.getMaxLife();
-        if (lifePercent < 0) lifePercent = 0;
+        g2.setColor(new Color(255, 0, 0, 80)); // Semi-transparent Red
+        g2.fillRect(drawX, drawY, solid.width, solid.height);
+        g2.setColor(Color.RED);
+        g2.drawRect(drawX, drawY, solid.width, solid.height);
 
-        int currentBarWidth = (int) (barWidth * lifePercent);
+        // 2. Melee Attack Range (Combo Trigger Radius)
+        g2.setColor(new Color(255, 127, 0, 60)); // Semi-transparent Orange
+        int attackRadius = entityConfig.TORCH_MELEE_RANGE; 
+        g2.fillOval(screenX - attackRadius, screenY - attackRadius, 2 * attackRadius, 2 * attackRadius);
+        g2.setColor(Color.ORANGE);
+        g2.drawOval(screenX - attackRadius, screenY - attackRadius, 2 * attackRadius, 2 * attackRadius);
 
-        // Sfondo nero
-        g2.setColor(Color.BLACK);
-        g2.fillRect(barX, barY, barWidth, barHeight);
-
-        // Barra della salute (Arancione/Rossa per un mostro di fuoco!)
-        g2.setColor(new Color(255, 69, 0)); 
-        g2.fillRect(barX, barY, currentBarWidth, barHeight);
-
-        // Bordino di finitura
-        g2.setColor(new Color(30, 30, 30));
-        g2.drawRect(barX, barY, barWidth, barHeight);
+        // 3. Player Engagement Range (Detection/Chasing Radius)
+        g2.setColor(new Color(0, 150, 255, 40)); // Semi-transparent Blue
+        int detectRadius = entityConfig.TORCH_DASH_RANGE_TRIGGER; 
+        g2.fillOval(screenX - detectRadius, screenY - detectRadius, 2 * detectRadius, 2 * detectRadius);
+        g2.setColor(Color.BLUE);
+        g2.drawOval(screenX - detectRadius, screenY - detectRadius, 2 * detectRadius, 2 * detectRadius);
     }
 
     //-------------------------------------------------------------

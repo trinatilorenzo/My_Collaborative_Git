@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 /**
  * The PLAYER CLASS represents the main player character in the game, extending the base Entity class.
  */
-    //-------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------
 public class Player extends Entity {
 
     private PlayerState state;
@@ -23,7 +23,7 @@ public class Player extends Entity {
 
 
     /**
-     * COSTRUCTOR
+     * CONSTRUCTOR
      */
     //-------------------------------------------------------------
     public Player(EntityConfig entityConfig) {
