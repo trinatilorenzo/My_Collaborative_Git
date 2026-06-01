@@ -161,6 +161,7 @@ public class CollisionChecker {
 
         for (GameObject obj : objects) {
             if (obj == null || obj.isRemoved() || !obj.isSolid()) continue;
+            if (obj.getLayer() != entity.getCurrentLayer()) continue;
             Rectangle solidArea = obj.getSolidArea();
             if (solidArea == null) continue;
 

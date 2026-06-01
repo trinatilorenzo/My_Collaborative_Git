@@ -71,6 +71,9 @@ public class GameObject {
     public int getHeight() {
         return height;
     }
+    public int getLayer() {
+        return layer;
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------

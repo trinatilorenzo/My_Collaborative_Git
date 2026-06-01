@@ -22,7 +22,22 @@ public class StructureRenderer extends ObjectRender<GameObject> {
 
     @Override
     public void draw(Graphics2D g2, GameObject obj, int screenX, int screenY) {
-        BufferedImage sprite = spriteByPath.computeIfAbsent("res/object/buildings/Castle_Blue.png", SpriteLoader::loadSpriteSheet);
+        String spritePath = getSpritePath(obj.getName());
+        BufferedImage sprite = spriteByPath.computeIfAbsent(spritePath, SpriteLoader::loadSpriteSheet);
         g2.drawImage(sprite, screenX, screenY, obj.getWidth(), obj.getHeight(), null);
+    }
+
+    private String getSpritePath(String objectName) {
+        if (objectName == null) {
+            return "/res/object/buildings/Castle_Blue.png";
+        }
+
+        return switch (objectName.trim().toLowerCase()) {
+            case "castle" -> "/res/object/buildings/Castle_Blue.png";
+            case "tower" -> "/res/object/buildings/Tower_Blue.png";
+            case "goldmine" -> "/res/object/buildings/GoldMine_Active.png";
+            case "goblin_home", "goblin_house" -> "/res/object/buildings/Goblin_House.png";
+            default -> "/res/object/buildings/Castle_Blue.png";
+        };
     }
 }

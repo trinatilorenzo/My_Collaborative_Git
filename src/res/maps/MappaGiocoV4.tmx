@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="67" nextobjectid="474">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="72" nextobjectid="489">
  <tileset firstgid="1" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/TILE_SET.tsx"/>
  <tileset firstgid="801" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/tilset_obj.tsx"/>
  <layer id="45" name="wawew" width="100" height="80">
@@ -1341,15 +1341,6 @@
   <object id="419" gid="801" x="3830.45" y="1414.06" width="192" height="256"/>
   <object id="472" gid="801" x="3204.28" y="914.493" width="192" height="256"/>
  </objectgroup>
- <objectgroup id="61" name="buildings">
-  <object id="99" gid="802" x="1790.56" y="1303.66" width="320" height="256"/>
-  <object id="334" gid="803" x="4481.98" y="4468.23" width="128" height="256"/>
-  <object id="335" gid="803" x="4051.16" y="4574.67" width="128" height="256"/>
-  <object id="336" gid="804" x="4223.54" y="4588.14" width="192" height="128"/>
-  <object id="337" gid="808" x="4540.27" y="2632.01" width="128" height="192"/>
-  <object id="338" gid="808" x="516.028" y="2639.35" width="128" height="192"/>
-  <object id="339" gid="808" x="2290" y="2392.19" width="128" height="192"/>
- </objectgroup>
  <objectgroup id="62" name="entity">
   <object id="249" name="Monk" x="1949.36" y="1303.73">
    <properties>
@@ -1405,5 +1396,20 @@
    </properties>
    <point/>
   </object>
+ </objectgroup>
+ <objectgroup id="67" name="castle">
+  <object id="488" gid="802" x="1788.71" y="1302.73" width="320" height="256"/>
+ </objectgroup>
+ <objectgroup id="68" name="tower">
+  <object id="486" name="Tower" gid="803" x="4483.91" y="4486.2" width="128" height="256"/>
+  <object id="487" name="Tower" gid="803" x="4053.09" y="4592.64" width="128" height="256"/>
+ </objectgroup>
+ <objectgroup id="69" name="GoldMine">
+  <object id="485" gid="804" x="4222.43" y="4587.04" width="192" height="128"/>
+ </objectgroup>
+ <objectgroup id="71" name="Goblin_Home">
+  <object id="482" gid="808" x="4551.69" y="2648.81" width="128" height="192"/>
+  <object id="483" gid="808" x="527.45" y="2656.15" width="128" height="192"/>
+  <object id="484" gid="808" x="2301.42" y="2408.99" width="128" height="192"/>
  </objectgroup>
 </map>

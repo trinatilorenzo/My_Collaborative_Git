@@ -41,6 +41,11 @@ public final class GameConfig {
     private static final String TREE_TAG_03 = "trees_03";
     private static final String TREE_TAG_02 = "trees_02";
     private static final String TREE_TAG_01 = "trees_01";
+
+    private static final String CASTLE_TAG = "castle";
+    private static final String TOWER_TAG = "tower";
+    private static final String GOLDMINE_TAG = "GoldMine";
+    private static final String GOBLIN_HOME_TAG = "Goblin_Home";
     //-------------------------------------------------------------
 
     // CONFIG
@@ -93,20 +98,35 @@ public final class GameConfig {
         ArrayList<SpawnPoint> treeSpawns02 = loadOBJSpawns(TREE_TAG_02, 2);
         ArrayList<SpawnPoint> treeSpawns01 = loadOBJSpawns(TREE_TAG_01, 1);
 
+        //load the building spawns
+        ArrayList<SpawnPoint> castleSpawns = loadOBJSpawns(CASTLE_TAG, 3);
+        ArrayList<SpawnPoint> towerSpawns = loadOBJSpawns(TOWER_TAG, 1);
+        ArrayList<SpawnPoint> goldMineSpawns = loadOBJSpawns(GOLDMINE_TAG, 1);
+        ArrayList<SpawnPoint> goblinHomeSpawns = loadOBJSpawns(GOBLIN_HOME_TAG, 2);
 
         //create the config
         this.screenConfig = new ScreenConfig(TILE_SIZE, GAME_BG_COLOR);
         this.mapConfig = new MapConfig(TILE_SIZE, MAX_WORLD_COL, MAX_WORLD_ROW);
         this.entityConfig = new EntityConfig(screenConfig, playerSpawnPoint, monkSpawnPoint, tntSpawPoint, dynamiteSpawnPoint);//, torchSpawnPoint);
-        this.ObjConfig = new ObjConfig(TREE_TAG_03, TREE_TAG_02, TREE_TAG_01, treeSpawns03, treeSpawns02, treeSpawns01);
+        this.ObjConfig = new ObjConfig(
+                TREE_TAG_03,
+                TREE_TAG_02,
+                TREE_TAG_01,
+                CASTLE_TAG,
+                TOWER_TAG,
+                GOLDMINE_TAG,
+                GOBLIN_HOME_TAG,
+                treeSpawns03,
+                treeSpawns02,
+                treeSpawns01,
+                castleSpawns,
+                towerSpawns,
+                goldMineSpawns,
+                goblinHomeSpawns
+        );
         this.UIConfig = new UIConfig();
     }//end constructor
     //-------------------------------------------------------------
-
-
-
-
-
 
 
     /**
@@ -161,6 +181,9 @@ public final class GameConfig {
 
         ArrayList<SpawnPoint> spawns = new ArrayList<>();
         NodeList objects = loadElementGroup(OBJ_GropupName);
+        if (objects == null) {
+            return spawns;
+        }
         for (int j = 0; j < objects.getLength(); j++) {
             Node node = objects.item(j);
             if (node.getNodeType() != Node.ELEMENT_NODE) continue;

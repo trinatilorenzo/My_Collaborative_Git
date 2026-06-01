@@ -108,6 +108,16 @@ public class GameModel {
         // third level tree
         spawnTrees(objC.TREES_01_SPAWNPOINT(), objC.TREE_TAG_01(), objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT, objC.TREE_01_HITBOX_OFFSET_Y, objC);
 
+        // buildings
+        spawnBuildings(objC.CASTLE_SPAWNPOINT(), objC.CASTLE_TAG(), ObjConfig.CASTLE_WIDTH, ObjConfig.CASTLE_HEIGHT,
+                ObjConfig.CASTLE_HITBOX_WIDTH, ObjConfig.CASTLE_HITBOX_HEIGHT, ObjConfig.CASTLE_HITBOX_OFFSET_Y, objC);
+        spawnBuildings(objC.TOWER_SPAWNPOINT(), objC.TOWER_TAG(), ObjConfig.TOWER_WIDTH, ObjConfig.TOWER_HEIGHT,
+                ObjConfig.TOWER_HITBOX_WIDTH, ObjConfig.TOWER_HITBOX_HEIGHT, ObjConfig.TOWER_HITBOX_OFFSET_Y, objC);
+        spawnBuildings(objC.GOLDMINE_SPAWNPOINT(), objC.GOLDMINE_TAG(), ObjConfig.GOLDMINE_WIDTH, ObjConfig.GOLDMINE_HEIGHT,
+                ObjConfig.GOLDMINE_HITBOX_WIDTH, ObjConfig.GOLDMINE_HITBOX_HEIGHT, ObjConfig.GOLDMINE_HITBOX_OFFSET_Y, objC);
+        spawnBuildings(objC.GOBLIN_HOME_SPAWNPOINT(), objC.GOBLIN_HOME_TAG(), ObjConfig.GOBLIN_HOME_WIDTH, ObjConfig.GOBLIN_HOME_HEIGHT,
+                ObjConfig.GOBLIN_HOME_HITBOX_WIDTH, ObjConfig.GOBLIN_HOME_HITBOX_HEIGHT, ObjConfig.GOBLIN_HOME_HITBOX_OFFSET_Y, objC);
+
         // START THE GAME
         gameState = GameState.PLAYING;
     }
@@ -139,12 +149,36 @@ public class GameModel {
             ));
         }
     }
+
+    private void spawnBuildings(List<SpawnPoint> spawnPoints, String buildingTag, int buildingWidth, int buildingHeight,
+                                int hitboxWidth, int hitboxHeight, int hitboxOffsetY, ObjConfig objConfig) {
+        for (SpawnPoint spawnPoint : spawnPoints) {
+            objects.add(new GameObject(
+                    objConfig,
+                    buildingTag,
+                    spawnPoint,
+                    buildingWidth,
+                    buildingHeight,
+                    createBuildingSolidArea(buildingWidth, hitboxWidth, hitboxHeight, hitboxOffsetY),
+                    ObjConfig.BUILDING_SOLID
+            ));
+        }
+    }
+
     private Rectangle createTreeSolidArea(int treeWidth, int hitboxOffsetY, ObjConfig objConfig) {
         return new Rectangle(
                 treeWidth / 2 - (objConfig.TREE_HITBOX_WIDTH / 2),
                 hitboxOffsetY,
                 objConfig.TREE_HITBOX_WIDTH,
                 objConfig.TREE_HITBOX_HEIGHT
+        );
+    }
+    private Rectangle createBuildingSolidArea(int buildingWidth, int hitboxWidth, int hitboxHeight, int hitboxOffsetY) {
+        return new Rectangle(
+                buildingWidth / 2 - (hitboxWidth / 2),
+                hitboxOffsetY,
+                hitboxWidth,
+                hitboxHeight
         );
     }
     //end helpers -------------------------------------------------
