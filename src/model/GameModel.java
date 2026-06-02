@@ -476,12 +476,14 @@ public class GameModel {
             deadStateElapsedMs = 0.0;
         }
         if (deadStateElapsedMs >= UIConfig.GAME_OVER_DELAY_MS) {
+            System.out.println("GAME OVER");
             gameState = GameState.GAME_OVER;
             deadStateElapsedMs = 0.0;
         }
     }
     //-------------------------------------------------------------
     private void updateState(InputState input) {
+        if (gameState == GameState.GAME_OVER) return;
         if (player.isDying() || player.isDead()) {
             gameState = GameState.PLAYING;
             return;
