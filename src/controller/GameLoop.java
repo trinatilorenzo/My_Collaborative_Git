@@ -3,29 +3,38 @@ package controller;
 import java.util.concurrent.locks.LockSupport;
 import static main.CONFIG.ScreenConfig.*;
 
-// GAME LOOP CLAS
-// This class is a Thread that control the game update every n FPS
+/**
+ * GAME LOOP CLAS
+ * This class is a Thread that control the game update every n FPS
+ */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameLoop extends Thread {
-    private final GameController controller;
-    private boolean running = true;
 
+    private final GameController controller;
+    private boolean running;
+
+    /**
+     * CONSTRUCTOR
+     */
+    //-------------------------------------------------------------
     public GameLoop(GameController controller) {
         this.controller = controller;
+        this.running = true;
         this.setPriority(Thread.MAX_PRIORITY);
     }
+    //-------------------------------------------------------------
 
 
     // GAME LOOP CORE --> START()
 
     /**
-     * Il loop è progettato per far sì che la logica di gioco avanzi sempre a passi fissi e regolari,
-     * mentre il render si adatta a quanti frame "reali" sono passati.
+     * The loop is designed to keep the game logic running at a fixed timestep,
+     * while the render frame rate changes with the real frame rate.
      */
     //-------------------------------------------------------------
-    //TODO capire bene come funziona
     @Override
     public void run() {
+
         long drawInterval = (long)(1e9 / FPS); // ideal duration of a frame
         double fixedDeltaMs = drawInterval / 1_000_000.0; // delta time used by model (ns -> ms) (es. 120 FPS = 8.33 ms)
         
@@ -72,7 +81,6 @@ public class GameLoop extends Thread {
             }
         }
     }
-
     //-------------------------------------------------------------
 
     // STOP GameLoop()
@@ -81,5 +89,6 @@ public class GameLoop extends Thread {
         running = false;
     }
     //-------------------------------------------------------------
+
 }
 //-------------------------------------------------------------------------------------------------------------------

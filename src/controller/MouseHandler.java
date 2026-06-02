@@ -5,17 +5,29 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+/**
+ * MOUSE HANDLER CLASS
+ * Manage input from the Mouse
+ */
+//-------------------------------------------------------------------------------------------------------------------
 public class MouseHandler implements MouseListener, MouseMotionListener {
+
+    // variable to set the state of the keys
     private volatile int mouseX;
     private volatile int mouseY;
-    private volatile boolean leftClickPending;
+    private volatile boolean leftClick;
+    private volatile boolean rightClick;
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             mouseX = e.getX();
             mouseY = e.getY();
-            leftClickPending = true;
+            leftClick = true;
+        } else if (e.getButton() == MouseEvent.BUTTON3) {
+            mouseX = e.getX();
+            mouseY = e.getY();
+            rightClick = true;
         }
     }
 
@@ -36,8 +48,13 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     }
 
     public synchronized boolean consumeLeftClick() {
-        boolean clicked = leftClickPending;
-        leftClickPending = false;
+        boolean clicked = leftClick;
+        leftClick = false;
+        return clicked;
+    }
+    public synchronized boolean consumeRightClick() {
+        boolean clicked = rightClick;
+        rightClick = false;
         return clicked;
     }
 
@@ -47,3 +64,4 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
 }
+//-------------------------------------------------------------------------------------------------------------------

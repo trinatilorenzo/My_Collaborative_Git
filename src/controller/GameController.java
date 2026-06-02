@@ -4,7 +4,8 @@ import main.CONFIG.UIConfig;
 import model.GameModel;
 import view.GameView;
 import main.CONFIG.enu.GameState;
-import view.UI.UI;
+import view.UI.GameOverLayout;
+import view.UI.MainMenuLayout;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -15,17 +16,21 @@ import java.awt.Rectangle;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {
+
     private final GameModel model;
     private final GameView view;
     private final KeyHandler keyHandler;
     private final MouseHandler mouseHandler;
     private final GameLoop loop;
-    private boolean renderOnceOnPause = true; // flag to control rendering when paused
+
+    private boolean renderOnceOnPause; // flag to control rendering when paused
+
     private GameState lastKnownState;
-    private boolean attackLatch;
     private int mainMenuSelection;
 
-    // COSTRUCTOR
+    /**
+     * CONSTRUCTOR
+     */
     //-------------------------------------------------------------
     public GameController(GameModel model, GameView view) {
         this.model = model;
@@ -35,22 +40,29 @@ public class GameController {
         this.mouseHandler = new MouseHandler();
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
-        this.attackLatch = false;
         this.mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
         
         view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
         view.addMouseListener(mouseHandler);
         view.addMouseMotionListener(mouseHandler);
         view.setFocusable(true); // ensure the view can receive keyboard focus
+
+        this.renderOnceOnPause = true;
     }
     //-------------------------------------------------------------
 
-    // START the game-loop thread
+    /**
+     * START the game-loop thread
+     */
+    //------------------------------------------------------------
     public void startGame() {
         loop.start();
     }
     //-------------------------------------------------------------
-    // STOP the game-loop thread
+    /**
+     *  STOP the game-loop thread
+     */
+    //------------------------------------------------------------
     public void stopGame(){
         loop.stopGameLoop();
         view.shutdownAudio();
@@ -59,68 +71,46 @@ public class GameController {
 
     /**
      * Update the model status and view rendering
+     * called by the game loop every frame with a fixed delta time
      */
-    public void update(double deltaMs) { //called by the game loop every frame with a fixed delta time
+    //------------------------------------------------------------
+    public void update(double deltaMs) {
 
-        InputState rawInput = keyHandler.getInputState();
-        InputState input = adaptAttackInput(rawInput);
-
-        if (model.getGameState() == GameState.MENU) {
-            updateMainMenu(input);
-            model.setDebugMode(input.debug());
-            syncAudio();
-            return;
-        }
-        if (model.getGameState() == GameState.GAME_OVER) {
-            updateGameOver(input);
-            model.setDebugMode(input.debug());
-            syncAudio();
-            return;
-        }
+        InputState input = keyHandler.getInputState();
+        GameState currentState = model.getGameState();
 
         model.setDebugMode(input.debug());
-
         model.update(input, deltaMs);
 
-        if (model.getGameState() == GameState.PLAYING) {
-            view.updateAnimations(deltaMs); // update animations only when playing
-            renderOnceOnPause = true;
+        switch (currentState) {
+            case MENU -> updateMainMenu(input);
+
+            case GAME_OVER -> updateGameOver(input);
+
+            case PLAYING -> {
+                view.updateAnimations(deltaMs);
+                renderOnceOnPause = true;
+            }
         }
 
         syncAudio();
 
     }
     //-------------------------------------------------------------
-    private InputState adaptAttackInput(InputState rawInput) {
-        boolean attackPressedThisFrame = rawInput.attack() && !attackLatch;
 
-        if (!rawInput.attack()) {
-            attackLatch = false;
-        } else if (attackPressedThisFrame) {
-            attackLatch = true;
-        }
-
-        return new InputState(
-                rawInput.up(),
-                rawInput.down(),
-                rawInput.left(),
-                rawInput.right(),
-                attackPressedThisFrame,
-                rawInput.pause(),
-                rawInput.debug(),
-                rawInput.interact(),
-                rawInput.menuPrevious(),
-                rawInput.menuNext(),
-                rawInput.menuConfirm()
-        );
-    }
-
+    /**
+     * Control the main menu
+     */
+    //-------------------------------------------------------------
     private void updateMainMenu(InputState input) {
-        UI.MainMenuLayout layout = view.getMainMenuLayout();
-        Point mousePosition = mouseHandler.getMousePosition();
-        mainMenuSelection = selectionFromMouse(layout, mousePosition, mainMenuSelection);
-        view.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
 
+        //to control the main menu, the GameController needs to know
+        // the mouse position relative to the layout of the main menu
+
+        MainMenuLayout layout = view.getMainMenuLayout();
+        Point mousePosition = mouseHandler.getMousePosition();
+
+        // selection with keyboard
         if (input.menuPrevious()) {
             selectPreviousMainMenuItem();
         }
@@ -128,44 +118,41 @@ public class GameController {
             selectNextMainMenuItem();
         }
         view.setMainMenuSelection(mainMenuSelection);
-
-        boolean leftClicked = mouseHandler.consumeLeftClick();
-        if (leftClicked && contains(layout.newGameBounds(), mousePosition)) {
-            selectMainMenuItem(0);
-            view.setMainMenuSelection(mainMenuSelection);
-            startNewGame();
-            return;
-        }
-        if (leftClicked && contains(layout.continueBounds(), mousePosition)) {
-            selectMainMenuItem(1);
-            view.setMainMenuSelection(mainMenuSelection);
-            return;
-        }
-        if (leftClicked && contains(layout.settingsBounds(), mousePosition)) {
-            selectMainMenuItem(2);
-            view.setMainMenuSelection(mainMenuSelection);
-            return;
-        }
-        if (leftClicked && contains(layout.ribbonYellowBounds(), mousePosition)) {
-            setActiveRibbon(0);
-            return;
-        }
-        if (leftClicked && contains(layout.ribbonRedBounds(), mousePosition)) {
-            setActiveRibbon(1);
-            return;
-        }
-        if (leftClicked && contains(layout.ribbonBlueBounds(), mousePosition)) {
-            setActiveRibbon(2);
-            return;
-        }
-
         if (input.menuConfirm()) {
             confirmMainMenuSelection();
             return;
         }
-    }
 
-    private int selectionFromMouse(UI.MainMenuLayout layout, Point mousePosition, int fallback) {
+        //selection with mouse
+        mainMenuSelection = selectionFromMouse(layout, mousePosition);
+        view.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
+
+        if(mouseHandler.consumeLeftClick()){
+            confirmMainMenuSelection();
+
+            //RIBBON
+            if (contains(layout.ribbonYellowBounds(), mousePosition)) {
+                setActiveRibbon(0);
+                return;
+            }
+            if (contains(layout.ribbonRedBounds(), mousePosition)) {
+                setActiveRibbon(1);
+                return;
+            }
+            if (contains(layout.ribbonBlueBounds(), mousePosition)) {
+                setActiveRibbon(2);
+                return;
+            }
+            return;
+        }
+
+    }
+    //-------------------------------------------------------------
+    /**
+     * HELPERS METHOD
+     */
+    //-------------------------------------------------------------
+    private int selectionFromMouse(MainMenuLayout layout, Point mousePosition) {
         if (contains(layout.newGameBounds(), mousePosition)) {
             return 0;
         }
@@ -175,14 +162,14 @@ public class GameController {
         if (contains(layout.settingsBounds(), mousePosition)) {
             return 2;
         }
-        return fallback;
+        return UIConfig.MENU_NO_SELECTION;
     }
-
+    //-------------------------------------------------------------
     private boolean contains(Rectangle bounds, Point mousePosition) {
         return bounds != null && mousePosition != null && bounds.contains(mousePosition);
     }
-
-    private int hoveredRibbonFromMouse(UI.MainMenuLayout layout, Point mousePosition) {
+    //-------------------------------------------------------------
+    private int hoveredRibbonFromMouse(MainMenuLayout layout, Point mousePosition) {
         if (contains(layout.ribbonYellowBounds(), mousePosition)) {
             return 0;
         }
@@ -194,29 +181,35 @@ public class GameController {
         }
         return UIConfig.MENU_NO_SELECTION;
     }
-
-    private void selectMainMenuItem(int selection) {
-        mainMenuSelection = Math.max(0, Math.min(UIConfig.MAIN_MENU_ITEM_COUNT - 1, selection));
-    }
-
+    //-------------------------------------------------------------
     private void selectPreviousMainMenuItem() {
         mainMenuSelection = (mainMenuSelection - 1 + UIConfig.MAIN_MENU_ITEM_COUNT) % UIConfig.MAIN_MENU_ITEM_COUNT;
     }
-
+    //-------------------------------------------------------------
     private void selectNextMainMenuItem() {
         mainMenuSelection = (mainMenuSelection + 1) % UIConfig.MAIN_MENU_ITEM_COUNT;
     }
-
+    //-------------------------------------------------------------
     private void confirmMainMenuSelection() {
-        if (mainMenuSelection == 0) {
-            startNewGame();
-        }
-    }
 
+        switch (mainMenuSelection){
+            case 0 -> { startNewGame();}
+            case 1 -> {System.out.println("continue");}
+            case 2 -> {System.out.println("settings");}
+        }
+
+    }
+    //-------------------------------------------------------------
     private void setActiveRibbon(int activeRibbon) {
         view.setActiveRibbon(activeRibbon);
     }
+    //-------------------------------------------------------------
+    //end helpers -------------------------------------------------------------
 
+    /**
+     * Initialize a new game
+     */
+    //-------------------------------------------------------------
     private void startNewGame() {
         model.initializeNewGame();
         mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
@@ -226,8 +219,13 @@ public class GameController {
         renderOnceOnPause = true;
     }
     //-------------------------------------------------------------
+
+    /**
+     * Control the GameOver Menu
+     */
+    //-------------------------------------------------------------
     private void updateGameOver(InputState input) {
-        UI.GameOverLayout layout = view.getGameOverLayout();
+        GameOverLayout layout = view.getGameOverLayout();
         Point mousePosition = mouseHandler.getMousePosition();
 
         boolean hoveredGameOverButton = contains(layout.newGameBounds(), mousePosition);
@@ -238,7 +236,12 @@ public class GameController {
             startNewGame();
         }
     }
+    //-------------------------------------------------------------
 
+    /**
+     * Sync the audio with the game state
+     */
+    //-------------------------------------------------------------
     private void syncAudio() {
         GameState currentState = model.getGameState();
         if (currentState != lastKnownState) {
@@ -247,10 +250,14 @@ public class GameController {
         }
         view.processGameEvents();
     }
-
     //-------------------------------------------------------------
-    // CONTROLL GAME VIEW
-    public void render() { // called by the game loop every frame to render the view
+
+    /**
+     * Control the view rendering
+     * called by the game loop every frame to render the view
+     */
+    //-------------------------------------------------------------
+    public void render() {
         if (model.getGameState() == GameState.PLAYING
                 || model.getGameState() == GameState.MENU
                 || model.getGameState() == GameState.GAME_OVER) {

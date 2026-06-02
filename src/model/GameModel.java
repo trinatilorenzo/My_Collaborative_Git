@@ -133,6 +133,7 @@ public class GameModel {
         }
         return enemies;
     }
+    //-------------------------------------------------------------
     private List<EnemyDynamite> spawnDynamiteEnemies(EntityConfig entityConfig, List<DynamiteProjectile> projectileStore) {
         List<EnemyDynamite> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.DYNAMITE_SPAWNPOINT()) {
@@ -142,6 +143,7 @@ public class GameModel {
         }
         return enemies;
     }
+    //-------------------------------------------------------------
     private List<EnemyTorch> spawnTorchEnemies(EntityConfig entityConfig) {
         List<EnemyTorch> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.TORCH_SPAWNPOINT()) {
@@ -151,6 +153,7 @@ public class GameModel {
         }
         return enemies;
     }
+    //-------------------------------------------------------------
     private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
             objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
@@ -158,7 +161,7 @@ public class GameModel {
             ));
         }
     }
-
+    //-------------------------------------------------------------
     private void spawnBuildings(List<SpawnPoint> spawnPoints, String buildingTag, int buildingWidth, int buildingHeight,
                                 int hitboxWidth, int hitboxHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
@@ -173,7 +176,7 @@ public class GameModel {
             ));
         }
     }
-
+    //-------------------------------------------------------------
     private Rectangle createTreeSolidArea(int treeWidth, int hitboxOffsetY, ObjConfig objConfig) {
         return new Rectangle(
                 treeWidth / 2 - (objConfig.TREE_HITBOX_WIDTH / 2),
@@ -182,6 +185,7 @@ public class GameModel {
                 objConfig.TREE_HITBOX_HEIGHT
         );
     }
+    //-------------------------------------------------------------
     private Rectangle createBuildingSolidArea(int buildingWidth, int hitboxWidth, int hitboxHeight, int hitboxOffsetY) {
         return new Rectangle(
                 buildingWidth / 2 - (hitboxWidth / 2),
@@ -191,7 +195,7 @@ public class GameModel {
         );
     }
     //end helpers -------------------------------------------------
-    //-------------------------------------------------------------
+
 
 
     /**
@@ -242,6 +246,7 @@ public class GameModel {
         updateInteractions();
 
         updateEvents(lifeBeforeUpdate);
+        updateState(input);
 
     }
     //-------------------------------------------------------------

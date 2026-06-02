@@ -14,6 +14,8 @@ import model.object.OBJ_Tree;
 import model.entity.Player;
 import model.entity.EnemyTorch;
 import model.event.AudioEventType;
+import view.UI.GameOverLayout;
+import view.UI.MainMenuLayout;
 import view.UI.UI;
 import view.audio.GameAudioManager;
 import view.renderer.entity.PlayerRender;
@@ -103,10 +105,10 @@ public class GameView extends JPanel {
     }
     //-------------------------------------------------------------
 
-    public UI.MainMenuLayout getMainMenuLayout() {
+    public MainMenuLayout getMainMenuLayout() {
         return ui_render.getMainMenuLayout();
     }
-    public UI.GameOverLayout getGameOverLayout() {
+    public GameOverLayout getGameOverLayout() {
         return ui_render.getGameOverLayout();
     }
 

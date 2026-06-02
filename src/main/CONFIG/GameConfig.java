@@ -4,7 +4,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import view.UI.UI;
 
 import java.awt.Color;
 import java.util.ArrayList;

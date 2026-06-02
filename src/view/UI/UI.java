@@ -118,23 +118,6 @@ public class UI {
     private int damageOverlayAlphaStep = -1;
 
     // =========================================================================
-    // Layout records
-    // =========================================================================
-
-    public record MainMenuLayout(Rectangle newGameBounds,
-                                 Rectangle continueBounds,
-                                 Rectangle settingsBounds,
-                                 Rectangle ribbonYellowBounds,
-                                 Rectangle ribbonRedBounds,
-                                 Rectangle ribbonBlueBounds) {}
-
-    public record GameOverLayout(Rectangle newGameBounds) {}
-
-    public record PauseMenuLayout(Rectangle resumeBounds,
-                                  Rectangle settingsBounds,
-                                  Rectangle quitBounds) {}
-
-    // =========================================================================
     // Constructor
     // =========================================================================
 
