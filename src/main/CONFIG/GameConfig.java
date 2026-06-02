@@ -57,25 +57,31 @@ public final class GameConfig {
 
     //UTIL
     private Document mapDoc;
+    private Document tilesetDoc;
     //-------------------------------------------------------------
 
-    /*
+    /**
      * GameConfig Constructor
      * @param mapFileName is the name of the map file with the extension
  *                        THE FILE MUST BE IN: "res/maps/mapFileName.tmx"
      * @param tilesetFileName is the name of the tileset file with the extension
-     *                    THE FILE MUST BE IN: "res/tiles/tilesetFileName.png"
+     *                    THE FILE MUST BE IN: "res/tiles/tilesetFileName.tsx"
      */
     //-------------------------------------------------------------
     public GameConfig(String mapFileName, String tilesetFileName) {
 
         MAP_PATH = "res/maps/" + mapFileName;
-        TILESET_PATH = "/res/tiles/" + tilesetFileName;
+        TILESET_PATH = "res/tiles/" + tilesetFileName;
 
         //load the xml file as a document to fetch the data
-        this.mapDoc = loadMapDoc(MAP_PATH);
+        this.mapDoc = loadXMLDoc(MAP_PATH);
         if (mapDoc == null) {
-            throw new IllegalStateException("Impossibile caricare la mappa: " + MAP_PATH);
+            throw new IllegalStateException("Impossible to load the map: " + MAP_PATH);
+        }
+
+        this.tilesetDoc = loadXMLDoc(TILESET_PATH);
+        if (tilesetDoc == null) {
+            throw new IllegalStateException("Impossible to load the tileset: " + MAP_PATH);
         }
 
         //get all the data from the xml file
@@ -129,13 +135,13 @@ public final class GameConfig {
 
 
     /**
-     * UTILITY METODH Load the map document from the specified path
+     * UTILITY METODH Load an XML document from the specified path.
      */
     //-------------------------------------------------------------
-    private Document loadMapDoc(String mapPath) {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(mapPath)) {
+    private Document loadXMLDoc(String path) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
-                throw new IllegalArgumentException("null found in:  " + mapPath);
+                throw new IllegalArgumentException("Resource not found: " + path);
             }
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -143,11 +149,10 @@ public final class GameConfig {
             doc.getDocumentElement().normalize();
             return doc;
         } catch (Exception e) {
-            throw new RuntimeException("Error while parsing the TMX", e);
+            throw new RuntimeException("Error while parsing XML from: " + path, e);
         }
     }
     //-------------------------------------------------------------
-
 
     /**
      * UTILITY METODH Load the entity spawns of the entity from the map document
@@ -265,6 +270,14 @@ public final class GameConfig {
     public UIConfig UIConfig() {return UIConfig;}
     public String MAP_PATH() {return MAP_PATH;}
     public String TILESET_PATH() {return TILESET_PATH;}
-    public Document mapDoc(){return mapDoc;}; // TODO private?
+    public String TILESET_IMG_PATH() {
+        Element imageElement = (Element) tilesetDoc
+                .getDocumentElement()
+                .getElementsByTagName("image")
+                .item(0);
+
+        return imageElement.getAttribute("source");
+    }
+    public Document mapDoc(){return mapDoc;};
+    public Document tilesetDoc(){return tilesetDoc;}
 }
-//----------------------------------------------------------------------------------------------------------------------

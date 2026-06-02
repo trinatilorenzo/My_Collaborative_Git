@@ -23,7 +23,7 @@ public class Main {
 
         // load the game configuration from the XML file
         // this class is specific for our game and contains all the game's constants'
-        GameConfig GS = new GameConfig("MappaGiocoV4.tmx", "tileSet1.png");
+        GameConfig GS = new GameConfig("MappaGiocoV4.tmx", "tileSet1.tsx");
 
         // MVC structure
         // Define the tre basic object Model View Controller

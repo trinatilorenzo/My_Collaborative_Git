@@ -157,7 +157,6 @@ int leftCol = Math.max(0, (player.getWorldX() - pScreenX) / screenCfg.TILE_SIZE(
         g2.setStroke(originalStroke);
         g2.setFont(originalFont);
     }
-
     //-------------------------------------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------

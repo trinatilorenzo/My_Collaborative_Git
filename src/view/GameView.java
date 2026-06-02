@@ -1,8 +1,10 @@
 package view;
 
-import main.CONFIG.GameConfig;
-import main.CONFIG.ScreenConfig;
 import main.CONFIG.EntityConfig;
+import main.CONFIG.GameConfig;
+import main.CONFIG.MapConfig;
+import main.CONFIG.ScreenConfig;
+import main.CONFIG.UIConfig;
 import main.CONFIG.enu.GameState;
 import model.GameModel;
 import model.object.GameObject;
@@ -50,48 +52,55 @@ import java.util.List;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameView extends JPanel {
+
     private final ScreenConfig screenCfg;
 
-    private GameModel model;
-    private MapRender mapRender;
-    private TileSet tileSet;
-    private PlayerRender playerRender;
-    private MonkRenderer monkRenderer;
-    private TNTRenderer tntRenderer;
-    private DynamiteRender dynamiteRender;
-    private TorchRenderer torchRenderer;
-    private UI ui_render;
-    private RendererRegistry rendererRegistry;
+    //model to render
+    private final GameModel model;
+
+    // renderers
+    private final MapRender mapRender;
+    private final TileSet tileSet;
+    private final PlayerRender playerRender;
+    private final MonkRenderer monkRenderer;
+    private final TNTRenderer tntRenderer;
+    private final DynamiteRender dynamiteRender;
+    private final TorchRenderer torchRenderer;
+    private final UI ui_render;
+    private final RendererRegistry rendererRegistry;
     private Cursor customGameCursor;
-    private GameAudioManager audioManager;
+
+    //audio
+    private final GameAudioManager audioManager;
 
 
-    // COSTRUCTOR
+    /**
+     * CONSTRUCTOR
+     */
     //-------------------------------------------------------------
     public GameView(GameConfig GS, GameModel model) {
         this.screenCfg = GS.screenConfig();
-
         this.model = model;
-        this.mapRender = new MapRender();
 
-        this.setPreferredSize (new Dimension(screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT()));
-        this.setBackground (Color.black) ;
-        this.setDoubleBuffered (true) ;
+        this.setPreferredSize(new Dimension(screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT()));
+        this.setBackground(Color.black);
+        this.setDoubleBuffered(true);
         this.setFocusable(true);
-        applyCustomCursor();
+        applyCustomCursor(UIConfig.CURSOR_PATH);
 
         //  import the tileset Asset
-        //TODO take only tilesetCOnfig
-        this.tileSet = new TileSet(GS.TILESET_PATH(), GS.mapConfig().ORIGINAL_TILESIZE(), GS.mapConfig().MAX_TILESET_ROW, GS.mapConfig().MAX_TILESET_COL);
+        System.out.println("tileset path: " + GS.TILESET_IMG_PATH());
+        this.tileSet = new TileSet(GS.TILESET_IMG_PATH(), GS.mapConfig().ORIGINAL_TILESIZE(), MapConfig.MAX_TILESET_ROW, MapConfig.MAX_TILESET_COL, GS.tilesetDoc());
 
-        // import the player Render
+        //import the map Render
+        this.mapRender = new MapRender();
+
+        // import the entity Render
         this.playerRender = new PlayerRender(GS.entityConfig());
         this.monkRenderer = new MonkRenderer(GS.entityConfig());
         this.tntRenderer = new TNTRenderer(GS.entityConfig());
         this.dynamiteRender = new DynamiteRender(GS.entityConfig());
         this.torchRenderer = new TorchRenderer(GS.entityConfig());
-        //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender, torchRenderer);
 
         // object renderers
         this.rendererRegistry = new RendererRegistry();
@@ -99,45 +108,21 @@ public class GameView extends JPanel {
         rendererRegistry.register(GameObject.class, new StructureRenderer());
         this.audioManager = new GameAudioManager();
         this.audioManager.syncBackgroundMusic(model.getGameState());
-        
-        //TODO: import other asset (object, npc, monster)
-          
+
+        //import the UI
+        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender, torchRenderer);
     }
     //-------------------------------------------------------------
-
-    public MainMenuLayout getMainMenuLayout() {
-        return ui_render.getMainMenuLayout();
-    }
-    public GameOverLayout getGameOverLayout() {
-        return ui_render.getGameOverLayout();
-    }
-
-    public void setMainMenuSelection(int selection) {
-        ui_render.setMainMenuSelection(selection);
-    }
-
-    public void setHoveredRibbon(int hoveredRibbon) {
-        ui_render.setHoveredRibbon(hoveredRibbon);
-    }
-
-    public void setActiveRibbon(int activeRibbon) {
-        ui_render.setActiveRibbon(activeRibbon);
-    }
-
-    public void setHoveredGameOverButton(boolean hovered) {
-        ui_render.setHoveredGameOverButton(hovered);
-    }
-
-    private void applyCustomCursor() {
+    private void applyCustomCursor(String cursorPath) {
         try {
             BufferedImage cursorImage = null;
-            try (InputStream is = getClass().getResourceAsStream("/res/UI/Pointers/01.png")) {
+            try (InputStream is = getClass().getResourceAsStream(cursorPath)) {
                 if (is != null) {
                     cursorImage = ImageIO.read(is);
                 }
             }
             if (cursorImage == null) {
-                cursorImage = ImageIO.read(new File("src/res/UI/Pointers/01.png"));
+                cursorImage = ImageIO.read(new File(cursorPath));
             }
             customGameCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage, new Point(0, 0), "game_cursor");
             setCursor(customGameCursor);
@@ -145,65 +130,41 @@ public class GameView extends JPanel {
             // If cursor asset cannot be loaded, keep default cursor.
         }
     }
+    //-------------------------------------------------------------
 
-    public Cursor getCustomGameCursor() {
-        return customGameCursor;
-    }
 
-    // where everything will be drawn
+    /**
+     * where everything will be drawn
+     */
     //-------------------------------------------------------------
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-        //TODO pulire la logica di rendering
-
-        // Always clear background
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT());
 
         if (model.getGameState() != GameState.MENU) {
-            // DRAW THE WORLD (anche in pausa, usando l'ultimo stato)
-            mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
 
+            // DRAW THE WORLD MAP
+            mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
             // Y-sorting logic: sort objects by their worldY coordinate
             drawEntities(g2);
+
+            //debug mode --------------
             if (model.isDebugMode()) {
                 drawObjectSolidAreas(g2);
             }
+            //--------------------------
         }
-        //DRAW OBJECTS
-        //drawObjects(g2);
 
-        // DRAW THE PLAYER
-        //playerRender.draw(g2, model.getPlayer());
-
-        // DRAW THE UI
+        // draw the UI
         ui_render.draw(g2);
 
-        //g2.dispose(); // not necessary
+        g2.dispose();
     }
 
-    //-------------------------------------------------------------
-
-    public void updateAnimations(double deltaMs) {
-        tileSet.updateAnimTile(deltaMs);
-        playerRender.update(model.getPlayer(), deltaMs);
-        monkRenderer.update(model.getMonk(), deltaMs);
-        for (EnemyTNT tnt : model.getTntEnemies()) {
-            tntRenderer.update(tnt, deltaMs);
-        }
-        for (EnemyDynamite enemyDynamite : model.getDynamiteEnemies()){
-            dynamiteRender.update(enemyDynamite, deltaMs);
-        }
-        for (EnemyTorch enemyTorch : model.getTorchEnemies()) {
-            torchRenderer.update(enemyTorch, deltaMs);
-        }
-        updateObjectAnimations(deltaMs);
-
-
-    }
     //-------------------------------------------------------------
 
     //--------------------------------------------------------------
@@ -263,7 +224,7 @@ public class GameView extends JPanel {
                 int halfW = EntityConfig.TNT_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.TNT_SPRITE_HEIGHT / 2;
                 if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 
@@ -275,7 +236,7 @@ public class GameView extends JPanel {
                 int halfW = EntityConfig.DYNAMITE_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
                 if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
                 dynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
@@ -288,7 +249,7 @@ public class GameView extends JPanel {
                 int halfH = EntityConfig.PROJECTILE_SPRITE_HEIGHT / 2;
 
                 if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 
@@ -302,25 +263,25 @@ public class GameView extends JPanel {
                 int halfH = EntityConfig.TORCH_SPRITE_HEIGHT / 2;
 
                 if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                    screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 
                 torchRenderer.draw(g2, torch, screenX, screenY);
-             }
+            }
             else if (obj instanceof GameObject o) {
                 @SuppressWarnings("unchecked")
                 ObjectRender<GameObject> renderer =
                         (ObjectRender<GameObject>) rendererRegistry.getRenderer(o.getClass());
 
-                if (renderer == null) continue; 
+                if (renderer == null) continue;
 
                 int screenX = o.getWorldX() - player.getWorldX() + pScreenX;
                 int screenY = o.getWorldY() - player.getWorldY() + pScreenY;
 
                 // culling: draw only if visible on screen
                 if (screenX + o.getWidth() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                    screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+                        screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
                     continue;
                 }
 
@@ -329,6 +290,28 @@ public class GameView extends JPanel {
         }
     }
     //--------------------------------------------------------------
+
+
+    public void updateAnimations(double deltaMs) {
+        tileSet.updateAnimTile(deltaMs);
+        playerRender.update(model.getPlayer(), deltaMs);
+        monkRenderer.update(model.getMonk(), deltaMs);
+        for (EnemyTNT tnt : model.getTntEnemies()) {
+            tntRenderer.update(tnt, deltaMs);
+        }
+        for (EnemyDynamite enemyDynamite : model.getDynamiteEnemies()){
+            dynamiteRender.update(enemyDynamite, deltaMs);
+        }
+        for (EnemyTorch enemyTorch : model.getTorchEnemies()) {
+            torchRenderer.update(enemyTorch, deltaMs);
+        }
+        updateObjectAnimations(deltaMs);
+
+
+    }
+    //-------------------------------------------------------------
+
+
 
     private void drawObjectSolidAreas(Graphics2D g2) {
         Player player = model.getPlayer();
@@ -367,10 +350,6 @@ public class GameView extends JPanel {
     }
     //--------------------------------------------------------------
 
-    // GETTER ----------------------
-    public PlayerRender getPlayerRender() {return playerRender;}
-    //---------------------------------
-
     private void updateObjectAnimations(double deltaMs) {
         for (GameObject obj : model.getObjects()) {
             @SuppressWarnings("unchecked")
@@ -401,6 +380,35 @@ public class GameView extends JPanel {
     public void shutdownAudio() {
         audioManager.stopAll();
     }
+
+
+    // GETTER ----------------------
+    public PlayerRender getPlayerRender() {return playerRender;}
+    public MainMenuLayout getMainMenuLayout() {
+        return ui_render.getMainMenuLayout();
+    }
+    public GameOverLayout getGameOverLayout() {
+        return ui_render.getGameOverLayout();
+    }
+    public Cursor getCustomGameCursor() {
+        return customGameCursor;
+    }
+    //---------------------------------
+
+    //SETTER ----------------------
+    public void setMainMenuSelection(int selection) {
+        ui_render.setMainMenuSelection(selection);
+    }
+    public void setHoveredRibbon(int hoveredRibbon) {
+        ui_render.setHoveredRibbon(hoveredRibbon);
+    }
+    public void setActiveRibbon(int activeRibbon) {
+        ui_render.setActiveRibbon(activeRibbon);
+    }
+    public void setHoveredGameOverButton(boolean hovered) {
+        ui_render.setHoveredGameOverButton(hovered);
+    }
+    //---------------------------------
 
 }
 //-------------------------------------------------------------------------------------------------------------------
