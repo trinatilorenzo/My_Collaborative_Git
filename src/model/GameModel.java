@@ -63,7 +63,7 @@ public class GameModel {
     private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
     /**
-     * COSTRUCTOR
+     * CONSTRUCTOR
       */
     //-------------------------------------------------------------
     public GameModel(GameConfig GS) {
@@ -94,9 +94,7 @@ public class GameModel {
         projectiles = new ArrayList<>();
         dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles);
         torchEnemies = spawnTorchEnemies(entityConfig);
-        //DEBUG ENEMY TORCH
-        //torchEnemies = new ArrayList<>();
-        //torchEnemies.add(new EnemyTorch(new SpawnPoint(1960, 1350, 3), entityConfig));
+        
         //initialize Objects
         ObjConfig objC = gameConfig.ObjConfig();
         objects = new ArrayList<>();
@@ -199,7 +197,7 @@ public class GameModel {
 
 
     /**
-     * MAIN MATHOD OF THE CLASS
+     * MAIN METHOD OF THE CLASS
      * Update the model status, Called by the controller every frame
      */
     //-------------------------------------------------------------

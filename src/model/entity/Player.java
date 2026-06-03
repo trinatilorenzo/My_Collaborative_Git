@@ -101,8 +101,8 @@ public class Player extends Entity {
         if (input.left())  { moveX -= distance; direction = Direction.LEFT;  facingDirection = Direction.LEFT; }
         if (input.right()) { moveX += distance; direction = Direction.RIGHT; facingDirection = Direction.RIGHT; }
 
-        intendedDx = (int) Math.round(moveX);
-        intendedDy = (int) Math.round(moveY);
+        fullSpeedX = (int) Math.round(moveX);
+        fullSpeedY = (int) Math.round(moveY);
 
         // Normalize to mantain same speed in diagonal movements
         if (moveX != 0 && moveY != 0) {

@@ -18,7 +18,8 @@ public class GameObject {
     protected int width, height; // visual size
     
     protected Rectangle solidArea; // dimension
-    
+    protected final Rectangle worldBoundsInstance = new Rectangle();
+
     protected boolean solid;
     protected boolean removed;
 
@@ -54,7 +55,13 @@ public class GameObject {
         return solidArea;
     }
     public Rectangle getSolidWorldArea() {
-        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+        worldBoundsInstance.setBounds(
+            worldX + solidArea.x,
+            worldY + solidArea.y,
+            solidArea.width,
+            solidArea.height
+        );
+        return worldBoundsInstance;
     }
     public String getName() {
         return name;
