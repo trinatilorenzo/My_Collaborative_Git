@@ -12,7 +12,6 @@ import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
 import model.entity.EnemyTNT;
 import model.entity.Monk;
-import model.object.OBJ_Tree;
 import model.entity.Player;
 import model.entity.EnemyTorch;
 import model.event.AudioEventType;
@@ -24,14 +23,11 @@ import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
 
-import view.renderer.object.TreeRenderer;
-import view.renderer.object.StructureRenderer;
-import view.renderer.object.ObjectRender;
-import view.renderer.object.RendererRegistry;
 import view.renderer.entity.DynamiteRender;
 import view.renderer.entity.MonkRenderer;
 import view.renderer.entity.TNTRenderer;
 import view.renderer.entity.TorchRenderer;
+import view.renderer.GameObjectRenderer;
 
 import javax.swing.*;
 import javax.imageio.ImageIO;
@@ -67,7 +63,7 @@ public class GameView extends JPanel {
     private final DynamiteRender dynamiteRender;
     private final TorchRenderer torchRenderer;
     private final UI ui_render;
-    private final RendererRegistry rendererRegistry;
+    private final GameObjectRenderer objectRenderer;
     private Cursor customGameCursor;
 
     //audio
@@ -102,10 +98,8 @@ public class GameView extends JPanel {
         this.dynamiteRender = new DynamiteRender(GS.entityConfig());
         this.torchRenderer = new TorchRenderer(GS.entityConfig());
 
-        // object renderers
-        this.rendererRegistry = new RendererRegistry();
-        rendererRegistry.register(OBJ_Tree.class, new TreeRenderer());
-        rendererRegistry.register(GameObject.class, new StructureRenderer());
+        // object renderer
+        this.objectRenderer = new GameObjectRenderer();
         this.audioManager = new GameAudioManager();
         this.audioManager.syncBackgroundMusic(model.getGameState());
 
@@ -270,12 +264,6 @@ public class GameView extends JPanel {
                 torchRenderer.draw(g2, torch, screenX, screenY);
             }
             else if (obj instanceof GameObject o) {
-                @SuppressWarnings("unchecked")
-                ObjectRender<GameObject> renderer =
-                        (ObjectRender<GameObject>) rendererRegistry.getRenderer(o.getClass());
-
-                if (renderer == null) continue;
-
                 int screenX = o.getWorldX() - player.getWorldX() + pScreenX;
                 int screenY = o.getWorldY() - player.getWorldY() + pScreenY;
 
@@ -285,7 +273,7 @@ public class GameView extends JPanel {
                     continue;
                 }
 
-                renderer.draw(g2, o, screenX, screenY);
+                objectRenderer.draw(g2, o, screenX, screenY);
             }
         }
     }
@@ -352,10 +340,7 @@ public class GameView extends JPanel {
 
     private void updateObjectAnimations(double deltaMs) {
         for (GameObject obj : model.getObjects()) {
-            @SuppressWarnings("unchecked")
-            ObjectRender<GameObject> renderer = (ObjectRender<GameObject>) rendererRegistry.getRenderer(obj.getClass());
-            if (renderer == null) continue;
-            renderer.update(obj, deltaMs);
+            objectRenderer.update(obj, deltaMs);
         }
     }
 

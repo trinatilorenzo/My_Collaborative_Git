@@ -7,8 +7,6 @@ import org.w3c.dom.NodeList;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.InputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -62,10 +60,6 @@ public final class GameConfig {
 
     /**
      * GameConfig Constructor
-     * @param mapFileName is the name of the map file with the extension
- *                        THE FILE MUST BE IN: "res/maps/mapFileName.tmx"
-     * @param tilesetFileName is the name of the tileset file with the extension
-     *                    THE FILE MUST BE IN: "res/tiles/tilesetFileName.tsx"
      */
     //-------------------------------------------------------------
     public GameConfig(String mapFileName, String tilesetFileName) {
