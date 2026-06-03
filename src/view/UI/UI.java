@@ -509,10 +509,11 @@ public class UI {
     private void drawDebugOverlay() {
         int pScreenX = screenConfig.SCREEN_WIDTH() / 2 - (screenConfig.TILE_SIZE() / 2);
         int pScreenY = screenConfig.SCREEN_HEIGHT() / 2 - (screenConfig.TILE_SIZE() / 2);
-        playerRenderer.drawSolidArea(g2, gameModel.getPlayer(), pScreenX, pScreenY);        mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
 
         mapRender.drawAllGameLayers(gameModel.getWorldMap(), gameModel.getPlayer(), g2);
-        
+
+        playerRenderer.drawSolidArea(g2, gameModel.getPlayer(), pScreenX, pScreenY);
+
         for (EnemyDynamite ed : gameModel.getDynamiteEnemies()) {
             dynamiteRenderer.drawSolidArea(g2, ed, screenX(ed.getWorldX()), screenY(ed.getWorldY()));
         }
@@ -529,6 +530,7 @@ public class UI {
         }
 
         drawTreeSolidAreas();
+        monkRenderer.drawSolidArea(g2, gameModel.getMonk(), screenX(gameModel.getMonk().getWorldX()), screenY(gameModel.getMonk().getWorldY()));
         drawFpsOverlay();
     }
     //-------------------------------------------------------------
