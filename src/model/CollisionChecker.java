@@ -165,13 +165,14 @@ public class CollisionChecker {
         for (GameObject obj : objects) {
             if (obj == null || obj.isRemoved() || !obj.isSolid()) continue;
             if (obj.getLayer() != entity.getCurrentLayer()) continue;
-            Rectangle solidArea = obj.getSolidArea();
-            if (solidArea == null) continue;
+            
+            Rectangle r = obj.getSolidWorldArea();
+            if (r == null) continue;
 
-            int objLeft = obj.getWorldX() + solidArea.x;
-            int objRight = objLeft + solidArea.width - 1;
-            int objTop = obj.getWorldY() + solidArea.y;
-            int objBottom = objTop + solidArea.height - 1;
+            int objLeft = r.x;
+            int objRight = r.x + r.width - 1;
+            int objTop = r.y;
+            int objBottom = r.y + r.height - 1;
 
             if (dx != 0 && overlaps(bounds.leftX + dx, bounds.rightX + dx, bounds.topY, bounds.bottomY,
                     objLeft, objRight, objTop, objBottom)) {
@@ -183,7 +184,7 @@ public class CollisionChecker {
                 entity.setCollisionY(true);
             }
 
-            if (entity.isCollisionX() || entity.isCollisionY()) {
+            if (entity.isCollisionX() && entity.isCollisionY()) {
                 break; // both axes blocked; further checks unnecessary
             }
         }
