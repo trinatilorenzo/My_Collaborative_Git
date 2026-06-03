@@ -17,7 +17,9 @@ public class Animation {
     private double accumulatorMs = 0.0;
     private boolean finished = false;
 
-    // COSTRUCTOR
+    /**
+     * CONSTRUCTOR
+     */
     //-------------------------------------------------------------
     public Animation(BufferedImage[] frames, double frameDurationMs, boolean loop){
         this.frames = frames;
@@ -26,6 +28,9 @@ public class Animation {
     }
     //-------------------------------------------------------------
 
+    /**
+     * Update the animation: increments counter and advances to the next frame if necessary
+     */
     //-------------------------------------------------------------
     public void update(double deltaMs){
         if (finished || frames.length <= 1) {
@@ -48,26 +53,27 @@ public class Animation {
         }
     }
     //-------------------------------------------------------------
+
+    /**
+     * Reset the animation to the first frame
+     */
+    //-------------------------------------------------------------
     public void reset() {
         currentFrame = 0;
         accumulatorMs = 0.0;
         finished = false;
     }
     //-------------------------------------------------------------
+
+    //GETTERS
+    //-------------------------------------------------------------
     public BufferedImage getCurrentFrame(){
         return frames[currentFrame];
     }
     //-------------------------------------------------------------
 
-    //-------------------------------------------------------------
     public boolean isFinished(){
         return finished;
-    }
-    //-------------------------------------------------------------
-    
-    //--------------------------------------------------------------
-    public int getFrameCount() {
-        return frames.length;
     }
     //--------------------------------------------------------------
 }

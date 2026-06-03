@@ -14,6 +14,9 @@ public class AnimationManager {
     private final Map<String, Animation> animations = new HashMap<>();
     private Animation currentAnimation;
 
+    /**
+     * Add an animation to the manager.
+     */
     //-------------------------------------------------------------
     public void addAnimation(String name, Animation animation){
         animations.put(name, animation);
