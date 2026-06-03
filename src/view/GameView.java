@@ -6,6 +6,7 @@ import main.CONFIG.MapConfig;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
 import main.CONFIG.enu.GameState;
+import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
 import model.object.GameObject;
 import model.entity.DynamiteProjectile;
@@ -92,7 +93,7 @@ public class GameView extends JPanel {
         this.mapRender = new MapRender();
 
         // import the entity Render
-        this.playerRender = new PlayerRender(GS.entityConfig());
+        this.playerRender = new PlayerRender(GS.entityConfig(), EntityConfig.DEFAULT_COLOR);
         this.monkRenderer = new MonkRenderer(GS.entityConfig());
         this.tntRenderer = new TNTRenderer(GS.entityConfig());
         this.dynamiteRender = new DynamiteRender(GS.entityConfig());
@@ -296,6 +297,11 @@ public class GameView extends JPanel {
         updateObjectAnimations(deltaMs);
 
 
+    }
+    //-------------------------------------------------------------
+
+    public void setPlayerRenderColor(PlayerColor playerColor) {
+        playerRender.setPlayerColor(playerColor);
     }
     //-------------------------------------------------------------
 

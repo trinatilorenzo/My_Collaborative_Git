@@ -2,6 +2,7 @@ package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.PlayerColor;
 import main.CONFIG.enu.PlayerState;
 import model.entity.Player;
 import view.SpriteLoader;
@@ -11,38 +12,45 @@ import view.Animation.AnimationManager;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-
-
 /**
  * The PLAYERRENDER CLASS is responsible for rendering the player entity onto the game screen.
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class PlayerRender {
 
-    private static final int DEATH_FRAME_SIZE = 128;
-
     private AnimationManager animationManager;
     private final EntityConfig entityConfig;
-    private PlayerState previousState = PlayerState.IDLE;
+    private PlayerState previousState;
+    private PlayerColor currentColor;
 
-    // COSTRUCTOR
+    /**
+     * COSTRUCTOR
+     */
     //-------------------------------------------------------------
-    public PlayerRender(EntityConfig entityConfig) {
+    public PlayerRender(EntityConfig entityConfig, PlayerColor PlayerColor) {
         this.entityConfig = entityConfig;
-        loadAnimations();
+        this.previousState = EntityConfig.PLAYER_DEFAULT_STATE;
+        loadAnimations(PlayerColor);
     }
     //-------------------------------------------------------------
 
+    /**
+     * Load animations for the player
+     */
     //-------------------------------------------------------------
-    private void loadAnimations() {
+    private void loadAnimations(PlayerColor PlayerColor) {
+        currentColor = PlayerColor;
+        //Select the sheet image
 
-        BufferedImage sheetImage = SpriteLoader.loadSpriteSheet("/res/player/Warrior_blue.png");
+        BufferedImage sheetImage = resolveSheetImage(PlayerColor);
 
-        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
-        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, entityConfig.SPRITE_WIDTH, entityConfig.SPRITE_HEIGHT);
+
+        // Select the frames from the sheet image
+        BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
         BufferedImage[] deathFrames = loadDeathFrames();
 
         animationManager = new AnimationManager();
@@ -54,11 +62,32 @@ public class PlayerRender {
         animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
         animationManager.addAnimation("death", new Animation(deathFrames, 80, false));
     }
+    //-------------------------------------------------------------
+    public void setPlayerColor(PlayerColor playerColor) {
+        if (playerColor != currentColor) {
+            previousState = EntityConfig.PLAYER_DEFAULT_STATE;
+            loadAnimations(playerColor);
+        }
+    }
+    //-------------------------------------------------------------
+    private BufferedImage resolveSheetImage(PlayerColor color) {
 
+        switch (color){
+            case RED -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Red.png");
+            }
+            case YELLOW -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Yellow.png");
+            }
+        }
+        return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue.png"); //default BLUE
+    }
+
+    //-------------------------------------------------------------
     private BufferedImage[] loadDeathFrames() {
         BufferedImage deadSheet = SpriteLoader.loadSpriteSheet("/res/player/Dead.png");
-        BufferedImage[] firstRow = SpriteLoader.getAnimationFrames(deadSheet, 0, 1, 7, DEATH_FRAME_SIZE, DEATH_FRAME_SIZE);
-        BufferedImage[] secondRow = SpriteLoader.getAnimationFrames(deadSheet, 1, 1, 4, DEATH_FRAME_SIZE, DEATH_FRAME_SIZE);
+        BufferedImage[] firstRow = SpriteLoader.getAnimationFrames(deadSheet, 0, 1, 7, EntityConfig.DEATH_FRAME_SIZE, EntityConfig.DEATH_FRAME_SIZE);
+        BufferedImage[] secondRow = SpriteLoader.getAnimationFrames(deadSheet, 1, 1, 4, EntityConfig.DEATH_FRAME_SIZE, EntityConfig.DEATH_FRAME_SIZE);
 
         BufferedImage[] deathFrames = new BufferedImage[10];
         System.arraycopy(firstRow, 1, deathFrames, 0, 6);
@@ -66,14 +95,28 @@ public class PlayerRender {
         return deathFrames;
     }
     //-------------------------------------------------------------
+
+
+
+    /**
+     * Change the player animation based on his state and direction
+     */
+    //-------------------------------------------------------------
     public void update(Player player, double deltaMs) {
+
         PlayerState currentState = player.getState();
         boolean attackJustStarted = currentState == PlayerState.ATTACKING && previousState != PlayerState.ATTACKING;
 
         switch (currentState) {
+
             case IDLE -> animationManager.playAnimation("idle");
             case WALKING -> animationManager.playAnimation("walk");
             case ATTACKING -> {
+                //restart the animation
+                if (attackJustStarted) {
+                    animationManager.getCurrent().reset();
+                }
+
                 if (player.getDirection() == Direction.DOWN) {
                     animationManager.playAnimation("attack_down");
                 } else if (player.getDirection() == Direction.UP) {
@@ -82,12 +125,8 @@ public class PlayerRender {
                     animationManager.playAnimation("attack_right");
                 }
 
-                if (attackJustStarted) {
-                    animationManager.getCurrent().reset();
-                }
-
                 if (animationManager.getCurrent().isFinished()) {
-                    player.completeAttackAnimation();
+                    player.completeAttackAnimation(); //to know when the attack is ended
                 }
             }
             case DYING -> {
@@ -96,12 +135,19 @@ public class PlayerRender {
                     player.completeDeathAnimation();
                 }
             }
+
             case DEAD -> animationManager.playAnimation("death");
         }
+
         animationManager.update(deltaMs);
         previousState = player.getState();
     }
+    //-------------------------------------------------------------
 
+    /**
+     * Draws the player on the screen
+     */
+    //-------------------------------------------------------------
     public void draw(Graphics2D g2, Player player, int screenX, int screenY) {
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
@@ -121,7 +167,12 @@ public class PlayerRender {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
     }
+    //-------------------------------------------------------------
 
+    /**
+     * Debug method to draw the player's solid area.
+     */
+    //-------------------------------------------------------------
     public void drawSolidArea(Graphics2D g2, Player player, int screenX, int screenY) {
         Rectangle solid = player.getSolidArea();
         int drawX = screenX - solid.width / 2;
@@ -143,5 +194,6 @@ public class PlayerRender {
             g2.drawRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
         }
     }
-}
+    //-------------------------------------------------------------
 
+}

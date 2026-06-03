@@ -1,9 +1,6 @@
 package main.CONFIG;
 
-import main.CONFIG.enu.Direction;
-import main.CONFIG.enu.DynamiteState;
-import main.CONFIG.enu.MonkState;
-import main.CONFIG.enu.TNTState;
+import main.CONFIG.enu.*;
 
 import java.util.ArrayList;
 
@@ -24,6 +21,8 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int SPRITE_WIDTH = 192;
         public static final int SPRITE_HEIGHT = 192;
 
+        public static final int DEATH_FRAME_SIZE = 128;
+
         public static final int HITBOX_WIDTH = 45;
         public static final int HITBOX_HEIGHT = 35;
 
@@ -35,6 +34,8 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
         public static final int PLAYER_RENDER_HEIGHT = SPRITE_HEIGHT * PLAYER_SCALE;
         public static final Direction START_FACING = Direction.RIGHT;
+        public static final PlayerState PLAYER_DEFAULT_STATE = PlayerState.IDLE;
+        public static final PlayerColor DEFAULT_COLOR = PlayerColor.BLUE;
         public static final int RANGE_ATTACK = 20;
 
         public static final int PLAYER_HITBOX_WIDTH = 45 * PLAYER_SCALE;

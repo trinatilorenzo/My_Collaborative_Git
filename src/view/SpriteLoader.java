@@ -7,10 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * SPRITE LOADER CLASS
- * A sprite loader that loads and caches spritesheets to avoid redundant loading
+ * SPRITE LOADER CLAS
+ * a utility class that loads and caches spritesheets to avoid redundant loading
  */
-
 //-------------------------------------------------------------------------------------------------------------------
 public class SpriteLoader {
 
@@ -32,7 +31,7 @@ public class SpriteLoader {
     //-------------------------------------------------------------
 
     /**
-     * 1. Extracts individual frames from a sprite sheet based on the specified parameters
+     * Extracts individual frames from a sprite sheet based on the specified parameters
       */
     //-------------------------------------------------------------
     public static BufferedImage[] getAnimationFrames(BufferedImage sheet, int startRow, int rows, int cols,

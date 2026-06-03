@@ -3,6 +3,7 @@ package model.entity;
 import controller.InputState;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
+import main.CONFIG.enu.PlayerColor;
 import main.CONFIG.enu.PlayerState;
 
 import java.awt.Rectangle;
@@ -47,12 +48,15 @@ public class Player extends Entity {
         speed = EntityConfig.START_PLAYER_SPEED;
         direction = EntityConfig.START_FACING;
         facingDirection = EntityConfig.START_FACING;
-        state = PlayerState.IDLE;
+
+        //state
+        state = EntityConfig.PLAYER_DEFAULT_STATE;
         maxLife = EntityConfig.PLAYER_MAX_LIFE;
         life = maxLife;
         deathAnimationCompleted = false;
         attackAnimationCompleted = true;
         attackDamageApplied = false;
+
     }
     //-------------------------------------------------------------
 
@@ -242,12 +246,11 @@ public class Player extends Entity {
             attackAnimationCompleted = true;
         }
     }
-
-    // SETTER ----------------------
     public void setAttackDamageApplied(boolean applied) { 
         this.attackDamageApplied = applied; 
     }
     //---------------------------------
+
 
 
 

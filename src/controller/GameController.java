@@ -1,6 +1,7 @@
 package controller;
 
 import main.CONFIG.UIConfig;
+import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
 import view.GameView;
 import main.CONFIG.enu.GameState;
@@ -27,6 +28,7 @@ public class GameController {
 
     private GameState lastKnownState;
     private int mainMenuSelection;
+    private PlayerColor selectedPlayerColor;
 
     /**
      * CONSTRUCTOR
@@ -48,6 +50,7 @@ public class GameController {
         view.setFocusable(true); // ensure the view can receive keyboard focus
 
         this.renderOnceOnPause = true;
+        this.selectedPlayerColor = main.CONFIG.EntityConfig.DEFAULT_COLOR;
     }
     //-------------------------------------------------------------
 
@@ -128,21 +131,22 @@ public class GameController {
         view.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
 
         if(mouseHandler.consumeLeftClick()){
-            confirmMainMenuSelection();
-
-            //RIBBON
             if (contains(layout.ribbonYellowBounds(), mousePosition)) {
                 setActiveRibbon(0);
+                selectedPlayerColor = PlayerColor.YELLOW;
                 return;
             }
             if (contains(layout.ribbonRedBounds(), mousePosition)) {
                 setActiveRibbon(1);
+                selectedPlayerColor = PlayerColor.RED;
                 return;
             }
             if (contains(layout.ribbonBlueBounds(), mousePosition)) {
                 setActiveRibbon(2);
+                selectedPlayerColor = PlayerColor.BLUE;
                 return;
             }
+            confirmMainMenuSelection();
             return;
         }
 
@@ -212,6 +216,7 @@ public class GameController {
     //-------------------------------------------------------------
     private void startNewGame() {
         model.initializeNewGame();
+        view.setPlayerRenderColor(selectedPlayerColor);
         mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
         view.setMainMenuSelection(mainMenuSelection);
         view.setHoveredRibbon(UIConfig.MENU_NO_SELECTION);
