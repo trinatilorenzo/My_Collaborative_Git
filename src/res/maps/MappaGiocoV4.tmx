@@ -1180,7 +1180,7 @@
 </data>
   </layer>
  </group>
- <objectgroup id="60" name="trees_01">
+ <objectgroup id="60" name="trees_02">
   <object id="150" gid="806" x="4539.35" y="2311.23" width="192" height="192"/>
   <object id="151" gid="806" x="4702.68" y="2583.59" width="192" height="192"/>
   <object id="152" gid="806" x="4474.33" y="2895.78" width="192" height="192"/>
@@ -1224,7 +1224,7 @@
   <object id="348" gid="806" x="4577.08" y="2541.22" width="192" height="192"/>
   <object id="349" gid="806" x="4319.64" y="2782.62" width="192" height="192"/>
  </objectgroup>
- <objectgroup id="66" name="trees_02">
+ <objectgroup id="66" name="trees_01">
   <object id="420" gid="807" x="4349.38" y="3460.12" width="192" height="192"/>
   <object id="421" gid="807" x="3135.46" y="4097.03" width="192" height="192"/>
   <object id="422" gid="807" x="2808.17" y="4162.97" width="192" height="192"/>
@@ -1378,19 +1378,19 @@
    </properties>
    <point/>
   </object>
-  <object id="354" name="Dynamite_spawnPoint" x="2356.63" y="2420.27">
+  <object id="354" name="Dynamite_spawnPoint" x="2369.26" y="2461.33">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
    <point/>
   </object>
-  <object id="358" name="Dynamite_spawnPoint" x="577.095" y="2612.11">
+  <object id="358" name="Dynamite_spawnPoint" x="806.091" y="2601.06">
    <properties>
     <property name="StartLayer" type="int" value="2"/>
    </properties>
    <point/>
   </object>
-  <object id="359" name="Dynamite_spawnPoint" x="4598.89" y="2606.75">
+  <object id="359" name="Dynamite_spawnPoint" x="4461.49" y="2597.27">
    <properties>
     <property name="StartLayer" type="int" value="2"/>
    </properties>
@@ -1420,8 +1420,8 @@
   <object id="485" gid="804" x="4222.43" y="4587.04" width="192" height="128"/>
  </objectgroup>
  <objectgroup id="71" name="Goblin_Home">
-  <object id="482" gid="808" x="4551.69" y="2648.81" width="128" height="192"/>
-  <object id="483" gid="808" x="527.45" y="2656.15" width="128" height="192"/>
+  <object id="482" gid="808" x="4532.74" y="2648.81" width="128" height="192"/>
+  <object id="483" gid="808" x="525.871" y="2656.15" width="128" height="192"/>
   <object id="484" gid="808" x="2301.42" y="2408.99" width="128" height="192"/>
  </objectgroup>
 </map>
