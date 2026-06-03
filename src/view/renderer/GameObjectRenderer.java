@@ -1,14 +1,21 @@
 package view.renderer;
 
+import main.CONFIG.ScreenConfig;
 import model.object.GameObject;
 import model.object.OBJ_Tree;
+import model.entity.Player;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 import view.SpriteLoader;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static main.CONFIG.ObjConfig.*;
@@ -136,6 +143,47 @@ public class GameObjectRenderer {
     private void drawBuilding(Graphics2D g2, GameObject obj, int screenX, int screenY) {
         BufferedImage sprite = getBuildingSprite(obj.getName());
         g2.drawImage(sprite, screenX, screenY, obj.getWidth(), obj.getHeight(), null);
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Draws object hitboxes in debug mode.
+     */
+    //-------------------------------------------------------------
+    public void drawDebugSolidAreas(Graphics2D g2, List<GameObject> objects, Player player, ScreenConfig screenCfg) {
+
+        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
+
+        Color previousColor = g2.getColor();
+        Stroke previousStroke = g2.getStroke();
+
+        g2.setStroke(new BasicStroke(2));
+
+        for (GameObject object : objects) {
+            if (object == null || object.isRemoved() || object.getSolidArea() == null) {
+                continue;
+            }
+
+            Rectangle solidArea = object.getSolidArea();
+            int screenX = object.getWorldX() + solidArea.x - player.getWorldX() + pScreenX;
+            int screenY = object.getWorldY() + solidArea.y - player.getWorldY() + pScreenY;
+
+            if (screenX + solidArea.width < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
+                    screenY + solidArea.height < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+                continue;
+            }
+
+            boolean sameLayer = object.getLayer() == player.getCurrentLayer();
+            g2.setColor(sameLayer ? new Color(255, 40, 40, 90) : new Color(255, 180, 0, 55));
+            g2.fillRect(screenX, screenY, solidArea.width, solidArea.height);
+
+            g2.setColor(sameLayer ? new Color(255, 40, 40, 220) : new Color(255, 180, 0, 160));
+            g2.drawRect(screenX, screenY, solidArea.width, solidArea.height);
+        }
+
+        g2.setStroke(previousStroke);
+        g2.setColor(previousColor);
     }
     //-------------------------------------------------------------
 

@@ -148,7 +148,7 @@ public class GameView extends JPanel {
 
             //debug mode --------------
             if (model.isDebugMode()) {
-                drawObjectSolidAreas(g2);
+                objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), model.getPlayer(), screenCfg);
             }
             //--------------------------
         }
@@ -298,45 +298,6 @@ public class GameView extends JPanel {
 
     }
     //-------------------------------------------------------------
-
-
-
-    private void drawObjectSolidAreas(Graphics2D g2) {
-        Player player = model.getPlayer();
-
-        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
-
-        Color previousColor = g2.getColor();
-        Stroke previousStroke = g2.getStroke();
-
-        g2.setStroke(new BasicStroke(2));
-        for (GameObject object : model.getObjects()) {
-            if (object == null || object.isRemoved() || object.getSolidArea() == null) {
-                continue;
-            }
-
-            Rectangle solidArea = object.getSolidArea();
-            int screenX = object.getWorldX() + solidArea.x - player.getWorldX() + pScreenX;
-            int screenY = object.getWorldY() + solidArea.y - player.getWorldY() + pScreenY;
-
-            if (screenX + solidArea.width < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                    screenY + solidArea.height < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
-                continue;
-            }
-
-            boolean sameLayer = object.getLayer() == player.getCurrentLayer();
-            g2.setColor(sameLayer ? new Color(255, 40, 40, 90) : new Color(255, 180, 0, 55));
-            g2.fillRect(screenX, screenY, solidArea.width, solidArea.height);
-
-            g2.setColor(sameLayer ? new Color(255, 40, 40, 220) : new Color(255, 180, 0, 160));
-            g2.drawRect(screenX, screenY, solidArea.width, solidArea.height);
-        }
-
-        g2.setStroke(previousStroke);
-        g2.setColor(previousColor);
-    }
-    //--------------------------------------------------------------
 
     private void updateObjectAnimations(double deltaMs) {
         for (GameObject obj : model.getObjects()) {
