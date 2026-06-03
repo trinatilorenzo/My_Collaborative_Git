@@ -107,7 +107,7 @@ public class EnemyTorch extends Entity {
             case DEAD:
                 break;
         }
-        System.out.println("Torch State: " + state + " | Life: " + life);
+        //System.out.println("Torch State: " + state + " | Life: " + life);
     }
     //-------------------------------------------------------------
 

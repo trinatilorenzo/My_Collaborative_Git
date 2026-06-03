@@ -115,16 +115,19 @@ public class CollisionChecker {
     }
     //-------------------------------------------------------------
     private void updateEntityLayer(Entity entity, EntityBounds bounds, int checkRow, int colLeft){
-        if (entity.getDx()!=0) return; // Only update layer on vertical movement
-        if (!isCollision(bounds.layer - 1, checkRow, colLeft) && entity.getDirection() != UP) {
+        int dy = entity.getDy();
+        if (dy > 0){
+            if (!isCollision(bounds.layer - 1, checkRow, colLeft)) {
             // move level down
             entity.setLayer(entity.getCurrentLayer() - 1);
             entity.setCollisionY(false);
-        }
-        if (!isCollision(bounds.layer + 1, checkRow, colLeft)&& entity.getDirection() != DOWN) {
-            // move level up
-            entity.setLayer(entity.getCurrentLayer() + 1);
-            entity.setCollisionY(false);
+            }
+        }else if (dy < 0){
+            if (!isCollision(bounds.layer + 1, checkRow, colLeft)) {
+                // move level up
+                entity.setLayer(entity.getCurrentLayer() + 1);
+                entity.setCollisionY(false);
+            }
         }
     }
     //-------------------------------------------------------------

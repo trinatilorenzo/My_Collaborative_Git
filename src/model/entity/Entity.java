@@ -17,7 +17,7 @@ public class Entity {
     protected int worldX, worldY; //center of the entity
     protected int speed; // PIXELS PER SECOND
     protected int dx, dy; // movement deltas per frame
-    protected int intendedDx, intendedDy;
+    protected int fullSpeedX, fullSpeedY; // the full speed in each axis (used for diagonal movement)
     protected Direction direction;
     protected int currentLayer;
 
@@ -48,8 +48,8 @@ public class Entity {
     public void update() {
         dx = 0;
         dy = 0;
-        intendedDx = 0;
-        intendedDy = 0;
+        fullSpeedX = 0;
+        fullSpeedY = 0;
         collisionX = false;
         collisionY = false;
     }
@@ -69,11 +69,11 @@ public class Entity {
             // the player is moving diagonally
             if (collisionY) {
                 // the player is moving horizontally
-                appliedDx = intendedDx;
+                appliedDx = fullSpeedX;
             }
             if (collisionX) {
                 // the player is moving vertically
-                appliedDy = intendedDy;
+                appliedDy = fullSpeedY;
             }
         }
 
@@ -107,6 +107,12 @@ public class Entity {
     }
     public int getWorldY() {
         return worldY;
+    }
+    public int getFullSpeedX() {
+        return fullSpeedX;
+    }
+    public int getFullSpeedY() {
+        return fullSpeedY;
     }
     public int getSpeed() {
         return speed;
