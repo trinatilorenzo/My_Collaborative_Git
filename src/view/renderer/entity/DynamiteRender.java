@@ -13,6 +13,10 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * The DynamiteRender CLASS is responsible for rendering the Dynamite entity onto the game screen.
+ */
+//-------------------------------------------------------------------------------------------------------------------
 public class DynamiteRender {
     private final ConcurrentHashMap<EnemyDynamite, AnimationManager> managerByEnemy;
     private final ConcurrentHashMap<EnemyDynamite, Integer> lastAttackCountByEnemy;
@@ -24,12 +28,15 @@ public class DynamiteRender {
 
     private BufferedImage[] projectileFrames;
 
-    // COSTRUCTOR
+    /**
+     * CONSTRUCTOR
+     */
     //-------------------------------------------------------------
     public DynamiteRender(EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
         loadAnimations();
         managerByEnemy = new ConcurrentHashMap<>();
+
         lastAttackCountByEnemy = new ConcurrentHashMap<>();
         attackAnimationActiveByEnemy = new ConcurrentHashMap<>();
     }
@@ -44,6 +51,9 @@ public class DynamiteRender {
         projectileFrames = SpriteLoader.getAnimationFrames(projectileImage, 0, 1, 6, entityConfig.PROJECTILE_SPRITE_WIDTH, entityConfig.PROJECTILE_SPRITE_HEIGHT);
     }
 
+    /**
+     * An animation Manger for each enemy entity
+     */
     //--------------------------------------------------------------
     private AnimationManager getManager(EnemyDynamite dynamite) {
         return managerByEnemy.computeIfAbsent(dynamite, k -> {
@@ -54,26 +64,27 @@ public class DynamiteRender {
             return manager;
         });
     }
+    //-------------------------------------------------------------
 
+    /**
+     * Change the enemy animation based on his state
+     */
     //-------------------------------------------------------------
     public void update(EnemyDynamite enemy, double deltaMs) {
         AnimationManager manager = getManager(enemy);
 
-        int previousAttackCount = lastAttackCountByEnemy.getOrDefault(enemy, 0);
-        if (enemy.getAttackCount() != previousAttackCount) {
-            manager.playAnimation("attack");
-            lastAttackCountByEnemy.put(enemy, enemy.getAttackCount());
-            attackAnimationActiveByEnemy.put(enemy, true);
+        switch (enemy.getState()) {
+            case WANDER, CHASING -> manager.playAnimation("wander");
+            case ATTACKING -> manager.playAnimation("attack");
+            case DEAD -> removeEnemy(enemy);
         }
-
         manager.update(deltaMs);
-
-        if (Boolean.TRUE.equals(attackAnimationActiveByEnemy.get(enemy)) && manager.getCurrent().isFinished()) {
-            manager.playAnimation("wander");
-            attackAnimationActiveByEnemy.put(enemy, false);
-        }
     }
+    //-------------------------------------------------------------
 
+    /**
+     * Draw the enemy on the screen
+     */
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, EnemyDynamite enemy, int screenX, int screenY) {
         AnimationManager manager = getManager(enemy);
@@ -90,35 +101,34 @@ public class DynamiteRender {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
 
-        // Draw life bar
+        // DYNAMIC HEALTH BAR (Appears only after taking the first hit)
         if (enemy.getLife() < enemy.getMaxLife()) {
-            int barWidth = width / 2; 
+            int barWidth = width/2 ;
             int barHeight = 6;
             int barX = screenX - barWidth / 2;
             int barY = drawY - barHeight - 5;
-            double healthPercent = (double) enemy.getLife() / enemy.getMaxLife();
-            if (healthPercent < 0) healthPercent = 0;
-            int currentBarWidth = (int) (barWidth * healthPercent);
-            g2.setColor(Color.BLACK);
-            g2.fillRect(barX, barY, barWidth, barHeight);
-            g2.setColor(Color.RED);
-            g2.fillRect(barX, barY, currentBarWidth, barHeight);  
-            g2.setColor(new Color(50, 50, 50));
-            g2.drawRect(barX, barY, barWidth, barHeight);
 
+            double lifePercent = (double) enemy.getLife() / enemy.getMaxLife();
+            if (lifePercent < 0) lifePercent = 0;
+
+            int currentBarWidth = (int) (barWidth * lifePercent);
+            int roundness = 5;
+            // Background (Black outline box)
+            g2.setColor(Color.gray);
+            g2.fillRoundRect(barX, barY, barWidth, barHeight, roundness, roundness);
+
+            // Health fill (Fiery Orange/Red color)
+            g2.setColor(new Color(255, 69, 0));
+            g2.fillRoundRect(barX, barY, currentBarWidth, barHeight, roundness, roundness);
+
+            // Border trim
+            g2.setColor(new Color(30, 30, 30));
+            g2.drawRoundRect(barX, barY, barWidth, barHeight, roundness, roundness);
         }
     }
-
-    //-------------------------------------------------------------
-    public void removeEnemy(EnemyDynamite enemy) {
-        managerByEnemy.remove(enemy);
-        lastAttackCountByEnemy.remove(enemy);
-        attackAnimationActiveByEnemy.remove(enemy);
-    }
-
     //-------------------------------------------------------------
     public void drawProjectile(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
-        BufferedImage frame = projectileFrames[0]; // Espandibile con animazione in futuro
+        BufferedImage frame = projectileFrames[0]; // for further use
 
         int w = entityConfig.PROJECTILE_SPRITE_WIDTH;
         int h = entityConfig.PROJECTILE_SPRITE_HEIGHT;
@@ -130,8 +140,22 @@ public class DynamiteRender {
         g2.drawImage(frame, -w / 2, -h / 2, w, h, null);
         g2.setTransform(old);
     }
+    //-------------------------------------------------------------
 
-    //DEBUG METOD
+    /**
+     * Use to be sure to remove an enemy from render when it's exploded
+     */
+    //-------------------------------------------------------------
+    public void removeEnemy(EnemyDynamite enemy) {
+        managerByEnemy.remove(enemy);
+        lastAttackCountByEnemy.remove(enemy);
+        attackAnimationActiveByEnemy.remove(enemy);
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Debug method to draw the tnt's solid area and interaction radius for the mob and the projectile.
+     */
     //-------------------------------------------------------------
     public void drawSolidArea(Graphics2D g2, EnemyDynamite enemyDynamite, int screenX, int screenY) {
         Rectangle solid = enemyDynamite.getSolidArea();
@@ -157,7 +181,6 @@ public class DynamiteRender {
         g2.setColor(Color.BLUE);
         g2.drawOval(screenX - r, screenY - r, 2 * r, 2 * r);
     }
-
     public void drawProjectileSolidArea(Graphics2D g2, DynamiteProjectile proj, int screenX, int screenY) {
         Rectangle solid = proj.getSolidArea();
         int drawX = screenX - solid.width / 2;
@@ -168,5 +191,7 @@ public class DynamiteRender {
         g2.setColor(Color.ORANGE);
         g2.drawRect(drawX, drawY, solid.width, solid.height);
     }
-}
+    //-------------------------------------------------------------
 
+}
+//-------------------------------------------------------------------------------------------------------------------

@@ -364,6 +364,7 @@ public class GameModel {
                 if (!player.isAttackDamageApplied() && attackArea.intersects(tnt.getSolidWorldArea())) {
                     tnt.takeDamage();
                     player.setAttackDamageApplied(true);
+                    System.out.println("DAMAGE APPLIED" + tnt.getLife());
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.ENEMY_HIT);
                 }

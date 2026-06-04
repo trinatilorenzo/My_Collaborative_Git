@@ -71,7 +71,7 @@ public record EntityConfig(ScreenConfig screenConfig,
         //TNTConfig
         public static TNTState TNT_DEFAULT_STATE = TNTState.WANDER;
         public static final int START_TNT_SPEED = 128; // pixels per second
-        public static final int TNT_MAX_LIFE = 1;
+        public static final int TNT_MAX_LIFE = 2;
         public static final int TNT_DETECTION_RADIUS = 80;
         public static final int TNT_EXPLOSION_RADIUS = 100;
 

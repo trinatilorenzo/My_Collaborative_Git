@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * The TorchRenderer class is responsible for rendering the Torch Enemy entity,
  * managing its animations, drawing the dynamic health bar, and rendering debug hitboxes.
  */
+//-------------------------------------------------------------------------------------------------------------------
 public class TorchRenderer {
 
     private final EntityConfig entityConfig;
@@ -29,7 +30,9 @@ public class TorchRenderer {
     private BufferedImage[] attackDownFrames;
     private BufferedImage[] attackUpFrames;
 
-    // CONSTRUCTOR
+    /**
+     * CONSTRUCTOR
+     */
     //-------------------------------------------------------------
     public TorchRenderer(EntityConfig entityConfig) {
         this.entityConfig = entityConfig;
@@ -51,6 +54,9 @@ public class TorchRenderer {
         attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 1, 6, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
     }
 
+    /**
+     * An animation Manger for each Torch entity
+     */
     //--------------------------------------------------------------
     private AnimationManager getManager(EnemyTorch torch) {
         return managerByEnemy.computeIfAbsent(torch, k -> {
@@ -60,14 +66,18 @@ public class TorchRenderer {
             manager.addAnimation("attack_right", new Animation(attackRightFrames, 60, false));
             manager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
             manager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
-            manager.playAnimation("idle"); // Initial state
+            manager.playAnimation("idle");
             return manager;
         });
     }
 
+    /**
+     * Change the TNT animation based on his state
+     */
     //-------------------------------------------------------------
     public void update(EnemyTorch torch, double deltaMs) {
         AnimationManager manager = getManager(torch);
+
         TorchState currentState = torch.getState();
         TorchState previousState = previousStateByEnemy.getOrDefault(torch, TorchState.APPROACH);
 
@@ -102,7 +112,7 @@ public class TorchRenderer {
                 }
             }
             case DEAD -> {
-                // Handle death frames here if implemented in the future
+                removeEnemy(torch);
             }
         }
 
@@ -127,33 +137,37 @@ public class TorchRenderer {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
 
+
         // DYNAMIC HEALTH BAR (Appears only after taking the first hit)
         if (torch.getLife() < torch.getMaxLife() && !torch.isDead()) {
             int barWidth = 100; 
             int barHeight = 6;
             int barX = screenX - barWidth / 2;
-            int barY = screenY - barHeight - 30; // Positions bar safely above the head
+            int barY = screenY - barHeight - 100; // Positions bar safely above the head
 
             double lifePercent = (double) torch.getLife() / torch.getMaxLife();
             if (lifePercent < 0) lifePercent = 0;
 
             int currentBarWidth = (int) (barWidth * lifePercent);
-            
+            int roundness = 5;
             // Background (Black outline box)
-            g2.setColor(Color.BLACK);
-            g2.fillRect(barX, barY, barWidth, barHeight);
+            g2.setColor(Color.gray);
+            g2.fillRoundRect(barX, barY, barWidth, barHeight, roundness, roundness);
             
             // Health fill (Fiery Orange/Red color)
             g2.setColor(new Color(255, 69, 0)); 
-            g2.fillRect(barX, barY, currentBarWidth, barHeight);
+            g2.fillRoundRect(barX, barY, currentBarWidth, barHeight, roundness, roundness);
             
             // Border trim
             g2.setColor(new Color(30, 30, 30));
-            g2.drawRect(barX, barY, barWidth, barHeight);
+            g2.drawRoundRect(barX, barY, barWidth, barHeight, roundness, roundness);
         }
     }
+    //-------------------------------------------------------------
 
-    // DEBUG METHOD: Renders body hitboxes and AI logic detection radiuses
+    /**
+     * Debug method to draw the tnt's solid area and interaction radius.
+     */
     //-------------------------------------------------------------
     public void drawSolidArea(Graphics2D g2, EnemyTorch torch, int screenX, int screenY) {
         // 1. Body Hitbox (Solid Area)
@@ -179,11 +193,17 @@ public class TorchRenderer {
         g2.fillOval(screenX - detectRadius, screenY - detectRadius, 2 * detectRadius, 2 * detectRadius);
         g2.setColor(Color.BLUE);
         g2.drawOval(screenX - detectRadius, screenY - detectRadius, 2 * detectRadius, 2 * detectRadius);
+
+
     }
+    //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     public void removeEnemy(EnemyTorch torch) {
         managerByEnemy.remove(torch);
         previousStateByEnemy.remove(torch);
     }
+    //-------------------------------------------------------------
+
 }
+//-------------------------------------------------------------------------------------------------------------------

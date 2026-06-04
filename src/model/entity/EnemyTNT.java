@@ -40,6 +40,7 @@ public class EnemyTNT extends Entity{
     private void initializeDefaultValues(SpawnPoint spawnPoint) {
         this.state =  EntityConfig.TNT_DEFAULT_STATE;
         life = EntityConfig.TNT_MAX_LIFE;
+        maxLife = EntityConfig.TNT_MAX_LIFE;
 
         this.worldX = spawnPoint.x();
         this.worldY = spawnPoint.y();
