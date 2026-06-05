@@ -18,6 +18,7 @@ import model.entity.EnemyTorch;
 import model.event.AudioEventType;
 import view.UI.GameOverLayout;
 import view.UI.MainMenuLayout;
+import view.UI.PauseMenuLayout;
 import view.UI.UI;
 import view.audio.GameAudioManager;
 import view.renderer.entity.PlayerRender;
@@ -105,7 +106,7 @@ public class GameView extends JPanel {
         this.audioManager.syncBackgroundMusic(model.getGameState());
 
         //import the UI
-        this.ui_render = new UI(model, playerRender, mapRender,screenCfg, GS.mapConfig(), tntRenderer, monkRenderer, dynamiteRender, torchRenderer);
+        this.ui_render = new UI(model, screenCfg);
     }
     //-------------------------------------------------------------
     private void applyCustomCursor(String cursorPath) {
@@ -147,11 +148,9 @@ public class GameView extends JPanel {
             // Y-sorting logic: sort objects by their worldY coordinate
             drawEntities(g2);
 
-            //debug mode --------------
             if (model.isDebugMode()) {
-                objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), model.getPlayer(), screenCfg);
+                drawWorldDebug(g2);
             }
-            //--------------------------
         }
 
         // draw the UI
@@ -161,6 +160,43 @@ public class GameView extends JPanel {
     }
 
     //-------------------------------------------------------------
+
+    private void drawWorldDebug(Graphics2D g2) {
+        Player player = model.getPlayer();
+        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
+
+        mapRender.drawAllGameLayers(model.getWorldMap(), player, g2);
+        playerRender.drawSolidArea(g2, player, pScreenX, pScreenY);
+
+        for (EnemyDynamite ed : model.getDynamiteEnemies()) {
+            dynamiteRender.drawSolidArea(g2, ed, screenX(ed.getWorldX(), player, pScreenX), screenY(ed.getWorldY(), player, pScreenY));
+        }
+        for (Object proj : model.getProjectiles()) {
+            if (proj instanceof DynamiteProjectile dp) {
+                dynamiteRender.drawProjectileSolidArea(g2, dp, screenX(dp.getWorldX(), player, pScreenX), screenY(dp.getWorldY(), player, pScreenY));
+            }
+        }
+        for (EnemyTNT tnt : model.getTntEnemies()) {
+            tntRenderer.drawSolidArea(g2, tnt, screenX(tnt.getWorldX(), player, pScreenX), screenY(tnt.getWorldY(), player, pScreenY));
+        }
+        for (EnemyTorch torch : model.getTorchEnemies()) {
+            torchRenderer.drawSolidArea(g2, torch, screenX(torch.getWorldX(), player, pScreenX), screenY(torch.getWorldY(), player, pScreenY));
+        }
+
+        objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), player, screenCfg);
+
+        Monk monk = model.getMonk();
+        monkRenderer.drawSolidArea(g2, monk, screenX(monk.getWorldX(), player, pScreenX), screenY(monk.getWorldY(), player, pScreenY));
+    }
+
+    private int screenX(int worldX, Player player, int pScreenX) {
+        return worldX - player.getWorldX() + pScreenX;
+    }
+
+    private int screenY(int worldY, Player player, int pScreenY) {
+        return worldY - player.getWorldY() + pScreenY;
+    }
 
     //--------------------------------------------------------------
     private void drawEntities(Graphics2D g2) {
@@ -342,6 +378,7 @@ public class GameView extends JPanel {
     public GameOverLayout getGameOverLayout() {
         return ui_render.getGameOverLayout();
     }
+    public PauseMenuLayout getPauseMenuLayout() {return ui_render.getPauseMenuLayout();}
     public Cursor getCustomGameCursor() {
         return customGameCursor;
     }
@@ -359,6 +396,9 @@ public class GameView extends JPanel {
     }
     public void setHoveredGameOverButton(boolean hovered) {
         ui_render.setHoveredGameOverButton(hovered);
+    }
+    public void setPauseMenuSelection(int selection) {
+        ui_render.setPauseMenuSelection(selection);
     }
     //---------------------------------
 

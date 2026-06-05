@@ -7,6 +7,7 @@ import view.GameView;
 import main.CONFIG.enu.GameState;
 import view.UI.GameOverLayout;
 import view.UI.MainMenuLayout;
+import view.UI.PauseMenuLayout;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -28,6 +29,7 @@ public class GameController {
 
     private GameState lastKnownState;
     private int mainMenuSelection;
+    private int pauseMenuSelection;
     private PlayerColor selectedPlayerColor;
 
     /**
@@ -43,7 +45,8 @@ public class GameController {
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
         this.mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
-        
+        this.pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+
         view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
         view.addMouseListener(mouseHandler);
         view.addMouseMotionListener(mouseHandler);
@@ -85,10 +88,17 @@ public class GameController {
         model.setDebugMode(input.debug());
         model.update(input, deltaMs);
 
+        if (currentState == GameState.PAUSED && lastKnownState != GameState.PAUSED) {
+            pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+            view.setPauseMenuSelection(pauseMenuSelection);
+        }
+
         switch (currentState) {
             case MENU -> updateMainMenu(input);
 
             case GAME_OVER -> updateGameOver(input);
+
+            case PAUSED -> updatePauseMenu(input);
 
             case PLAYING -> {
                 view.updateAnimations(deltaMs);
@@ -226,6 +236,84 @@ public class GameController {
     //-------------------------------------------------------------
 
     /**
+     * Control the pause menu
+     */
+    //-------------------------------------------------------------
+    private void updatePauseMenu(InputState input) {
+
+        PauseMenuLayout layout = view.getPauseMenuLayout();
+        Point mousePosition = mouseHandler.getMousePosition();
+
+        if (input.menuPrevious()) {
+            selectPreviousPauseMenuItem();
+        }
+        if (input.menuNext()) {
+            selectNextPauseMenuItem();
+        }
+        view.setPauseMenuSelection(pauseMenuSelection);
+
+        if (input.menuConfirm()) {
+            confirmPauseMenuSelection();
+            return;
+        }
+
+        pauseMenuSelection = pauseSelectionFromMouse(layout, mousePosition);
+        view.setPauseMenuSelection(pauseMenuSelection);
+
+        if (mouseHandler.consumeLeftClick()) {
+            confirmPauseMenuSelection();
+        }
+    }
+    //-------------------------------------------------------------
+
+    private int pauseSelectionFromMouse(PauseMenuLayout layout, Point mousePosition) {
+        if (contains(layout.resumeBounds(), mousePosition)) {
+            return 0;
+        }
+        if (contains(layout.settingsBounds(), mousePosition)) {
+            return 1;
+        }
+        if (contains(layout.saveBounds(), mousePosition)) {
+            return 2;
+        }
+        return UIConfig.MENU_NO_SELECTION;
+    }
+
+    private void selectPreviousPauseMenuItem() {
+        pauseMenuSelection = (pauseMenuSelection - 1 + UIConfig.PAUSE_MENU_ITEM_COUNT) % UIConfig.PAUSE_MENU_ITEM_COUNT;
+    }
+
+    private void selectNextPauseMenuItem() {
+        pauseMenuSelection = (pauseMenuSelection + 1) % UIConfig.PAUSE_MENU_ITEM_COUNT;
+    }
+
+    private void confirmPauseMenuSelection() {
+        switch (pauseMenuSelection) {
+            case 0 -> resumeFromPause();
+            case 1 -> System.out.println("settings");
+            case 2 -> quitToMainMenu();
+        }
+    }
+
+    private void resumeFromPause() {
+        model.resumeFromPause();
+        keyHandler.resetPauseToggle();
+        pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+        view.setPauseMenuSelection(pauseMenuSelection);
+        renderOnceOnPause = true;
+    }
+
+    private void quitToMainMenu() {
+        model.returnToMenu();
+        keyHandler.resetPauseToggle();
+        pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+        view.setPauseMenuSelection(pauseMenuSelection);
+        mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+        view.setMainMenuSelection(mainMenuSelection);
+        renderOnceOnPause = true;
+    }
+
+    /**
      * Control the GameOver Menu
      */
     //-------------------------------------------------------------
@@ -265,11 +353,12 @@ public class GameController {
     public void render() {
         if (model.getGameState() == GameState.PLAYING
                 || model.getGameState() == GameState.MENU
-                || model.getGameState() == GameState.GAME_OVER) {
+                || model.getGameState() == GameState.GAME_OVER
+                || model.getGameState() == GameState.PAUSED) {
             view.repaint();
         } else if (renderOnceOnPause) { // render once when paused to show the pause screen
             view.repaint();
-            renderOnceOnPause = false; 
+            renderOnceOnPause = false;
 
         }
     }

@@ -4,4 +4,6 @@ import java.awt.Rectangle;
 
 public record PauseMenuLayout(Rectangle resumeBounds,
                               Rectangle settingsBounds,
-                              Rectangle quitBounds) {}
+                              Rectangle saveBounds,
+                              Rectangle pauseTextBounds,
+                              Rectangle pauseRibbonBounds) {}
