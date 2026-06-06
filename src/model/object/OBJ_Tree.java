@@ -1,6 +1,8 @@
 package model.object;
+
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
+import main.CONFIG.enu.PowerUpType; 
 import main.CONFIG.enu.TreeState;
 import java.awt.Rectangle;
 
@@ -15,9 +17,11 @@ public class OBJ_Tree extends GameObject {
     private int health;
     private TreeState state;
 
-    //
     private double chopTimer = 0; // Timer to track chopping progress
 
+    private PowerUpType hiddenPowerUp = null; // The power-up hidden inside the tree, if any
+    private boolean powerUpDropped = false; // To ensure power-up is dropped only once
+    
     /**
      * COSTRUCTOR
      */
@@ -86,7 +90,17 @@ public class OBJ_Tree extends GameObject {
     }
     //-------------------------------------------------------------
 
-
+    /**
+     * Drops the hidden power-up if the tree is chopped and a power-up is hidden inside.
+     */
+    //-------------------------------------------------------------
+    public boolean shouldDropPowerUp() {
+        if (state == TreeState.CHOPPED && hiddenPowerUp != null && !powerUpDropped) {
+            powerUpDropped = true; // Ensure it can only be dropped once
+            return true;
+        }
+        return false; // No power-up to drop
+    }
 
     //GETTER
     //-------------------------------------------------------------
@@ -94,15 +108,20 @@ public class OBJ_Tree extends GameObject {
         return state;
     }
     public Rectangle getSolidWorldArea() { //called by game model to check attack collision with the tree, since the solidArea is relative to the object position we need to get the world coordinates of the solid area
-
-        return new Rectangle(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
-
+        // We can reuse the worldBoundsInstance to avoid creating a new Rectangle object every time
+        worldBoundsInstance.setBounds(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);
+        return worldBoundsInstance;
+    }
+    public PowerUpType getHiddenPowerUp() {
+        return hiddenPowerUp;
     }
     //-------------------------------------------------------------
 
     //SETTER
     //-------------------------------------------------------------
-
+    public void setHiddenPowerUp(PowerUpType powerUp) {
+        this.hiddenPowerUp = powerUp;
+    }
     //-------------------------------------------------------------
 
 

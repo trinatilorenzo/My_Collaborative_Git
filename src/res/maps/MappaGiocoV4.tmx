@@ -1402,12 +1402,6 @@
    </properties>
    <point/>
   </object>
-  <object id="490" name="Torch_spawnPoint" x="2882.92" y="1412.85">
-   <properties>
-    <property name="StartLayer" type="int" value="1"/>
-   </properties>
-   <point/>
-  </object>
  </objectgroup>
  <objectgroup id="67" name="castle">
   <object id="488" gid="802" x="1788.71" y="1302.73" width="320" height="256"/>
