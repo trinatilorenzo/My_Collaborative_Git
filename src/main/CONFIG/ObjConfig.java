@@ -96,5 +96,11 @@ public record ObjConfig(String TREE_TAG_03,
     public ArrayList<SpawnPoint> GOBLIN_HOME_SPAWNPOINT() {return goblinHomeSpawnPoint;}
     //-------------------------------------------------------------
 
+    // POWER-UP
+    public static final int POWER_UP_SIZE = 48;
+    public static final int POWER_UP_HITBOX_WIDTH = 30;
+    public static final int POWER_UP_HITBOX_HEIGHT = 30;
+    //-------------------------------------------------------------
+
 
 }

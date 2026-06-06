@@ -5,6 +5,7 @@ import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
 import main.CONFIG.enu.PlayerColor;
 import main.CONFIG.enu.PlayerState;
+import main.CONFIG.enu.PowerUpType;
 
 import java.awt.Rectangle;
 
@@ -22,6 +23,9 @@ public class Player extends Entity {
 
     private boolean attackDamageApplied;
 
+    // handle power-ups effects
+    private double shieldTimerMs = 0;
+    private boolean speedBoost = false;
 
     /**
      * CONSTRUCTOR
@@ -56,6 +60,7 @@ public class Player extends Entity {
         deathAnimationCompleted = false;
         attackAnimationCompleted = true;
         attackDamageApplied = false;
+        
 
     }
     //-------------------------------------------------------------
@@ -70,6 +75,14 @@ public class Player extends Entity {
         // player DEAD no update
         if (state == PlayerState.DYING || state == PlayerState.DEAD) {
             return;
+        }
+
+        // update shield timer
+        if (shieldTimerMs > 0) {
+            shieldTimerMs -= deltaMs;
+            if (shieldTimerMs <= 0) {
+                shieldTimerMs = 0;
+            }
         }
 
 
@@ -176,6 +189,10 @@ public class Player extends Entity {
      */
     //--------------------------------------------------------------
     public void takeDamage() {
+        if (shieldTimerMs > 0) {
+            // player is shielded, ignore damage
+            return;
+        }
         life --;
         // the player is dying
         if (life <= 0) {
@@ -210,6 +227,23 @@ public class Player extends Entity {
     }
     //--------------------------------------------------------------
 
+    /**
+     * Apply the effect of a collected power-up to the player.
+     */
+    public void applyPowerUpEffect(PowerUpType type) {
+        switch (type) {
+            case SHIELD:
+                this.shieldTimerMs = EntityConfig.SHIELD_DURATION_MS;
+                break;
+            case HEALTH_RESTORE:
+                this.life = this.maxLife;
+                break;
+            case SPEED_BOOST:
+                this.speedBoost = true;
+                this.speed += EntityConfig.SPEED_BOOST_AMOUNT;
+                break;
+        }
+    }
     // GETTER ----------------------
     public PlayerState getState() {
         return state;

@@ -10,12 +10,13 @@ import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.MonkState;
 import main.CONFIG.enu.PlayerState;
+import main.CONFIG.enu.PowerUpType;
 import main.CONFIG.enu.TNTState;
 import main.CONFIG.enu.TorchState;
 import model.entity.*;
 import model.event.AudioEventType;
 import model.object.GameObject;
-import model.object.OBJ_Tree;
+import model.object.*;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class GameModel {
     // Map & OBJ
     private final GameMap worldGameMap;
     private List<GameObject> objects;
+    //-------------------------------------------------------------
 
     // Player & NPC
     //-------------------------------------------------------------
@@ -57,11 +59,17 @@ public class GameModel {
     private String currentDialogue; // dialogue currently displayed to the player
     //-------------------------------------------------------------
 
+    // Death sequence
     private double deadStateElapsedMs;
 
     //Audio events
     private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
+    // Level and progression
+    private int currentLevel = 1;
+    private boolean levelCompleted;
+    private boolean currentLevelPowerUpCollected = false;
+    //-------------------------------------------------------------
     /**
      * CONSTRUCTOR
       */
@@ -116,6 +124,9 @@ public class GameModel {
         spawnBuildings(objC.GOBLIN_HOME_SPAWNPOINT(), objC.GOBLIN_HOME_TAG(), ObjConfig.GOBLIN_HOME_WIDTH, ObjConfig.GOBLIN_HOME_HEIGHT,
                 ObjConfig.GOBLIN_HOME_HITBOX_WIDTH, ObjConfig.GOBLIN_HOME_HITBOX_HEIGHT, ObjConfig.GOBLIN_HOME_HITBOX_OFFSET_Y, objC);
 
+        // Power ups settings
+        assignRandomPowerUps(objC);
+
         // START THE GAME
         gameState = GameState.PLAYING;
     }
@@ -132,6 +143,10 @@ public class GameModel {
         return enemies;
     }
     //-------------------------------------------------------------
+    /**
+     * Helper method to spawn dynamite enemies based on the spawn points defined.
+      * It creates an EnemyDynamite instance for each spawn point and adds it to the list of enemies.
+     */
     private List<EnemyDynamite> spawnDynamiteEnemies(EntityConfig entityConfig, List<DynamiteProjectile> projectileStore) {
         List<EnemyDynamite> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.DYNAMITE_SPAWNPOINT()) {
@@ -142,6 +157,10 @@ public class GameModel {
         return enemies;
     }
     //-------------------------------------------------------------
+    /**
+     * Helper method to spawn torch enemies based on the spawn points.
+     * It creates an EnemyTorch instance for each spawn point and adds it to the list of enemies.
+    */
     private List<EnemyTorch> spawnTorchEnemies(EntityConfig entityConfig) {
         List<EnemyTorch> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.TORCH_SPAWNPOINT()) {
@@ -152,6 +171,10 @@ public class GameModel {
         return enemies;
     }
     //-------------------------------------------------------------
+    /**
+     * Helper method to spawn trees based on the spawn points defined in the ObjConfig.
+      * It creates an OBJ_Tree instance for each spawn point and adds it to the list of game objects.
+     */
     private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
             objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
@@ -160,6 +183,9 @@ public class GameModel {
         }
     }
     //-------------------------------------------------------------
+    /**
+     * Helper method to spawn buildings based on the spawn points defined in the ObjConfig.
+     */
     private void spawnBuildings(List<SpawnPoint> spawnPoints, String buildingTag, int buildingWidth, int buildingHeight,
                                 int hitboxWidth, int hitboxHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
@@ -175,6 +201,10 @@ public class GameModel {
         }
     }
     //-------------------------------------------------------------
+    /**
+     * Helper method to create a solid area for trees. 
+      * It calculates the position and size of the solid area relative to the tree's visual representation.
+     */
     private Rectangle createTreeSolidArea(int treeWidth, int hitboxOffsetY, ObjConfig objConfig) {
         return new Rectangle(
                 treeWidth / 2 - (objConfig.TREE_HITBOX_WIDTH / 2),
@@ -184,6 +214,9 @@ public class GameModel {
         );
     }
     //-------------------------------------------------------------
+    /**
+     * Helper method to create a solid area for buildings.
+     */
     private Rectangle createBuildingSolidArea(int buildingWidth, int hitboxWidth, int hitboxHeight, int hitboxOffsetY) {
         return new Rectangle(
                 buildingWidth / 2 - (hitboxWidth / 2),
@@ -191,6 +224,28 @@ public class GameModel {
                 hitboxWidth,
                 hitboxHeight
         );
+    }
+    /**
+     * Assigns random power-ups to a subset of trees in the game world.
+     */
+    private void assignRandomPowerUps(ObjConfig objC){
+        assignPowerUpToRandomTree(objC.TREE_TAG_03(), PowerUpType.SHIELD); 
+        assignPowerUpToRandomTree(objC.TREE_TAG_02(), PowerUpType.HEALTH_RESTORE); 
+        assignPowerUpToRandomTree(objC.TREE_TAG_01(), PowerUpType.SPEED_BOOST); 
+
+    }
+    //---------------------------------------------
+    private void assignPowerUpToRandomTree(String treeTag, PowerUpType type){
+        List<OBJ_Tree> validTrees = new ArrayList<>();
+        for (GameObject obj: objects) {
+            if (obj instanceof OBJ_Tree tree && tree.getName().equals(treeTag)){
+                validTrees.add(tree);
+            }
+        }
+        if (!validTrees.isEmpty()) {
+            int randomIndex = (int) (Math.random()) * validTrees.size();
+            validTrees.get(randomIndex).setHiddenPowerUp(type);
+        }
     }
     //end helpers -------------------------------------------------
 
@@ -234,11 +289,22 @@ public class GameModel {
         if (player.getState() == PlayerState.WALKING) {
             player.move();
         }
+
+        List<GameObject> toSpawn = new ArrayList<>();
         for (GameObject obj : objects) {
             if (!obj.isRemoved()) {
                 obj.update(deltaMs);
+
+                // if the tree has been chopped and has a hidden power-up, spawn the power-up object
+                if (obj instanceof OBJ_Tree tree && tree.shouldDropPowerUp()){
+                    toSpawn.add(new OBJ_PowerUp(gameConfig.ObjConfig(), tree.getHiddenPowerUp(), tree.getWorldX(), tree.getWorldY(), tree.getLayer()));
+                }
             }
         }
+        if (!toSpawn.isEmpty()) {
+            objects.addAll(toSpawn);
+        }
+        objects.removeIf(GameObject::isRemoved);
 
         monk.update(player, deltaMs);
         updateInteractions();
@@ -406,11 +472,51 @@ public class GameModel {
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.TREE_HIT);
                 }
+                if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
+                    player.applyPowerUpEffect(powerUp.getType());
+                    powerUp.remove(); // Remove the power-up from the game world
+                    if (isPowerUpForCurrentLevel(powerUp.getType())) {
+                        currentLevelPowerUpCollected = true; // Mark the power-up as collected for level progression
+                    }
+                    //Audio ----------------------
+                    //TODO: emitAudioEvent(AudioEventType.POWERUP_COLLECTED);
+                }
             }
             // -------------------
+
+            // checkLevelProgression();
         }
     }
+
     //-------------------------------------------------------------
+    private boolean isPowerUpForCurrentLevel(PowerUpType type) {
+        return (currentLevel == 1 && type == PowerUpType.SHIELD) ||
+               (currentLevel == 2 && type == PowerUpType.HEALTH_RESTORE) ||
+               (currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
+    }
+    //-------------------------------------------------------------
+    private void checkLevelProgression() {
+        boolean allEnemiesDefeated = false;
+        switch (currentLevel) {
+            case 1 -> allEnemiesDefeated = tntEnemies.isEmpty();
+            case 2 -> allEnemiesDefeated = dynamiteEnemies.isEmpty();
+            case 3 -> allEnemiesDefeated = torchEnemies.isEmpty();
+        }
+
+        if (allEnemiesDefeated && currentLevelPowerUpCollected) {
+            if (currentLevel < 3){
+                currentLevel ++;
+                currentLevelPowerUpCollected = false;
+                System.out.println("LEVEL UP! Current level: " + currentLevel);
+            } else {
+                levelCompleted = true;
+                System.out.println("CONGRATS! YOU COMPLETED THE GAME!");
+            }
+        } else {
+            levelCompleted = false;
+
+        }
+    }
     private void updateMonk(InputState input) {
         // Monk Talking ----------------------
 
@@ -447,6 +553,9 @@ public class GameModel {
         }
     }
     //-------------------------------------------------------------
+    /**
+     * Called when player is dying or dead to update only necessary logic and animations
+      */
     private void updateDeathSequence(double deltaMs) {
         monk.update(player, deltaMs);
         // Keep only finite transitions running; do not start new gameplay logic.
@@ -463,10 +572,11 @@ public class GameModel {
         }
         projectiles.removeIf(DynamiteProjectile::isExploded);
 
-        // TO DO: capire cosa fa questo metodo e implemntare per altri enemy
-
     }
     //-------------------------------------------------------------
+    /**
+     * Updates the game over countdown timer.
+     */
     private void updateGameOverCountdown(double deltaMs) {
         boolean readyForGameOver = player.isDeathAnimationCompleted() && !hasPendingTransientAnimations();
         if (readyForGameOver) {
@@ -543,15 +653,11 @@ public class GameModel {
     public List<GameObject> getObjects() { return objects; }
     public boolean isDebugMode() { return debugMode; }
     public int getTILE_SIZE(){ return gameConfig.screenConfig().TILE_SIZE(); }
-    public Monk getMonk() {
-        return monk;
-    }
+    public Monk getMonk() { return monk; }
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
-    public List<DynamiteProjectile> getProjectiles(){
-        return projectiles;
-    }
+    public List<DynamiteProjectile> getProjectiles(){ return projectiles; }
     public List<EnemyTorch> getTorchEnemies() { return torchEnemies; }
     //---------------------------------
 

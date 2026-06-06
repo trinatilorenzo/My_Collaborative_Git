@@ -81,6 +81,10 @@ public class GameObject {
     public int getLayer() {
         return layer;
     }
+    // SETTER
+    public void remove() {
+        this.removed = true;
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------
