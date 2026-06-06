@@ -663,6 +663,15 @@ public class GameModel {
 
     // SETTER ----------------------
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
+
+    public void resumeFromPause() {
+        if (gameState == GameState.PAUSED){
+            gameState = GameState.PLAYING;
+        }
+    }
+    public void returnToMenu() {
+        gameState = GameState.MENU;
+    }
     //---------------------------------
 
 

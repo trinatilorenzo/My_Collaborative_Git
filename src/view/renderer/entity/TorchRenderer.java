@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * The TorchRenderer class is responsible for rendering the Torch Enemy entity,
  * managing its animations, drawing the dynamic health bar, and rendering debug hitboxes.
  */
+
+//TODO VEDERE SE é SCRITTA BENE HO SLO MESO I COMMENTI PERCHE SO CHE LA STAVI MODIFICANDO
 //-------------------------------------------------------------------------------------------------------------------
 public class TorchRenderer {
 
