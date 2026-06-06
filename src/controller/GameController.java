@@ -141,19 +141,24 @@ public class GameController {
         view.setHoveredRibbon(hoveredRibbonFromMouse(layout, mousePosition));
 
         if(mouseHandler.consumeLeftClick()){
-            if (contains(layout.ribbonYellowBounds(), mousePosition)) {
+            if (contains(layout.ribbonBlueBounds(), mousePosition)) {
                 setActiveRibbon(0);
+                selectedPlayerColor = PlayerColor.BLUE;
+                return;
+            }
+            if (contains(layout.ribbonYellowBounds(), mousePosition)) {
+                setActiveRibbon(1);
                 selectedPlayerColor = PlayerColor.YELLOW;
                 return;
             }
             if (contains(layout.ribbonRedBounds(), mousePosition)) {
-                setActiveRibbon(1);
+                setActiveRibbon(2);
                 selectedPlayerColor = PlayerColor.RED;
                 return;
             }
-            if (contains(layout.ribbonBlueBounds(), mousePosition)) {
-                setActiveRibbon(2);
-                selectedPlayerColor = PlayerColor.BLUE;
+            if (contains(layout.ribbonPurpleBounds(), mousePosition)) {
+                setActiveRibbon(3);
+                selectedPlayerColor = PlayerColor.PURPLE;
                 return;
             }
             confirmMainMenuSelection();
@@ -184,14 +189,17 @@ public class GameController {
     }
     //-------------------------------------------------------------
     private int hoveredRibbonFromMouse(MainMenuLayout layout, Point mousePosition) {
-        if (contains(layout.ribbonYellowBounds(), mousePosition)) {
+        if (contains(layout.ribbonBlueBounds(), mousePosition)) {
             return 0;
         }
-        if (contains(layout.ribbonRedBounds(), mousePosition)) {
+        if (contains(layout.ribbonYellowBounds(), mousePosition)) {
             return 1;
         }
-        if (contains(layout.ribbonBlueBounds(), mousePosition)) {
+        if (contains(layout.ribbonRedBounds(), mousePosition)) {
             return 2;
+        }
+        if (contains(layout.ribbonPurpleBounds(), mousePosition)) {
+            return 3;
         }
         return UIConfig.MENU_NO_SELECTION;
     }

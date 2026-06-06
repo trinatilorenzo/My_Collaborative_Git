@@ -1,8 +1,6 @@
 
 package view.UI;
 
-import main.CONFIG.EntityConfig;
-import main.CONFIG.GameConfig;
 import model.GameModel;
 import model.entity.Player;
 import main.CONFIG.ScreenConfig;
@@ -63,12 +61,14 @@ public class UI {
     private final BufferedImage menuLogo;
     private final BufferedImage settingsIcon;
     private final BufferedImage settingsIconPressed;
-    private final BufferedImage ribbonYellow;
-    private final BufferedImage ribbonRed;
-    private final BufferedImage ribbonBlue;
-    private final BufferedImage ribbonYellowPressed;
-    private final BufferedImage ribbonRedPressed;
-    private final BufferedImage ribbonBluePressed;
+    private final BufferedImage avatarYellow;
+    private final BufferedImage avatarRed;
+    private final BufferedImage avatarBlue;
+    private final BufferedImage avatarPurple;
+    private final BufferedImage avatarYellowPressed;
+    private final BufferedImage avatarRedPressed;
+    private final BufferedImage avatarBluePressed;
+    private final BufferedImage avatarPurplePressed;
     private final BufferedImage[] menuClouds;
 
     float[][] cloudPlacements;
@@ -89,8 +89,8 @@ public class UI {
 
     private long damageFlashStartNano = -1L;
     private int mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
-    private int hoveredRibbon = UIConfig.MENU_NO_SELECTION;
-    private int activeRibbon = UIConfig.MENU_NO_SELECTION;
+    private int hoveredRibbon = UIConfig.RIBBON_DEFAULT;
+    private int activeRibbon = UIConfig.RIBBON_DEFAULT;
     private boolean hoveredGameOverButton = false;
     private int pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
     private BufferedImage damageOverlayCache;
@@ -136,15 +136,18 @@ public class UI {
         exitButtonSelected = loadUiImage("src/res/UI/Icons/Regular_01.png");
 
         menuLogo = loadUiImage("src/res/UI/Icons/logo_gioco.png");
-        settingsIcon = scaleImage(loadUiImage("src/res/UI/Icons/Regular_02.png"), tileSize, tileSize);
-        settingsIconPressed = scaleImage(loadUiImage("src/res/UI/Icons/Pressed_02.png"), tileSize, tileSize);
+        settingsIcon = scaleImage(loadUiImage("src/res/UI/Icons/Regular_11.png"), tileSize, tileSize);
+        settingsIconPressed = scaleImage(loadUiImage("src/res/UI/Icons/Pressed_11.png"), tileSize, tileSize);
 
-        ribbonYellow = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Left.png");
-        ribbonRed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Left.png");
-        ribbonBlue = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Left.png");
-        ribbonYellowPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Yellow_Connection_Left_Pressed.png");
-        ribbonRedPressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Red_Connection_Left_Pressed.png");
-        ribbonBluePressed = loadUiImage("src/res/UI/Ribbons/Ribbon_Blue_Connection_Left_Pressed.png");
+        avatarYellow = loadUiImage("src/res/UI/Human_Avatars/Avatar_Yellow.png");
+        avatarRed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Red.png");
+        avatarBlue = loadUiImage("src/res/UI/Human_Avatars/Avatar_Blue.png");
+        avatarPurple = loadUiImage("src/res/UI/Human_Avatars/Avatar_Purple.png");
+        avatarYellowPressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Yellow_Selected.png");
+        avatarRedPressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Red_Selected.png");
+        avatarBluePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Blue_Selected.png");
+        avatarPurplePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Purple_Selected.png");
+
 
 
 
@@ -228,14 +231,18 @@ public class UI {
         Rectangle ribbonYellowBounds = layout.ribbonYellowBounds();
         Rectangle ribbonRedBounds = layout.ribbonRedBounds();
         Rectangle ribbonBlueBounds = layout.ribbonBlueBounds();
+        Rectangle ribbonPurpleBounds = layout.ribbonPurpleBounds();
 
         //draw ribbon
-        g2.drawImage((hoveredRibbon == 0 || activeRibbon == 0) ? ribbonYellowPressed : ribbonYellow,
-                ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
-        g2.drawImage((hoveredRibbon == 1 || activeRibbon == 1) ? ribbonRedPressed : ribbonRed,
-                ribbonRedBounds.x, ribbonRedBounds.y, ribbonRedBounds.width, ribbonRedBounds.height, null);
-        g2.drawImage((hoveredRibbon == 2 || activeRibbon == 2) ? ribbonBluePressed : ribbonBlue,
+
+        g2.drawImage((hoveredRibbon == 0 || activeRibbon == 0) ? avatarBluePressed : avatarBlue,
                 ribbonBlueBounds.x, ribbonBlueBounds.y, ribbonBlueBounds.width, ribbonBlueBounds.height, null);
+        g2.drawImage((hoveredRibbon == 1 || activeRibbon == 1) ? avatarYellowPressed : avatarYellow,
+                ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
+        g2.drawImage((hoveredRibbon == 2 || activeRibbon == 2) ? avatarRedPressed : avatarRed,
+                ribbonRedBounds.x, ribbonRedBounds.y, ribbonRedBounds.width, ribbonRedBounds.height, null);
+        g2.drawImage((hoveredRibbon == 3 || activeRibbon == 3) ? avatarPurplePressed : avatarPurple,
+                ribbonPurpleBounds.x, ribbonPurpleBounds.y, ribbonPurpleBounds.width, ribbonPurpleBounds.height, null);
 
         //draw button
         drawButton(menuButton, menuButtonSelected,newGameBounds.x,  newGameBounds.y,  newGameBounds.width,  newGameBounds.height,  "New Game", selectedItem == 0);
@@ -578,12 +585,13 @@ public class UI {
         int ribbonW = UIConfig.MENU_RIBBON_SIZE;
         int ribbonH = UIConfig.MENU_RIBBON_SIZE;
 
-        Rectangle ribbonYellowBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
-        Rectangle ribbonRedBounds = new Rectangle(ribbonX, ribbonY + ribbonH, ribbonW, ribbonH);
-        Rectangle ribbonBlueBounds = new Rectangle(ribbonX, ribbonY + ribbonH*2,ribbonW, ribbonH);
+        Rectangle ribbonBlueBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
+        Rectangle ribbonYellowBounds = new Rectangle(ribbonX, ribbonY + ribbonH, ribbonW, ribbonH);
+        Rectangle ribbonRedBounds = new Rectangle(ribbonX, ribbonY + ribbonH*2,ribbonW, ribbonH);
+        Rectangle ribbonPurpleBounds = new Rectangle(ribbonX, ribbonY + ribbonH*3,ribbonW, ribbonH);
 
         return new MainMenuLayout(newGameBounds, continueBounds, settingsBounds,
-                ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds);
+                ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds, ribbonPurpleBounds);
     }
     //-------------------------------------------------------------
 

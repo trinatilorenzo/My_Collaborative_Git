@@ -7,4 +7,5 @@ public record MainMenuLayout(Rectangle newGameBounds,
                              Rectangle settingsBounds,
                              Rectangle ribbonYellowBounds,
                              Rectangle ribbonRedBounds,
-                             Rectangle ribbonBlueBounds) {}
+                             Rectangle ribbonBlueBounds,
+                             Rectangle ribbonPurpleBounds) {}

@@ -16,6 +16,7 @@ public record UIConfig() {
     public static final int MAIN_MENU_ITEM_COUNT = 3;
     public static final int MENU_DEFAULT_SELECTION = 0;
     public static final int MENU_NO_SELECTION = -1;
+    public static final int RIBBON_DEFAULT = 0;
 
     public static final int MENU_LOGO_WIDTH = 500;
 
@@ -28,7 +29,7 @@ public record UIConfig() {
 
     public static final int MENU_RIBBON_X = 20;
     public static final int MENU_RIBBON_Y = 16;
-    public static final int MENU_RIBBON_SIZE = 64;
+    public static final int MENU_RIBBON_SIZE = 100;
     //-------------------------------------------------------------
 
     //HUD PLAYER LIFE

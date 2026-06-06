@@ -79,6 +79,9 @@ public class PlayerRender {
             case YELLOW -> {
                 return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Yellow.png");
             }
+            case PURPLE -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Purple.png");
+            }
         }
         return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue.png"); //default BLUE
     }
