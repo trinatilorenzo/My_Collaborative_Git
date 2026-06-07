@@ -17,6 +17,7 @@ public class Player extends Entity {
 
     private PlayerState state;
     private Direction facingDirection;
+    private PlayerColor color;
 
     private boolean deathAnimationCompleted;
     private boolean attackAnimationCompleted;
@@ -266,6 +267,7 @@ public class Player extends Entity {
     public boolean isAttackDamageApplied() {
         return attackDamageApplied;
     }
+    public PlayerColor getColor() {return color;}
     //---------------------------------
 
     // SETTER ----------------------
@@ -283,6 +285,7 @@ public class Player extends Entity {
     public void setAttackDamageApplied(boolean applied) { 
         this.attackDamageApplied = applied; 
     }
+    public void setColor(PlayerColor color) {this.color = color;    }
     //---------------------------------
 
 

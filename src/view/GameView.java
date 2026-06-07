@@ -5,6 +5,7 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.MapConfig;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
+import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.GameState;
 import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
@@ -16,10 +17,7 @@ import model.entity.Monk;
 import model.entity.Player;
 import model.entity.EnemyTorch;
 import model.event.AudioEventType;
-import view.UI.GameOverLayout;
-import view.UI.MainMenuLayout;
-import view.UI.PauseMenuLayout;
-import view.UI.UI;
+import view.UI.*;
 import view.audio.GameAudioManager;
 import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
@@ -141,7 +139,7 @@ public class GameView extends JPanel {
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT());
 
-        if (model.getGameState() != GameState.MENU) {
+        if (model.getGameState() == GameState.PLAYING || model.getGameState() == GameState.PAUSED) {
 
             // DRAW THE WORLD MAP
             mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
@@ -379,26 +377,61 @@ public class GameView extends JPanel {
         return ui_render.getGameOverLayout();
     }
     public PauseMenuLayout getPauseMenuLayout() {return ui_render.getPauseMenuLayout();}
+    public SettingsLayout getSettingsLayout() {return ui_render.getSettingsLayout();}
     public Cursor getCustomGameCursor() {
         return customGameCursor;
     }
     //---------------------------------
 
     //SETTER ----------------------
-    public void setMainMenuSelection(int selection) {
-        ui_render.setMainMenuSelection(selection);
+    public void setMainMenuHover(ButtonValue.MainMenu key) {
+        ui_render.setMainMenuHover(key);
     }
-    public void setHoveredRibbon(int hoveredRibbon) {
-        ui_render.setHoveredRibbon(hoveredRibbon);
+
+    public void setMainMenuSelected(ButtonValue.MainMenu key) {
+        ui_render.setMainMenuSelected(key);
     }
-    public void setActiveRibbon(int activeRibbon) {
-        ui_render.setActiveRibbon(activeRibbon);
+
+    public void setRibbonSelected(ButtonValue.MainMenu key){
+        ui_render.setRibbonSelected(key);
     }
-    public void setHoveredGameOverButton(boolean hovered) {
-        ui_render.setHoveredGameOverButton(hovered);
+
+    public void setPauseHover(ButtonValue.Pause key) {
+        ui_render.setPauseHover(key);
     }
-    public void setPauseMenuSelection(int selection) {
-        ui_render.setPauseMenuSelection(selection);
+
+    public void setPauseSelected(ButtonValue.Pause key) {
+        ui_render.setPauseSelected(key);
+    }
+
+    public void setSettingsHover(ButtonValue.Settings key) {
+        ui_render.setSettingsHover(key);
+    }
+
+    public void setSettingsSelected(ButtonValue.Settings key) {
+        ui_render.setSettingsSelected(key);
+    }
+
+    public void setGameOverHover(ButtonValue.GameOver key) {
+        ui_render.setGameOverHover(key);
+    }
+
+    public void setGameOverSelected(ButtonValue.GameOver key) {
+        ui_render.setGameOverSelected(key);
+    }
+
+    public void setSettingsMusicSelected(ButtonValue.Settings key) {
+        ui_render.setSettingsMusicSelected(key);
+    }
+    public void setSettingsSoundSelected(ButtonValue.Settings key) {
+        ui_render.setSettingsSoundSelected(key);
+    }
+
+    public void setSettingsFpsSelected(ButtonValue.Settings key) {
+        ui_render.setSettingsFpsSelected(key);
+    }
+    public void setSettingsScreenResSelected(ButtonValue.Settings key) {
+        ui_render.setSettingsScreenResSelected(key);
     }
     //---------------------------------
 
