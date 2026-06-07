@@ -1,5 +1,6 @@
 package view.renderer;
 
+import main.CONFIG.ObjConfig;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.enu.PowerUpType;
 import model.object.GameObject;
@@ -10,6 +11,7 @@ import view.Animation.Animation;
 import view.Animation.AnimationManager;
 import view.SpriteLoader;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -153,7 +155,18 @@ public class GameObjectRenderer {
             sprite = getTreeAnimation(tree).getCurrent().getCurrentFrame();
         }
 
+        long time = ObjConfig.POWER_UP_LIGHTING_DURATION;
+        if (tree.isFlashingActive() && tree.getState() != CHOPPED){
+            boolean lighting = (System.currentTimeMillis() / time) % 2 == 0;
+            if (lighting){
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+            }
+
+        }
+
         g2.drawImage(sprite, drawX, drawY, tree.getWidth(), tree.getHeight(), null);
+
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
     }
     //-------------------------------------------------------------
     private void drawBuilding(Graphics2D g2, GameObject obj, int screenX, int screenY) {
