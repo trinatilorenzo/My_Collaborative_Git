@@ -41,8 +41,9 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int PLAYER_HITBOX_WIDTH = 45 * PLAYER_SCALE;
         public static final int PLAYER_HITBOX_HEIGHT = 35 * PLAYER_SCALE;
 
-        public static final double SHIELD_DURATION_MS = 60000.0; // 1 minute
+        public static final double SHIELD_DURATION_MS = 30000.0; // 30 seconds
         public static final int SPEED_BOOST_AMOUNT = 128; 
+        public static final double VISUAL_EFFECT_DURATION_MS = 3000.0; // 3 seconds
 
 
         public int START_WORLD_X(){return playerSpawnPoint().x();}

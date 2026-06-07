@@ -23,6 +23,10 @@ public class PlayerRender {
     private PlayerState previousState;
     private PlayerColor currentColor;
 
+    private long speedEffectStart = -1;
+    private long healthEffectStart = -1;
+
+
     /**
      * COSTRUCTOR
      */
@@ -82,6 +86,9 @@ public class PlayerRender {
             case PURPLE -> {
                 return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Purple.png");
             }
+            case BLUE -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue.png");
+            }
         }
         return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue.png"); //default BLUE
     }
@@ -107,6 +114,14 @@ public class PlayerRender {
     //-------------------------------------------------------------
     public void update(Player player, double deltaMs) {
 
+        if (player.isSpeedBoosted() && speedEffectStart==-1){
+            speedEffectStart = System.currentTimeMillis();
+        }
+
+        if (player.isHealthRestored() && healthEffectStart == -1) {
+            healthEffectStart = System.currentTimeMillis();
+        }
+    
         PlayerState currentState = player.getState();
         boolean attackJustStarted = currentState == PlayerState.ATTACKING && previousState != PlayerState.ATTACKING;
 
@@ -164,11 +179,62 @@ public class PlayerRender {
             return;
         }
 
+        // Save original graphics settings
+        Composite originalComposite = g2.getComposite();
+        Stroke originalStroke = g2.getStroke();
+
+        if (player.isSpeedBoosted()) {
+            if (System.currentTimeMillis() - speedEffectStart < EntityConfig.VISUAL_EFFECT_DURATION_MS){
+                long blinkTime = System.currentTimeMillis() / 200; // Change color every 200ms
+                if (blinkTime%2==0) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f)); // Semi-transparent
+                }
+            }
+            
+        }
+
+        if (player.isHealthRestored()){
+            if (System.currentTimeMillis() - healthEffectStart < EntityConfig.VISUAL_EFFECT_DURATION_MS){
+                long blinkTime = System.currentTimeMillis() / 200; // Change color every 200ms
+                if (blinkTime%2==0) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f)); // Semi-transparent
+                }
+            }
+        }
+
+        // Draw the player sprite 
         if (player.getFacing() != Direction.RIGHT) {
             g2.drawImage(frame, drawX + width, drawY, -width, height, null);
         } else {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
+
+        g2.setComposite(originalComposite); // Restore original composite for drawing the player
+
+        if (player.isShielded()) {
+            double shieldPulse = 1.0 + 0.05 * Math.sin(System.currentTimeMillis() / 200.0);
+            int shieldRadius = (int) ((Math.max(width, height) / 2 + 5) * shieldPulse);
+            
+            // Outer glow
+            g2.setColor(new Color(0, 180, 255, 30));
+            g2.fillOval(screenX - shieldRadius - 8, screenY - shieldRadius - 8, (shieldRadius + 8) * 2, (shieldRadius + 8) * 2);
+
+            // Shield core
+            g2.setColor(new Color(0, 220, 255, 50));
+            g2.fillOval( screenX - shieldRadius, screenY - shieldRadius, shieldRadius * 2, shieldRadius * 2);
+            g2.setStroke(new BasicStroke(2.5f));
+            g2.setColor(new Color(120, 255, 255, 180));
+            g2.drawOval( screenX - shieldRadius, screenY - shieldRadius, shieldRadius * 2, shieldRadius * 2);
+            g2.setStroke(new BasicStroke(1.2f));
+            g2.setColor(new Color(255, 255, 255, 100));
+            g2.drawOval(screenX - shieldRadius + 4, screenY - shieldRadius + 4, (shieldRadius - 4) * 2, (shieldRadius - 4) * 2);
+        }
+
+        // Restore original graphics settings before drawing the player
+        g2.setStroke(originalStroke);
+        g2.setComposite(originalComposite);
+
+
     }
     //-------------------------------------------------------------
 

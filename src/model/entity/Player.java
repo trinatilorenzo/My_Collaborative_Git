@@ -25,7 +25,9 @@ public class Player extends Entity {
 
     // handle power-ups effects
     private double shieldTimerMs = 0;
-    private boolean speedBoost = false;
+    private boolean isShielded = false;
+    private boolean isSpeedBoosted = false;
+    private boolean isHealthRestored = false;
 
     /**
      * CONSTRUCTOR
@@ -82,6 +84,7 @@ public class Player extends Entity {
             shieldTimerMs -= deltaMs;
             if (shieldTimerMs <= 0) {
                 shieldTimerMs = 0;
+                isShielded = false;
             }
         }
 
@@ -234,12 +237,14 @@ public class Player extends Entity {
         switch (type) {
             case SHIELD:
                 this.shieldTimerMs = EntityConfig.SHIELD_DURATION_MS;
+                this.isShielded = true;
                 break;
             case HEALTH_RESTORE:
                 this.life = this.maxLife;
+                this.isHealthRestored = true;
                 break;
             case SPEED_BOOST:
-                this.speedBoost = true;
+                this.isSpeedBoosted = true;
                 this.speed += EntityConfig.SPEED_BOOST_AMOUNT;
                 break;
         }
@@ -265,6 +270,15 @@ public class Player extends Entity {
     }
     public boolean isAttackDamageApplied() {
         return attackDamageApplied;
+    }
+    public boolean isShielded() {
+        return isShielded;
+    }
+    public boolean isSpeedBoosted() {
+        return isSpeedBoosted;
+    }
+    public boolean isHealthRestored() {
+        return isHealthRestored;
     }
     //---------------------------------
 

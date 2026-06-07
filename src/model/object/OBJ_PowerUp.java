@@ -12,13 +12,20 @@ import main.CONFIG.enu.PowerUpType;
 //-------------------------------------------------------------------------------------------------------------------
 public class OBJ_PowerUp extends GameObject {
     private final PowerUpType type;
+    private final long spawnTime;
+    private static final long pickupDuration = ObjConfig.PICKUP_DURATION_MS; // Duration of the power-up effect after being picked up
 
     /**
      * CONSTRUCTOR
      */
     public OBJ_PowerUp(ObjConfig objConfig, PowerUpType type, int x, int y, int layer) {
-        super(objConfig, type.name(), new SpawnPoint(x, y, layer), objConfig.POWER_UP_SIZE, objConfig.POWER_UP_SIZE, new Rectangle(0, 0, objConfig.POWER_UP_HITBOX_WIDTH, objConfig.POWER_UP_HITBOX_HEIGHT), false);
+        super(objConfig, type.name(), new SpawnPoint(x, y, layer), objConfig.POWER_UP_SIZE, objConfig.POWER_UP_SIZE, new Rectangle(0, 0, objConfig.POWER_UP_HITBOX_SIZE, objConfig.POWER_UP_HITBOX_SIZE), false);
         this.type = type;
+        this.spawnTime = System.currentTimeMillis();
+    }
+
+    public boolean isCollectible() {
+        return (System.currentTimeMillis() - spawnTime) >= pickupDuration;
     }
 
     public PowerUpType getType() {
