@@ -1,8 +1,10 @@
 package view.renderer;
 
 import main.CONFIG.ScreenConfig;
+import main.CONFIG.enu.PowerUpType;
 import model.object.GameObject;
 import model.object.OBJ_Tree;
+import model.object.OBJ_PowerUp;
 import model.entity.Player;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
@@ -10,6 +12,7 @@ import view.SpriteLoader;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
@@ -47,6 +50,11 @@ public class GameObjectRenderer {
     private BufferedImage goldMine;
     private BufferedImage goblinHouse;
 
+    // Power-up sprites
+    private BufferedImage spriteShield;
+    private BufferedImage spriteHealth;
+    private BufferedImage spriteSpeed;
+
     /**
      * CONSTRUCTOR
      */
@@ -54,6 +62,7 @@ public class GameObjectRenderer {
     public GameObjectRenderer() {
         loadTreeSprites();
         loadBuildingSprites();
+        loadPowerUpSprites();
     }
     //-------------------------------------------------------------
 
@@ -82,7 +91,12 @@ public class GameObjectRenderer {
     }
     //-------------------------------------------------------------
 
-
+    //-------------------------------------------------------------
+    private void loadPowerUpSprites() {
+        spriteShield = SpriteLoader.loadSpriteSheet("/res/object/powerups/Icon_06.png");
+        spriteHealth = SpriteLoader.loadSpriteSheet("/res/object/powerups/heart_full.png");
+        spriteSpeed = SpriteLoader.loadSpriteSheet("/res/object/powerups/Icon_04.png");
+    }
     /**
      * Updates animated objects.
      */
@@ -116,6 +130,8 @@ public class GameObjectRenderer {
     public void draw(Graphics2D g2, GameObject obj, int screenX, int screenY) {
         if (obj instanceof OBJ_Tree tree) {
             drawTree(g2, tree, screenX, screenY);
+        } else if (obj instanceof OBJ_PowerUp powerUp) {
+            drawPowerUp(g2, powerUp, screenX, screenY);
         } else {
             drawBuilding(g2, obj, screenX, screenY);
         }
@@ -146,6 +162,25 @@ public class GameObjectRenderer {
     }
     //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
+    // Draws power-ups with a simple pulsating effect.
+    private void drawPowerUp(Graphics2D g2, OBJ_PowerUp powerUp, int screenX, int screenY) {
+        BufferedImage sprite = switch (powerUp.getType()) {
+            case SHIELD -> spriteShield;
+            case HEALTH_RESTORE -> spriteHealth;
+            case SPEED_BOOST -> spriteSpeed;
+        };
+
+        // Pulsating effect: scale oscillates between 0.9 and 1.1
+        double scale = 1.0 + 0.1 * Math.sin(System.currentTimeMillis() / 300.0);
+        int width = (int) (powerUp.getWidth() * scale);
+        int height = (int) (powerUp.getHeight() * scale);
+        
+        int drawX = screenX - (width - powerUp.getWidth()) / 2;
+        int drawY = screenY - (height - powerUp.getHeight()) / 2;
+
+        g2.drawImage(sprite, drawX, drawY, width, height, null);
+    }
     /**
      * Draws object hitboxes in debug mode.
      */
@@ -157,6 +192,7 @@ public class GameObjectRenderer {
 
         Color previousColor = g2.getColor();
         Stroke previousStroke = g2.getStroke();
+        Font previousFont = g2.getFont();
 
         g2.setStroke(new BasicStroke(2));
 
@@ -174,16 +210,26 @@ public class GameObjectRenderer {
                 continue;
             }
 
+            // Red for objects on the same layer as the player, orange for others
             boolean sameLayer = object.getLayer() == player.getCurrentLayer();
             g2.setColor(sameLayer ? new Color(255, 40, 40, 90) : new Color(255, 180, 0, 55));
             g2.fillRect(screenX, screenY, solidArea.width, solidArea.height);
 
             g2.setColor(sameLayer ? new Color(255, 40, 40, 220) : new Color(255, 180, 0, 160));
             g2.drawRect(screenX, screenY, solidArea.width, solidArea.height);
+        
+
+            // Light blue for trees whit power-ups
+            if (object instanceof OBJ_Tree tree && tree.hasPowerUp()) {
+                g2.setColor(new Color(40, 200, 255, 110));
+                g2.fillRect(screenX, screenY, solidArea.width, solidArea.height);
+
+            }
         }
 
         g2.setStroke(previousStroke);
         g2.setColor(previousColor);
+        g2.setFont(previousFont);
     }
     //-------------------------------------------------------------
 

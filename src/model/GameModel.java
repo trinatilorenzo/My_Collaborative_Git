@@ -9,7 +9,6 @@ import main.CONFIG.UIConfig;
 import main.CONFIG.enu.*;
 import model.entity.*;
 import model.event.AudioEventType;
-import model.object.GameObject;
 import model.object.*;
 
 import java.awt.Rectangle;
@@ -250,8 +249,9 @@ public class GameModel {
             }
         }
         if (!validTrees.isEmpty()) {
-            int randomIndex = (int) (Math.random()) * validTrees.size();
+            int randomIndex = (int) (Math.random() * validTrees.size());
             validTrees.get(randomIndex).setHiddenPowerUp(type);
+            System.out.println("Assigned " + type + " to tree: " + validTrees.get(randomIndex).getName() + " at (" + validTrees.get(randomIndex).getWorldX() + ", " + validTrees.get(randomIndex).getWorldY() + ")");
         }
     }
     //end helpers -------------------------------------------------
@@ -307,7 +307,10 @@ public class GameModel {
 
                 // if the tree has been chopped and has a hidden power-up, spawn the power-up object
                 if (obj instanceof OBJ_Tree tree && tree.shouldDropPowerUp()){
-                    toSpawn.add(new OBJ_PowerUp(gameConfig.ObjConfig(), tree.getHiddenPowerUp(), tree.getWorldX(), tree.getWorldY(), tree.getLayer()));
+                    Rectangle treeHitbox = tree.getSolidArea();
+                    int powerUpX = tree.getWorldX() + treeHitbox.x + (treeHitbox.width - gameConfig.ObjConfig().POWER_UP_SIZE) / 2;
+                    int powerUpY = tree.getWorldY() + treeHitbox.y + (treeHitbox.height - gameConfig.ObjConfig().POWER_UP_SIZE) / 2;
+                    toSpawn.add(new OBJ_PowerUp(gameConfig.ObjConfig(), tree.getHiddenPowerUp(), powerUpX, powerUpY, tree.getLayer()));
                 }
             }
         }
@@ -482,21 +485,27 @@ public class GameModel {
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.TREE_HIT);
                 }
-                if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
-                    player.applyPowerUpEffect(powerUp.getType());
-                    powerUp.remove(); // Remove the power-up from the game world
-                    if (isPowerUpForCurrentLevel(powerUp.getType())) {
-                        currentLevelPowerUpCollected = true; // Mark the power-up as collected for level progression
-                    }
-                    //Audio ----------------------
-                    //TODO: emitAudioEvent(AudioEventType.POWERUP_COLLECTED);
-                }
             }
-            // -------------------
-
-            // checkLevelProgression();
         }
+        for (GameObject obj: objects){
+            if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
+                if (!powerUp.isCollectible()) {
+                    continue; // Skip if the power-up is not yet collectible
+                }
+                player.applyPowerUpEffect(powerUp.getType());
+                powerUp.remove(); // Remove the power-up from the game world
+                if (isPowerUpForCurrentLevel(powerUp.getType())) {
+                    currentLevelPowerUpCollected = true; // Mark the power-up as collected for level progression
+                }
+                //Audio ----------------------
+                //TODO: emitAudioEvent(AudioEventType.POWERUP_COLLECTED);
+            }
+        }
+        // -------------------
+        // checkLevelProgression();
     }
+       
+
 
     //-------------------------------------------------------------
     private boolean isPowerUpForCurrentLevel(PowerUpType type) {

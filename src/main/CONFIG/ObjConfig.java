@@ -97,9 +97,9 @@ public record ObjConfig(String TREE_TAG_03,
     //-------------------------------------------------------------
 
     // POWER-UP
-    public static final int POWER_UP_SIZE = 48;
-    public static final int POWER_UP_HITBOX_WIDTH = 30;
-    public static final int POWER_UP_HITBOX_HEIGHT = 30;
+    public static final int POWER_UP_SIZE = 64;
+    public static final int POWER_UP_HITBOX_SIZE = 48;
+    public static final long PICKUP_DURATION_MS = 800; // Duration of the power-up effect after being picked up
     //-------------------------------------------------------------
 
 

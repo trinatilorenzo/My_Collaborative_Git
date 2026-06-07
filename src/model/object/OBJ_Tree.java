@@ -115,6 +115,9 @@ public class OBJ_Tree extends GameObject {
     public PowerUpType getHiddenPowerUp() {
         return hiddenPowerUp;
     }
+    public boolean hasPowerUp() {
+        return hiddenPowerUp != null;
+    }
     //-------------------------------------------------------------
 
     //SETTER

@@ -26,7 +26,9 @@ public class Player extends Entity {
 
     // handle power-ups effects
     private double shieldTimerMs = 0;
-    private boolean speedBoost = false;
+    private boolean isShielded = false;
+    private boolean isSpeedBoosted = false;
+    private boolean isHealthRestored = false;
 
     /**
      * CONSTRUCTOR
@@ -83,6 +85,7 @@ public class Player extends Entity {
             shieldTimerMs -= deltaMs;
             if (shieldTimerMs <= 0) {
                 shieldTimerMs = 0;
+                isShielded = false;
             }
         }
 
@@ -268,6 +271,15 @@ public class Player extends Entity {
         return attackDamageApplied;
     }
     public PlayerColor getColor() {return color;}
+    public boolean isShielded() {
+        return isShielded;
+    }
+    public boolean isSpeedBoosted() {
+        return isSpeedBoosted;
+    }
+    public boolean isHealthRestored() {
+        return isHealthRestored;
+    }
     //---------------------------------
 
     // SETTER ----------------------
