@@ -243,7 +243,7 @@ public class Player extends Entity {
                 this.life = this.maxLife;
                 break;
             case SPEED_BOOST:
-                this.speedBoost = true;
+                this.isSpeedBoosted = true;
                 this.speed += EntityConfig.SPEED_BOOST_AMOUNT;
                 break;
         }
