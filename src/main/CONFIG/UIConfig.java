@@ -1,5 +1,7 @@
 package main.CONFIG;
 
+import main.CONFIG.enu.ButtonValue;
+
 /**
  * UI SETTINGS
  */
@@ -11,12 +13,15 @@ public record UIConfig() {
     public static final String CURSOR_PATH = "/res/UI/Pointers/01.png";
     //-------------------------------------------------------------
 
+    //Default button Selection
+    public static final ButtonValue.MainMenu MENU_DEFAULT_SELECTION = null ;
+
+    public static final ButtonValue.Pause PAUSE_DEFAULT_SELECTION = null;
+    public static final ButtonValue.Settings SETTINGS_DEFAULT_SELECTION = null;
+
+
     //MENU
     //-------------------------------------------------------------
-    public static final int MAIN_MENU_ITEM_COUNT = 3;
-    public static final int MENU_DEFAULT_SELECTION = 0;
-    public static final int MENU_NO_SELECTION = -1;
-    public static final int RIBBON_DEFAULT = 0;
 
     public static final int MENU_LOGO_WIDTH = 500;
 
@@ -40,7 +45,6 @@ public record UIConfig() {
 
     //PAUSE
     //-------------------------------------------------------------
-    public static final int PAUSE_MENU_ITEM_COUNT = 3;
 
     public static final int BANNER_WIDTH = 192*4;
     public static final int PAUSE_RIBBON_OFFSET_Y = 24;
@@ -59,6 +63,19 @@ public record UIConfig() {
     public static final double GAME_OVER_DELAY_MS = 500.0;
     //-------------------------------------------------------------
 
+    //SETTINGS MENU
+    //-------------------------------------------------------------
+
+    public static final int SETTINGS_RIBBON_WIDTH = 500;
+    public static final int SETTINGS_RIBBON_HEIGHT = 60;
+    public static final int SETTINGS_ICON_SIZE = 80;
+    public static final int SETTINGS_FIRST_RIBBON_Y = 60;
+    public static final int SETTINGS_OPTION_BUTTON_WIDTH = 140;
+    public static final int SETTINGS_OPTION_BUTTON_HEIGHT = 50;
+
+    public static final int SETTINGS_BUTTON_WIDTH = 64 * 3;
+    public static final int SETTINGS_BUTTON_HEIGHT = 64;
+    //-------------------------------------------------------------
 
 
 }

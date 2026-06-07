@@ -12,19 +12,28 @@ import java.awt.event.MouseMotionListener;
 //-------------------------------------------------------------------------------------------------------------------
 public class MouseHandler implements MouseListener, MouseMotionListener {
 
-    // variable to set the state of the keys
+    // Posizione corrente del cursore (aggiornata da mouseMoved/mouseDragged)
     private volatile int mouseX;
     private volatile int mouseY;
+
+    // Posizione esatta al momento del click (separata dal move, per evitare drift tra eventi)
+    private volatile int clickX;
+    private volatile int clickY;
+
     private volatile boolean leftClick;
     private volatile boolean rightClick;
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
+            clickX = e.getX();
+            clickY = e.getY();
             mouseX = e.getX();
             mouseY = e.getY();
             leftClick = true;
         } else if (e.getButton() == MouseEvent.BUTTON3) {
+            clickX = e.getX();
+            clickY = e.getY();
             mouseX = e.getX();
             mouseY = e.getY();
             rightClick = true;
@@ -43,19 +52,29 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
         mouseY = e.getY();
     }
 
+    /** Posizione corrente del cursore (per hover). */
     public Point getMousePosition() {
         return new Point(mouseX, mouseY);
     }
 
-    public synchronized boolean consumeLeftClick() {
-        boolean clicked = leftClick;
+    /**
+     * Consuma il click sinistro e restituisce la posizione esatta in cui è avvenuto.
+     * Restituisce null se non c'è nessun click pendente.
+     */
+    public synchronized Point consumeLeftClick() {
+        if (!leftClick) return null;
         leftClick = false;
-        return clicked;
+        return new Point(clickX, clickY);
     }
-    public synchronized boolean consumeRightClick() {
-        boolean clicked = rightClick;
+
+    /**
+     * Consuma il click destro e restituisce la posizione esatta in cui è avvenuto.
+     * Restituisce null se non c'è nessun click pendente.
+     */
+    public synchronized Point consumeRightClick() {
+        if (!rightClick) return null;
         rightClick = false;
-        return clicked;
+        return new Point(clickX, clickY);
     }
 
     // Not used

@@ -17,6 +17,7 @@ public class Player extends Entity {
 
     private PlayerState state;
     private Direction facingDirection;
+    private PlayerColor color;
 
     private boolean deathAnimationCompleted;
     private boolean attackAnimationCompleted;
@@ -237,11 +238,9 @@ public class Player extends Entity {
         switch (type) {
             case SHIELD:
                 this.shieldTimerMs = EntityConfig.SHIELD_DURATION_MS;
-                this.isShielded = true;
                 break;
             case HEALTH_RESTORE:
                 this.life = this.maxLife;
-                this.isHealthRestored = true;
                 break;
             case SPEED_BOOST:
                 this.isSpeedBoosted = true;
@@ -271,6 +270,7 @@ public class Player extends Entity {
     public boolean isAttackDamageApplied() {
         return attackDamageApplied;
     }
+    public PlayerColor getColor() {return color;}
     public boolean isShielded() {
         return isShielded;
     }
@@ -297,6 +297,7 @@ public class Player extends Entity {
     public void setAttackDamageApplied(boolean applied) { 
         this.attackDamageApplied = applied; 
     }
+    public void setColor(PlayerColor color) {this.color = color;    }
     //---------------------------------
 
 

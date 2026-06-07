@@ -1,11 +1,10 @@
-
 package view.UI;
 
+import main.CONFIG.enu.ButtonValue;
 import model.GameModel;
 import model.entity.Player;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
-
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -13,9 +12,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EnumMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 
-//TODO rivedere i vari metodi
+import static main.CONFIG.enu.ButtonValue.MainMenu.*;
+import static main.CONFIG.enu.ButtonValue.Pause.*;
+import static main.CONFIG.enu.ButtonValue.Settings.*;
+import static main.CONFIG.enu.ButtonValue.GameOver.*;
+
+
 /**
  * Draws all in-game UI elements: HUD, menus, dialogue windows, and debug HUD overlays.
  */
@@ -54,8 +60,17 @@ public class UI {
     private final SliceSprite resumeButtonSelected;
     private final SliceSprite saveButton;
     private final SliceSprite saveButtonSelected;
-    private final BufferedImage exitButton;
-    private final BufferedImage exitButtonSelected;
+
+
+    private final BufferedImage buttonMusic;
+    private final BufferedImage buttonMusicSelected;
+    private final BufferedImage buttonSound;
+    private final BufferedImage buttonSoundSelected;
+
+    private final SliceSprite blueRibbon;
+    private final SliceSprite yellowRibbon;
+    private final SliceSprite redRibbon;
+
 
 
     private final BufferedImage menuLogo;
@@ -71,7 +86,8 @@ public class UI {
     private final BufferedImage avatarPurplePressed;
     private final BufferedImage[] menuClouds;
 
-    float[][] cloudPlacements;
+    float[][] cloudPlacementsMenu;
+    float[][] cloudPlacementsSettings;
 
     Color backgroundColor;
     Color pauseBgColor;
@@ -83,16 +99,46 @@ public class UI {
     private int frames = 0;
     private int fps = 0;
 
+
     // =========================================================================
-    // Damage flash state
+    // Menu's
     // =========================================================================
 
-    private long damageFlashStartNano = -1L;
-    private int mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+
+   /* private int mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
     private int hoveredRibbon = UIConfig.RIBBON_DEFAULT;
     private int activeRibbon = UIConfig.RIBBON_DEFAULT;
     private boolean hoveredGameOverButton = false;
     private int pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+
+    private int settingsSelection = -1;*/
+
+
+    // =========================================================================
+    // Damage flash state
+    // =========================================================================
+
+    // HOVER
+    private final Map<ButtonValue.MainMenu, Boolean> mainMenuHover = new EnumMap<>(ButtonValue.MainMenu.class);
+    private final Map<ButtonValue.Pause, Boolean> pauseHover = new EnumMap<>(ButtonValue.Pause.class);
+    private final Map<ButtonValue.Settings, Boolean> settingsHover = new EnumMap<>(ButtonValue.Settings.class);
+    private final Map<ButtonValue.GameOver, Boolean> gameOverHover = new EnumMap<>(ButtonValue.GameOver.class);
+
+    // SELECTED
+    private final Map<ButtonValue.MainMenu, Boolean> mainMenuSelected = new EnumMap<>(ButtonValue.MainMenu.class);
+    private final Map<ButtonValue.Pause, Boolean> pauseSelected = new EnumMap<>(ButtonValue.Pause.class);
+    private final Map<ButtonValue.Settings, Boolean> settingsSelected = new EnumMap<>(ButtonValue.Settings.class);
+    private final Map<ButtonValue.GameOver, Boolean> gameOverSelected = new EnumMap<>(ButtonValue.GameOver.class);
+
+    private final Map<ButtonValue.MainMenu, Boolean> ribbonSelected = new EnumMap<>(ButtonValue.MainMenu.class);
+    private final Map<ButtonValue.Settings, Boolean> musicSelected = new EnumMap<>(ButtonValue.Settings.class);
+    private final Map<ButtonValue.Settings, Boolean> soundSelected = new EnumMap<>(ButtonValue.Settings.class);
+    private final Map<ButtonValue.Settings, Boolean> fpsSeclected = new EnumMap<>(ButtonValue.Settings.class);
+    private final Map<ButtonValue.Settings, Boolean> screenSeclected = new EnumMap<>(ButtonValue.Settings.class);
+
+
+
+    private long damageFlashStartNano = -1L;
     private BufferedImage damageOverlayCache;
     private int damageOverlayCacheWidth = -1;
     private int damageOverlayCacheHeight = -1;
@@ -132,8 +178,6 @@ public class UI {
         resumeButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Cyan_3Slides_Pressed.png", tileSize, tileSize);
         saveButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Red_3Slides_Pressed.png", tileSize, tileSize);
         saveButton = new SliceSprite("src/res/UI/Buttons/Button_GrayRed_3Slides.png", tileSize, tileSize);
-        exitButton = loadUiImage("src/res/UI/Icons/Pressed_01.png");
-        exitButtonSelected = loadUiImage("src/res/UI/Icons/Regular_01.png");
 
         menuLogo = loadUiImage("src/res/UI/Icons/logo_gioco.png");
         settingsIcon = scaleImage(loadUiImage("src/res/UI/Icons/Regular_11.png"), tileSize, tileSize);
@@ -148,8 +192,14 @@ public class UI {
         avatarBluePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Blue_Selected.png");
         avatarPurplePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Purple_Selected.png");
 
+        buttonMusic = loadUiImage("src/res/UI/Buttons/ButtonMusic.png");
+        buttonMusicSelected = loadUiImage("src/res/UI/Buttons/ButtonMusic_Pressed.png");
+        buttonSound = loadUiImage("src/res/UI/Buttons/ButtonSound.png");
+        buttonSoundSelected = loadUiImage("src/res/UI/Buttons/ButtonSound_Pressed.png");
 
-
+        blueRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", tileSize, tileSize);
+        redRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Red_3Slides.png", tileSize, tileSize);
+        yellowRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Yellow_3Slides.png", tileSize, tileSize);
 
 
         menuClouds = new BufferedImage[] {
@@ -164,7 +214,7 @@ public class UI {
         };
 
         // Each entry: { relativeX, relativeY, drawWidth }
-        cloudPlacements = new float[][] {
+        cloudPlacementsMenu = new float[][] {
                 { 0.12f, 0.16f, 300f },
                 { 0.28f, 0.72f, 300f },
                 { 0.29f, 0.24f, 300f },
@@ -174,9 +224,50 @@ public class UI {
                 { 0.63f, 0.16f, 300f },
                 { 0.82f, 0.26f, 300f }
         };
+        cloudPlacementsSettings = new float[][] {
+                { 0.10f, 0.10f, 200f },
+                { 0.90f, 0.10f, 200f },
+                { 0.21f, 0.19f, 600f },
+        };
 
         backgroundColor = screenConfig.GAME_BG_COLOR();
         pauseBgColor = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 150);
+
+
+        //initialize button state
+        for (ButtonValue.MainMenu k : ButtonValue.MainMenu.values()) {
+            mainMenuHover.put(k, false);
+            mainMenuSelected.put(k, false);
+        }
+        for (ButtonValue.Pause k : ButtonValue.Pause.values()) {
+            pauseHover.put(k, false);
+            pauseSelected.put(k, false);
+        }
+        for (ButtonValue.Settings k : ButtonValue.Settings.values()) {
+            settingsHover.put(k, false);
+            settingsSelected.put(k, false);
+        }
+        for (ButtonValue.GameOver k : ButtonValue.GameOver.values()) {
+            gameOverHover.put(k, false);
+            gameOverSelected.put(k, false);
+        }
+        // ribbonSelected: solo le quattro chiavi ribbon
+        ribbonSelected.put(TOGGLE_BLUE,   true);
+        ribbonSelected.put(TOGGLE_YELLOW, false);
+        ribbonSelected.put(TOGGLE_RED,    false);
+        ribbonSelected.put(TOGGLE_PURPLE, false);
+
+        musicSelected.put(MUSIC, false);
+        soundSelected.put(SOUND, false);
+        fpsSeclected.put(FPS_120, true);
+        fpsSeclected.put(FPS_60,  false);
+        fpsSeclected.put(FPS_240, false);
+        screenSeclected.put(RES_MID, true);
+        screenSeclected.put(RES_FULL, false);
+        screenSeclected.put(RES_MIN,  false);
+
+
+
 
     }
     //-------------------------------------------------------------
@@ -198,61 +289,13 @@ public class UI {
             }
             case PAUSED    -> { drawPlayerLife(); drawPauseScreen(); }
             case GAME_OVER -> drawGameOverScreen();
+            case SETTINGS    -> drawSettingsScreen();
         }
 
         if (gameModel.isDebugMode()) drawFpsOverlay();
     }
     //-------------------------------------------------------------
     // ALL DRAW METHODS
-    //-------------------------------------------------------------
-    private void drawMainMenu() {
-        int w = screenConfig.SCREEN_WIDTH();
-        int h = screenConfig.SCREEN_HEIGHT();
-
-        // backGround
-        g2.setColor(new Color(140, 224, 228));
-        g2.drawRect(0, 0, w - 1, h - 1);
-        drawMenuClouds(0, 0, w, h);
-
-        //logo
-        int logoWidth = UIConfig.MENU_LOGO_WIDTH;
-        int logoHeight = (int) (((double) menuLogo.getHeight() / menuLogo.getWidth()) * logoWidth); //scale no distortion
-        g2.drawImage(menuLogo, (w - logoWidth) / 2, 40, logoWidth, logoHeight, null);
-
-        // Button
-        MainMenuLayout layout = getMainMenuLayout();
-        int selectedItem = mainMenuSelection;
-        int hoveredRibbon = this.hoveredRibbon;
-        int activeRibbon = this.activeRibbon;
-
-        Rectangle newGameBounds = layout.newGameBounds();
-        Rectangle continueBounds = layout.continueBounds();
-        Rectangle settingsBounds = layout.settingsBounds();
-        Rectangle ribbonYellowBounds = layout.ribbonYellowBounds();
-        Rectangle ribbonRedBounds = layout.ribbonRedBounds();
-        Rectangle ribbonBlueBounds = layout.ribbonBlueBounds();
-        Rectangle ribbonPurpleBounds = layout.ribbonPurpleBounds();
-
-        //draw ribbon
-
-        g2.drawImage((hoveredRibbon == 0 || activeRibbon == 0) ? avatarBluePressed : avatarBlue,
-                ribbonBlueBounds.x, ribbonBlueBounds.y, ribbonBlueBounds.width, ribbonBlueBounds.height, null);
-        g2.drawImage((hoveredRibbon == 1 || activeRibbon == 1) ? avatarYellowPressed : avatarYellow,
-                ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
-        g2.drawImage((hoveredRibbon == 2 || activeRibbon == 2) ? avatarRedPressed : avatarRed,
-                ribbonRedBounds.x, ribbonRedBounds.y, ribbonRedBounds.width, ribbonRedBounds.height, null);
-        g2.drawImage((hoveredRibbon == 3 || activeRibbon == 3) ? avatarPurplePressed : avatarPurple,
-                ribbonPurpleBounds.x, ribbonPurpleBounds.y, ribbonPurpleBounds.width, ribbonPurpleBounds.height, null);
-
-        //draw button
-        drawButton(menuButton, menuButtonSelected,newGameBounds.x,  newGameBounds.y,  newGameBounds.width,  newGameBounds.height,  "New Game", selectedItem == 0);
-        drawButton(menuButton, menuButtonSelected,continueBounds.x, continueBounds.y, continueBounds.width, continueBounds.height, "Resume",   selectedItem == 1);
-
-        //draw settings icon
-        g2.drawImage((selectedItem == 2) ? settingsIconPressed : settingsIcon,
-                settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
-    }
-    //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void drawPlayerLife() {
 
@@ -288,7 +331,6 @@ public class UI {
         }
     }
     //-------------------------------------------------------------
-    //-------------------------------------------------------------
     public void drawDialogueWindow() {
 
         int width = screenConfig.SCREEN_WIDTH() - (screenConfig.TILE_SIZE() * 2);
@@ -320,6 +362,81 @@ public class UI {
     }
     //-------------------------------------------------------------
     //-------------------------------------------------------------
+    private void drawMainMenu() {
+        int w = screenConfig.SCREEN_WIDTH();
+        int h = screenConfig.SCREEN_HEIGHT();
+
+        // backGround
+        g2.setColor(new Color(140, 224, 228));
+        g2.drawRect(0, 0, w - 1, h - 1);
+        drawClouds(0, 0, w, h, cloudPlacementsMenu);
+
+        //logo
+        int logoWidth = UIConfig.MENU_LOGO_WIDTH;
+        int logoHeight = (int) (((double) menuLogo.getHeight() / menuLogo.getWidth()) * logoWidth); //scale no distortion
+        g2.drawImage(menuLogo, (w - logoWidth) / 2, 40, logoWidth, logoHeight, null);
+
+        // Button
+        MainMenuLayout layout = getMainMenuLayout();
+        /*int selectedItem = mainMenuSelection;
+        int hoveredRibbon = this.hoveredRibbon;
+        int activeRibbon = this.activeRibbon;*/
+
+        Rectangle newGameBounds = layout.newGameBounds();
+        Rectangle continueBounds = layout.continueBounds();
+        Rectangle settingsBounds = layout.settingsBounds();
+        Rectangle ribbonYellowBounds = layout.ribbonYellowBounds();
+        Rectangle ribbonRedBounds = layout.ribbonRedBounds();
+        Rectangle ribbonBlueBounds = layout.ribbonBlueBounds();
+        Rectangle ribbonPurpleBounds = layout.ribbonPurpleBounds();
+
+        //draw ribbon
+        g2.drawImage(mainMenuHover.get(ButtonValue.MainMenu.TOGGLE_BLUE) || ribbonSelected.get(ButtonValue.MainMenu.TOGGLE_BLUE)
+                        ? avatarBluePressed : avatarBlue,
+                ribbonBlueBounds.x, ribbonBlueBounds.y, ribbonBlueBounds.width, ribbonBlueBounds.height, null);
+
+        g2.drawImage(mainMenuHover.get(TOGGLE_YELLOW) || ribbonSelected.get(TOGGLE_YELLOW)
+                        ? avatarYellowPressed : avatarYellow,
+                ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
+
+        g2.drawImage(mainMenuHover.get(TOGGLE_RED) || ribbonSelected.get(TOGGLE_RED)
+                        ? avatarRedPressed : avatarRed,
+                ribbonRedBounds.x, ribbonRedBounds.y, ribbonRedBounds.width, ribbonRedBounds.height, null);
+
+        g2.drawImage(mainMenuHover.get(TOGGLE_PURPLE) || ribbonSelected.get(TOGGLE_PURPLE)
+                        ? avatarPurplePressed : avatarPurple,
+                ribbonPurpleBounds.x, ribbonPurpleBounds.y, ribbonPurpleBounds.width, ribbonPurpleBounds.height, null);
+
+        //draw button
+        drawButton(menuButton, menuButtonSelected, newGameBounds.x,  newGameBounds.y,  newGameBounds.width,  newGameBounds.height,
+                "New Game", mainMenuHover.get(NEW_GAME)  || mainMenuSelected.get(NEW_GAME));
+        drawButton(menuButton, menuButtonSelected, continueBounds.x, continueBounds.y, continueBounds.width, continueBounds.height,
+                "Resume",   mainMenuHover.get(LOAD_GAME)  || mainMenuSelected.get(LOAD_GAME));
+
+        //draw settings icon
+        g2.drawImage(mainMenuHover.get(SETTINGS) || mainMenuSelected.get(SETTINGS)
+                        ? settingsIconPressed : settingsIcon,
+                settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
+    }
+    //-------------------------------------------------------------
+    private void drawClouds(int panelX, int panelY, int panelW, int panelH, float[][] cloudPlacements) {
+        if (menuClouds == null || menuClouds.length == 0) return;
+
+        for (int i = 0; i < cloudPlacements.length; i++) {
+
+            BufferedImage cloud = menuClouds[i % menuClouds.length]; //get clouds from array circularly
+
+            int drawWidth  = Math.round(cloudPlacements[i][2]); //when you define a placement you set a width for it
+            int drawHeight = Math.round(drawWidth * ((float) cloud.getHeight() / cloud.getWidth())); //correctly scale
+
+            int drawX = panelX + Math.round(cloudPlacements[i][0] * panelW) - drawWidth  / 2;
+            int drawY = panelY + Math.round(cloudPlacements[i][1] * panelH) - drawHeight / 2;
+            g2.drawImage(cloud, drawX, drawY, drawWidth, drawHeight, null);
+        }
+
+    }
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void drawPauseScreen() {
 
         g2.setColor(pauseBgColor);
@@ -343,17 +460,104 @@ public class UI {
         g2.drawString(title, textX, textY);
 
 
-        drawButton(resumeButton, resumeButtonSelected,resumeBounds.x, resumeBounds.y, resumeBounds.width, resumeBounds.height,
-                "Resume", pauseMenuSelection == 0);
+        drawButton(resumeButton, resumeButtonSelected, resumeBounds.x, resumeBounds.y, resumeBounds.width, resumeBounds.height,
+                "Resume", pauseHover.get(RESUME) || pauseSelected.get(RESUME));
 
-        drawButton(saveButton, saveButtonSelected,saveBounds.x, saveBounds.y, saveBounds.width, saveBounds.height,
-                "Save & Exit", pauseMenuSelection == 2);
+        drawButton(saveButton, saveButtonSelected, saveBounds.x, saveBounds.y, saveBounds.width, saveBounds.height,
+                "Save & Exit", pauseHover.get(SAVE) || pauseSelected.get(SAVE));
 
-        g2.drawImage((pauseMenuSelection == 1) ? settingsIconPressed : settingsIcon,
+        g2.drawImage(pauseHover.get(PAUSE_SETTINGS) || pauseSelected.get(PAUSE_SETTINGS) ? settingsIconPressed : settingsIcon,
                 settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
 
     }
     //-------------------------------------------------------------
+    //-------------------------------------------------------------
+    private void drawSettingsScreen() {
+
+        SettingsLayout layout = getSettingsLayout();
+
+        // -------------------------------------------------------
+        // SFONDO PANNELLO SETTINGS (overlay semitrasparente)
+        // -------------------------------------------------------
+        Rectangle sb = layout.settingsBounds();
+        g2.setColor(new Color(209, 205, 180));
+        g2.fillRoundRect(sb.x, sb.y, sb.width, sb.height, 20, 20);
+        g2.setColor(new Color(30, 30, 80));
+        g2.setStroke(new BasicStroke(7));
+        g2.drawRoundRect(sb.x, sb.y, sb.width, sb.height, 20, 20);
+        g2.setStroke(new BasicStroke(1)); // reset stroke
+
+        // Icona settings (gear)
+        Rectangle settingsBounds = layout.settingsIconBounds();
+        g2.drawImage(settingsHover.get(SETTINGS_ICON) || settingsSelected.get(SETTINGS_ICON)
+                        ? settingsIconPressed : settingsIcon,
+                settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
+
+        drawClouds(sb.x, sb.y, sb.width, sb.height, cloudPlacementsSettings);
+
+        // -------------------------------------------------------
+        // SEZIONE AUDIO — ribbon + icone
+        // -------------------------------------------------------
+        Rectangle audioRibbon = layout.audioRibbonBounds();
+        redRibbon.draw(g2, audioRibbon.x, audioRibbon.y, audioRibbon.width, audioRibbon.height);
+
+        Rectangle musicB = layout.musicBounds();
+        g2.drawImage(settingsHover.get(MUSIC) || musicSelected.get(MUSIC)
+                        ? buttonMusicSelected : buttonMusic,
+                musicB.x, musicB.y, musicB.width, musicB.height, null);
+
+        Rectangle soundB = layout.soundBounds();
+        g2.drawImage(settingsHover.get(SOUND) || soundSelected.get(SOUND)
+                        ? buttonSoundSelected : buttonSound,
+                soundB.x, soundB.y, soundB.width, soundB.height, null);
+
+        // -------------------------------------------------------
+        // SEZIONE SCREEN — ribbon + bottoni FULL / MID / SMAL
+        // -------------------------------------------------------
+        Rectangle resRibbon = layout.resRibbonBounds();
+        blueRibbon.draw(g2, resRibbon.x, resRibbon.y, resRibbon.width, resRibbon.height);
+
+        drawButton(menuButton, menuButtonSelected,
+                layout.resFullBounds().x, layout.resFullBounds().y,
+                layout.resFullBounds().width, layout.resFullBounds().height,
+                "FULL", settingsHover.get(RES_FULL) || screenSeclected.get(RES_FULL));
+
+        drawButton(menuButton, menuButtonSelected,
+                layout.resHalfBounds().x, layout.resHalfBounds().y,
+                layout.resHalfBounds().width, layout.resHalfBounds().height,
+                "MID", settingsHover.get(RES_MID) || screenSeclected.get(RES_MID));
+
+        drawButton(menuButton, menuButtonSelected,
+                layout.resMinBounds().x, layout.resMinBounds().y,
+                layout.resMinBounds().width, layout.resMinBounds().height,
+                "SMAL", settingsHover.get(RES_MIN) || screenSeclected.get(RES_MIN));
+
+        // -------------------------------------------------------
+        // SEZIONE FPS — ribbon + bottoni 60 / 120 / 240
+        // -------------------------------------------------------
+        Rectangle fpsRibbon = layout.fpsRibbonBounds();
+        yellowRibbon.draw(g2, fpsRibbon.x, fpsRibbon.y, fpsRibbon.width, fpsRibbon.height);
+
+        drawButton(menuButton, menuButtonSelected,
+                layout.fpsBounds1().x, layout.fpsBounds1().y,
+                layout.fpsBounds1().width, layout.fpsBounds1().height,
+                "60", settingsHover.get(FPS_60) || fpsSeclected.get(FPS_60));
+
+        drawButton(menuButton, menuButtonSelected,
+                layout.fpsBounds2().x, layout.fpsBounds2().y,
+                layout.fpsBounds2().width, layout.fpsBounds2().height,
+                "120", settingsHover.get(FPS_120) || fpsSeclected.get(FPS_120));
+
+        drawButton(menuButton, menuButtonSelected,
+                layout.fpsBounds3().x, layout.fpsBounds3().y,
+                layout.fpsBounds3().width, layout.fpsBounds3().height,
+                "240", settingsHover.get(FPS_240) || fpsSeclected.get(FPS_240));
+
+    }
+
+    //-------------------------------------------------------------
+
+
     //-------------------------------------------------------------
     private void drawGameOverScreen() {
         drawPlayerLife();
@@ -384,30 +588,14 @@ public class UI {
         // Restart button
         GameOverLayout layout = getGameOverLayout();
         Rectangle newGameBounds = layout.newGameBounds();
-        drawButton(menuButton, menuButtonSelected,newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
-                "New Game", hoveredGameOverButton);
-    }
-    //-------------------------------------------------------------
-    //-------------------------------------------------------------
-    private void drawMenuClouds(int panelX, int panelY, int panelW, int panelH) {
-        if (menuClouds == null || menuClouds.length == 0) return;
-
-        for (int i = 0; i < cloudPlacements.length; i++) {
-
-            BufferedImage cloud = menuClouds[i % menuClouds.length]; //get clouds from array circularly
-
-            int drawWidth  = Math.round(cloudPlacements[i][2]); //when you define a placement you set a width for it
-            int drawHeight = Math.round(drawWidth * ((float) cloud.getHeight() / cloud.getWidth())); //correctly scale
-
-            int drawX = panelX + Math.round(cloudPlacements[i][0] * panelW) - drawWidth  / 2;
-            int drawY = panelY + Math.round(cloudPlacements[i][1] * panelH) - drawHeight / 2;
-            g2.drawImage(cloud, drawX, drawY, drawWidth, drawHeight, null);
-        }
-
+        drawButton(menuButton, menuButtonSelected, newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
+                "New Game", gameOverHover.get(RESTART) || gameOverSelected.get(RESTART));
     }
     //-------------------------------------------------------------
 
-    /** Draws a menu button sprite with a horizontally and vertically centred label. */
+
+    /**
+     * Draws a menu button sprite with a horizontally and vertically centred label. */
     //-------------------------------------------------------------
     private void drawButton(SliceSprite menuButton, SliceSprite menuButtonSelected, int x, int y, int width, int height, String label, boolean selected) {
         (selected ? menuButtonSelected : menuButton).draw(g2, x, y, width, height);
@@ -430,70 +618,14 @@ public class UI {
     //-------------------------------------------------------------
 
 
-    /**
-     * Starts a 0.5-second red damage flash overlay.
-     * Call this from the model or player whenever the player receives damage.
-     * The overlay fades automatically; no reset is needed.
-     */
-    //-------------------------------------------------------------
-    public void triggerDamageFlash() {
-        damageFlashStartNano = System.nanoTime();
-    }
-    //-------------------------------------------------------------
-
-    public void setMainMenuSelection(int mainMenuSelection) {
-        this.mainMenuSelection = mainMenuSelection;
-    }
-
-    public void setHoveredRibbon(int hoveredRibbon) {
-        this.hoveredRibbon = hoveredRibbon;
-    }
-
-    public void setActiveRibbon(int activeRibbon) {
-        this.activeRibbon = activeRibbon;
-    }
-
-    public void setHoveredGameOverButton(boolean hoveredGameOverButton) {
-        this.hoveredGameOverButton = hoveredGameOverButton;
-    }
-
-    public void setPauseMenuSelection(int pauseMenuSelection) {
-        this.pauseMenuSelection = pauseMenuSelection;
-    }
-
-    // =========================================================================
-    // Screen draw methods
-    // =========================================================================
-
-
-
-
-
-
-
-
-
-    // =========================================================================
     // Damage overlay
-    // =========================================================================
-
-    /**
-     * Returns {@code true} while the damage flash window is open.
-     * The window expires {@value } ns after the last
-     * call to {@link #triggerDamageFlash()}.
-     */
+    //-------------------------------------------------------------
     //-------------------------------------------------------------
     private boolean isDamageFlashActive() {
         return damageFlashStartNano >= 0
                 && (System.nanoTime() - damageFlashStartNano) < UIConfig.DAMAGE_FLASH_DURATION_NS;
     }
     //-------------------------------------------------------------
-
-    /**
-     * Draws a red vignette + soft screen flash that fades out according to {@code alpha}.
-     *
-     * @param alpha master opacity in [0, 1]: 1 = fully visible (just hit), 0 = invisible (expired).
-     */
     //-------------------------------------------------------------
     private void drawDamageOverlay(float alpha) {
         int w = screenConfig.SCREEN_WIDTH();
@@ -509,7 +641,10 @@ public class UI {
         g2.drawImage(damageOverlayCache, 0, 0, null);
     }
     //-------------------------------------------------------------
-
+    /**
+     * The class redraw all theOverlay sprites in the game only when need
+     * to improve rendering performance.
+     */
     private void rebuildDamageOverlayCache(int w, int h, float alpha) {
         damageOverlayCache = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         damageOverlayCacheWidth = w;
@@ -558,10 +693,8 @@ public class UI {
     }
     //-------------------------------------------------------------
 
-    // =========================================================================
-    // Layout computation
-    // =========================================================================
 
+    //LAYOUT
     //-------------------------------------------------------------
     public MainMenuLayout getMainMenuLayout() {
 
@@ -594,8 +727,6 @@ public class UI {
                 ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds, ribbonPurpleBounds);
     }
     //-------------------------------------------------------------
-
-    //-------------------------------------------------------------
     public GameOverLayout getGameOverLayout() {
         int buttonWidth  = 320;
         int buttonHeight = 84;
@@ -604,7 +735,6 @@ public class UI {
         return new GameOverLayout(new Rectangle(centerX - buttonWidth / 2, buttonY, buttonWidth, buttonHeight));
     }
     //-------------------------------------------------------------
-
     public PauseMenuLayout getPauseMenuLayout() {
 
         int centerX = screenConfig.SCREEN_WIDTH() / 2;
@@ -636,10 +766,100 @@ public class UI {
 
         return new PauseMenuLayout(resumeBounds, settingsBounds, saveBounds, pauseTextBounds, pauseRibbonBounds);
     }
-    // =========================================================================
-    // Debug HUD overlay
-    // =========================================================================
+    //-------------------------------------------------------------
+    public SettingsLayout getSettingsLayout() {
 
+        int sw = screenConfig.SCREEN_WIDTH();
+        int sh = screenConfig.SCREEN_HEIGHT();
+
+        // --- SFONDO SETTINGS ---
+        int settingsW = (int) (sw * 0.98f);
+        int settingsH = (int) (sh * 0.98f);
+        int settingsX = (sw - settingsW) / 2;
+        int settingsY = (sh - settingsH) / 2;
+        Rectangle settingsBounds = new Rectangle(settingsX, settingsY, settingsW, settingsH);
+
+        // --- ICONA SETTINGS (gear) in alto a destra ---
+        int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
+        Rectangle settingsIconBounds = new Rectangle(
+                sw - settingsSize - UIConfig.MENU_PADDING,
+                UIConfig.MENU_PADDING,
+                settingsSize,
+                settingsSize
+        );
+
+        // ---- RIBBON AUDIO (sezione in cima) ----
+        int ribbonW = (int) (settingsW * 0.55f);
+        int ribbonH = UIConfig.SETTINGS_RIBBON_HEIGHT; // es. 2 * TILE_SIZE
+        int ribbonX = settingsX + (settingsW - ribbonW) / 2;
+
+        int audioRibbonY = settingsY + UIConfig.MENU_PADDING;
+        Rectangle audioRibbonBounds = new Rectangle(ribbonX, audioRibbonY, ribbonW, ribbonH);
+
+        // Testo dentro il ribbon AUDIO
+        Rectangle audioTextBounds = new Rectangle(ribbonX, audioRibbonY, ribbonW, ribbonH);
+
+        // ---- ICONE AUDIO (music note + speaker) ----
+        int iconSize = UIConfig.SETTINGS_ICON_SIZE; // es. 2 * TILE_SIZE
+        int iconsY = audioRibbonY + ribbonH + UIConfig.MENU_PADDING;
+        int totalIconsW = iconSize * 2 + UIConfig.MENU_PADDING;
+        int iconsStartX = settingsX + (settingsW - totalIconsW) / 2;
+
+        Rectangle musicBounds = new Rectangle(iconsStartX, iconsY, iconSize, iconSize);
+        Rectangle soundBounds = new Rectangle(iconsStartX + iconSize + UIConfig.MENU_PADDING, iconsY, iconSize, iconSize);
+
+        // ---- RIBBON SCREEN ----
+        int screenRibbonY = iconsY + iconSize + UIConfig.MENU_PADDING * 2;
+        Rectangle resRibbonBounds = new Rectangle(ribbonX, screenRibbonY, ribbonW, ribbonH);
+        Rectangle resTextBounds = new Rectangle(ribbonX, screenRibbonY, ribbonW, ribbonH);
+
+        // ---- BOTTONI SCREEN: FULL | MID | SMAL ----
+        int btnW = UIConfig.SETTINGS_BUTTON_WIDTH;   // es. ~(settingsW / 4)
+        int btnH = UIConfig.SETTINGS_BUTTON_HEIGHT;  // es. TILE_SIZE
+        int btnY = screenRibbonY + ribbonH + UIConfig.MENU_PADDING;
+
+        int totalBtnsW = btnW * 3 + UIConfig.MENU_PADDING * 2;
+        int btnsStartX = settingsX + (settingsW - totalBtnsW) / 2;
+
+        Rectangle resFullBounds = new Rectangle(btnsStartX, btnY, btnW, btnH);
+        Rectangle resHalfBounds = new Rectangle(btnsStartX + btnW + UIConfig.MENU_PADDING, btnY, btnW, btnH);
+        Rectangle resMinBounds = new Rectangle(btnsStartX + (btnW + UIConfig.MENU_PADDING) * 2, btnY, btnW, btnH);
+
+        // ---- RIBBON FPS ----
+        int fpsRibbonY = btnY + btnH + UIConfig.MENU_PADDING * 2;
+        Rectangle fpsRibbonBounds = new Rectangle(ribbonX, fpsRibbonY, ribbonW, ribbonH);
+        Rectangle fpsTextBounds = new Rectangle(ribbonX, fpsRibbonY, ribbonW, ribbonH);
+
+        // ---- BOTTONI FPS: 60 | 120 | 240 ----
+        int fpsBtnY = fpsRibbonY + ribbonH + UIConfig.MENU_PADDING;
+        Rectangle fpsBounds1 = new Rectangle(btnsStartX, fpsBtnY, btnW, btnH);
+        Rectangle fpsBounds2 = new Rectangle(btnsStartX + btnW + UIConfig.MENU_PADDING, fpsBtnY, btnW, btnH);
+        Rectangle fpsBounds3 = new Rectangle(btnsStartX + (btnW + UIConfig.MENU_PADDING) * 2, fpsBtnY, btnW, btnH);
+
+        return new SettingsLayout(
+                settingsBounds,
+                settingsIconBounds,
+                audioTextBounds,
+                audioRibbonBounds,
+                musicBounds,
+                soundBounds,
+                fpsRibbonBounds,
+                fpsTextBounds,
+                fpsBounds1,
+                fpsBounds2,
+                fpsBounds3,
+                resTextBounds,
+                resRibbonBounds,
+                resFullBounds,
+                resHalfBounds,
+                resMinBounds
+        );
+
+    }
+    //-------------------------------------------------------------
+
+
+    // DEBUG METHODS
     //-------------------------------------------------------------
     private void drawFpsOverlay() {
         frames++;
@@ -663,10 +883,7 @@ public class UI {
     //-------------------------------------------------------------
 
 
-    // =========================================================================
-    // Private utility methods
-    // =========================================================================
-
+    // CLASS UTILITY METHODS
     /**
      * Returns the X coordinate to center horizontally the text on screen. */
     //-------------------------------------------------------------
@@ -685,7 +902,6 @@ public class UI {
         g.dispose();
         return scaled;
     }
-
     //-------------------------------------------------------------
     /**
      * Loads an image from the given file-system path, throwing on failure. */
@@ -710,6 +926,104 @@ public class UI {
     }
     //-------------------------------------------------------------
 
+
+    //BUTOTN STATE MANAGE
+    //-------------------------------------------------------------
+    private boolean isActive(Map<?, Boolean> map, Object key) {
+        return (map.get(key));
+    }
+    //-------------------------------------------------------------
+
+
+
+
+    // SETTER
+    //-------------------------------------------------------------
+    public void triggerDamageFlash() {
+        // Starts a 0.5-second red damage flash overlay.
+        damageFlashStartNano = System.nanoTime();
+    }
+
+    /*
+    public void setMainMenuSelection(int mainMenuSelection) {
+        this.mainMenuSelection = mainMenuSelection;
+    }
+    public void setHoveredRibbon(int hoveredRibbon) {
+        this.hoveredRibbon = hoveredRibbon;
+    }
+    public void setActiveRibbon(int activeRibbon) {
+        this.activeRibbon = activeRibbon;
+    }
+    public void setHoveredGameOverButton(boolean hoveredGameOverButton) {
+        this.hoveredGameOverButton = hoveredGameOverButton;
+    }
+    public void setPauseMenuSelection(int pauseMenuSelection) {
+        this.pauseMenuSelection = pauseMenuSelection;
+    }
+    public void setSettingsSelection(int settingsSelection) {}
+*/
+
+    // MainMenu hover: un solo pulsante attivo, null = nessuno
+    public void setMainMenuHover(ButtonValue.MainMenu key) {
+        mainMenuHover.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // MainMenu selected (navigazione tastiera) — solo bottoni normali, NON tocca i ribbon
+    public void setMainMenuSelected(ButtonValue.MainMenu key) {
+        mainMenuSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // Ribbon selected — map separata, un click su ribbon non azzera i bottoni normali e viceversa
+    public void setRibbonSelected(ButtonValue.MainMenu key) {
+        ribbonSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // Pause hover
+    public void setPauseHover(ButtonValue.Pause key) {
+        pauseHover.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // Pause selected
+    public void setPauseSelected(ButtonValue.Pause key) {
+        pauseSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // Settings hover
+    public void setSettingsHover(ButtonValue.Settings key) {
+        settingsHover.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // Settings selected
+    public void setSettingsSelected(ButtonValue.Settings key) {
+        settingsSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // GameOver hover
+    public void setGameOverHover(ButtonValue.GameOver key) {
+        gameOverHover.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    // GameOver selected
+    public void setGameOverSelected(ButtonValue.GameOver key) {
+        gameOverSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    public void setSettingsMusicSelected(ButtonValue.Settings key) {
+        musicSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+
+    public void setSettingsSoundSelected(ButtonValue.Settings key) {
+        soundSelected.replaceAll((k, v) -> key != null && k == key);
+    }
+    public void setSettingsFpsSelected(ButtonValue.Settings key) {
+        fpsSeclected.replaceAll((k, v) -> key!= null && k == key);
+    }
+    public void setSettingsScreenResSelected(ButtonValue.Settings key) {
+        settingsSelected.replaceAll((k, v) -> k != null && k == key);
+    }
+
+
+    //-------------------------------------------------------------
 }
 //-------------------------------------------------------------------------------------------------------------------
 // end class UI

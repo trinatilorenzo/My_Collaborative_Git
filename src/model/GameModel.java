@@ -6,13 +6,7 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
 import main.CONFIG.UIConfig;
-import main.CONFIG.enu.DynamiteState;
-import main.CONFIG.enu.GameState;
-import main.CONFIG.enu.MonkState;
-import main.CONFIG.enu.PlayerState;
-import main.CONFIG.enu.PowerUpType;
-import main.CONFIG.enu.TNTState;
-import main.CONFIG.enu.TorchState;
+import main.CONFIG.enu.*;
 import model.entity.*;
 import model.event.AudioEventType;
 import model.object.*;
@@ -54,6 +48,12 @@ public class GameModel {
     private List<EnemyTorch> torchEnemies;
     //-------------------------------------------------------------
 
+    //UI State
+
+    private boolean musicEnabled, soundEnabled;
+    private int resValue; // 0 = Max , 1 = Mid, 2 = Low
+    private int fpsValue; // 0 = 60 , 1 = 120, 2 = 240
+
     // Dialogue
     private String currentDialogue; // dialogue currently displayed to the player
     //-------------------------------------------------------------
@@ -68,6 +68,8 @@ public class GameModel {
     private int currentLevel = 1;
     private boolean levelCompleted;
     private boolean currentLevelPowerUpCollected = false;
+
+
     //-------------------------------------------------------------
     /**
      * CONSTRUCTOR
@@ -83,6 +85,11 @@ public class GameModel {
 
         currentDialogue = "";
         deadStateElapsedMs = 0.0;
+
+        musicEnabled = true;
+        soundEnabled = true;
+        resValue = 1;
+        fpsValue = 1;
 
     }
     //-------------------------------------------------------------
@@ -267,6 +274,9 @@ public class GameModel {
                 break;
             case PAUSED:
                 updateState(input);
+                break;
+            case SETTINGS:
+                // no update for settings state
                 break;
             case GAME_OVER:
                 // no update for game over state
@@ -704,17 +714,69 @@ public class GameModel {
 
     // SETTER ----------------------
     public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
-
     public void resumeFromPause() {
         if (gameState == GameState.PAUSED){
             gameState = GameState.PLAYING;
         }
+    }
+    public void openSettings(){
+        gameState = GameState.SETTINGS;
     }
     public void returnToMenu() {
         gameState = GameState.MENU;
     }
     //---------------------------------
 
+    //UI SETTERS
+    public void setSoundEnabled(){
+        this.soundEnabled = true;
+    }
+    public void setMusicEnabled(){
+        this.musicEnabled = true;
+    }
+
+    public void setMaxResolution(){
+        this.resValue = 0;
+    }
+    public void setMidResolution(){
+        this.resValue = 1;
+    }
+    public void setMinResolution(){
+        this.resValue = 2;
+    }
+
+    public void setLowFps(){
+        this.fpsValue = 0;
+    }
+    public void setMediumFps(){
+        this.fpsValue = 1;
+    }
+    public void setHighFps(){
+        this.fpsValue = 2;
+    }
+
+    public void setPlayerColor(PlayerColor playerColor){
+        player.setColor(playerColor);
+    }
+
+    //---------------------------------
+
+    //UI GETTERS
+    public boolean isSoundEnabled(){
+        return soundEnabled;
+    }
+    public boolean isMusicEnabled(){
+        return musicEnabled;
+    }
+    public int getResolutionValue(){
+        return resValue;
+    }
+    public int getFpsValue(){
+        return fpsValue;
+    }
+    public PlayerColor getPlayerColor(){
+        return player.getColor();
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------
