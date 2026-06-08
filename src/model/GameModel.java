@@ -50,9 +50,12 @@ public class GameModel {
 
     //UI State
 
+    private boolean settingsMenuOpen, settingsPauseOpen;
     private boolean musicEnabled, soundEnabled;
     private int resValue; // 0 = Max , 1 = Mid, 2 = Low
     private int fpsValue; // 0 = 60 , 1 = 120, 2 = 240
+    private PlayerColor playerColor;
+
 
     // Dialogue
     private String currentDialogue; // dialogue currently displayed to the player
@@ -86,6 +89,9 @@ public class GameModel {
         currentDialogue = "";
         deadStateElapsedMs = 0.0;
 
+        settingsMenuOpen = false;
+        settingsPauseOpen = false;
+        playerColor = GS.entityConfig().DEFAULT_COLOR;
         musicEnabled = true;
         soundEnabled = true;
         resValue = 1;
@@ -99,7 +105,7 @@ public class GameModel {
      */
     //-------------------------------------------------------------
     public void initializeNewGame(){
-        player = new Player(gameConfig.entityConfig());
+        player = new Player(gameConfig.entityConfig(), playerColor);
 
         //initialize NPC
         EntityConfig entityConfig = gameConfig.entityConfig();
@@ -687,8 +693,33 @@ public class GameModel {
             gameState = GameState.PLAYING;
         }
     }
-    public void openSettings(){
-        gameState = GameState.SETTINGS;
+    public void toggleSetingsFormPause(){
+        if (settingsPauseOpen){
+            settingsPauseOpen = false;
+        }else {
+            settingsPauseOpen = true;
+            settingsMenuOpen = false;
+            gameState = GameState.SETTINGS;
+        }
+    }
+    public void toggleSetingsFormMenu(){
+        if (settingsMenuOpen){
+            settingsMenuOpen = false;
+        }else {
+            settingsMenuOpen = true;
+            settingsPauseOpen = false;
+            gameState = GameState.SETTINGS;
+        }
+    }
+    public void closeSettings(){
+        if (settingsMenuOpen){
+            gameState = GameState.MENU;
+            settingsMenuOpen = false;
+        }
+        if (settingsPauseOpen){
+            gameState = GameState.PAUSED;
+            settingsPauseOpen = false;
+        }
     }
     public void returnToMenu() {
         gameState = GameState.MENU;
@@ -696,22 +727,33 @@ public class GameModel {
     //---------------------------------
 
     //UI SETTERS
-    public void setSoundEnabled(){
-        this.soundEnabled = true;
+    public void toggleSound(){
+        if (soundEnabled){
+            this.soundEnabled = false;
+        }else{
+            this.soundEnabled = true;
+        }
+
     }
-    public void setMusicEnabled(){
-        this.musicEnabled = true;
+    public void toggleMusic(){
+        if (musicEnabled){
+            this.musicEnabled = false;
+        }else{
+            this.musicEnabled = true;
+        }
+
     }
 
-    public void setMaxResolution(){
+    public void setMinResolution(){
         this.resValue = 0;
     }
     public void setMidResolution(){
         this.resValue = 1;
     }
-    public void setMinResolution(){
+    public void setMaxResolution(){
         this.resValue = 2;
     }
+
 
     public void setLowFps(){
         this.fpsValue = 0;
@@ -724,7 +766,10 @@ public class GameModel {
     }
 
     public void setPlayerColor(PlayerColor playerColor){
-        player.setColor(playerColor);
+        this.playerColor = playerColor;
+        if(player != null){
+            player.setColor(playerColor);
+        }
     }
 
     //---------------------------------
@@ -743,7 +788,11 @@ public class GameModel {
         return fpsValue;
     }
     public PlayerColor getPlayerColor(){
-        return player.getColor();
+        if(player != null){
+            playerColor = player.getColor();
+        }
+
+        return playerColor;
     }
 
 }

@@ -33,7 +33,7 @@ public class UI {
     // =========================================================================
 
     private final ScreenConfig screenConfig;
-    private final GameModel gameModel;
+    private final GameModel model;
     private Graphics2D g2;
 
     // =========================================================================
@@ -64,13 +64,14 @@ public class UI {
 
     private final BufferedImage buttonMusic;
     private final BufferedImage buttonMusicSelected;
+    private final BufferedImage buttonMusicPressed;
     private final BufferedImage buttonSound;
     private final BufferedImage buttonSoundSelected;
+    private final BufferedImage buttonSoundPressed;
 
     private final SliceSprite blueRibbon;
     private final SliceSprite yellowRibbon;
     private final SliceSprite redRibbon;
-
 
 
     private final BufferedImage menuLogo;
@@ -91,6 +92,7 @@ public class UI {
 
     Color backgroundColor;
     Color pauseBgColor;
+
     // =========================================================================
     // FPS counter — updated once per second in debug mode
     // =========================================================================
@@ -102,20 +104,6 @@ public class UI {
 
     // =========================================================================
     // Menu's
-    // =========================================================================
-
-
-   /* private int mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
-    private int hoveredRibbon = UIConfig.RIBBON_DEFAULT;
-    private int activeRibbon = UIConfig.RIBBON_DEFAULT;
-    private boolean hoveredGameOverButton = false;
-    private int pauseMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
-
-    private int settingsSelection = -1;*/
-
-
-    // =========================================================================
-    // Damage flash state
     // =========================================================================
 
     // HOVER
@@ -130,13 +118,10 @@ public class UI {
     private final Map<ButtonValue.Settings, Boolean> settingsSelected = new EnumMap<>(ButtonValue.Settings.class);
     private final Map<ButtonValue.GameOver, Boolean> gameOverSelected = new EnumMap<>(ButtonValue.GameOver.class);
 
-    private final Map<ButtonValue.MainMenu, Boolean> ribbonSelected = new EnumMap<>(ButtonValue.MainMenu.class);
-    private final Map<ButtonValue.Settings, Boolean> musicSelected = new EnumMap<>(ButtonValue.Settings.class);
-    private final Map<ButtonValue.Settings, Boolean> soundSelected = new EnumMap<>(ButtonValue.Settings.class);
-    private final Map<ButtonValue.Settings, Boolean> fpsSeclected = new EnumMap<>(ButtonValue.Settings.class);
-    private final Map<ButtonValue.Settings, Boolean> screenSeclected = new EnumMap<>(ButtonValue.Settings.class);
 
-
+    // =========================================================================
+    // Damage flash state
+    // =========================================================================
 
     private long damageFlashStartNano = -1L;
     private BufferedImage damageOverlayCache;
@@ -158,7 +143,7 @@ public class UI {
      */
     //-------------------------------------------------------------
     public UI(GameModel gameModel, ScreenConfig screenConfig) {
-        this.gameModel = gameModel;
+        this.model = gameModel;
         this.screenConfig = screenConfig;
 
         maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
@@ -193,9 +178,11 @@ public class UI {
         avatarPurplePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Purple_Selected.png");
 
         buttonMusic = loadUiImage("src/res/UI/Buttons/ButtonMusic.png");
-        buttonMusicSelected = loadUiImage("src/res/UI/Buttons/ButtonMusic_Pressed.png");
+        buttonMusicSelected = loadUiImage("src/res/UI/Buttons/ButtonMusic_Hover.png");
+        buttonMusicPressed = loadUiImage("src/res/UI/Buttons/ButtonMusic_Pressed.png");
         buttonSound = loadUiImage("src/res/UI/Buttons/ButtonSound.png");
-        buttonSoundSelected = loadUiImage("src/res/UI/Buttons/ButtonSound_Pressed.png");
+        buttonSoundSelected = loadUiImage("src/res/UI/Buttons/ButtonSound_Hover.png");
+        buttonSoundPressed = loadUiImage("src/res/UI/Buttons/ButtonSound_Pressed.png");
 
         blueRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", tileSize, tileSize);
         redRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Red_3Slides.png", tileSize, tileSize);
@@ -251,23 +238,6 @@ public class UI {
             gameOverHover.put(k, false);
             gameOverSelected.put(k, false);
         }
-        // ribbonSelected: solo le quattro chiavi ribbon
-        ribbonSelected.put(TOGGLE_BLUE,   true);
-        ribbonSelected.put(TOGGLE_YELLOW, false);
-        ribbonSelected.put(TOGGLE_RED,    false);
-        ribbonSelected.put(TOGGLE_PURPLE, false);
-
-        musicSelected.put(MUSIC, false);
-        soundSelected.put(SOUND, false);
-        fpsSeclected.put(FPS_120, true);
-        fpsSeclected.put(FPS_60,  false);
-        fpsSeclected.put(FPS_240, false);
-        screenSeclected.put(RES_MID, true);
-        screenSeclected.put(RES_FULL, false);
-        screenSeclected.put(RES_MIN,  false);
-
-
-
 
     }
     //-------------------------------------------------------------
@@ -280,27 +250,66 @@ public class UI {
     public void draw(Graphics2D g2) {
         this.g2 = g2;
 
-        switch (gameModel.getGameState()) {
-            case MENU      -> drawMainMenu();
-            case PLAYING   -> {
-
-                drawPlayerLife();
-                if (!gameModel.getCurrentDialogue().isEmpty()) drawDialogueWindow();
+        switch (model.getGameState()) {
+            case MENU      -> {
+                updateModelStatus();
+                drawMainMenu();
             }
-            case PAUSED    -> { drawPlayerLife(); drawPauseScreen(); }
-            case GAME_OVER -> drawGameOverScreen();
-            case SETTINGS    -> drawSettingsScreen();
+            case PLAYING   -> {
+                drawPlayerLife();
+                if (!model.getCurrentDialogue().isEmpty()) drawDialogueWindow();
+            }
+            case PAUSED    -> {
+                drawPlayerLife(); drawPauseScreen(); }
+            case GAME_OVER -> {
+                drawGameOverScreen();
+            }
+            case SETTINGS    -> {
+                updateModelStatus();
+                drawSettingsScreen();
+            }
         }
 
-        if (gameModel.isDebugMode()) drawFpsOverlay();
+        if (model.isDebugMode()) drawFpsOverlay();
+    }
+
+    private void updateModelStatus(){
+        //Set start value based on model
+        resetMainMenuSelected();
+        resetSettingsSelected();
+
+        switch (model.getPlayerColor()) {
+            case YELLOW -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_YELLOW, true);}
+            case RED    -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_RED, true);}
+            case BLUE   -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);}
+            case PURPLE -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);}
+        }
+        switch (model.getFpsValue()) {
+            case 0 -> {settingsSelected.put(FPS_60, true);}
+            case 1 -> {settingsSelected.put(FPS_120, true);}
+            case 2 -> {settingsSelected.put(FPS_240, true);}
+        }
+
+        switch (model.getResolutionValue()){
+            case 0 -> {settingsSelected.put(RES_MIN, true);}
+            case 1 -> {settingsSelected.put(RES_MID, true);}
+            case 2 -> {settingsSelected.put(RES_FULL, true);}
+        }
+
+        if (model.isMusicEnabled()){
+            settingsSelected.put(ButtonValue.Settings.MUSIC, true);
+        }
+        if (model.isSoundEnabled()){
+            settingsSelected.put(ButtonValue.Settings.SOUND, true);
+        }
     }
     //-------------------------------------------------------------
     // ALL DRAW METHODS
     //-------------------------------------------------------------
     private void drawPlayerLife() {
 
-        int playerLife = gameModel.getPlayer().getLife();
-        int maxLife = gameModel.getPlayer().getMaxLife();
+        int playerLife = model.getPlayer().getLife();
+        int maxLife = model.getPlayer().getMaxLife();
         int totalHearts = (maxLife + 1) / 2;
 
         int heartWidth = heartFull.getWidth();
@@ -341,7 +350,7 @@ public class UI {
 
         dialogueBanner.draw(g2, x, y, width);
 
-        String dialogue = gameModel.getCurrentDialogue();
+        String dialogue = model.getCurrentDialogue();
         if (dialogue == null || dialogue.isEmpty()) return;
 
         // Dialogue text
@@ -385,25 +394,25 @@ public class UI {
         Rectangle newGameBounds = layout.newGameBounds();
         Rectangle continueBounds = layout.continueBounds();
         Rectangle settingsBounds = layout.settingsBounds();
-        Rectangle ribbonYellowBounds = layout.ribbonYellowBounds();
-        Rectangle ribbonRedBounds = layout.ribbonRedBounds();
-        Rectangle ribbonBlueBounds = layout.ribbonBlueBounds();
-        Rectangle ribbonPurpleBounds = layout.ribbonPurpleBounds();
+        Rectangle ribbonYellowBounds = layout.toggleYellowBounds();
+        Rectangle ribbonRedBounds = layout.toggleRedBounds();
+        Rectangle ribbonBlueBounds = layout.toggleBlueBounds();
+        Rectangle ribbonPurpleBounds = layout.togglePurpleBounds();
 
         //draw ribbon
-        g2.drawImage(mainMenuHover.get(ButtonValue.MainMenu.TOGGLE_BLUE) || ribbonSelected.get(ButtonValue.MainMenu.TOGGLE_BLUE)
+        g2.drawImage(mainMenuHover.get(ButtonValue.MainMenu.TOGGLE_BLUE) || mainMenuSelected.get(ButtonValue.MainMenu.TOGGLE_BLUE)
                         ? avatarBluePressed : avatarBlue,
                 ribbonBlueBounds.x, ribbonBlueBounds.y, ribbonBlueBounds.width, ribbonBlueBounds.height, null);
 
-        g2.drawImage(mainMenuHover.get(TOGGLE_YELLOW) || ribbonSelected.get(TOGGLE_YELLOW)
+        g2.drawImage(mainMenuHover.get(TOGGLE_YELLOW) || mainMenuSelected.get(TOGGLE_YELLOW)
                         ? avatarYellowPressed : avatarYellow,
                 ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
 
-        g2.drawImage(mainMenuHover.get(TOGGLE_RED) || ribbonSelected.get(TOGGLE_RED)
+        g2.drawImage(mainMenuHover.get(TOGGLE_RED) || mainMenuSelected.get(TOGGLE_RED)
                         ? avatarRedPressed : avatarRed,
                 ribbonRedBounds.x, ribbonRedBounds.y, ribbonRedBounds.width, ribbonRedBounds.height, null);
 
-        g2.drawImage(mainMenuHover.get(TOGGLE_PURPLE) || ribbonSelected.get(TOGGLE_PURPLE)
+        g2.drawImage(mainMenuHover.get(TOGGLE_PURPLE) || mainMenuSelected.get(TOGGLE_PURPLE)
                         ? avatarPurplePressed : avatarPurple,
                 ribbonPurpleBounds.x, ribbonPurpleBounds.y, ribbonPurpleBounds.width, ribbonPurpleBounds.height, null);
 
@@ -502,14 +511,20 @@ public class UI {
         redRibbon.draw(g2, audioRibbon.x, audioRibbon.y, audioRibbon.width, audioRibbon.height);
 
         Rectangle musicB = layout.musicBounds();
-        g2.drawImage(settingsHover.get(MUSIC) || musicSelected.get(MUSIC)
-                        ? buttonMusicSelected : buttonMusic,
-                musicB.x, musicB.y, musicB.width, musicB.height, null);
+        if(settingsSelected.get(MUSIC)){
+            g2.drawImage(buttonMusicPressed, musicB.x, musicB.y, musicB.width, musicB.height, null);
+        }else{
+            g2.drawImage(settingsHover.get(MUSIC) ? buttonMusicSelected : buttonMusic,
+                    musicB.x, musicB.y, musicB.width, musicB.height, null);}
+
 
         Rectangle soundB = layout.soundBounds();
-        g2.drawImage(settingsHover.get(SOUND) || soundSelected.get(SOUND)
-                        ? buttonSoundSelected : buttonSound,
-                soundB.x, soundB.y, soundB.width, soundB.height, null);
+        if(settingsSelected.get(SOUND)){
+            g2.drawImage(buttonSoundPressed, soundB.x, soundB.y, soundB.width, soundB.height, null);
+        }else{
+            g2.drawImage(settingsHover.get(SOUND) ? buttonSoundSelected : buttonSound,
+                    soundB.x, soundB.y, soundB.width, soundB.height, null);
+        }
 
         // -------------------------------------------------------
         // SEZIONE SCREEN — ribbon + bottoni FULL / MID / SMAL
@@ -520,17 +535,17 @@ public class UI {
         drawButton(menuButton, menuButtonSelected,
                 layout.resFullBounds().x, layout.resFullBounds().y,
                 layout.resFullBounds().width, layout.resFullBounds().height,
-                "FULL", settingsHover.get(RES_FULL) || screenSeclected.get(RES_FULL));
+                "FULL", settingsHover.get(RES_FULL) || settingsSelected.get(RES_FULL));
 
         drawButton(menuButton, menuButtonSelected,
                 layout.resHalfBounds().x, layout.resHalfBounds().y,
                 layout.resHalfBounds().width, layout.resHalfBounds().height,
-                "MID", settingsHover.get(RES_MID) || screenSeclected.get(RES_MID));
+                "MID", settingsHover.get(RES_MID) || settingsSelected.get(RES_MID));
 
         drawButton(menuButton, menuButtonSelected,
                 layout.resMinBounds().x, layout.resMinBounds().y,
                 layout.resMinBounds().width, layout.resMinBounds().height,
-                "SMAL", settingsHover.get(RES_MIN) || screenSeclected.get(RES_MIN));
+                "SMAL", settingsHover.get(RES_MIN) || settingsSelected.get(RES_MIN));
 
         // -------------------------------------------------------
         // SEZIONE FPS — ribbon + bottoni 60 / 120 / 240
@@ -541,17 +556,17 @@ public class UI {
         drawButton(menuButton, menuButtonSelected,
                 layout.fpsBounds1().x, layout.fpsBounds1().y,
                 layout.fpsBounds1().width, layout.fpsBounds1().height,
-                "60", settingsHover.get(FPS_60) || fpsSeclected.get(FPS_60));
+                "60", settingsHover.get(FPS_60) || settingsSelected.get(FPS_60));
 
         drawButton(menuButton, menuButtonSelected,
                 layout.fpsBounds2().x, layout.fpsBounds2().y,
                 layout.fpsBounds2().width, layout.fpsBounds2().height,
-                "120", settingsHover.get(FPS_120) || fpsSeclected.get(FPS_120));
+                "120", settingsHover.get(FPS_120) || settingsSelected.get(FPS_120));
 
         drawButton(menuButton, menuButtonSelected,
                 layout.fpsBounds3().x, layout.fpsBounds3().y,
                 layout.fpsBounds3().width, layout.fpsBounds3().height,
-                "240", settingsHover.get(FPS_240) || fpsSeclected.get(FPS_240));
+                "240", settingsHover.get(FPS_240) || settingsSelected.get(FPS_240));
 
     }
 
@@ -686,7 +701,7 @@ public class UI {
 
         g.dispose();
         long elapsedMs = (System.nanoTime() - startNs) / 1_000_000L;
-        if (gameModel.isDebugMode() && elapsedMs >= 4) {
+        if (model.isDebugMode() && elapsedMs >= 4) {
             System.out.println("[UI] damage overlay cache rebuilt in " + elapsedMs + "ms (alphaStep="
                     + damageOverlayAlphaStep + ", " + w + "x" + h + ")");
         }
@@ -870,7 +885,7 @@ public class UI {
             fpsTimer = now;
         }
 
-        Player player = gameModel.getPlayer();
+        Player player = model.getPlayer();
         int xTile = (player.getWorldX() + player.getSolidArea().x) / screenConfig.TILE_SIZE();
         int yTile = (player.getWorldY() + player.getSolidArea().y) / screenConfig.TILE_SIZE();
 
@@ -944,83 +959,62 @@ public class UI {
         damageFlashStartNano = System.nanoTime();
     }
 
-    /*
-    public void setMainMenuSelection(int mainMenuSelection) {
-        this.mainMenuSelection = mainMenuSelection;
-    }
-    public void setHoveredRibbon(int hoveredRibbon) {
-        this.hoveredRibbon = hoveredRibbon;
-    }
-    public void setActiveRibbon(int activeRibbon) {
-        this.activeRibbon = activeRibbon;
-    }
-    public void setHoveredGameOverButton(boolean hoveredGameOverButton) {
-        this.hoveredGameOverButton = hoveredGameOverButton;
-    }
-    public void setPauseMenuSelection(int pauseMenuSelection) {
-        this.pauseMenuSelection = pauseMenuSelection;
-    }
-    public void setSettingsSelection(int settingsSelection) {}
-*/
-
-    // MainMenu hover: un solo pulsante attivo, null = nessuno
+    // MainMenu
     public void setMainMenuHover(ButtonValue.MainMenu key) {
         mainMenuHover.replaceAll((k, v) -> key != null && k == key);
     }
-
-    // MainMenu selected (navigazione tastiera) — solo bottoni normali, NON tocca i ribbon
     public void setMainMenuSelected(ButtonValue.MainMenu key) {
         mainMenuSelected.replaceAll((k, v) -> key != null && k == key);
     }
-
-    // Ribbon selected — map separata, un click su ribbon non azzera i bottoni normali e viceversa
-    public void setRibbonSelected(ButtonValue.MainMenu key) {
-        ribbonSelected.replaceAll((k, v) -> key != null && k == key);
+    public void resetMainMenuHover() {
+        mainMenuHover.replaceAll((k, v) -> false);
+    }
+    public void resetMainMenuSelected() {
+        mainMenuSelected.replaceAll((k, v) -> false);
     }
 
-    // Pause hover
+    // Pause
     public void setPauseHover(ButtonValue.Pause key) {
         pauseHover.replaceAll((k, v) -> key != null && k == key);
     }
-
-    // Pause selected
     public void setPauseSelected(ButtonValue.Pause key) {
         pauseSelected.replaceAll((k, v) -> key != null && k == key);
     }
+    public void resetPauseHover() {
+        pauseHover.replaceAll((k, v) -> false);
+    }
+    public void resetPauseSelected() {
+        pauseSelected.replaceAll((k, v) -> false);
+    }
 
-    // Settings hover
+    // Settings
     public void setSettingsHover(ButtonValue.Settings key) {
         settingsHover.replaceAll((k, v) -> key != null && k == key);
     }
-
-    // Settings selected
     public void setSettingsSelected(ButtonValue.Settings key) {
         settingsSelected.replaceAll((k, v) -> key != null && k == key);
     }
+    public void resetSettingsHover() {
+        settingsHover.replaceAll((k, v) -> false);
+    }
+    public void resetSettingsSelected() {
+        settingsSelected.replaceAll((k, v) -> false);
+    }
 
-    // GameOver hover
+    // GameOver
     public void setGameOverHover(ButtonValue.GameOver key) {
         gameOverHover.replaceAll((k, v) -> key != null && k == key);
     }
-
-    // GameOver selected
     public void setGameOverSelected(ButtonValue.GameOver key) {
         gameOverSelected.replaceAll((k, v) -> key != null && k == key);
     }
-
-    public void setSettingsMusicSelected(ButtonValue.Settings key) {
-        musicSelected.replaceAll((k, v) -> key != null && k == key);
+    public void resetGameOverHover() {
+        gameOverHover.replaceAll((k, v) -> false);
+    }
+    public void resetGameOverSelected() {
+        gameOverSelected.replaceAll((k, v) -> false);
     }
 
-    public void setSettingsSoundSelected(ButtonValue.Settings key) {
-        soundSelected.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void setSettingsFpsSelected(ButtonValue.Settings key) {
-        fpsSeclected.replaceAll((k, v) -> key!= null && k == key);
-    }
-    public void setSettingsScreenResSelected(ButtonValue.Settings key) {
-        settingsSelected.replaceAll((k, v) -> k != null && k == key);
-    }
 
 
     //-------------------------------------------------------------
