@@ -89,7 +89,7 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int TNT_HITBOX_WIDTH = 55;
         public static final int TNT_HITBOX_HEIGHT = 35;
 
-        public static final int TNT_FOR_SPAWNPOINT = 5;
+        public static final int TNT_FOR_SPAWNPOINT = 1;
         public ArrayList<SpawnPoint> TNT_SPAWNPOINT() {return TntSpawnPoint;}
 
         //-------------------------------------------------------------

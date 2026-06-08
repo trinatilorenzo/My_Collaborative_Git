@@ -4,6 +4,9 @@ import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.PowerUpType; 
 import main.CONFIG.enu.TreeState;
+
+import static main.CONFIG.ObjConfig.POWER_UP_LIGHTING_DURATION;
+
 import java.awt.Rectangle;
 
 /**
@@ -22,6 +25,8 @@ public class OBJ_Tree extends GameObject {
     private PowerUpType hiddenPowerUp = null; // The power-up hidden inside the tree, if any
     private boolean powerUpDropped = false; // To ensure power-up is dropped only once
     
+    private boolean flashingActive = false;
+
     /**
      * COSTRUCTOR
      */
@@ -102,6 +107,8 @@ public class OBJ_Tree extends GameObject {
         return false; // No power-up to drop
     }
 
+    //-------------------------------------------------------------
+    
     //GETTER
     //-------------------------------------------------------------
     public TreeState getState() {
@@ -118,12 +125,18 @@ public class OBJ_Tree extends GameObject {
     public boolean hasPowerUp() {
         return hiddenPowerUp != null;
     }
+    public boolean isFlashingActive(){
+        return flashingActive;
+    }
     //-------------------------------------------------------------
 
     //SETTER
     //-------------------------------------------------------------
     public void setHiddenPowerUp(PowerUpType powerUp) {
         this.hiddenPowerUp = powerUp;
+    }
+    public void setFlashingActive(){
+        this.flashingActive = true;
     }
     //-------------------------------------------------------------
 

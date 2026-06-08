@@ -508,40 +508,51 @@ public class GameModel {
             }
         }
         // -------------------
-        // checkLevelProgression();
+        checkLevelProgression();
     }
-       
 
-
-    //-------------------------------------------------------------
-    private boolean isPowerUpForCurrentLevel(PowerUpType type) {
-        return (currentLevel == 1 && type == PowerUpType.SHIELD) ||
-               (currentLevel == 2 && type == PowerUpType.HEALTH_RESTORE) ||
-               (currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
-    }
-    //-------------------------------------------------------------
+    //----------------------------------------------------------------------
+    /**
+     * Update level progression
+     */
     private void checkLevelProgression() {
-        boolean allEnemiesDefeated = false;
-        switch (currentLevel) {
-            case 1 -> allEnemiesDefeated = tntEnemies.isEmpty();
-            case 2 -> allEnemiesDefeated = dynamiteEnemies.isEmpty();
-            case 3 -> allEnemiesDefeated = torchEnemies.isEmpty();
-        }
+       boolean enemiesDefeated = allEnemiesDefeated();
+        
+        updateFlashingEffect(enemiesDefeated);
 
-        if (allEnemiesDefeated && currentLevelPowerUpCollected) {
-            if (currentLevel < 3){
-                currentLevel ++;
-                currentLevelPowerUpCollected = false;
-                System.out.println("LEVEL UP! Current level: " + currentLevel);
-            } else {
-                levelCompleted = true;
-                System.out.println("CONGRATS! YOU COMPLETED THE GAME!");
+        if (enemiesDefeated){
+            if (currentLevelPowerUpCollected) {
+                if (currentLevel < 3){
+                    currentLevel ++;
+                    currentLevelPowerUpCollected = false;
+                } else {
+                    levelCompleted = true;
+                }
             }
         } else {
             levelCompleted = false;
 
         }
     }
+    //-----------------------------------------------------------------------------------
+    private void updateFlashingEffect(boolean enemiesDefeated){
+        PowerUpType targetType = switch (currentLevel) {
+            case 1 -> PowerUpType.SHIELD;
+            case 2 -> PowerUpType.HEALTH_RESTORE;
+            case 3 -> PowerUpType.SPEED_BOOST;
+            default -> null;
+        };
+
+        for (GameObject obj : objects) {
+            if (obj instanceof OBJ_Tree tree) {
+                // If the enemies are defeated and the power-up has not been taken it flashes.
+                if (enemiesDefeated && tree.getHiddenPowerUp() == targetType && !currentLevelPowerUpCollected) 
+                    tree.setFlashingActive(); 
+            }
+        }
+    }
+
+    //-------------------------------------------------------
     private void updateMonk(InputState input) {
         // Monk Talking ----------------------
 
@@ -651,7 +662,28 @@ public class GameModel {
         return false;
     }
     //-------------------------------------------------------------
-
+    
+    //-------------------------------------------------------------
+    private boolean isPowerUpForCurrentLevel(PowerUpType type) {
+        return (currentLevel == 1 && type == PowerUpType.SHIELD) ||
+               (currentLevel == 2 && type == PowerUpType.HEALTH_RESTORE) ||
+               (currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
+    }
+    //-------------------------------------------------------------
+    
+    /**
+     * Check if all enemies of current level are defeated
+     */
+    private boolean allEnemiesDefeated () {
+        boolean allEnemiesDefeated = false;
+        switch (currentLevel) {
+            case 1 -> allEnemiesDefeated = tntEnemies.isEmpty();
+            case 2 -> allEnemiesDefeated = dynamiteEnemies.isEmpty();
+            case 3 -> allEnemiesDefeated = torchEnemies.isEmpty();
+        }
+        return allEnemiesDefeated;
+    }
+    
     /**
      * Audio event emitter
       */
