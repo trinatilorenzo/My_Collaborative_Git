@@ -19,6 +19,9 @@ public record UIConfig() {
     public static final ButtonValue.Settings SETTINGS_DEFAULT_SELECTION = null;
     public static final ButtonValue.GameOver GAME_OVER_DEFAULT_SELECTION = null;
 
+    public static final int MAX_BUTTON_TEXT_SIZE = 50;
+    public static final int MAX_RIBBON_TEXT_SIZE = 90;
+    public static final int MIN_BUTTON_TEXT_SIZE = 8;
 
     //MENU
     //-------------------------------------------------------------
@@ -66,6 +69,7 @@ public record UIConfig() {
     //SETTINGS MENU
     //-------------------------------------------------------------
 
+    public static final int SETTINGS_PADDING = 20;
     public static final int SETTINGS_RIBBON_WIDTH = 500;
     public static final int SETTINGS_RIBBON_HEIGHT = 60;
     public static final int SETTINGS_ICON_SIZE = 80;

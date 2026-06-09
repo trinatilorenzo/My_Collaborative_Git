@@ -103,7 +103,7 @@ public class UI {
 
 
     // =========================================================================
-    // Menu's
+    // Menu's Botton
     // =========================================================================
 
     // HOVER
@@ -261,9 +261,7 @@ public class UI {
             }
             case PAUSED    -> {
                 drawPlayerLife(); drawPauseScreen(); }
-            case GAME_OVER -> {
-                drawGameOverScreen();
-            }
+            case GAME_OVER -> drawGameOverScreen();
             case SETTINGS    -> {
                 updateModelStatus();
                 drawSettingsScreen();
@@ -273,27 +271,31 @@ public class UI {
         if (model.isDebugMode()) drawFpsOverlay();
     }
 
+    /**
+     * Sync the button state with the game model
+     */
+    //-------------------------------------------------------------
     private void updateModelStatus(){
         //Set start value based on model
         resetMainMenuSelected();
         resetSettingsSelected();
 
         switch (model.getPlayerColor()) {
-            case YELLOW -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_YELLOW, true);}
-            case RED    -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_RED, true);}
-            case BLUE   -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);}
-            case PURPLE -> {mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);}
+            case YELLOW -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_YELLOW, true);
+            case RED    -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_RED, true);
+            case BLUE   -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);
+            case PURPLE -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);
         }
         switch (model.getFpsValue()) {
-            case 0 -> {settingsSelected.put(FPS_60, true);}
-            case 1 -> {settingsSelected.put(FPS_120, true);}
-            case 2 -> {settingsSelected.put(FPS_240, true);}
+            case 0 -> settingsSelected.put(FPS_60, true);
+            case 1 -> settingsSelected.put(FPS_120, true);
+            case 2 -> settingsSelected.put(FPS_240, true);
         }
 
         switch (model.getResolutionValue()){
-            case 0 -> {settingsSelected.put(RES_MIN, true);}
-            case 1 -> {settingsSelected.put(RES_MID, true);}
-            case 2 -> {settingsSelected.put(RES_FULL, true);}
+            case 0 -> settingsSelected.put(RES_MIN, true);
+            case 1 -> settingsSelected.put(RES_MID, true);
+            case 2 -> settingsSelected.put(RES_FULL, true);
         }
 
         if (model.isMusicEnabled()){
@@ -304,6 +306,8 @@ public class UI {
         }
     }
     //-------------------------------------------------------------
+
+
     // ALL DRAW METHODS
     //-------------------------------------------------------------
     private void drawPlayerLife() {
@@ -353,21 +357,20 @@ public class UI {
         String dialogue = model.getCurrentDialogue();
         if (dialogue == null || dialogue.isEmpty()) return;
 
-        // Dialogue text
         g2.setColor(new Color(60, 40, 20));
         g2.setFont(maruMonica.deriveFont(Font.BOLD, 28F));
 
-        //TODO far andare a capo il testo in automatioc
         int textX = x + 60;
         int textY = y + 80;
-        for (String line : dialogue.split("\n")) {
+        int maxTextWidth = width - 120;
+
+        for (String line : wrapText(dialogue, g2.getFontMetrics(), maxTextWidth)) {
             g2.drawString(line, textX, textY);
             textY += 40;
         }
 
-        // "Press M to continue" hint
         g2.setFont(maruMonica.deriveFont(Font.ITALIC, 22F));
-        g2.drawString("Press M to continue...", x + width - 300, y + height - 130);
+        g2.drawString("Press M to continue...", x + width - 300, y + height - 30);
     }
     //-------------------------------------------------------------
     //-------------------------------------------------------------
@@ -453,7 +456,6 @@ public class UI {
 
         PauseMenuLayout layout = getPauseMenuLayout();
         Rectangle ribbonBounds = layout.pauseRibbonBounds();
-        Rectangle textBounds = layout.pauseTextBounds();
         Rectangle resumeBounds = layout.resumeBounds();
         Rectangle settingsBounds = layout.settingsBounds();
         Rectangle saveBounds = layout.saveBounds();
@@ -462,12 +464,7 @@ public class UI {
         pauseBanner.draw(g2, ribbonBounds.x, ribbonBounds.y, ribbonBounds.width);
         String title = "PAUSE";
         g2.setColor(new Color(60, 40, 20, 200));
-        g2.setFont(maruMonica.deriveFont(Font.BOLD, (float) UIConfig.PAUSE_TITLE_FONT_SIZE));
-        Rectangle2D fontBounds = g2.getFontMetrics().getStringBounds(title, g2);
-        int textX = textBounds.x + (int) Math.round((textBounds.width - fontBounds.getWidth()) / 2.0 - fontBounds.getX());
-        int textY = textBounds.y + (int) Math.round((textBounds.height - fontBounds.getHeight()) / 2.0 - fontBounds.getY());
-        g2.drawString(title, textX, textY);
-
+        drawTextInRibbon(ribbonBounds, title, 1, 1);
 
         drawButton(resumeButton, resumeButtonSelected, resumeBounds.x, resumeBounds.y, resumeBounds.width, resumeBounds.height,
                 "Resume", pauseHover.get(RESUME) || pauseSelected.get(RESUME));
@@ -485,9 +482,7 @@ public class UI {
 
         SettingsLayout layout = getSettingsLayout();
 
-        // -------------------------------------------------------
-        // SFONDO PANNELLO SETTINGS (overlay semitrasparente)
-        // -------------------------------------------------------
+        //background
         Rectangle sb = layout.settingsBounds();
         g2.setColor(new Color(209, 205, 180));
         g2.fillRoundRect(sb.x, sb.y, sb.width, sb.height, 20, 20);
@@ -495,20 +490,24 @@ public class UI {
         g2.setStroke(new BasicStroke(7));
         g2.drawRoundRect(sb.x, sb.y, sb.width, sb.height, 20, 20);
         g2.setStroke(new BasicStroke(1)); // reset stroke
+        // -------------------------------------------------------
 
-        // Icona settings (gear)
+        // Settings icon
         Rectangle settingsBounds = layout.settingsIconBounds();
         g2.drawImage(settingsHover.get(SETTINGS_ICON) || settingsSelected.get(SETTINGS_ICON)
                         ? settingsIconPressed : settingsIcon,
                 settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
 
         drawClouds(sb.x, sb.y, sb.width, sb.height, cloudPlacementsSettings);
+        // -------------------------------------------------------
 
-        // -------------------------------------------------------
-        // SEZIONE AUDIO — ribbon + icone
-        // -------------------------------------------------------
+        //Audio section
         Rectangle audioRibbon = layout.audioRibbonBounds();
         redRibbon.draw(g2, audioRibbon.x, audioRibbon.y, audioRibbon.width, audioRibbon.height);
+
+        String title = "Audio Settings";
+        g2.setColor(Color.WHITE);
+        drawTextInRibbon(audioRibbon, title, 0.5 , 0.9);
 
         Rectangle musicB = layout.musicBounds();
         if(settingsSelected.get(MUSIC)){
@@ -525,12 +524,14 @@ public class UI {
             g2.drawImage(settingsHover.get(SOUND) ? buttonSoundSelected : buttonSound,
                     soundB.x, soundB.y, soundB.width, soundB.height, null);
         }
+        // -------------------------------------------------------
 
-        // -------------------------------------------------------
-        // SEZIONE SCREEN — ribbon + bottoni FULL / MID / SMAL
-        // -------------------------------------------------------
+        //Resolution
         Rectangle resRibbon = layout.resRibbonBounds();
         blueRibbon.draw(g2, resRibbon.x, resRibbon.y, resRibbon.width, resRibbon.height);
+
+        title = "Screen Resolution";
+        drawTextInRibbon(resRibbon, title, 0.5, 0.97);
 
         drawButton(menuButton, menuButtonSelected,
                 layout.resFullBounds().x, layout.resFullBounds().y,
@@ -548,10 +549,13 @@ public class UI {
                 "SMAL", settingsHover.get(RES_MIN) || settingsSelected.get(RES_MIN));
 
         // -------------------------------------------------------
-        // SEZIONE FPS — ribbon + bottoni 60 / 120 / 240
-        // -------------------------------------------------------
+
+        // Fps
         Rectangle fpsRibbon = layout.fpsRibbonBounds();
         yellowRibbon.draw(g2, fpsRibbon.x, fpsRibbon.y, fpsRibbon.width, fpsRibbon.height);
+
+        title = "FPS";
+        drawTextInRibbon(fpsRibbon, title, 0.5, 0.98);
 
         drawButton(menuButton, menuButtonSelected,
                 layout.fpsBounds1().x, layout.fpsBounds1().y,
@@ -567,12 +571,9 @@ public class UI {
                 layout.fpsBounds3().x, layout.fpsBounds3().y,
                 layout.fpsBounds3().width, layout.fpsBounds3().height,
                 "240", settingsHover.get(FPS_240) || settingsSelected.get(FPS_240));
-
+        // -------------------------------------------------------
     }
-
     //-------------------------------------------------------------
-
-
     //-------------------------------------------------------------
     private void drawGameOverScreen() {
         drawPlayerLife();
@@ -608,7 +609,6 @@ public class UI {
     }
     //-------------------------------------------------------------
 
-
     /**
      * Draws a menu button sprite with a horizontally and vertically centred label. */
     //-------------------------------------------------------------
@@ -616,7 +616,9 @@ public class UI {
         (selected ? menuButtonSelected : menuButton).draw(g2, x, y, width, height);
 
         g2.setColor(Color.WHITE);
-        g2.setFont(maruMonica.deriveFont(Font.BOLD, 50F));
+        Font fittedFont = fitFontToBox(g2, label, maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_BUTTON_TEXT_SIZE),
+                (int) (width*0.7) , (int) (height * 0.5));
+        g2.setFont(fittedFont);
 
         int constant = 2;
 
@@ -629,8 +631,22 @@ public class UI {
         int textY = constant + y + (int) Math.round((height - textBounds.getHeight()) / 2.0 - textBounds.getY());
 
         g2.drawString(label, textX, textY);
+
     }
     //-------------------------------------------------------------
+    private void drawTextInRibbon(Rectangle ribbonBounds, String title, double ribbonScale, double constY) {
+
+        Font fittedFont = fitFontToBox(g2, title, maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_RIBBON_TEXT_SIZE),
+                (int)(ribbonBounds.width * ribbonScale), (int)(ribbonBounds.height * ribbonScale) );
+        g2.setFont(fittedFont);
+
+        Rectangle2D fontBounds = g2.getFontMetrics().getStringBounds(title, g2);
+        int textX = ribbonBounds.x + (int) Math.round((ribbonBounds.width - fontBounds.getWidth()) / 2.0 - fontBounds.getX());
+        int textY = ribbonBounds.y + (int) Math.round((ribbonBounds.height - fontBounds.getHeight()) / 2.0 - fontBounds.getY());
+        g2.drawString(title, textX, (int)(textY*constY));
+    }
+    //-------------------------------------------------------------
+
 
 
     // Damage overlay
@@ -646,7 +662,7 @@ public class UI {
         int w = screenConfig.SCREEN_WIDTH();
         int h = screenConfig.SCREEN_HEIGHT();
 
-        int alphaStep = Math.max(0, Math.min(DAMAGE_ALPHA_STEPS, Math.round(alpha * DAMAGE_ALPHA_STEPS)));
+        int alphaStep = Math.clamp(Math.round(alpha * DAMAGE_ALPHA_STEPS), 0, DAMAGE_ALPHA_STEPS);
         if (damageOverlayCache == null
                 || damageOverlayCacheWidth != w
                 || damageOverlayCacheHeight != h
@@ -761,7 +777,6 @@ public class UI {
         int bannerY = centerY - bannerHeight / 2 - UIConfig.PAUSE_RIBBON_OFFSET_Y;
 
         Rectangle pauseRibbonBounds = new Rectangle(bannerX, bannerY, bannerWidth, bannerHeight);
-        Rectangle pauseTextBounds   = new Rectangle(bannerX, bannerY, bannerWidth, bannerHeight);
 
         int resumButtonWidth  = UIConfig.RESUME_BUTTON_WIDTH;
         int resumeButtonHeight = UIConfig.RESUME_BUTTON_HEIGHT;
@@ -779,7 +794,7 @@ public class UI {
                 settingsSize,
                 settingsSize);
 
-        return new PauseMenuLayout(resumeBounds, settingsBounds, saveBounds, pauseTextBounds, pauseRibbonBounds);
+        return new PauseMenuLayout(resumeBounds, settingsBounds, saveBounds, pauseRibbonBounds);
     }
     //-------------------------------------------------------------
     public SettingsLayout getSettingsLayout() {
@@ -787,14 +802,14 @@ public class UI {
         int sw = screenConfig.SCREEN_WIDTH();
         int sh = screenConfig.SCREEN_HEIGHT();
 
-        // --- SFONDO SETTINGS ---
+        //bg
         int settingsW = (int) (sw * 0.98f);
         int settingsH = (int) (sh * 0.98f);
         int settingsX = (sw - settingsW) / 2;
         int settingsY = (sh - settingsH) / 2;
         Rectangle settingsBounds = new Rectangle(settingsX, settingsY, settingsW, settingsH);
 
-        // --- ICONA SETTINGS (gear) in alto a destra ---
+        // settings icon
         int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
         Rectangle settingsIconBounds = new Rectangle(
                 sw - settingsSize - UIConfig.MENU_PADDING,
@@ -803,67 +818,60 @@ public class UI {
                 settingsSize
         );
 
-        // ---- RIBBON AUDIO (sezione in cima) ----
+        // audio rubbon
         int ribbonW = (int) (settingsW * 0.55f);
-        int ribbonH = UIConfig.SETTINGS_RIBBON_HEIGHT; // es. 2 * TILE_SIZE
+        int ribbonH = UIConfig.SETTINGS_RIBBON_HEIGHT;
         int ribbonX = settingsX + (settingsW - ribbonW) / 2;
 
-        int audioRibbonY = settingsY + UIConfig.MENU_PADDING;
+        int audioRibbonY = settingsY + UIConfig.SETTINGS_PADDING *3;
         Rectangle audioRibbonBounds = new Rectangle(ribbonX, audioRibbonY, ribbonW, ribbonH);
 
-        // Testo dentro il ribbon AUDIO
-        Rectangle audioTextBounds = new Rectangle(ribbonX, audioRibbonY, ribbonW, ribbonH);
 
-        // ---- ICONE AUDIO (music note + speaker) ----
-        int iconSize = UIConfig.SETTINGS_ICON_SIZE; // es. 2 * TILE_SIZE
-        int iconsY = audioRibbonY + ribbonH + UIConfig.MENU_PADDING;
-        int totalIconsW = iconSize * 2 + UIConfig.MENU_PADDING;
+        // audio icon
+        int iconSize = UIConfig.SETTINGS_ICON_SIZE;
+        int iconsY = audioRibbonY + ribbonH + UIConfig.SETTINGS_PADDING;
+        int totalIconsW = iconSize * 2 + UIConfig.SETTINGS_PADDING;
         int iconsStartX = settingsX + (settingsW - totalIconsW) / 2;
 
         Rectangle musicBounds = new Rectangle(iconsStartX, iconsY, iconSize, iconSize);
-        Rectangle soundBounds = new Rectangle(iconsStartX + iconSize + UIConfig.MENU_PADDING, iconsY, iconSize, iconSize);
+        Rectangle soundBounds = new Rectangle(iconsStartX + iconSize + UIConfig.SETTINGS_PADDING, iconsY, iconSize, iconSize);
 
-        // ---- RIBBON SCREEN ----
-        int screenRibbonY = iconsY + iconSize + UIConfig.MENU_PADDING * 2;
+        // screen ribbon
+        int screenRibbonY = iconsY + iconSize + UIConfig.SETTINGS_PADDING * 2;
         Rectangle resRibbonBounds = new Rectangle(ribbonX, screenRibbonY, ribbonW, ribbonH);
-        Rectangle resTextBounds = new Rectangle(ribbonX, screenRibbonY, ribbonW, ribbonH);
 
-        // ---- BOTTONI SCREEN: FULL | MID | SMAL ----
-        int btnW = UIConfig.SETTINGS_BUTTON_WIDTH;   // es. ~(settingsW / 4)
-        int btnH = UIConfig.SETTINGS_BUTTON_HEIGHT;  // es. TILE_SIZE
-        int btnY = screenRibbonY + ribbonH + UIConfig.MENU_PADDING;
+        // screen button
+        int btnW = UIConfig.SETTINGS_BUTTON_WIDTH;
+        int btnH = UIConfig.SETTINGS_BUTTON_HEIGHT;
+        int btnY = screenRibbonY + ribbonH + UIConfig.SETTINGS_PADDING;
 
-        int totalBtnsW = btnW * 3 + UIConfig.MENU_PADDING * 2;
+        int totalBtnsW = btnW * 3 + UIConfig.SETTINGS_PADDING * 2;
         int btnsStartX = settingsX + (settingsW - totalBtnsW) / 2;
 
         Rectangle resFullBounds = new Rectangle(btnsStartX, btnY, btnW, btnH);
-        Rectangle resHalfBounds = new Rectangle(btnsStartX + btnW + UIConfig.MENU_PADDING, btnY, btnW, btnH);
-        Rectangle resMinBounds = new Rectangle(btnsStartX + (btnW + UIConfig.MENU_PADDING) * 2, btnY, btnW, btnH);
+        Rectangle resHalfBounds = new Rectangle(btnsStartX + btnW + UIConfig.SETTINGS_PADDING, btnY, btnW, btnH);
+        Rectangle resMinBounds = new Rectangle(btnsStartX + (btnW + UIConfig.SETTINGS_PADDING) * 2, btnY, btnW, btnH);
 
-        // ---- RIBBON FPS ----
-        int fpsRibbonY = btnY + btnH + UIConfig.MENU_PADDING * 2;
+        // fps ribbon
+        int fpsRibbonY = btnY + btnH + UIConfig.SETTINGS_PADDING * 2;
         Rectangle fpsRibbonBounds = new Rectangle(ribbonX, fpsRibbonY, ribbonW, ribbonH);
-        Rectangle fpsTextBounds = new Rectangle(ribbonX, fpsRibbonY, ribbonW, ribbonH);
 
-        // ---- BOTTONI FPS: 60 | 120 | 240 ----
-        int fpsBtnY = fpsRibbonY + ribbonH + UIConfig.MENU_PADDING;
+        // fps button
+        int fpsBtnY = fpsRibbonY + ribbonH + UIConfig.SETTINGS_PADDING;
         Rectangle fpsBounds1 = new Rectangle(btnsStartX, fpsBtnY, btnW, btnH);
-        Rectangle fpsBounds2 = new Rectangle(btnsStartX + btnW + UIConfig.MENU_PADDING, fpsBtnY, btnW, btnH);
-        Rectangle fpsBounds3 = new Rectangle(btnsStartX + (btnW + UIConfig.MENU_PADDING) * 2, fpsBtnY, btnW, btnH);
+        Rectangle fpsBounds2 = new Rectangle(btnsStartX + btnW + UIConfig.SETTINGS_PADDING, fpsBtnY, btnW, btnH);
+        Rectangle fpsBounds3 = new Rectangle(btnsStartX + (btnW + UIConfig.SETTINGS_PADDING) * 2, fpsBtnY, btnW, btnH);
 
         return new SettingsLayout(
                 settingsBounds,
                 settingsIconBounds,
-                audioTextBounds,
                 audioRibbonBounds,
                 musicBounds,
                 soundBounds,
                 fpsRibbonBounds,
-                fpsTextBounds,
                 fpsBounds1,
                 fpsBounds2,
                 fpsBounds3,
-                resTextBounds,
                 resRibbonBounds,
                 resFullBounds,
                 resHalfBounds,
@@ -906,6 +914,7 @@ public class UI {
         int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
         return screenConfig.SCREEN_WIDTH() / 2 - length / 2;
     }
+
     //-------------------------------------------------------------
     /**
      *  Returns a new BufferedImage that is a scaled copy of original. */
@@ -940,16 +949,53 @@ public class UI {
         }
     }
     //-------------------------------------------------------------
-
-
-    //BUTOTN STATE MANAGE
     //-------------------------------------------------------------
-    private boolean isActive(Map<?, Boolean> map, Object key) {
-        return (map.get(key));
+    private java.util.List<String> wrapText(String text, FontMetrics fm, int maxWidth) {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+
+        for (String paragraph : text.split("\n")) {
+
+            String[] words = paragraph.split(" ");
+            String line = "";
+
+            for (String word : words) {
+                String testLine = line.isEmpty() ? word : line + " " + word;
+
+                if (fm.stringWidth(testLine) <= maxWidth) {
+                    line = testLine;
+                } else {
+                    if (!line.isEmpty()) {
+                        lines.add(line);
+                    }
+                    line = word;
+                }
+            }
+
+            if (!line.isEmpty()) {
+                lines.add(line);
+            }
+        }
+
+        return lines;
     }
     //-------------------------------------------------------------
+    private Font fitFontToBox(Graphics2D g2, String text, Font baseFont, int maxWidth, int maxHeight) {
+        int size = baseFont.getSize();
 
+        while (size > UIConfig.MIN_BUTTON_TEXT_SIZE) {
+            Font testFont = baseFont.deriveFont((float) size);
+            FontMetrics fm = g2.getFontMetrics(testFont);
 
+            if (fm.stringWidth(text) <= maxWidth && fm.getHeight() <= maxHeight) {
+                return testFont;
+            }
+
+            size--;
+        }
+
+        return baseFont;
+    }
+    //-------------------------------------------------------------
 
 
     // SETTER
@@ -1014,10 +1060,8 @@ public class UI {
     public void resetGameOverSelected() {
         gameOverSelected.replaceAll((k, v) -> false);
     }
-
-
-
     //-------------------------------------------------------------
+
 }
 //-------------------------------------------------------------------------------------------------------------------
 // end class UI
