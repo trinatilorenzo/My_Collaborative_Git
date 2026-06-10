@@ -81,8 +81,7 @@ public class GameView extends JPanel {
         this.screenCfg = GS.screenConfig();
         this.model = model;
 
-        this.screenWidth = screenCfg.MIN_SCREEN_WIDTH();
-        this.screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
+        setResolution();
 
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
@@ -161,6 +160,7 @@ public class GameView extends JPanel {
         ui_render.draw(g2);
 
         g2.dispose();
+
     }
 
     //-------------------------------------------------------------
@@ -340,7 +340,127 @@ public class GameView extends JPanel {
     }
     //-------------------------------------------------------------
 
+    private void applyResolutionValuesOnly() {
+        switch (model.getResolutionValue()) {
+            case 0 -> {
+                screenWidth = screenCfg.MIN_SCREEN_WIDTH();
+                screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
+            }
+            case 1 -> {
+                Rectangle r = GraphicsEnvironment
+                        .getLocalGraphicsEnvironment()
+                        .getMaximumWindowBounds();
 
+                screenWidth = r.width;
+                screenHeight = r.height;
+            }
+            case 2 -> {
+                GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+                screenWidth = gd.getDisplayMode().getWidth();
+                screenHeight = gd.getDisplayMode().getHeight();
+            }
+        }
+    }
+
+    public void setResolution() {
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+
+
+        if (frame == null) {
+            applyResolutionValuesOnly();
+            setPreferredSize(new Dimension(screenWidth, screenHeight));
+
+            if (ui_render != null) {
+                ui_render.setScreenSize(screenWidth, screenHeight);
+            }
+
+            revalidate();
+            repaint();
+            return;
+        }
+
+        GraphicsDevice gd = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice();
+
+        if (gd.getFullScreenWindow() == frame) {
+            gd.setFullScreenWindow(null);
+        }
+
+        //reset state
+        frame.dispose();
+        frame.setExtendedState(JFrame.NORMAL);
+
+        switch (model.getResolutionValue()) {
+            case 0 -> {
+                screenWidth = screenCfg.MIN_SCREEN_WIDTH();
+                screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
+
+                frame.setUndecorated(false);
+                frame.setResizable(false);
+
+                setPreferredSize(new Dimension(screenWidth, screenHeight));
+                setMinimumSize(new Dimension(screenWidth, screenHeight));
+                setMaximumSize(new Dimension(screenWidth, screenHeight));
+
+                frame.setContentPane(this);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+
+                Dimension size = getSize();
+                screenWidth = size.width;
+                screenHeight = size.height;
+            }
+
+            case 1 -> {
+
+                Rectangle r = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+                frame.setBounds(r);
+
+                frame.setUndecorated(false);
+                frame.setResizable(false);
+                frame.setVisible(true);
+
+                Dimension d = frame.getContentPane().getSize();
+                screenWidth = d.width;
+                screenHeight = d.height;
+
+            }
+
+            case 2 -> {
+
+                screenWidth = gd.getDisplayMode().getWidth();
+                screenHeight = gd.getDisplayMode().getHeight();
+
+                frame.setUndecorated(true);
+                frame.setResizable(false);
+
+                setPreferredSize(new Dimension(screenWidth, screenHeight));
+
+                frame.setContentPane(this);
+                frame.pack();
+                frame.setVisible(true);
+
+                if (gd.isFullScreenSupported()) {
+                    gd.setFullScreenWindow(frame);
+                } else {
+                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                }
+            }
+        }
+
+        if (ui_render != null) {
+            ui_render.setScreenSize(screenWidth, screenHeight);
+        }
+
+        revalidate();
+        repaint();
+        frame.revalidate();
+        frame.repaint();
+
+        System.out.println("screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
+    }
     //-------------------------------------------------------------
 
     private void updateObjectAnimations(double deltaMs) {
@@ -429,103 +549,8 @@ public class GameView extends JPanel {
     }
 
 
-    public void setMinResolution() {
-
-        screenWidth = screenCfg.MIN_SCREEN_WIDTH();
-        screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
-
-        ui_render.setScreenSize(screenWidth, screenHeight);
-
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            if (frame == null) return;
-
-            // Esci dal full screen se attivo
-            GraphicsDevice gd = GraphicsEnvironment
-                    .getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice();
-
-            if (gd.getFullScreenWindow() == frame) {
-                gd.setFullScreenWindow(null);
-            }
-
-            // Rimuovi undecorated se era stato impostato per il full screen
-            if (frame.isUndecorated()) {
-                frame.dispose();
-                frame.setUndecorated(false);
-                frame.setVisible(true);
-            }
-
-            // Ripristina dimensioni
-            this.setPreferredSize(new Dimension(screenWidth, screenHeight));
-            frame.pack();
-            frame.setLocationRelativeTo(null); // ricentra sullo schermo
-        });
-    }
-    public void setDefaultScreen() {
-
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            if (frame == null) return;
-
-            GraphicsDevice gd = GraphicsEnvironment
-                    .getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice();
-
-            // se era in fullscreen vero, esci
-            if (gd.getFullScreenWindow() == frame) {
-                gd.setFullScreenWindow(null);
-            }
-
-            // assicurati che la finestra abbia bordi e barra titolo
-            if (frame.isUndecorated()) {
-                frame.dispose();
-                frame.setUndecorated(false);
-                frame.setVisible(true);
-            }
-
-            // finestra massimizzata, NON fullscreen
-            frame.setExtendedState(JFrame.NORMAL);
-            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-            // aggiorna le dimensioni della view dopo il resize reale
-            SwingUtilities.invokeLater(() -> {
-                screenWidth = getWidth();
-                screenHeight = getHeight();
-                ui_render.setScreenSize(screenWidth, screenHeight);
-                revalidate();
-                repaint();
-            });
-        });
-    }
-
-    public void setFullScreen() {
 
 
-        GraphicsDevice gd = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice();
-
-        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        if (frame == null) return;
-
-        SwingUtilities.invokeLater(() -> {
-            frame.dispose();
-            frame.setUndecorated(true);
-            frame.setVisible(true);
-
-            if (gd.isFullScreenSupported()) {
-                gd.setFullScreenWindow(frame);
-            } else {
-                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }
-
-            screenWidth = this.getWidth();
-            screenHeight = this.getHeight();
-        });
-
-        ui_render.setScreenSize(screenWidth, screenHeight);
-    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------

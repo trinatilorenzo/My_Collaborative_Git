@@ -474,17 +474,17 @@ public class GameController {
             }
             case RES_FULL -> {
                 model.setMaxResolution();
-                view.setFullScreen();
+                view.setResolution();
                 System.out.println("full");
             }
             case RES_MID  -> {
                 model.setMidResolution();
-                view.setDefaultScreen(); // TODO : the wiew shoud read by model the resolution
+                view.setResolution();
                 System.out.println("mid");
             }
             case RES_MIN  -> {
                 model.setMinResolution();
-                view.setMinResolution();
+                view.setResolution();
                 System.out.println("small");
             }
             case FPS_60   -> {

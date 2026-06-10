@@ -94,8 +94,8 @@ public class GameModel {
         playerColor = GS.entityConfig().DEFAULT_COLOR;
         musicEnabled = true;
         soundEnabled = true;
-        resValue = 1;
-        fpsValue = 1;
+        resValue = 2;
+        fpsValue = 0;
 
     }
     //-------------------------------------------------------------
