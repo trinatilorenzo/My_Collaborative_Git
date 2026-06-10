@@ -2,7 +2,6 @@ package view.renderer;
 
 import main.CONFIG.ObjConfig;
 import main.CONFIG.ScreenConfig;
-import main.CONFIG.enu.PowerUpType;
 import model.object.GameObject;
 import model.object.OBJ_Tree;
 import model.object.OBJ_PowerUp;
@@ -198,10 +197,10 @@ public class GameObjectRenderer {
      * Draws object hitboxes in debug mode.
      */
     //-------------------------------------------------------------
-    public void drawDebugSolidAreas(Graphics2D g2, List<GameObject> objects, Player player, ScreenConfig screenCfg) {
+    public void drawDebugSolidAreas(Graphics2D g2, List<GameObject> objects, Player player, ScreenConfig screenCfg, int screenWidth, int screenHeight) {
 
-        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
         Color previousColor = g2.getColor();
         Stroke previousStroke = g2.getStroke();
@@ -218,8 +217,8 @@ public class GameObjectRenderer {
             int screenX = object.getWorldX() + solidArea.x - player.getWorldX() + pScreenX;
             int screenY = object.getWorldY() + solidArea.y - player.getWorldY() + pScreenY;
 
-            if (screenX + solidArea.width < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                    screenY + solidArea.height < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+            if (screenX + solidArea.width < 0 || screenX > screenWidth ||
+                    screenY + solidArea.height < 0 || screenY > screenHeight) {
                 continue;
             }
 

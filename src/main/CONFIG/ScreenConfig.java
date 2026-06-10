@@ -15,12 +15,14 @@ public record ScreenConfig(int ORIGINAL_TILESIZE, Color GAME_BG_COLOR) {
 
     //SCREEN SIZE
     public static final int SCALE = 1;
-    public static final int MAX_SCREEN_COL = 20; //min 15
-    public static final int MAX_SCREEN_ROW = 12; //min 11
+
+    public static final int MIN_SCREEN_COL = 15; //min 15
+    public static final int MIN_SCREEN_ROW = 11; //min 11
 
     public int TILE_SIZE() {return ORIGINAL_TILESIZE * SCALE;}
-    public int SCREEN_WIDTH() {
-        return TILE_SIZE() * MAX_SCREEN_COL;
+
+    public int MIN_SCREEN_WIDTH() {
+        return TILE_SIZE() * MIN_SCREEN_COL;
     }
-    public int SCREEN_HEIGHT() {return TILE_SIZE() * MAX_SCREEN_ROW;}
+    public int MIN_SCREEN_HEIGHT() {return TILE_SIZE() * MIN_SCREEN_ROW;}
 }

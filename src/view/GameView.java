@@ -51,6 +51,9 @@ public class GameView extends JPanel {
 
     private final ScreenConfig screenCfg;
 
+    private int screenWidth;
+    private int screenHeight;
+
     //model to render
     private final GameModel model;
 
@@ -78,7 +81,10 @@ public class GameView extends JPanel {
         this.screenCfg = GS.screenConfig();
         this.model = model;
 
-        this.setPreferredSize(new Dimension(screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT()));
+        this.screenWidth = screenCfg.MIN_SCREEN_WIDTH();
+        this.screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
+
+        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.setFocusable(true);
@@ -104,7 +110,7 @@ public class GameView extends JPanel {
         this.audioManager.syncBackgroundMusic(model.getGameState());
 
         //import the UI
-        this.ui_render = new UI(model, screenCfg);
+        this.ui_render = new UI(model, screenCfg, screenWidth, screenHeight);
     }
     //-------------------------------------------------------------
     private void applyCustomCursor(String cursorPath) {
@@ -137,12 +143,12 @@ public class GameView extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
 
         g2.setColor(screenCfg.GAME_BG_COLOR());
-        g2.fillRect(0,0, screenCfg.SCREEN_WIDTH(), screenCfg.SCREEN_HEIGHT());
+        g2.fillRect(0,0, screenWidth, screenHeight);
 
         if (model.getGameState() == GameState.PLAYING || model.getGameState() == GameState.PAUSED) {
 
             // DRAW THE WORLD MAP
-            mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2);
+            mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2, screenWidth, screenHeight);
             // Y-sorting logic: sort objects by their worldY coordinate
             drawEntities(g2);
 
@@ -161,10 +167,10 @@ public class GameView extends JPanel {
 
     private void drawWorldDebug(Graphics2D g2) {
         Player player = model.getPlayer();
-        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenX = screenWidth/ 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
-        mapRender.drawAllGameLayers(model.getWorldMap(), player, g2);
+        mapRender.drawAllGameLayers(model.getWorldMap(), player, g2, screenWidth, screenHeight);
         playerRender.drawSolidArea(g2, player, pScreenX, pScreenY);
 
         for (EnemyDynamite ed : model.getDynamiteEnemies()) {
@@ -182,7 +188,7 @@ public class GameView extends JPanel {
             torchRenderer.drawSolidArea(g2, torch, screenX(torch.getWorldX(), player, pScreenX), screenY(torch.getWorldY(), player, pScreenY));
         }
 
-        objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), player, screenCfg);
+        objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), player, screenCfg, screenWidth, screenHeight);
 
         Monk monk = model.getMonk();
         monkRenderer.drawSolidArea(g2, monk, screenX(monk.getWorldX(), player, pScreenX), screenY(monk.getWorldY(), player, pScreenY));
@@ -202,8 +208,8 @@ public class GameView extends JPanel {
         Monk monk = model.getMonk();
 
         // Player's coordinates
-        int pScreenX = screenCfg.SCREEN_WIDTH() / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenCfg.SCREEN_HEIGHT() / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
         // List to hold all entities for sorting
         java.util.List<Object> renderList = new java.util.ArrayList<>();
@@ -252,8 +258,8 @@ public class GameView extends JPanel {
 
                 int halfW = EntityConfig.TNT_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.TNT_SPRITE_HEIGHT / 2;
-                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                if (screenX + halfW < 0 || screenX - halfW > screenWidth||
+                        screenY + halfH < 0 || screenY - halfH > screenHeight) {
                     continue;
                 }
 
@@ -264,8 +270,8 @@ public class GameView extends JPanel {
                 int screenY = enemyDynamite.getWorldY() - player.getWorldY() + pScreenY;
                 int halfW = EntityConfig.DYNAMITE_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
-                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                if (screenX + halfW < 0 || screenX - halfW > screenWidth ||
+                        screenY + halfH < 0 || screenY - halfH > screenHeight) {
                     continue;
                 }
                 dynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
@@ -277,8 +283,8 @@ public class GameView extends JPanel {
                 int halfW = EntityConfig.PROJECTILE_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.PROJECTILE_SPRITE_HEIGHT / 2;
 
-                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                if (screenX + halfW < 0 || screenX - halfW > screenWidth ||
+                        screenY + halfH < 0 || screenY - halfH > screenHeight) {
                     continue;
                 }
 
@@ -291,8 +297,8 @@ public class GameView extends JPanel {
                 int halfW = EntityConfig.TORCH_SPRITE_WIDTH / 2;
                 int halfH = EntityConfig.TORCH_SPRITE_HEIGHT / 2;
 
-                if (screenX + halfW < 0 || screenX - halfW > screenCfg.SCREEN_WIDTH() ||
-                        screenY + halfH < 0 || screenY - halfH > screenCfg.SCREEN_HEIGHT()) {
+                if (screenX + halfW < 0 || screenX - halfW > screenWidth ||
+                        screenY + halfH < 0 || screenY - halfH >screenHeight) {
                     continue;
                 }
 
@@ -303,8 +309,8 @@ public class GameView extends JPanel {
                 int screenY = o.getWorldY() - player.getWorldY() + pScreenY;
 
                 // culling: draw only if visible on screen
-                if (screenX + o.getWidth() < 0 || screenX > screenCfg.SCREEN_WIDTH() ||
-                        screenY + o.getHeight() < 0 || screenY > screenCfg.SCREEN_HEIGHT()) {
+                if (screenX + o.getWidth() < 0 || screenX > screenWidth ||
+                        screenY + o.getHeight() < 0 || screenY > screenHeight) {
                     continue;
                 }
 
@@ -422,7 +428,104 @@ public class GameView extends JPanel {
         ui_render.resetGameOverHover();
     }
 
-    //---------------------------------
+
+    public void setMinResolution() {
+
+        screenWidth = screenCfg.MIN_SCREEN_WIDTH();
+        screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
+
+        ui_render.setScreenSize(screenWidth, screenHeight);
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            if (frame == null) return;
+
+            // Esci dal full screen se attivo
+            GraphicsDevice gd = GraphicsEnvironment
+                    .getLocalGraphicsEnvironment()
+                    .getDefaultScreenDevice();
+
+            if (gd.getFullScreenWindow() == frame) {
+                gd.setFullScreenWindow(null);
+            }
+
+            // Rimuovi undecorated se era stato impostato per il full screen
+            if (frame.isUndecorated()) {
+                frame.dispose();
+                frame.setUndecorated(false);
+                frame.setVisible(true);
+            }
+
+            // Ripristina dimensioni
+            this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+            frame.pack();
+            frame.setLocationRelativeTo(null); // ricentra sullo schermo
+        });
+    }
+    public void setDefaultScreen() {
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            if (frame == null) return;
+
+            GraphicsDevice gd = GraphicsEnvironment
+                    .getLocalGraphicsEnvironment()
+                    .getDefaultScreenDevice();
+
+            // se era in fullscreen vero, esci
+            if (gd.getFullScreenWindow() == frame) {
+                gd.setFullScreenWindow(null);
+            }
+
+            // assicurati che la finestra abbia bordi e barra titolo
+            if (frame.isUndecorated()) {
+                frame.dispose();
+                frame.setUndecorated(false);
+                frame.setVisible(true);
+            }
+
+            // finestra massimizzata, NON fullscreen
+            frame.setExtendedState(JFrame.NORMAL);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+            // aggiorna le dimensioni della view dopo il resize reale
+            SwingUtilities.invokeLater(() -> {
+                screenWidth = getWidth();
+                screenHeight = getHeight();
+                ui_render.setScreenSize(screenWidth, screenHeight);
+                revalidate();
+                repaint();
+            });
+        });
+    }
+
+    public void setFullScreen() {
+
+
+        GraphicsDevice gd = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice();
+
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame == null) return;
+
+        SwingUtilities.invokeLater(() -> {
+            frame.dispose();
+            frame.setUndecorated(true);
+            frame.setVisible(true);
+
+            if (gd.isFullScreenSupported()) {
+                gd.setFullScreenWindow(frame);
+            } else {
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            }
+
+            screenWidth = this.getWidth();
+            screenHeight = this.getHeight();
+        });
+
+        ui_render.setScreenSize(screenWidth, screenHeight);
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------

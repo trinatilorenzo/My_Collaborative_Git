@@ -50,8 +50,9 @@ public record EntityConfig(ScreenConfig screenConfig,
         public int START_WORLD_Y(){return playerSpawnPoint().y();}
         public int START_WORLD_LAYER(){return playerSpawnPoint().layer();}
 
-        public int SCREEN_POSX(){ return screenConfig.SCREEN_WIDTH() / 2;}
-        public int SCREEN_POSY(){ return screenConfig.SCREEN_HEIGHT() / 2;}
+        //TODO vedere
+        //public int SCREEN_POSX(){ return screenConfig.SCREEN_WIDTH() / 2;}
+        //public int SCREEN_POSY(){ return screenConfig.SCREEN_HEIGHT() / 2;}
         //-------------------------------------------------------------
 
         //NPCConfig
