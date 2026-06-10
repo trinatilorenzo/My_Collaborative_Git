@@ -138,6 +138,8 @@ public class GameModel {
 
         // Power ups settings
         assignRandomPowerUps(objC);
+        currentLevelPowerUpCollected = false;
+        currentLevel = 1; 
 
         // START THE GAME
         gameState = GameState.PLAYING;
@@ -547,7 +549,10 @@ public class GameModel {
             if (obj instanceof OBJ_Tree tree) {
                 // If the enemies are defeated and the power-up has not been taken it flashes.
                 if (enemiesDefeated && tree.getHiddenPowerUp() == targetType && !currentLevelPowerUpCollected) 
-                    tree.setFlashingActive(); 
+                    tree.setFlashingActive(true); 
+                else {
+                    tree.setFlashingActive(false);
+                }
             }
         }
     }

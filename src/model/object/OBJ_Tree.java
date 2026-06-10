@@ -135,8 +135,8 @@ public class OBJ_Tree extends GameObject {
     public void setHiddenPowerUp(PowerUpType powerUp) {
         this.hiddenPowerUp = powerUp;
     }
-    public void setFlashingActive(){
-        this.flashingActive = true;
+    public void setFlashingActive(boolean value){
+        this.flashingActive = value;
     }
     //-------------------------------------------------------------
 

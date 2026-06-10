@@ -240,9 +240,11 @@ public class Player extends Entity {
         switch (type) {
             case SHIELD:
                 this.shieldTimerMs = EntityConfig.SHIELD_DURATION_MS;
+                this.isShielded = true;
                 break;
             case HEALTH_RESTORE:
                 this.life = this.maxLife;
+                this.isHealthRestored = true; 
                 break;
             case SPEED_BOOST:
                 this.isSpeedBoosted = true;
