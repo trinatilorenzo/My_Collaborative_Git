@@ -34,12 +34,13 @@ public class Player extends Entity {
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public Player(EntityConfig entityConfig) {
+    public Player(EntityConfig entityConfig, PlayerColor color) {
         super(entityConfig);
 
         // Initialize the player's solid area for collision detection
         solidArea = new Rectangle(0,0, EntityConfig.PLAYER_HITBOX_WIDTH, EntityConfig.PLAYER_HITBOX_HEIGHT);
         initializeDefaultValues();
+        this.color = color;
 
     }
     //-------------------------------------------------------------
@@ -63,7 +64,8 @@ public class Player extends Entity {
         deathAnimationCompleted = false;
         attackAnimationCompleted = true;
         attackDamageApplied = false;
-        
+
+        color = entityConfig.DEFAULT_COLOR;
 
     }
     //-------------------------------------------------------------

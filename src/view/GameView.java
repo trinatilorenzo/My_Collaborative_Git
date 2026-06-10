@@ -92,7 +92,7 @@ public class GameView extends JPanel {
         this.mapRender = new MapRender();
 
         // import the entity Render
-        this.playerRender = new PlayerRender(GS.entityConfig(), EntityConfig.DEFAULT_COLOR);
+        this.playerRender = new PlayerRender(GS.entityConfig(), model.getPlayerColor());
         this.monkRenderer = new MonkRenderer(GS.entityConfig());
         this.tntRenderer = new TNTRenderer(GS.entityConfig());
         this.dynamiteRender = new DynamiteRender(GS.entityConfig());
@@ -334,9 +334,7 @@ public class GameView extends JPanel {
     }
     //-------------------------------------------------------------
 
-    public void setPlayerRenderColor(PlayerColor playerColor) {
-        playerRender.setPlayerColor(playerColor);
-    }
+
     //-------------------------------------------------------------
 
     private void updateObjectAnimations(double deltaMs) {
@@ -368,6 +366,9 @@ public class GameView extends JPanel {
     }
 
 
+    public void updatePlayerColor() {
+        playerRender.setPlayerColor(model.getPlayerColor());
+    }
     // GETTER ----------------------
     public PlayerRender getPlayerRender() {return playerRender;}
     public MainMenuLayout getMainMenuLayout() {
@@ -387,52 +388,40 @@ public class GameView extends JPanel {
     public void setMainMenuHover(ButtonValue.MainMenu key) {
         ui_render.setMainMenuHover(key);
     }
-
     public void setMainMenuSelected(ButtonValue.MainMenu key) {
         ui_render.setMainMenuSelected(key);
     }
-
-    public void setRibbonSelected(ButtonValue.MainMenu key){
-        ui_render.setRibbonSelected(key);
+    public void resetMainMenuHover() {
+        ui_render.resetMainMenuHover();
     }
-
     public void setPauseHover(ButtonValue.Pause key) {
         ui_render.setPauseHover(key);
     }
-
     public void setPauseSelected(ButtonValue.Pause key) {
         ui_render.setPauseSelected(key);
     }
-
+    public void resetPauseHover(){
+        ui_render.resetPauseHover();
+    }
     public void setSettingsHover(ButtonValue.Settings key) {
         ui_render.setSettingsHover(key);
     }
-
     public void setSettingsSelected(ButtonValue.Settings key) {
         ui_render.setSettingsSelected(key);
     }
-
+    public void resetSettingsHover(){
+        ui_render.resetSettingsHover();
+    }
     public void setGameOverHover(ButtonValue.GameOver key) {
         ui_render.setGameOverHover(key);
     }
-
     public void setGameOverSelected(ButtonValue.GameOver key) {
         ui_render.setGameOverSelected(key);
     }
-
-    public void setSettingsMusicSelected(ButtonValue.Settings key) {
-        ui_render.setSettingsMusicSelected(key);
-    }
-    public void setSettingsSoundSelected(ButtonValue.Settings key) {
-        ui_render.setSettingsSoundSelected(key);
+    public void resetGameOverHover(){
+        ui_render.resetGameOverHover();
     }
 
-    public void setSettingsFpsSelected(ButtonValue.Settings key) {
-        ui_render.setSettingsFpsSelected(key);
-    }
-    public void setSettingsScreenResSelected(ButtonValue.Settings key) {
-        ui_render.setSettingsScreenResSelected(key);
-    }
     //---------------------------------
 
 }

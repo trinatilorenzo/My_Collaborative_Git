@@ -15,9 +15,9 @@ public record UIConfig() {
 
     //Default button Selection
     public static final ButtonValue.MainMenu MENU_DEFAULT_SELECTION = null ;
-
     public static final ButtonValue.Pause PAUSE_DEFAULT_SELECTION = null;
     public static final ButtonValue.Settings SETTINGS_DEFAULT_SELECTION = null;
+    public static final ButtonValue.GameOver GAME_OVER_DEFAULT_SELECTION = null;
 
 
     //MENU
