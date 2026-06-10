@@ -133,7 +133,8 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int TORCH_HITBOX_WIDTH = 55;       
         public static final int TORCH_HITBOX_HEIGHT = 35;       
         public static final int TORCH_SPRITE_WIDTH = 192;      
-        public static final int TORCH_SPRITE_HEIGHT = 192;      
+        public static final int TORCH_SPRITE_HEIGHT = 192;
+        public static final double TORCH_SCALE = 1.5;       
         public static final int TORCH_FOR_SPAWNPOINT = 1;
         public static final int FIRE_SPRITE_WIDTH = 128;
         public static final int FIRE_SPRITE_HEIGHT = 128;

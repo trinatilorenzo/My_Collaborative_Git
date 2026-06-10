@@ -88,7 +88,7 @@ public class TorchRenderer {
     private AnimationManager getFireManager(EnemyTorch torch) {
         return fireManagerByEnemy.computeIfAbsent(torch, k -> {
             AnimationManager manager = new AnimationManager();
-            manager.addAnimation("fire_effect", new Animation(fireFrames, 60, false));
+            manager.addAnimation("fire_effect", new Animation(fireFrames, 120, false));
             manager.playAnimation("fire_effect");
             return manager;
         });
@@ -152,8 +152,8 @@ public class TorchRenderer {
         AnimationManager manager = getManager(torch);
         BufferedImage frame = manager.getCurrent().getCurrentFrame();
 
-        int width = entityConfig.TORCH_SPRITE_WIDTH ;
-        int height = entityConfig.TORCH_SPRITE_HEIGHT ;
+        int width = (int) (entityConfig.TORCH_SPRITE_WIDTH * entityConfig.TORCH_SCALE);
+        int height = (int) (entityConfig.TORCH_SPRITE_HEIGHT * entityConfig.TORCH_SCALE);
         int drawX = screenX - width / 2;
         int drawY = screenY - height / 2;
 
@@ -171,16 +171,18 @@ public class TorchRenderer {
             BufferedImage fireFrame = getFireManager(torch).getCurrent().getCurrentFrame();
             
             // Calculate position of the fire 
-            int fireX = drawX;
-            int fireY = drawY;
-            int offset = width / 2; 
+            int fireCenterX = screenX;
+            int fireCenterY = screenY;
+            int offset = (int) width / 3; 
 
             switch (torch.getDirection()) {
-                case RIGHT -> fireX += offset;
-                case LEFT  -> fireX -= offset;
-                case DOWN  -> fireY += offset;
-                case UP    -> fireY -= offset;
+                case RIGHT -> fireCenterX += offset;
+                case LEFT  -> fireCenterX -= offset;
+                case DOWN  -> fireCenterY += offset;
+                case UP    -> fireCenterY -= offset;
             }
+            int fireX = fireCenterX - EntityConfig.FIRE_SPRITE_WIDTH / 2;
+            int fireY = fireCenterY - EntityConfig.FIRE_SPRITE_HEIGHT / 2;
             
             g2.drawImage(fireFrame, fireX, fireY, EntityConfig.FIRE_SPRITE_WIDTH, EntityConfig.FIRE_SPRITE_HEIGHT, null);
             
