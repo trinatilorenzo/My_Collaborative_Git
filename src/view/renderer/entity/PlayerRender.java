@@ -210,8 +210,9 @@ public class PlayerRender {
         }
 
         g2.setComposite(originalComposite); // Restore original composite for drawing the player
-
+        
         if (player.isShielded()) {
+            System.out.println("shielded");
             double shieldPulse = 1.0 + 0.05 * Math.sin(System.currentTimeMillis() / 200.0);
             int shieldRadius = (int) ((Math.max(width, height) / 2 + 5) * shieldPulse);
             

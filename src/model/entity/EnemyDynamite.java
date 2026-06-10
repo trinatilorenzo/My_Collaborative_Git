@@ -26,7 +26,6 @@ public class EnemyDynamite extends Entity {
     private final List<DynamiteProjectile> globalProjectiles;
     private int attackCount;
 
-
     /**
      * CONSTRUCTOR
      */
@@ -78,14 +77,11 @@ public class EnemyDynamite extends Entity {
                 break;
             case WANDER:
                 wander(deltaMs);
-                facePlayer(player);
-
                 break;
 
             case CHASING:
                 chasePlayer(player, deltaMs);
                 facePlayer(player);
-
                 break;
             
             case ATTACKING:
@@ -101,8 +97,6 @@ public class EnemyDynamite extends Entity {
     //-------------------------------------------------------------
     /**
      *  Simple "AI" methods to wander around the map
-     *  Move randomly up and down, left and right, and stay still
-     *  by a random number for TNT_MOVEINTERVAL
      */
     private void wander(double deltaMs) {
         //save the current direction
@@ -146,8 +140,8 @@ public class EnemyDynamite extends Entity {
      */
     private void chasePlayer(Player player, double deltaMs) {
         // distance from the player
-        double dxPlayer = player.getWorldX() - worldX; //distance in x
-        double dyPlayer = player.getWorldY() - worldY; //distance in y
+        double dxPlayer = player.getWorldX() - this.worldX; //distance in x
+        double dyPlayer = player.getWorldY() - this.worldY; //distance in y
         double distance = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
         if (distance > 0) {
