@@ -60,8 +60,8 @@ public class EnemyTorch extends Entity {
         this.solidArea = new Rectangle(
             0,
             0,
-            (int)(EntityConfig.TORCH_HITBOX_WIDTH*EntityConfig.TORCH_SCALE),
-            (int) (EntityConfig.TORCH_HITBOX_HEIGHT*EntityConfig.TORCH_SCALE)
+            EntityConfig.TORCH_HITBOX_WIDTH,
+            EntityConfig.TORCH_HITBOX_HEIGHT
         );
 
         this.direction = Direction.DOWN;
