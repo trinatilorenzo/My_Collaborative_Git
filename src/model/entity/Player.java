@@ -284,6 +284,17 @@ public class Player extends Entity {
     public boolean isHealthRestored() {
         return isHealthRestored;
     }
+
+    @Override
+    public Rectangle getSolidWorldArea() {
+        worldBoundsInstance.setBounds(
+            worldX - solidArea.width / 2,
+            worldY - solidArea.height / 2 + EntityConfig.PLAYER_OFFSET_HEIGHT,
+            solidArea.width,
+            solidArea.height
+        );
+        return worldBoundsInstance;
+    }
     //---------------------------------
 
     // SETTER ----------------------

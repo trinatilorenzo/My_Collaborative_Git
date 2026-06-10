@@ -40,6 +40,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
         public static final int PLAYER_HITBOX_WIDTH = 45 * PLAYER_SCALE;
         public static final int PLAYER_HITBOX_HEIGHT = 35 * PLAYER_SCALE;
+        public static final int PLAYER_OFFSET_HEIGHT = 15;
 
         public static final double SHIELD_DURATION_MS = 30000.0; // 30 seconds
         public static final int SPEED_BOOST_AMOUNT = 128; 
@@ -128,14 +129,16 @@ public record EntityConfig(ScreenConfig screenConfig,
         // Enemy Torch Config
         public static final int TORCH_MAX_LIFE = 6;
         public static final int TORCH_START_SPEED = 128;      // px/s
-        public static final int TORCH_MELEE_RANGE = 100;       // px  
-        public static final int TORCH_DASH_RANGE_TRIGGER = 150;     
-        public static final int TORCH_DASH_SPEED = 256;      
-        public static final int TORCH_HITBOX_WIDTH = 55;       
-        public static final int TORCH_HITBOX_HEIGHT = 35;       
+        public static final double TORCH_SCALE = 1.5;       
+        public static final int TORCH_HITBOX_WIDTH = (int) (45 * TORCH_SCALE);       
+        public static final int TORCH_HITBOX_HEIGHT = (int) (35 * TORCH_SCALE);       
         public static final int TORCH_SPRITE_WIDTH = 192;      
-        public static final int TORCH_SPRITE_HEIGHT = 192;      
+        public static final int TORCH_SPRITE_HEIGHT = 192;
         public static final int TORCH_FOR_SPAWNPOINT = 1;
+        public static final int TORCH_RECOVERY_TIME = 3000;
+        public static final int TORCH_GUARD_TIME = 1500;
+        public static final int TORCH_APPROACH_TIME = 1500;
+        public static final int TORCH_COOLDOWN_TIME = 1500;
         public static final int FIRE_SPRITE_WIDTH = 128;
         public static final int FIRE_SPRITE_HEIGHT = 128;
         public ArrayList<SpawnPoint> TORCH_SPAWNPOINT() {return TorchSpawnPoint;}

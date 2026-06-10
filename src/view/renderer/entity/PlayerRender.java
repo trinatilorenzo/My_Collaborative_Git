@@ -244,14 +244,14 @@ public class PlayerRender {
      */
     //-------------------------------------------------------------
     public void drawSolidArea(Graphics2D g2, Player player, int screenX, int screenY) {
-        Rectangle solid = player.getSolidArea();
-        int drawX = screenX - solid.width / 2;
-        int drawY = screenY - solid.height / 2;
+        Rectangle worldSolid = player.getSolidWorldArea();
+        int drawX = worldSolid.x - player.getWorldX() + screenX;
+        int drawY = worldSolid.y - player.getWorldY() + screenY;
 
         g2.setColor(new Color(255, 0, 0, 80));
-        g2.fillRect(drawX, drawY, solid.width, solid.height);
+        g2.fillRect(drawX, drawY, worldSolid.width, worldSolid.height);
         g2.setColor(Color.RED);
-        g2.drawRect(drawX, drawY, solid.width, solid.height);
+        g2.drawRect(drawX, drawY, worldSolid.width, worldSolid.height);
 
         if (player.getState() == PlayerState.ATTACKING) {
             Rectangle attackArea = player.getAttackArea();

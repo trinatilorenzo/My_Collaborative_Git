@@ -8,8 +8,6 @@ import java.util.List;
 
 import model.entity.Player;
 
-import static main.CONFIG.enu.Direction.*;
-
 /**
  * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
  * within the game world collides with the game's tilemap, objects, or other entities.
@@ -28,10 +26,12 @@ public class CollisionChecker {
         //methods to create the bounds of the entity
         static EntityBounds of(Entity entity) {
             // worldX & worldY = center of solid area
-            int leftX = entity.getWorldX() - entity.getSolidArea().width / 2;
-            int rightX = entity.getWorldX() + entity.getSolidArea().width / 2 - 1;
-            int topY = entity.getWorldY() - entity.getSolidArea().height / 2;
-            int bottomY = entity.getWorldY() + entity.getSolidArea().height / 2 - 1;
+            Rectangle r = entity.getSolidWorldArea();
+            
+            int leftX = r.x;
+            int rightX = r.x + r.width - 1;
+            int topY = r.y;
+            int bottomY = r.y + r.height - 1;
             return new EntityBounds(leftX, rightX, topY, bottomY, entity.getCurrentLayer());
         }
     }
