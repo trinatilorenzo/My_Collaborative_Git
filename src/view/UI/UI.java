@@ -28,6 +28,9 @@ import static main.CONFIG.enu.ButtonValue.GameOver.*;
 //-------------------------------------------------------------------------------------------------------------------
 public class UI {
 
+    private int screenWidth;
+    private int screenHeight;
+
     // =========================================================================
     // Dependencies
     // =========================================================================
@@ -142,9 +145,11 @@ public class UI {
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public UI(GameModel gameModel, ScreenConfig screenConfig) {
+    public UI(GameModel gameModel, ScreenConfig screenConfig, int screenWidth, int screenHeight) {
         this.model = gameModel;
         this.screenConfig = screenConfig;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
 
         maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
 
@@ -346,11 +351,11 @@ public class UI {
     //-------------------------------------------------------------
     public void drawDialogueWindow() {
 
-        int width = screenConfig.SCREEN_WIDTH() - (screenConfig.TILE_SIZE() * 2);
+        int width = screenWidth- (screenConfig.TILE_SIZE() * 2);
         int height = screenConfig.TILE_SIZE() * 4;
 
-        int x = (screenConfig.SCREEN_WIDTH() - width) / 2;
-        int y = screenConfig.SCREEN_HEIGHT() - height;
+        int x = (screenWidth - width) / 2;
+        int y = screenHeight - height;
 
         dialogueBanner.draw(g2, x, y, width);
 
@@ -375,8 +380,8 @@ public class UI {
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void drawMainMenu() {
-        int w = screenConfig.SCREEN_WIDTH();
-        int h = screenConfig.SCREEN_HEIGHT();
+        int w = screenWidth;
+        int h = screenHeight;
 
         // backGround
         g2.setColor(new Color(140, 224, 228));
@@ -452,7 +457,7 @@ public class UI {
     private void drawPauseScreen() {
 
         g2.setColor(pauseBgColor);
-        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
+        g2.fillRect(0, 0, screenWidth, screenHeight);
 
         PauseMenuLayout layout = getPauseMenuLayout();
         Rectangle ribbonBounds = layout.pauseRibbonBounds();
@@ -582,13 +587,13 @@ public class UI {
         Composite oldComposite = g2.getComposite();
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
         g2.setColor(new Color(8, 8, 8));
-        g2.fillRect(0, 0, screenConfig.SCREEN_WIDTH(), screenConfig.SCREEN_HEIGHT());
+        g2.fillRect(0, 0, screenWidth, screenHeight);
         g2.setComposite(oldComposite);
 
         // Title ribbon
         int titleRibbonWidth = 520;
         int titleRibbonHeight = 80;
-        int titleRibbonX = (screenConfig.SCREEN_WIDTH() - titleRibbonWidth) / 2;
+        int titleRibbonX = (screenWidth - titleRibbonWidth) / 2;
         int titleRibbonY = 72;
         ribbonBlueWide.draw(g2, titleRibbonX, titleRibbonY, titleRibbonWidth, titleRibbonHeight);
 
@@ -659,8 +664,8 @@ public class UI {
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void drawDamageOverlay(float alpha) {
-        int w = screenConfig.SCREEN_WIDTH();
-        int h = screenConfig.SCREEN_HEIGHT();
+        int w = screenWidth;
+        int h = screenHeight;
 
         int alphaStep = Math.clamp(Math.round(alpha * DAMAGE_ALPHA_STEPS), 0, DAMAGE_ALPHA_STEPS);
         if (damageOverlayCache == null
@@ -731,15 +736,15 @@ public class UI {
 
         int buttonWidth = UIConfig.MENU_BUTTON_WIDTH;
         int buttonHeight = UIConfig.MENU_BUTTON_HEIGHT;
-        int centerX = screenConfig.SCREEN_WIDTH() / 2;
-        int firstY = (screenConfig.SCREEN_HEIGHT() / 2) + screenConfig.TILE_SIZE();
+        int centerX = screenWidth / 2;
+        int firstY = (screenHeight / 2) + screenConfig.TILE_SIZE();
         int gap = UIConfig.MENU_PADDING;
 
         Rectangle newGameBounds  = new Rectangle(centerX - buttonWidth / 2, firstY, buttonWidth, buttonHeight);
         Rectangle continueBounds = new Rectangle(centerX - buttonWidth / 2, firstY + buttonHeight + gap, buttonWidth, buttonHeight);
 
         int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
-        Rectangle settingsBounds = new Rectangle(screenConfig.SCREEN_WIDTH() - settingsSize - UIConfig.MENU_PADDING,
+        Rectangle settingsBounds = new Rectangle(screenWidth - settingsSize - UIConfig.MENU_PADDING,
                 UIConfig.MENU_PADDING,
                 settingsSize,
                 settingsSize);
@@ -761,15 +766,15 @@ public class UI {
     public GameOverLayout getGameOverLayout() {
         int buttonWidth  = 320;
         int buttonHeight = 84;
-        int centerX      = screenConfig.SCREEN_WIDTH() / 2;
-        int buttonY      = screenConfig.SCREEN_HEIGHT() - buttonHeight - 56;
+        int centerX      = screenWidth / 2;
+        int buttonY      = screenHeight - buttonHeight - 56;
         return new GameOverLayout(new Rectangle(centerX - buttonWidth / 2, buttonY, buttonWidth, buttonHeight));
     }
     //-------------------------------------------------------------
     public PauseMenuLayout getPauseMenuLayout() {
 
-        int centerX = screenConfig.SCREEN_WIDTH() / 2;
-        int centerY = screenConfig.SCREEN_HEIGHT() / 2;
+        int centerX = screenWidth / 2;
+        int centerY = screenHeight / 2;
 
         int bannerWidth  = UIConfig.BANNER_WIDTH;
         int bannerHeight = pauseBanner.getImageHeight();
@@ -789,7 +794,7 @@ public class UI {
         Rectangle saveBounds   = new Rectangle(centerX - saveButtonWidth / 2, firstButtonY + saveButtonHeight + gap, saveButtonWidth, saveButtonHeight);
 
         int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
-        Rectangle settingsBounds = new Rectangle(screenConfig.SCREEN_WIDTH() - settingsSize - UIConfig.MENU_PADDING,
+        Rectangle settingsBounds = new Rectangle(screenWidth - settingsSize - UIConfig.MENU_PADDING,
                 UIConfig.MENU_PADDING,
                 settingsSize,
                 settingsSize);
@@ -799,8 +804,8 @@ public class UI {
     //-------------------------------------------------------------
     public SettingsLayout getSettingsLayout() {
 
-        int sw = screenConfig.SCREEN_WIDTH();
-        int sh = screenConfig.SCREEN_HEIGHT();
+        int sw = screenWidth;
+        int sh = screenHeight;
 
         //bg
         int settingsW = (int) (sw * 0.98f);
@@ -912,7 +917,7 @@ public class UI {
     //-------------------------------------------------------------
     public int getXforCenteredText(String text) {
         int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        return screenConfig.SCREEN_WIDTH() / 2 - length / 2;
+        return screenWidth / 2 - length / 2;
     }
 
     //-------------------------------------------------------------
@@ -1000,6 +1005,11 @@ public class UI {
 
     // SETTER
     //-------------------------------------------------------------
+    public void setScreenSize(int screenWidth, int screenHeight) {
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+    }
+
     public void triggerDamageFlash() {
         // Starts a 0.5-second red damage flash overlay.
         damageFlashStartNano = System.nanoTime();
