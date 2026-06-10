@@ -426,6 +426,7 @@ public class GameModel {
             if (torch.getState() != TorchState.DEAD){
 
                 torch.update(player, deltaMs);
+                collisionChecker.checkEntity(torch, player);
                 collisionChecker.checkEntity(player, torch);
                 collisionChecker.checkTile(torch);
                 collisionChecker.checkObjects(torch);

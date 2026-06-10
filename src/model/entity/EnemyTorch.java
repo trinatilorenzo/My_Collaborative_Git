@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.SpawnPoint;
 import main.CONFIG.enu.Direction;
-import main.CONFIG.enu.DynamiteState;
 import main.CONFIG.enu.TorchState;
 
 /**
@@ -27,6 +26,7 @@ public class EnemyTorch extends Entity {
 
     // Attack
     private boolean attackDamageApplied;
+    private int attackCount;
 
     /**
      * CONSTRUCTOR
@@ -60,12 +60,13 @@ public class EnemyTorch extends Entity {
         this.solidArea = new Rectangle(
             0,
             0,
-            EntityConfig.TORCH_HITBOX_WIDTH,
-            EntityConfig.TORCH_HITBOX_HEIGHT
+            (int)(EntityConfig.TORCH_HITBOX_WIDTH*EntityConfig.TORCH_SCALE),
+            (int) (EntityConfig.TORCH_HITBOX_HEIGHT*EntityConfig.TORCH_SCALE)
         );
 
         this.direction = Direction.DOWN;
         this.facingDirection = Direction.RIGHT;
+        this.stateTimer = 0;
     }
     //-------------------------------------------------------------
 
@@ -76,13 +77,7 @@ public class EnemyTorch extends Entity {
     public void update(Player player, double deltaMs) {
 
         super.update();
-
-        if (attackCooldownMs > 0) {
-            attackCooldownMs -= deltaMs;
-        }
-
         stateTimer += deltaMs;
-
         facePlayer(player);
 
         switch (state) {
@@ -92,11 +87,7 @@ public class EnemyTorch extends Entity {
                 break;
 
             case ATTACK_COMBO:
-                updateAttackState(player);
-                break;
-
-            case DASH:
-                updateDashState(player, deltaMs);
+                updateAttackState(player, deltaMs);
                 break;
 
             case RECOVERY:
@@ -120,24 +111,11 @@ public class EnemyTorch extends Entity {
      */
     //-------------------------------------------------------------
     private void updateApproachState(Player player, double deltaMs) {
-
-        double dxPlayer = player.getWorldX() - this.worldX; //distance in x
-        double dyPlayer = player.getWorldY() - this.worldY; //distance in y
-        double distance = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
-
-        if (distance < EntityConfig.TORCH_MELEE_RANGE) {
-
+        moveTowardsPlayer(player, deltaMs);
+        if (stateTimer>=EntityConfig.TORCH_APPROACH_TIME) {
             state = TorchState.ATTACK_COMBO;
             stateTimer = 0;
-
             attackDamageApplied = false;
-
-        } else if ( distance > EntityConfig.TORCH_DASH_RANGE_TRIGGER && attackCooldownMs <= 0) {
-            state = TorchState.DASH;
-            stateTimer = 0;
-
-        } else {
-            moveTowardsPlayer(player, deltaMs);
         }
     }
     //-------------------------------------------------------------
@@ -146,54 +124,37 @@ public class EnemyTorch extends Entity {
      * Handles flame attack logic.
      */
     //-------------------------------------------------------------
-    private void updateAttackState(Player player) {
+    private void updateAttackState(Player player, double deltaMs) {
+
+        moveTowardsPlayer(player, deltaMs);
 
         if (!attackDamageApplied) {
 
             Rectangle flameArea = getAttackArea();
-
             Rectangle playerHitbox = player.getSolidWorldArea();
 
             if (flameArea.intersects(playerHitbox)) {
                 player.takeDamage();
+                attackDamageApplied = true;
             }
-
-            attackDamageApplied = true;
         }
 
-        // Temporary timer until attack animation callbacks are implemented
+        // TODO Temporary timer until attack animation callbacks are implemented
         if (stateTimer >= 600) {
             completeAttackAnimation();
         }
     }
     //-------------------------------------------------------------
-
-    /**
-     * Executes dash behaviour.
-     */
-    //-------------------------------------------------------------
-    private void updateDashState(Player player, double deltaMs) {
-        moveTowardsPlayer(player, deltaMs);
-        this.speed = EntityConfig.TORCH_DASH_SPEED;
-        if (stateTimer >= 400) {
-            state = TorchState.RECOVERY;
-            stateTimer = 0;
-        }
-    }
-    //-------------------------------------------------------------
-
     /**
      * Recovery period after an attack or dash.
      */
     //-------------------------------------------------------------
     private void updateRecoveryState() {
-
-        if (stateTimer >= 1000) {
-
+        dx = 0;
+        dy = 0; 
+        if (stateTimer >= EntityConfig.TORCH_COOLDOWN_TIME) {
             state = TorchState.APPROACH;
             stateTimer = 0;
-
-            attackCooldownMs = 2000;
         }
     }
     //-------------------------------------------------------------
@@ -204,8 +165,7 @@ public class EnemyTorch extends Entity {
     //-------------------------------------------------------------
     private void updateGuardState() {
 
-        if (stateTimer >= 1500) {
-
+        if (stateTimer >= EntityConfig.TORCH_GUARD_TIME) {
             state = TorchState.APPROACH;
             stateTimer = 0;
         }
@@ -239,16 +199,11 @@ public class EnemyTorch extends Entity {
     //-------------------------------------------------------------
     private void updateMovementDirection() {
 
-        if (dx == 0 && dy == 0) {
-            return;
-        }
+        if (dx == 0 && dy == 0) return;
 
         if (Math.abs(dx) > Math.abs(dy)) {
-
             direction = (dx > 0)? Direction.RIGHT: Direction.LEFT;
-
         } else {
-
             direction = (dy > 0)? Direction.DOWN: Direction.UP;
         }
     }
@@ -261,7 +216,6 @@ public class EnemyTorch extends Entity {
     public Rectangle getAttackArea() {
 
         Rectangle attackArea = new Rectangle();
-
         int flameRange = EntityConfig.RANGE_ATTACK;
 
         attackArea.width = solidArea.width + flameRange;
@@ -271,7 +225,6 @@ public class EnemyTorch extends Entity {
         int hitboxTop = worldY - solidArea.height / 2;
 
         switch (direction) {
-
             case UP:
                 attackArea.x = worldX - attackArea.width / 2;
                 attackArea.y = hitboxTop - attackArea.height;
@@ -292,7 +245,6 @@ public class EnemyTorch extends Entity {
                 attackArea.y = worldY - attackArea.height / 2;
                 break;
         }
-
         return attackArea;
     }
     //-------------------------------------------------------------
@@ -303,16 +255,10 @@ public class EnemyTorch extends Entity {
     //-------------------------------------------------------------
     public void takeDamage() {
 
-        if (state == TorchState.DEAD) {
+        if (state == TorchState.DEAD || state == TorchState.GUARD) {
             return;
         }
-
-        if (state == TorchState.GUARD) {
-            return;
-        }
-
         life--;
-
         if (life <= 0) {
             state = TorchState.DEAD;
         }
@@ -326,9 +272,16 @@ public class EnemyTorch extends Entity {
     public void completeAttackAnimation() {
 
         if (state == TorchState.ATTACK_COMBO) {
-
-            state = TorchState.RECOVERY;
+            attackCount++;
+            attackDamageApplied = false;
             stateTimer = 0;
+            if (attackCount >= 5) {
+                // End combo
+                attackCount = 0;
+                state = TorchState.RECOVERY;
+            }else {
+                state = TorchState.APPROACH;
+            }
         }
     }
     //-------------------------------------------------------------
@@ -339,18 +292,9 @@ public class EnemyTorch extends Entity {
     //-------------------------------------------------------------
     private void facePlayer(Player player) {
 
-        facingDirection =
-            (player.getWorldX() >= worldX)
-                ? Direction.RIGHT
-                : Direction.LEFT;
+        facingDirection = (player.getWorldX() >= worldX)? Direction.RIGHT: Direction.LEFT;
     }
     //-------------------------------------------------------------
-
-    /**
-     * Returns the distance from the player.
-     */
-    //-------------------------------------------------------------
-
     // GETTERS ----------------------------------------------------
 
     public TorchState getState() {
@@ -364,6 +308,5 @@ public class EnemyTorch extends Entity {
     public boolean isDead() {
         return state == TorchState.DEAD;
     }
-
     //-------------------------------------------------------------
 }

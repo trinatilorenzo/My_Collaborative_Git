@@ -105,8 +105,7 @@ public class TorchRenderer {
         TorchState currentState = torch.getState();
         TorchState previousState = previousStateByEnemy.getOrDefault(torch, TorchState.APPROACH);
 
-        boolean attackJustStarted = (currentState == TorchState.ATTACK_COMBO || currentState == TorchState.DASH) 
-                                    && (previousState != TorchState.ATTACK_COMBO && previousState != TorchState.DASH);
+        boolean attackJustStarted = (currentState == TorchState.ATTACK_COMBO && previousState != TorchState.ATTACK_COMBO);
 
         // Map logical AI duel states to visual animations
         switch (currentState) {
@@ -116,7 +115,7 @@ public class TorchRenderer {
             }
             case APPROACH -> manager.playAnimation("walk");
             
-            case ATTACK_COMBO, DASH -> {
+            case ATTACK_COMBO-> {
                 // Directional attack rendering based on where the enemy is facing
                 if (torch.getDirection() == Direction.DOWN) {
                     manager.playAnimation("attack_down");
@@ -156,6 +155,12 @@ public class TorchRenderer {
         int height = (int) (entityConfig.TORCH_SPRITE_HEIGHT * entityConfig.TORCH_SCALE);
         int drawX = screenX - width / 2;
         int drawY = screenY - height / 2;
+        
+        // Effect of recovery
+        Composite originalComposite = g2.getComposite();
+        if (torch.getState() == TorchState.RECOVERY) {
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+        }
 
         // Flip image horizontally if facing left (assuming base sprite faces right)
         if (!torch.isFacingRight()) {
@@ -164,9 +169,11 @@ public class TorchRenderer {
             g2.drawImage(frame, drawX, drawY, width, height, null);
         }
 
+        g2.setComposite(originalComposite);
+
         // Draw the fire
         TorchState currentState = torch.getState();
-        if (currentState == TorchState.ATTACK_COMBO || currentState == TorchState.DASH) {
+        if (currentState == TorchState.ATTACK_COMBO) {
             
             BufferedImage fireFrame = getFireManager(torch).getCurrent().getCurrentFrame();
             
@@ -231,21 +238,8 @@ public class TorchRenderer {
         g2.setColor(Color.RED);
         g2.drawRect(drawX, drawY, solid.width, solid.height);
 
-        // 2. Melee Attack Range (Combo Trigger Radius)
-        g2.setColor(new Color(255, 127, 0, 60)); // Semi-transparent Orange
-        int attackRadius = entityConfig.TORCH_MELEE_RANGE; 
-        g2.fillOval(screenX - attackRadius, screenY - attackRadius, 2 * attackRadius, 2 * attackRadius);
-        g2.setColor(Color.ORANGE);
-        g2.drawOval(screenX - attackRadius, screenY - attackRadius, 2 * attackRadius, 2 * attackRadius);
 
-        // 3. Player Engagement Range (Detection/Chasing Radius)
-        g2.setColor(new Color(0, 150, 255, 40)); // Semi-transparent Blue
-        int detectRadius = entityConfig.TORCH_DASH_RANGE_TRIGGER; 
-        g2.fillOval(screenX - detectRadius, screenY - detectRadius, 2 * detectRadius, 2 * detectRadius);
-        g2.setColor(Color.BLUE);
-        g2.drawOval(screenX - detectRadius, screenY - detectRadius, 2 * detectRadius, 2 * detectRadius);
-
-        if (torch.getState() == TorchState.ATTACK_COMBO || torch.getState() == TorchState.DASH) {
+        if (torch.getState() == TorchState.ATTACK_COMBO) {
             Rectangle attackArea = torch.getAttackArea();
             int attackDrawX = attackArea.x - torch.getWorldX() + screenX;
             int attackDrawY = attackArea.y - torch.getWorldY() + screenY;
