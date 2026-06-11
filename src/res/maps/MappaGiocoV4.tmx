@@ -1342,7 +1342,7 @@
   <object id="472" gid="801" x="3204.28" y="914.493" width="192" height="256"/>
  </objectgroup>
  <objectgroup id="62" name="entity">
-  <object id="249" name="Monk" x="1949.36" y="1303.73">
+  <object id="249" name="Monk" x="1949.36" y="1311.78">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
@@ -1378,19 +1378,19 @@
    </properties>
    <point/>
   </object>
-  <object id="354" name="Dynamite_spawnPoint" x="2369.26" y="2461.33">
+  <object id="354" name="Dynamite_spawnPoint" x="2362.2" y="2500.15">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
    <point/>
   </object>
-  <object id="358" name="Dynamite_spawnPoint" x="806.091" y="2601.06">
+  <object id="358" name="Dynamite_spawnPoint" x="860.202" y="2596.35">
    <properties>
     <property name="StartLayer" type="int" value="2"/>
    </properties>
    <point/>
   </object>
-  <object id="359" name="Dynamite_spawnPoint" x="4461.49" y="2597.27">
+  <object id="359" name="Dynamite_spawnPoint" x="4446.2" y="2580.8">
    <properties>
     <property name="StartLayer" type="int" value="2"/>
    </properties>
@@ -1402,9 +1402,15 @@
    </properties>
    <point/>
   </object>
+  <object id="490" name="Torch_spawnPoint" x="3543.01" y="3794.1">
+   <properties>
+    <property name="StartLayer" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
  </objectgroup>
  <objectgroup id="67" name="castle">
-  <object id="488" gid="802" x="1788.71" y="1302.73" width="320" height="256"/>
+  <object id="488" gid="802" x="1788.71" y="1291.46" width="320" height="256"/>
  </objectgroup>
  <objectgroup id="68" name="tower">
   <object id="486" name="Tower" gid="803" x="4483.91" y="4486.2" width="128" height="256"/>

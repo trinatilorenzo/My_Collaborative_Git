@@ -143,6 +143,18 @@ public class GameView extends JPanel {
 
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenWidth, screenHeight);
+        if (model.getGameState() == GameState.SETTINGS){
+            if(model.isSoundEnabled()){
+                audioManager.setSfxVolume(1);
+            }else{
+                audioManager.setSfxVolume(0);
+            }
+            if (model.isMusicEnabled()) {
+                audioManager.setMusicVolume(1);
+            }else {
+                audioManager.setMusicVolume(0);
+            }
+        }
 
         if (model.getGameState() == GameState.PLAYING || model.getGameState() == GameState.PAUSED) {
 
@@ -155,6 +167,7 @@ public class GameView extends JPanel {
                 drawWorldDebug(g2);
             }
         }
+
 
         // draw the UI
         ui_render.draw(g2);

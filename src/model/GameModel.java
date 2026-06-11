@@ -101,7 +101,7 @@ public class GameModel implements Serializable {
         playerColor = GS.entityConfig().DEFAULT_COLOR;
         musicEnabled = true;
         soundEnabled = true;
-        resValue = 2;
+        resValue = 0;
         fpsValue = 0;
 
     }

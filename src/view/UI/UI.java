@@ -303,10 +303,10 @@ public class UI {
             case 2 -> settingsSelected.put(RES_FULL, true);
         }
 
-        if (model.isMusicEnabled()){
+        if (!model.isMusicEnabled()){
             settingsSelected.put(ButtonValue.Settings.MUSIC, true);
         }
-        if (model.isSoundEnabled()){
+        if (!model.isSoundEnabled()){
             settingsSelected.put(ButtonValue.Settings.SOUND, true);
         }
     }

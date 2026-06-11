@@ -5,7 +5,6 @@ import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
-import model.SaveManager;
 import view.GameView;
 import main.CONFIG.enu.GameState;
 import view.UI.GameOverLayout;
@@ -24,8 +23,6 @@ import java.io.IOException;
  */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {
-
-    private static final String SAVE_PATH = "save/savegame.dat";
 
     private GameModel model;
     private final GameView view;
@@ -208,7 +205,7 @@ public class GameController {
             case LOAD_GAME:
                 try {
                     GameConfig config = model.getGameConfig();
-                    GameModel loaded = SaveManager.loadGame(SAVE_PATH);
+                    GameModel loaded = SaveManager.loadLatestGame();
 
                     loaded.restoreTransientState(config);
                     model.copyFrom(loaded);
@@ -323,7 +320,7 @@ public class GameController {
 
             case SAVE:
                 try {
-                    SaveManager.saveGame(model, SAVE_PATH);
+                    SaveManager.saveGame(model);
                     System.out.println("Partita salvata.");
                     model.returnToMenu();
                     keyHandler.resetPauseToggle();
