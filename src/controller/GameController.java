@@ -1,9 +1,11 @@
 package controller;
 
+import main.CONFIG.GameConfig;
 import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
+import model.SaveManager;
 import view.GameView;
 import main.CONFIG.enu.GameState;
 import view.UI.GameOverLayout;
@@ -13,6 +15,8 @@ import view.UI.SettingsLayout;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.IOException;
+
 
 /**
  * ALL THE CONTROLLER STAFF HERE
@@ -21,7 +25,9 @@ import java.awt.Rectangle;
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {
 
-    private final GameModel model;
+    private static final String SAVE_PATH = "save/savegame.dat";
+
+    private GameModel model;
     private final GameView view;
     private final KeyHandler keyHandler;
     private final MouseHandler mouseHandler;
@@ -200,9 +206,20 @@ public class GameController {
                 break;
 
             case LOAD_GAME:
-                System.out.println("continue");
-                break;
+                try {
+                    GameConfig config = model.getGameConfig();
+                    GameModel loaded = SaveManager.loadGame(SAVE_PATH);
 
+                    loaded.restoreTransientState(config);
+                    model.copyFrom(loaded);
+
+                    model.forcePlayingState();          // vedi sotto
+                    keyHandler.resetPauseToggle();
+
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
             case SETTINGS:
                 model.toggleSetingsFormMenu();
                 break;
@@ -305,9 +322,17 @@ public class GameController {
                 break;
 
             case SAVE:
-                model.returnToMenu();
-                keyHandler.resetPauseToggle();
-                System.out.println("save");
+                try {
+                    SaveManager.saveGame(model, SAVE_PATH);
+                    System.out.println("Partita salvata.");
+                    model.returnToMenu();
+                    keyHandler.resetPauseToggle();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
                 break;
 
             case PAUSE_SETTINGS:

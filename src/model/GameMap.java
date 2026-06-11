@@ -5,6 +5,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +17,11 @@ import java.util.List;
  */
 
 //-------------------------------------------------------------------------------------------------------------------
-public class GameMap {
+public class GameMap implements Serializable {
 
-    private final MapConfig mConf;
+    private static final long serialVersionUID = 1L;
+
+    private transient MapConfig mConf;
     private final int GRAPHIC_LAYER_NUM, GAME_LAYER_NUM;
 
 
@@ -160,6 +163,10 @@ public class GameMap {
     }
     public void setCollisionTile(int layer, int row, int col, boolean collision) {
         collisionMap[layer][row][col] = collision;
+    }
+
+    public void mConf(MapConfig mConf){
+        this.mConf = mConf;
     }
     //---------------------------------
 
