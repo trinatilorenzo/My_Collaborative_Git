@@ -1,5 +1,6 @@
 package controller;
 
+import main.CONFIG.GameConfig;
 import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.PlayerColor;
@@ -13,6 +14,8 @@ import view.UI.SettingsLayout;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.IOException;
+
 
 /**
  * ALL THE CONTROLLER STAFF HERE
@@ -21,7 +24,7 @@ import java.awt.Rectangle;
 //-------------------------------------------------------------------------------------------------------------------
 public class GameController {
 
-    private final GameModel model;
+    private GameModel model;
     private final GameView view;
     private final KeyHandler keyHandler;
     private final MouseHandler mouseHandler;
@@ -200,9 +203,20 @@ public class GameController {
                 break;
 
             case LOAD_GAME:
-                System.out.println("continue");
-                break;
+                try {
+                    GameConfig config = model.getGameConfig();
+                    GameModel loaded = SaveManager.loadLatestGame();
 
+                    loaded.restoreTransientState(config);
+                    model.copyFrom(loaded);
+
+                    model.forcePlayingState();          // vedi sotto
+                    keyHandler.resetPauseToggle();
+
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
             case SETTINGS:
                 model.toggleSetingsFormMenu();
                 break;
@@ -305,9 +319,17 @@ public class GameController {
                 break;
 
             case SAVE:
-                model.returnToMenu();
-                keyHandler.resetPauseToggle();
-                System.out.println("save");
+                try {
+                    SaveManager.saveGame(model);
+                    System.out.println("Partita salvata.");
+                    model.returnToMenu();
+                    keyHandler.resetPauseToggle();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
                 break;
 
             case PAUSE_SETTINGS:
@@ -474,17 +496,17 @@ public class GameController {
             }
             case RES_FULL -> {
                 model.setMaxResolution();
-                view.setFullScreen();
+                view.setResolution();
                 System.out.println("full");
             }
             case RES_MID  -> {
                 model.setMidResolution();
-                view.setDefaultScreen(); // TODO : the wiew shoud read by model the resolution
+                view.setResolution();
                 System.out.println("mid");
             }
             case RES_MIN  -> {
                 model.setMinResolution();
-                view.setMinResolution();
+                view.setResolution();
                 System.out.println("small");
             }
             case FPS_60   -> {

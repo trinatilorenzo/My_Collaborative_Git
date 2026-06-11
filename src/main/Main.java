@@ -43,8 +43,6 @@ public class Main {
         window.setIconImage(logo.getImage());
         try {Taskbar.getTaskbar().setIconImage(logo.getImage());} catch (Exception ignored) {}
 
-        //TODO: FINESTRA RIDIMENSIONABILE
-        window.setResizable(true);
 
         window.add(view);
         window.pack();
@@ -53,11 +51,11 @@ public class Main {
             view.setCursor(customCursor);
             window.setCursor(customCursor);
         }
-        //window.addKeyListener(controller);
 
         window.setLocationRelativeTo(null);
         window.setVisible(true);
         view.requestFocusInWindow();
+        view.setResolution();
 
         // ------------------------------------------------------------------------------------------------------------
 

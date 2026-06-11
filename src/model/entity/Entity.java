@@ -2,15 +2,20 @@ package model.entity;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
 import java.awt.Rectangle;
+import java.io.Serializable;
 
 /**
  * The ENTITY CLASS serves as the base for all game entities by providing common properties
  * and functionality such as position, movement, collision handling, and layer management.
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class Entity {
+public class Entity implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+
     // Settings
-    protected EntityConfig entityConfig;
+    protected transient EntityConfig entityConfig;
 
     // Position and movement
     protected static final double DIAGONAL_FACTOR = 1.0 / Math.sqrt(2);
@@ -171,6 +176,10 @@ public class Entity {
     }
     public void setMaxLife(int maxLife) {
         this.maxLife = maxLife;
+    }
+
+    public void setEntityConfig(EntityConfig entityConfig) {
+        this.entityConfig = entityConfig;
     }
     //---------------------------------
 }

@@ -4,14 +4,18 @@ import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
 
 import java.awt.Rectangle;
+import java.io.Serializable;
 
 /**
  * The GAME OBJECT CLASS serves as the base for all interactive objects in the game world,
  * providing common properties such as position, collision handling, and rendering information.
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameObject {
-    protected ObjConfig objConfig;
+public class GameObject implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    protected transient ObjConfig objConfig;
 
     protected String name;
     protected int worldX, worldY, layer; //position
@@ -84,6 +88,9 @@ public class GameObject {
     // SETTER
     public void remove() {
         this.removed = true;
+    }
+    public void setObjConfig(ObjConfig objConfig) {
+        this.objConfig = objConfig;
     }
 
 }

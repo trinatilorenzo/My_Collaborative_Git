@@ -12,6 +12,10 @@ import model.event.AudioEventType;
 import model.object.*;
 
 import java.awt.Rectangle;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +24,11 @@ import java.util.List;
  * world map, entity, combat, AI, events ...
 */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameModel {
-    private final GameConfig gameConfig;
+public class GameModel implements Serializable {
+    private transient GameConfig gameConfig;
+
+    @Serial
+    private static final long serialVersionUID = 1L;
     //-------------------------------------------------------------
 
     // Game status
@@ -30,11 +37,11 @@ public class GameModel {
     //-------------------------------------------------------------
 
     // Collision
-    private final CollisionChecker collisionChecker;
+    private transient CollisionChecker collisionChecker;
     //-------------------------------------------------------------
 
     // Map & OBJ
-    private final GameMap worldGameMap;
+    private  GameMap worldGameMap;
     private List<GameObject> objects;
     //-------------------------------------------------------------
 
@@ -65,7 +72,7 @@ public class GameModel {
     private double deadStateElapsedMs;
 
     //Audio events
-    private final List<AudioEventType> pendingAudioEvents = new ArrayList<>();
+    private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
     // Level and progression
     private int currentLevel = 1;
@@ -94,8 +101,8 @@ public class GameModel {
         playerColor = GS.entityConfig().DEFAULT_COLOR;
         musicEnabled = true;
         soundEnabled = true;
-        resValue = 1;
-        fpsValue = 1;
+        resValue = 0;
+        fpsValue = 0;
 
     }
     //-------------------------------------------------------------
@@ -714,6 +721,116 @@ public class GameModel {
     //-------------------------------------------------------------
 
 
+    //save and load
+
+    public void beforeSave() {
+        if (pendingAudioEvents != null) {
+            pendingAudioEvents.clear();
+        }
+    }
+
+    public void restoreTransientState(GameConfig config) {
+        this.gameConfig = config;
+        this.collisionChecker = new CollisionChecker(this);
+
+        if (this.pendingAudioEvents == null) {
+            this.pendingAudioEvents = new ArrayList<>();
+        } else {
+            this.pendingAudioEvents.clear();
+        }
+
+        ObjConfig objC = config.ObjConfig();
+        EntityConfig entC = config.entityConfig();
+
+
+        if (player != null) player.setEntityConfig(entC);
+        if (monk != null) monk.setEntityConfig(entC);
+
+        if (tntEnemies != null) {
+            for (EnemyTNT e : tntEnemies) {
+                e.setEntityConfig(entC);
+            }
+        }
+
+        if (dynamiteEnemies != null) {
+            for (EnemyDynamite e : dynamiteEnemies) {
+                e.setEntityConfig(entC);
+            }
+        }
+
+        if (torchEnemies != null) {
+            for (EnemyTorch e : torchEnemies) {
+                e.setEntityConfig(entC);
+            }
+        }
+
+        if (objects != null) {
+            for (GameObject obj : objects) {
+                obj.setObjConfig(objC);
+            }
+        }
+
+        if(worldGameMap != null){
+            this.worldGameMap.mConf(config.mapConfig());
+        }
+    }
+
+    public void afterLoad() {
+        this.collisionChecker = new CollisionChecker(this);
+
+        if (this.pendingAudioEvents == null) {
+            this.pendingAudioEvents = new ArrayList<>();
+        } else {
+            this.pendingAudioEvents.clear();
+        }
+
+        if (this.objects == null) this.objects = new ArrayList<>();
+        if (this.tntEnemies == null) this.tntEnemies = new ArrayList<>();
+        if (this.dynamiteEnemies == null) this.dynamiteEnemies = new ArrayList<>();
+        if (this.projectiles == null) this.projectiles = new ArrayList<>();
+        if (this.torchEnemies == null) this.torchEnemies = new ArrayList<>();
+        if (this.currentDialogue == null) this.currentDialogue = "";
+    }
+
+    public void copyFrom(GameModel other) {
+        this.gameState = other.gameState;
+        this.debugMode = other.debugMode;
+
+        this.objects = other.objects;
+        this.player = other.player;
+        this.monk = other.monk;
+        this.tntEnemies = other.tntEnemies;
+        this.dynamiteEnemies = other.dynamiteEnemies;
+        this.projectiles = other.projectiles;
+        this.torchEnemies = other.torchEnemies;
+
+        this.settingsMenuOpen = other.settingsMenuOpen;
+        this.settingsPauseOpen = other.settingsPauseOpen;
+        this.musicEnabled = other.musicEnabled;
+        this.soundEnabled = other.soundEnabled;
+        this.resValue = other.resValue;
+        this.fpsValue = other.fpsValue;
+        this.playerColor = other.playerColor;
+        this.currentDialogue = other.currentDialogue;
+
+        this.deadStateElapsedMs = other.deadStateElapsedMs;
+        this.currentLevel = other.currentLevel;
+        this.levelCompleted = other.levelCompleted;
+        this.currentLevelPowerUpCollected = other.currentLevelPowerUpCollected;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        afterLoad();
+    }
+
+    public void forcePlayingState() {
+        this.gameState = GameState.PLAYING;
+        this.settingsPauseOpen = false;
+        this.settingsMenuOpen = false;
+    }
+
     // GETTER ----------------------
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
@@ -728,6 +845,7 @@ public class GameModel {
     public String getCurrentDialogue() { return currentDialogue; }
     public List<DynamiteProjectile> getProjectiles(){ return projectiles; }
     public List<EnemyTorch> getTorchEnemies() { return torchEnemies; }
+    public GameConfig getGameConfig() { return gameConfig; }
     //---------------------------------
 
     // SETTER ----------------------
