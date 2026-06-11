@@ -46,6 +46,12 @@ public record UIConfig() {
 
     public static final long DAMAGE_FLASH_DURATION_NS = 1500_000_000;
 
+    //HUD PLAYER SHIELD
+    public static final int BAR_SHIELD_WIDTH = 160;
+    public static final int BAR_SHIELD_HEIGHT = 18;
+    public static final int ICON_SHIELD_SIZE = 30;
+    public static final int SHIELD_OFFSET_SCREEN = 20;
+
     //PAUSE
     //-------------------------------------------------------------
 

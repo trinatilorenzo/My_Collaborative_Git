@@ -3,6 +3,8 @@ package view.UI;
 import main.CONFIG.enu.ButtonValue;
 import model.GameModel;
 import model.entity.Player;
+import view.SpriteLoader;
+import main.CONFIG.EntityConfig;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
 import java.awt.*;
@@ -52,6 +54,8 @@ public class UI {
     private final BufferedImage heartFull;
     private final BufferedImage heartHalf;
     private final BufferedImage heartBlank;
+
+    private final BufferedImage shield;
 
     private final SliceSprite menuButton;
     private final SliceSprite menuButtonSelected;
@@ -136,7 +140,12 @@ public class UI {
 
     private static final int DAMAGE_ALPHA_STEPS = 24;
     private static final float[] DAMAGE_GRADIENT_DIST = { 0.0f, 0.60f, 0.82f, 1.0f };
-
+    // =========================================================================
+    // Shield state
+    // =========================================================================
+    private long shieldEffectStart = -1;
+    private final double shieldDuration = EntityConfig.SHIELD_DURATION_MS;
+    
     // =========================================================================
     // Class Methods
     // =========================================================================
@@ -157,6 +166,8 @@ public class UI {
         heartFull = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),  tileSize, tileSize);
         heartHalf = scaleImage(loadUiImage("src/res/UI/heart/heart_half.png"),  tileSize, tileSize);
         heartBlank = scaleImage(loadUiImage("src/res/UI/heart/heart_blank.png"), tileSize, tileSize);
+
+        shield = loadUiImage("src/res/object/powerups/Icon_06.png");
 
         menuButton = new SliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png",  tileSize, tileSize);
         menuButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Hover_3Slides.png", tileSize, tileSize);
@@ -262,6 +273,7 @@ public class UI {
             }
             case PLAYING   -> {
                 drawPlayerLife();
+                drawShield();
                 if (!model.getCurrentDialogue().isEmpty()) drawDialogueWindow();
             }
             case PAUSED    -> {
@@ -347,6 +359,55 @@ public class UI {
             float alpha   = 1.0f - Math.min(1.0f, elapsed); // linear fade-out
             drawDamageOverlay(alpha);
         }
+    }
+    //-------------------------------------------------------------
+    public void drawShield(){
+        if (model.getPlayer().isShielded()){
+            if (shieldEffectStart == -1) {
+                shieldEffectStart = System.currentTimeMillis();
+            }
+            long passed = System.currentTimeMillis() - shieldEffectStart;
+            float progress = 1.0f - (float)(passed/shieldDuration);
+            if (progress<0) progress = 0;
+            
+            int barWidth = UIConfig.BAR_SHIELD_WIDTH;
+            int barHeight = UIConfig.BAR_SHIELD_HEIGHT;
+            int shieldSize = UIConfig.ICON_SHIELD_SIZE;
+            int spacing = shieldSize / 6;
+
+            int totalWidth = shieldSize + spacing + barWidth;
+            int startX = screenWidth - totalWidth - UIConfig.SHIELD_OFFSET_SCREEN; 
+            int startY = UIConfig.SHIELD_OFFSET_SCREEN; 
+
+            Color originalColor = g2.getColor();
+            Stroke originalStroke = g2.getStroke();
+
+            int barX = startX + shieldSize + spacing;
+            int barY = startY;
+            // Bar background
+            g2.setColor(new Color(35, 35, 35, 200));
+            g2.fillRoundRect(barX, barY, barWidth, barHeight, 8, 8);
+
+            // Moving bar
+            g2.setColor(new Color(0, 190, 255));
+            g2.fillRoundRect(barX, barY, (int) (barWidth * progress), barHeight, 8, 8);
+
+            // Stroke of the bar
+            g2.setColor(new Color(255, 255, 255, 180));
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawRoundRect(barX, barY, barWidth, barHeight, 8, 8);
+
+            // Draw shield
+            g2.drawImage(shield, startX, startY-((shieldSize-barHeight)/2), shieldSize, shieldSize, null);
+            
+            // Reset Graphics2D values
+            g2.setColor(originalColor);
+            g2.setStroke(originalStroke);
+
+        } else {
+            shieldEffectStart = -1;
+        }
+
     }
     //-------------------------------------------------------------
     public void drawDialogueWindow() {
