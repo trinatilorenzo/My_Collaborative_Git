@@ -14,7 +14,6 @@ public class Monk extends Entity {
     //state
     private MonkState state;
     private double disappearElapsedMs;
-    private double respawnElapsedMs;
     //dialogues
     private String[] dialogues;
     private int dialogueIndex;
@@ -44,7 +43,6 @@ public class Monk extends Entity {
         this.dialogueIndex = 0;
         //state
         this.disappearElapsedMs = 0.0;
-        this.respawnElapsedMs = 0.0;
     }
     //-------------------------------------------------------------
 
@@ -60,22 +58,32 @@ public class Monk extends Entity {
             disappearElapsedMs += deltaMs;
             if (disappearElapsedMs >= EntityConfig.MONK_DISAPPEAR_DURATION_MS) {
                 state = MonkState.DISAPPEARED;
-                respawnElapsedMs = 0.0;
             }
             return;
         }
 
         // respawn after a cooldown
         if (state == MonkState.DISAPPEARED) {
-            respawnElapsedMs += deltaMs;
-            if (respawnElapsedMs >= EntityConfig.MONK_RESPAWN_DURATION_MS) {
-                resetDialogue();
-            }
+
             return;
         }
         checkPlayerProximity(player);
     }
     //-------------------------------------------------------------
+
+    /**
+     * Move the monk to a new point on the map and set up new dialogues.
+     */
+    //-------------------------------------------------------------
+    public void moveToNextLocation(int newX, int newY, String[] nextDialogues) {
+        this.worldX = newX;
+        this.worldY = newY;
+        this.dialogues = nextDialogues;
+        this.dialogueIndex = 0;
+        this.disappearElapsedMs = 0.0;
+        this.state = MonkState.IDLE; 
+    }
+
 
     /**
      * Checks if the player is within the detection radius
@@ -144,7 +152,6 @@ public class Monk extends Entity {
         state = MonkState.IDLE;
         dialogueIndex = 0;
         disappearElapsedMs = 0.0;
-        respawnElapsedMs = 0.0;
     }
     //-------------------------------------------------------------
     public void setState(MonkState state) {
@@ -162,13 +169,13 @@ public class Monk extends Entity {
      */
     //-------------------------------------------------------------
     public boolean hasFinishedDialogue() {
-        return dialogueIndex >= dialogues.length;
+        return dialogues == null || dialogueIndex >= dialogues.length;
     }
     //-------------------------------------------------------------
     /** Return the text of the current dialogue */
     //-------------------------------------------------------------
     public String getCurrentDialogue() {
-        if (dialogueIndex < dialogues.length) {
+        if (dialogues != null && dialogueIndex < dialogues.length) {
             return dialogues[dialogueIndex];
         } else {
             return null; // No more dialogues

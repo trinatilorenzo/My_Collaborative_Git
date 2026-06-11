@@ -529,6 +529,8 @@ public class GameModel {
                     currentLevel ++;
                     currentLevelPowerUpCollected = false;
                 } else {
+                    // win
+                    updateMonkPositionForEndLevel();
                     levelCompleted = true;
                 }
             }
@@ -587,6 +589,10 @@ public class GameModel {
             }
         }
         // ----------------------------------
+    }
+    //-------------------------------------------------------------
+    private void updateMonkPositionForEndLevel(){
+        //TODO 
     }
     //-------------------------------------------------------------
     private void updateEvents(int lifeBeforeUpdate) {
