@@ -71,6 +71,9 @@ public class GameModel implements Serializable {
     // Death sequence
     private double deadStateElapsedMs;
 
+    // Win sequence
+    private double winStateElapsedMs;
+
     //Audio events
     private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
@@ -95,6 +98,7 @@ public class GameModel implements Serializable {
 
         currentDialogue = "";
         deadStateElapsedMs = 0.0;
+        winStateElapsedMs = 0.0;
 
         settingsMenuOpen = false;
         settingsPauseOpen = false;
@@ -210,7 +214,7 @@ public class GameModel implements Serializable {
     private void spawnBuildings(List<SpawnPoint> spawnPoints, String buildingTag, int buildingWidth, int buildingHeight,
                                 int hitboxWidth, int hitboxHeight, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
-            objects.add(new GameObject(
+            GameObject building = new GameObject(
                     objConfig,
                     buildingTag,
                     spawnPoint,
@@ -218,7 +222,14 @@ public class GameModel implements Serializable {
                     buildingHeight,
                     createBuildingSolidArea(buildingWidth, hitboxWidth, hitboxHeight, hitboxOffsetY),
                     ObjConfig.BUILDING_SOLID
-            ));
+            );
+
+            // Makes the gold mine not solid
+            if (buildingTag.equals(objConfig.GOLDMINE_TAG())) {
+                building.setSolid(false); 
+            }
+
+            objects.add(building);
         }
     }
     //-------------------------------------------------------------
@@ -295,6 +306,9 @@ public class GameModel implements Serializable {
                 break;
             case GAME_OVER:
                 // no update for game over state
+                break;
+            case WIN:
+                // no update for game win state
                 break;
         }
 
@@ -504,6 +518,18 @@ public class GameModel implements Serializable {
             }
         }
         for (GameObject obj: objects){
+            if (obj.getName().equals(gameConfig.ObjConfig().GOLDMINE_TAG())){
+                // Check if the player's hitbox intersects the mine's hitbox
+                if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
+                    // Handle win state 
+                    if (currentLevel == 3 && levelCompleted) {
+                        gameState = GameState.WIN;
+                        System.out.println("YOU WIN! Il giocatore ha raggiunto la miniera.");
+                        break; 
+                    }
+                }
+            }
+
             if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
                 if (!powerUp.isCollectible()) {
                     continue; // Skip if the power-up is not yet collectible
@@ -535,10 +561,14 @@ public class GameModel implements Serializable {
                 if (currentLevel < 3){
                     currentLevel ++;
                     currentLevelPowerUpCollected = false;
+                    System.out.println("Level passed! Current Level: "+currentLevel);
                 } else {
-                    // win
+                    // all levels passed 
                     updateMonkPositionForEndLevel();
                     levelCompleted = true;
+                     System.out.println("Level passed! End level "+currentLevel);
+
+
                 }
             }
         } else {
@@ -647,7 +677,7 @@ public class GameModel implements Serializable {
     }
     //-------------------------------------------------------------
     private void updateState(InputState input) {
-        if (gameState == GameState.GAME_OVER) return;
+        if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) return;
         if (player.isDying() || player.isDead()) {
             gameState = GameState.PLAYING;
             return;

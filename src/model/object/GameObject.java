@@ -92,6 +92,9 @@ public class GameObject implements Serializable {
     public void setObjConfig(ObjConfig objConfig) {
         this.objConfig = objConfig;
     }
+    public void setSolid(boolean value){
+        this.solid = value;
+    }
 
 }
 //-------------------------------------------------------------------------------------------------------------------
