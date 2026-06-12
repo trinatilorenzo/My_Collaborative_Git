@@ -112,6 +112,8 @@ public class GameController {
             }
 
             case SETTINGS -> updateSettings(input);
+
+            case WIN -> updateWinScreen(input, deltaMs);
         }
 
         syncAudio();
@@ -210,7 +212,7 @@ public class GameController {
                     loaded.restoreTransientState(config);
                     model.copyFrom(loaded);
 
-                    model.forcePlayingState();          // vedi sotto
+                    model.forcePlayingState();          
                     keyHandler.resetPauseToggle();
 
                 } catch (IOException | ClassNotFoundException e) {
@@ -380,6 +382,45 @@ public class GameController {
         }
     }
     //-------------------------------------------------------------
+    //-------------------------------------------------------------
+    private void updateWinScreen(InputState input, double deltaMs){
+        view.updateAnimations(deltaMs);
+
+        GameOverLayout layout = view.getGameOverLayout();
+        Point mouse = mouseHandler.getMousePosition();
+
+        // Keyboard
+        if (input.menuPrevious()) {
+            gameOverSelection = previousGameOverItem(gameOverSelection);
+        }
+        if (input.menuNext()) {
+            gameOverSelection = nextGameOverItem(gameOverSelection);
+        }
+        if (input.menuConfirm()) {
+            performGameOverAction(gameOverSelection);
+            return;
+        }
+
+        // Mouse (Hover)
+        ButtonValue.GameOver gameOverHover = gameOverButtonFromPoint(layout, mouse);
+        if (gameOverHover != null) {
+            gameOverSelection = gameOverHover;
+            view.setGameOverHover(gameOverHover);
+        } else {
+            view.resetGameOverHover();
+        }
+
+        // Mouse (Click)
+        Point click = mouseHandler.consumeLeftClick();
+        ButtonValue.GameOver clicked = gameOverButtonFromPoint(layout, click);
+
+        if (clicked != null) {
+            gameOverSelection = clicked;
+            performGameOverAction(clicked);
+        }
+    }
+
+
     /**
      * HELPERS METHOD — Settings
      */
