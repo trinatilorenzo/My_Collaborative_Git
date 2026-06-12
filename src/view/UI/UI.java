@@ -148,6 +148,34 @@ public class UI {
     private final double shieldDuration = EntityConfig.SHIELD_DURATION_MS;
     
     // =========================================================================
+    // Win Screen & Particle State
+    // =========================================================================
+    private java.util.List<CoinParticle> coinParticles;
+    // Internal class to handle single coin
+    private static class CoinParticle {
+        float x, y;
+        float speed;
+        float size;
+        float angle;
+        float rotationSpeed;
+
+        public CoinParticle(int screenWidth, int screenHeight) {
+            reset(screenWidth, screenHeight, true);
+        }
+
+        // Reset position of the coin
+        public void reset(int screenWidth, int screenHeight, boolean randomInitialY) {
+            this.x = (float) (Math.random() * screenWidth);
+            this.y = randomInitialY ? (float) (Math.random() * - screenHeight) : -20; 
+            this.speed = (float) (Math.random() * 3 + 2); // Fall speed
+            this.size = (float) (Math.random() * 10 + 8);  // Coin's size
+            this.angle = (float) (Math.random() * Math.PI * 2);
+            this.rotationSpeed = (float) (Math.random() * 0.08 + 0.04); // Speed rotation
+        }
+    }
+
+
+    // =========================================================================
     // Class Methods
     // =========================================================================
 
@@ -286,6 +314,7 @@ public class UI {
                 updateModelStatus();
                 drawSettingsScreen();
             }
+            case WIN -> drawWinScreen();
         }
 
         if (model.isDebugMode()) drawFpsOverlay();
@@ -663,6 +692,81 @@ public class UI {
         // Restart button
         drawButton(resumeButton, resumeButtonSelected, newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
                 "Main Menu", gameOverHover.get(RESTART) || gameOverSelected.get(RESTART));
+    }
+    //-------------------------------------------------------------
+    private void drawWinScreen(){
+        if (coinParticles == null){
+            coinParticles = new java.util.ArrayList<>();
+            for (int i=0; i<60; i++){
+                coinParticles.add(new CoinParticle(screenWidth, screenHeight));
+            }
+        }
+
+        drawPlayerLife();
+
+        // Overlay
+        Composite oldComposite = g2.getComposite();
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.65f));
+        g2.setColor(new Color(25, 20, 5));
+        g2.fillRect(0, 0, screenWidth, screenHeight);
+        g2.setComposite(oldComposite);
+
+        // Rain of coins
+        g2.setColor(new Color (255, 215, 0));
+        for (CoinParticle coin: coinParticles){
+            coin.y += coin.speed;
+            coin.angle += coin.rotationSpeed; // Spin the coin
+
+            // If it leaves the bottom of the screen, it respawns at the top
+            if (coin.y > screenHeight) {
+                coin.reset (screenWidth, screenHeight, false);
+            }
+
+            // Simulate 3D rotation by changing the width of the coin using the cosine of the angle
+            int animatedWidth = (int) (coin.size * Math.abs(Math.cos(coin.angle)));
+            int animatedHeight = (int) coin.size;
+
+            // Calculate position
+            int drawX = (int) (coin.x + (coin.size - animatedWidth) / 2);
+            int drawY = (int) coin.y;
+
+            // Draw the shadow of the coin
+            g2.setColor(new Color(150, 100, 0, 100));
+            g2.fillOval(drawX+ 2, drawY + 2, animatedWidth, animatedHeight);
+
+            // Draw the coin
+            g2.setColor(new Color(255, 215, 0));
+            g2.fillOval(drawX, drawY, animatedWidth, animatedHeight);
+
+            // Internal edge for depth
+            g2.setColor(new Color(200, 140, 0));
+            g2.drawOval(drawX, drawY, animatedWidth, animatedHeight);
+        }
+
+        // Title of win
+        int titleRibbonWidth = 520;
+        int titleRibbonHeight = 80;
+        int titleRibbonX = (screenWidth - titleRibbonWidth) / 2;
+        int titleRibbonY = 72;
+        yellowRibbon.draw(g2, titleRibbonX, titleRibbonY, titleRibbonWidth, titleRibbonHeight);
+        
+
+        // Text
+        g2.setColor(new Color(60, 40, 20));
+        g2.setFont(maruMonica.deriveFont(Font.BOLD, 70F));
+        String title = "YOU WIN!";
+        Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(title, g2);
+        int textX = getXforCenteredText(title);
+        int textY = titleRibbonY + (int) Math.round((titleRibbonHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
+        g2.drawString(title, textX, textY);
+
+        // Button for newgame
+        GameOverLayout layout = getGameOverLayout();
+        Rectangle newGameBounds = layout.newGameBounds();
+    
+        // Disegnamo il pulsante usando i tuoi asset standard
+        drawButton(menuButton, menuButtonSelected, newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
+                "Play Again", gameOverHover.get(RESTART) || gameOverSelected.get(RESTART));
     }
     //-------------------------------------------------------------
 
