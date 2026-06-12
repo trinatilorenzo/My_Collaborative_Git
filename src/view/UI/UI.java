@@ -46,6 +46,7 @@ public class UI {
     // =========================================================================
 
     private final Font maruMonica;
+    private final Font dungeonFont;
 
     // =========================================================================
     // Assets — loaded once at construction time
@@ -189,6 +190,8 @@ public class UI {
         this.screenHeight = screenHeight;
 
         maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
+        dungeonFont = loadFont("/res/fonts/DungeonFont.ttf");
+
 
         int tileSize = this.screenConfig.TILE_SIZE();
         heartFull = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),  tileSize, tileSize);
@@ -671,36 +674,24 @@ public class UI {
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void drawGameOverScreen() {
-        drawPlayerLife();
 
         // Dark semi-transparent overlay
-        Composite oldComposite = g2.getComposite();
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-        g2.setColor(new Color(8, 8, 8));
+        g2.setColor(new Color(8, 8, 8, 150));
         g2.fillRect(0, 0, screenWidth, screenHeight);
-        g2.setComposite(oldComposite);
 
-        // Title ribbon
-        int titleRibbonWidth = 520;
-        int titleRibbonHeight = 80;
-        int titleRibbonX = (screenWidth - titleRibbonWidth) / 2;
-        int titleRibbonY = 72;
-        ribbonBlueWide.draw(g2, titleRibbonX, titleRibbonY, titleRibbonWidth, titleRibbonHeight);
+        GameOverLayout layout = getGameOverLayout();
+        Rectangle ribbonBounds = layout.gameOverRibbonBounds();
+        Rectangle newGameBounds = layout.newGameBounds();
 
-        // "GAME OVER" text centred inside the ribbon
-        g2.setColor(Color.WHITE);
-        g2.setFont(maruMonica.deriveFont(Font.BOLD, 70F));
+        // Pause text
+        redRibbon.draw(g2, ribbonBounds.x, ribbonBounds.y, ribbonBounds.width, ribbonBounds.height);
         String title = "GAME OVER";
-        Rectangle2D textBounds = g2.getFontMetrics().getStringBounds(title, g2);
-        int textX = getXforCenteredText(title);
-        int textY = titleRibbonY + (int) Math.round((titleRibbonHeight - textBounds.getHeight()) / 2.0 - textBounds.getY());
-        g2.drawString(title, textX, textY);
+        g2.setColor(Color.white);
+        drawTextInRibbon(ribbonBounds, title, 0.6, 0.9);
 
         // Restart button
-        GameOverLayout layout = getGameOverLayout();
-        Rectangle newGameBounds = layout.newGameBounds();
-        drawButton(menuButton, menuButtonSelected, newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
-                "New Game", gameOverHover.get(RESTART) || gameOverSelected.get(RESTART));
+        drawButton(resumeButton, resumeButtonSelected, newGameBounds.x, newGameBounds.y, newGameBounds.width, newGameBounds.height,
+                "Main Menu", gameOverHover.get(RESTART) || gameOverSelected.get(RESTART));
     }
     //-------------------------------------------------------------
     private void drawWinScreen(){
@@ -929,11 +920,26 @@ public class UI {
     }
     //-------------------------------------------------------------
     public GameOverLayout getGameOverLayout() {
-        int buttonWidth  = 320;
-        int buttonHeight = 84;
-        int centerX      = screenWidth / 2;
-        int buttonY      = screenHeight - buttonHeight - 56;
-        return new GameOverLayout(new Rectangle(centerX - buttonWidth / 2, buttonY, buttonWidth, buttonHeight));
+        int centerX = screenWidth / 2;
+        int centerY = screenHeight / 2;
+
+        //banner
+        int ribbonW = (int) (screenWidth * 0.55f);
+        int ribbonH = UIConfig.GAME_OVER_RIBBON_HEIGHT;
+        int ribbonX =  (screenWidth - ribbonW) / 2;
+
+        int ribbonY =  UIConfig.GAME_OVER_PADDING;
+        Rectangle gameOverRibbonBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
+
+
+        //button
+        int newGameButtonWidth  = UIConfig.RESUME_BUTTON_WIDTH;
+        int newGameButtonHeight = UIConfig.RESUME_BUTTON_HEIGHT;
+        int gap = UIConfig.GAME_OVER_PADDING ;
+        int firstButtonY = screenHeight - newGameButtonHeight - gap;
+        Rectangle newGameBounds = new Rectangle(centerX - newGameButtonWidth / 2, firstButtonY, newGameButtonWidth, newGameButtonHeight);
+
+        return new GameOverLayout(newGameBounds, gameOverRibbonBounds);
     }
     //-------------------------------------------------------------
     public PauseMenuLayout getPauseMenuLayout() {

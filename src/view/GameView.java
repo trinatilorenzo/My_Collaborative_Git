@@ -143,35 +143,36 @@ public class GameView extends JPanel {
 
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenWidth, screenHeight);
-        if (model.getGameState() == GameState.SETTINGS){
-            if(model.isSoundEnabled()){
-                audioManager.setSfxVolume(1);
-            }else{
-                audioManager.setSfxVolume(0);
+
+        switch (model.getGameState()) {
+
+            case PLAYING, PAUSED, GAME_OVER, WIN -> {
+
+                // DRAW THE WORLD MAP
+                mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2, screenWidth, screenHeight);
+                // Y-sorting logic: sort objects by their worldY coordinate
+                drawEntities(g2);
+
+                if (model.isDebugMode()) {
+                    drawWorldDebug(g2);
+                }
             }
-            if (model.isMusicEnabled()) {
-                audioManager.setMusicVolume(1);
-            }else {
-                audioManager.setMusicVolume(0);
+            case SETTINGS -> {
+                if(model.isSoundEnabled()){
+                    audioManager.setSfxVolume(1);
+                }else{
+                    audioManager.setSfxVolume(0);
+                }
+                if (model.isMusicEnabled()) {
+                    audioManager.setMusicVolume(1);
+                }else {
+                    audioManager.setMusicVolume(0);
+                }
             }
         }
-
-        if (model.getGameState() == GameState.PLAYING || model.getGameState() == GameState.PAUSED) {
-
-            // DRAW THE WORLD MAP
-            mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2, screenWidth, screenHeight);
-            // Y-sorting logic: sort objects by their worldY coordinate
-            drawEntities(g2);
-
-            if (model.isDebugMode()) {
-                drawWorldDebug(g2);
-            }
-        }
-
 
         // draw the UI
         ui_render.draw(g2);
-
         g2.dispose();
 
     }
