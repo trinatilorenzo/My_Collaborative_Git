@@ -70,6 +70,8 @@ public record UIConfig() {
     //GAME OVER
     //-------------------------------------------------------------
     public static final double GAME_OVER_DELAY_MS = 500.0;
+    public static final int GAME_OVER_RIBBON_HEIGHT = 130;
+    public static final int GAME_OVER_PADDING = 80;
     //-------------------------------------------------------------
 
     //SETTINGS MENU

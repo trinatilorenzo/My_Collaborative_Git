@@ -11,7 +11,7 @@ import java.awt.event.KeyListener;
 public class KeyHandler implements KeyListener {
 
     // variable to set the state of the keys
-    private volatile boolean up, down, left, right ;
+    private volatile boolean up, down, left, right;
     private volatile boolean attackRequested;
     private volatile boolean interact = false; 
 
@@ -45,7 +45,7 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_M -> interact = true;
 
             // Anti repetition toggle
-            case KeyEvent.VK_P -> {
+            case KeyEvent.VK_ESCAPE -> {
                 if (!pausePressed) {
                     pauseToggle = !pauseToggle;
                     pausePressed = true;
@@ -68,7 +68,7 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_D -> right = false;
             case KeyEvent.VK_SPACE -> attackPressed = false;
             case KeyEvent.VK_M -> interact = false;
-            case KeyEvent.VK_P -> pausePressed = false;
+            case KeyEvent.VK_ESCAPE -> pausePressed = false;
             case KeyEvent.VK_F3 -> debugPressed = false;
         }
     }

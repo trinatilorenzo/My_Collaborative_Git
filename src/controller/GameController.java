@@ -404,7 +404,7 @@ public class GameController {
     private void performGameOverAction(ButtonValue.GameOver selection) {
         switch (selection) {
             case RESTART    -> {
-                model.initializeNewGame();
+                model.returnToMenu();
             }
         }
     }
