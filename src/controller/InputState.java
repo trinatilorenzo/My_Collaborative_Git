@@ -9,6 +9,8 @@ public record InputState(
         boolean down,
         boolean left,
         boolean right,
+        boolean shield,
+        boolean movementRequested,
         boolean attack,
         boolean pause,
         boolean debug,

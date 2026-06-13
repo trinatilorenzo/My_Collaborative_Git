@@ -27,6 +27,7 @@ public class Player extends Entity {
     // handle power-ups effects
     private double shieldTimerMs = 0;
     private boolean isShielded = false;
+    private boolean hasShield = false;
     private boolean isSpeedBoosted = false;
     private boolean isHealthRestored = false;
 
@@ -83,21 +84,20 @@ public class Player extends Entity {
         }
 
         // update shield timer
-        if (shieldTimerMs > 0) {
+        if (shieldTimerMs > 0 && input.shield()) {
+            System.out.println(shieldTimerMs);
             shieldTimerMs -= deltaMs;
+            isShielded = true;
             if (shieldTimerMs <= 0) {
                 shieldTimerMs = 0;
                 isShielded = false;
+                hasShield = false;
             }
+        }else {
+            isShielded = false;
         }
 
-
-        boolean isMoving = false;
-        if (state != PlayerState.ATTACKING) {
-            // move the player only if he is not attacking
-            isMoving = updateMovement(input, deltaMs);
-        }
-        // update the player's state
+        boolean isMoving = updateMovement(input, deltaMs);
         updateState(input, isMoving);
     }
     //-------------------------------------------------------------
@@ -141,8 +141,12 @@ public class Player extends Entity {
      */
     //-------------------------------------------------------------
     private void updateState(InputState input, boolean isMoving) {
-        // While an attack animation is running, keep the state locked until renderer closes it.
         if (state == PlayerState.ATTACKING) {
+            if (input.movementRequested()) {
+                state = PlayerState.WALKING;
+                attackAnimationCompleted = true;
+                attackDamageApplied = true;
+            }
             return;
         }
 
@@ -160,31 +164,31 @@ public class Player extends Entity {
 
     //----------------------------------------------
     public Rectangle getAttackArea() {
+        Rectangle body = getSolidWorldArea();
         Rectangle attackArea = new Rectangle();
-        attackArea.width = solidArea.width + EntityConfig.RANGE_ATTACK;
-        attackArea.height = solidArea.height + EntityConfig.RANGE_ATTACK;
-        // worldX/Y = center of solid area
-        int hitboxLeft = worldX - solidArea.width / 2;
-        int hitboxTop = worldY - solidArea.height / 2;
 
-        switch(direction) {
-            case UP:
-                attackArea.x = worldX - attackArea.width / 2;
-                attackArea.y = hitboxTop - attackArea.height;
-                break;
-            case DOWN:
-                attackArea.x = worldX - attackArea.width / 2;
-                attackArea.y = hitboxTop + solidArea.height;
-                break;
-            case LEFT:
-                attackArea.x = hitboxLeft - attackArea.width;
-                attackArea.y = worldY - attackArea.height / 2;
-                break;
-            case RIGHT:
-                attackArea.x = hitboxLeft + solidArea.width;
-                attackArea.y = worldY - attackArea.height / 2;
-                break;
+        attackArea.width = body.width + EntityConfig.RANGE_ATTACK;
+        attackArea.height = body.height + EntityConfig.RANGE_ATTACK;
+
+        switch (direction) {
+            case UP -> {
+                attackArea.x = body.x + body.width / 2 - attackArea.width / 2;
+                attackArea.y = body.y - attackArea.height;
+            }
+            case DOWN -> {
+                attackArea.x = body.x + body.width / 2 - attackArea.width / 2;
+                attackArea.y = body.y + body.height;
+            }
+            case LEFT -> {
+                attackArea.x = body.x - attackArea.width;
+                attackArea.y = body.y + body.height / 2 - attackArea.height / 2;
+            }
+            case RIGHT -> {
+                attackArea.x = body.x + body.width;
+                attackArea.y = body.y + body.height / 2 - attackArea.height / 2;
+            }
         }
+
         return attackArea;
     }
     //--------------------------------------------------------------
@@ -241,6 +245,7 @@ public class Player extends Entity {
             case SHIELD:
                 this.shieldTimerMs = EntityConfig.SHIELD_DURATION_MS;
                 this.isShielded = true;
+                this.hasShield = true;
                 break;
             case HEALTH_RESTORE:
                 this.life = this.maxLife;
@@ -283,6 +288,12 @@ public class Player extends Entity {
     }
     public boolean isHealthRestored() {
         return isHealthRestored;
+    }
+    public double getShieldTimerMs() {
+        return shieldTimerMs;
+    }
+    public boolean hasShield() {
+        return hasShield;
     }
 
     @Override

@@ -11,7 +11,7 @@ import model.entity.*;
 import model.event.AudioEventType;
 import model.object.*;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
@@ -131,11 +131,14 @@ public class GameModel implements Serializable {
         objects = new ArrayList<>();
 
         // first level tree
-        spawnTrees(objC.TREES_03_SPAWNPOINT(), objC.TREE_TAG_03(), objC.TREE_03_WIDTH, objC.TREE_03_HEIGHT, objC.TREE_03_HITBOX_OFFSET_Y, objC);
+        spawnTrees(objC.TREES_03_SPAWNPOINT(), objC.TREE_TAG_03(), objC.TREE_03_WIDTH, objC.TREE_03_HEIGHT,
+                new Dimension(objC.TREE_03_HITBOX_WIDTH, objC.TREE_03_HITBOX_HEIGHT), objC.TREE_03_HITBOX_OFFSET_Y, objC);
         // second level tree
-        spawnTrees(objC.TREES_02_SPAWNPOINT(), objC.TREE_TAG_02(), objC.TREE_02_WIDTH, objC.TREE_02_HEIGHT, objC.TREE_02_HITBOX_OFFSET_Y, objC);
+        spawnTrees(objC.TREES_02_SPAWNPOINT(), objC.TREE_TAG_02(), objC.TREE_02_WIDTH, objC.TREE_02_HEIGHT,
+                new Dimension(objC.TREE_02_HITBOX_WIDTH, objC.TREE_02_HITBOX_HEIGHT) ,objC.TREE_02_HITBOX_OFFSET_Y, objC);
         // third level tree
-        spawnTrees(objC.TREES_01_SPAWNPOINT(), objC.TREE_TAG_01(), objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT, objC.TREE_01_HITBOX_OFFSET_Y, objC);
+        spawnTrees(objC.TREES_01_SPAWNPOINT(), objC.TREE_TAG_01(), objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT,
+                new Dimension(objC.TREE_01_HITBOX_WIDTH, objC.TREE_01_HITBOX_HEIGHT), objC.TREE_01_HITBOX_OFFSET_Y, objC);
 
         // buildings
         spawnBuildings(objC.CASTLE_SPAWNPOINT(), objC.CASTLE_TAG(), ObjConfig.CASTLE_WIDTH, ObjConfig.CASTLE_HEIGHT,
@@ -200,10 +203,10 @@ public class GameModel implements Serializable {
      * Helper method to spawn trees based on the spawn points defined in the ObjConfig.
       * It creates an OBJ_Tree instance for each spawn point and adds it to the list of game objects.
      */
-    private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, int hitboxOffsetY, ObjConfig objConfig) {
+    private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, Dimension hitboxDim, int hitboxOffsetY, ObjConfig objConfig) {
         for (SpawnPoint spawnPoint : spawnPoints) {
             objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
-                    createTreeSolidArea(treeWidth, hitboxOffsetY, objConfig)
+                    createTreeSolidArea(treeWidth, hitboxDim, hitboxOffsetY, objConfig)
             ));
         }
     }
@@ -237,13 +240,10 @@ public class GameModel implements Serializable {
      * Helper method to create a solid area for trees. 
       * It calculates the position and size of the solid area relative to the tree's visual representation.
      */
-    private Rectangle createTreeSolidArea(int treeWidth, int hitboxOffsetY, ObjConfig objConfig) {
+    private Rectangle createTreeSolidArea(int treeWidth, Dimension treeHitbox, int hitboxOffsetY, ObjConfig objConfig) {
         return new Rectangle(
-                treeWidth / 2 - (objConfig.TREE_HITBOX_WIDTH / 2),
-                hitboxOffsetY,
-                objConfig.TREE_HITBOX_WIDTH,
-                objConfig.TREE_HITBOX_HEIGHT
-        );
+                treeWidth / 2 - ( treeHitbox.width/ 2),
+                hitboxOffsetY, treeHitbox.width, treeHitbox.height);
     }
     //-------------------------------------------------------------
     /**
@@ -375,6 +375,12 @@ public class GameModel implements Serializable {
         if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
             emitAudioEvent(AudioEventType.PLAYER_ATTACK);
         }
+        if (playerStateBeforeUpdate == PlayerState.ATTACKING && player.getState() != PlayerState.ATTACKING) {
+            emitAudioEvent(AudioEventType.PLAYER_ATTACK_STOP);
+        }
+        if (player.getState() == PlayerState.WALKING) {
+            emitAudioEvent(AudioEventType.PLAYER_WALK);
+        }
         //----------------------------
     }
     //-------------------------------------------------------------
@@ -473,7 +479,6 @@ public class GameModel implements Serializable {
                 if (!player.isAttackDamageApplied() && attackArea.intersects(tnt.getSolidWorldArea())) {
                     tnt.takeDamage();
                     player.setAttackDamageApplied(true);
-                    System.out.println("DAMAGE APPLIED" + tnt.getLife());
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.ENEMY_HIT);
                 }

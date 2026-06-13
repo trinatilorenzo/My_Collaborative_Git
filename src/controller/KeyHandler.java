@@ -12,8 +12,12 @@ public class KeyHandler implements KeyListener {
 
     // variable to set the state of the keys
     private volatile boolean up, down, left, right;
+    private volatile boolean movementRequested;
     private volatile boolean attackRequested;
-    private volatile boolean interact = false; 
+    private volatile boolean interact = false;
+
+    private volatile boolean shieldToggle = false;
+    private volatile boolean shieldPressed = false;
 
     private volatile boolean debugToggle = false;
     private volatile boolean pauseToggle = false;
@@ -28,10 +32,32 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_W -> { up = true; menuPrevious = true; }
-            case KeyEvent.VK_S -> { down = true; menuNext = true; }
-            case KeyEvent.VK_A -> { left = true; menuPrevious = true; }
-            case KeyEvent.VK_D -> { right = true; menuNext = true; }
+            case KeyEvent.VK_W -> {
+                if (!up) movementRequested = true;
+                up = true;
+                menuPrevious = true;
+            }
+            case KeyEvent.VK_S -> {
+                if (!down) movementRequested = true;
+                down = true;
+                menuNext = true;
+            }
+            case KeyEvent.VK_A -> {
+                if (!left) movementRequested = true;
+                left = true;
+                menuPrevious = true;
+            }
+            case KeyEvent.VK_D -> {
+                if (!right) movementRequested = true;
+                right = true;
+                menuNext = true;
+            }
+            case KeyEvent.VK_R -> {
+                if (!shieldPressed) {
+                    shieldToggle = !shieldToggle;
+                    shieldPressed = true;
+                }
+            }
             case KeyEvent.VK_UP, KeyEvent.VK_LEFT -> menuPrevious = true;
             case KeyEvent.VK_DOWN, KeyEvent.VK_RIGHT -> menuNext = true;
             case KeyEvent.VK_SPACE -> {
@@ -66,6 +92,7 @@ public class KeyHandler implements KeyListener {
             case KeyEvent.VK_S -> down = false;
             case KeyEvent.VK_A -> left = false;
             case KeyEvent.VK_D -> right = false;
+            case KeyEvent.VK_R -> shieldPressed = false;
             case KeyEvent.VK_SPACE -> attackPressed = false;
             case KeyEvent.VK_M -> interact = false;
             case KeyEvent.VK_ESCAPE -> pausePressed = false;
@@ -86,6 +113,8 @@ public class KeyHandler implements KeyListener {
                 down,
                 left,
                 right,
+                shieldToggle,
+                movementRequested,
                 attackRequested,
                 pauseToggle,
                 debugToggle,
@@ -96,7 +125,8 @@ public class KeyHandler implements KeyListener {
         );
 
         attackRequested = false;
-        interact = false; // Reset interact after returning the state, so it only triggers once per key press
+        movementRequested = false;
+        interact = false;
         menuPrevious = false;
         menuNext = false;
         menuConfirm = false;

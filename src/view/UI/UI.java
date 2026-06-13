@@ -393,53 +393,51 @@ public class UI {
         }
     }
     //-------------------------------------------------------------
-    public void drawShield(){
-        if (model.getPlayer().isShielded()){
-            if (shieldEffectStart == -1) {
-                shieldEffectStart = System.currentTimeMillis();
-            }
-            long passed = System.currentTimeMillis() - shieldEffectStart;
-            float progress = 1.0f - (float)(passed/shieldDuration);
-            if (progress<0) progress = 0;
-            
-            int barWidth = UIConfig.BAR_SHIELD_WIDTH;
-            int barHeight = UIConfig.BAR_SHIELD_HEIGHT;
-            int shieldSize = UIConfig.ICON_SHIELD_SIZE;
-            int spacing = shieldSize / 6;
-
-            int totalWidth = shieldSize + spacing + barWidth;
-            int startX = screenWidth - totalWidth - UIConfig.SHIELD_OFFSET_SCREEN; 
-            int startY = UIConfig.SHIELD_OFFSET_SCREEN; 
-
-            Color originalColor = g2.getColor();
-            Stroke originalStroke = g2.getStroke();
-
-            int barX = startX + shieldSize + spacing;
-            int barY = startY;
-            // Bar background
-            g2.setColor(new Color(35, 35, 35, 200));
-            g2.fillRoundRect(barX, barY, barWidth, barHeight, 8, 8);
-
-            // Moving bar
-            g2.setColor(new Color(0, 190, 255));
-            g2.fillRoundRect(barX, barY, (int) (barWidth * progress), barHeight, 8, 8);
-
-            // Stroke of the bar
-            g2.setColor(new Color(255, 255, 255, 180));
-            g2.setStroke(new BasicStroke(1.5f));
-            g2.drawRoundRect(barX, barY, barWidth, barHeight, 8, 8);
-
-            // Draw shield
-            g2.drawImage(shield, startX, startY-((shieldSize-barHeight)/2), shieldSize, shieldSize, null);
-            
-            // Reset Graphics2D values
-            g2.setColor(originalColor);
-            g2.setStroke(originalStroke);
-
-        } else {
-            shieldEffectStart = -1;
+    public void drawShield() {
+        if (!model.getPlayer().hasShield()) {
+            return;
         }
 
+        double remainingMs = model.getPlayer().getShieldTimerMs();
+        double maxMs = EntityConfig.SHIELD_DURATION_MS;
+
+        float progress = (float) (remainingMs / maxMs);
+        if (progress < 0f) progress = 0f;
+        if (progress > 1f) progress = 1f;
+
+        int barWidth = UIConfig.BAR_SHIELD_WIDTH;
+        int barHeight = UIConfig.BAR_SHIELD_HEIGHT;
+        int shieldSize = UIConfig.ICON_SHIELD_SIZE;
+        int spacing = shieldSize / 6;
+
+        int totalWidth = shieldSize + spacing + barWidth;
+        int startX = screenWidth - totalWidth - UIConfig.SHIELD_OFFSET_SCREEN;
+        int startY = UIConfig.SHIELD_OFFSET_SCREEN;
+
+        Color originalColor = g2.getColor();
+        Stroke originalStroke = g2.getStroke();
+
+        int barX = startX + shieldSize + spacing;
+        int barY = startY;
+
+        // Bar background
+        g2.setColor(new Color(35, 35, 35, 200));
+        g2.fillRoundRect(barX, barY, barWidth, barHeight, 8, 8);
+
+        // Remaining shield bar
+        g2.setColor(new Color(0, 190, 255));
+        g2.fillRoundRect(barX, barY, (int) (barWidth * progress), barHeight, 8, 8);
+
+        // Bar border
+        g2.setColor(new Color(255, 255, 255, 180));
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.drawRoundRect(barX, barY, barWidth, barHeight, 8, 8);
+
+        // Shield icon
+        g2.drawImage(shield, startX, startY - ((shieldSize - barHeight) / 2), shieldSize, shieldSize, null);
+
+        g2.setColor(originalColor);
+        g2.setStroke(originalStroke);
     }
     //-------------------------------------------------------------
     public void drawDialogueWindow() {

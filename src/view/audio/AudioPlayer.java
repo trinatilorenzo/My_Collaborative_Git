@@ -20,6 +20,10 @@ public class AudioPlayer {
     private volatile double musicVolume = 0.65;
     private volatile double sfxVolume = 0.4;
 
+    private Thread currentSfxThread;
+    private volatile Player currentSfxPlayer;
+    private volatile int sfxSession = 0;
+
     // --- Stato per la sequenza controllata ---
     private volatile String[] sequencePaths;
     private volatile int sequenceIndex;
@@ -53,33 +57,40 @@ public class AudioPlayer {
     //  SFX ONE-SHOT
     // =========================================================
 
-    public void playOnce(String resourcePath) {
+    public synchronized void playOnce(String resourcePath) {
         if (resourcePath == null || resourcePath.isBlank()) return;
 
-        Thread sfxThread = new Thread(
-                () -> playTrack(resourcePath, false, -1, () -> sfxVolume),
+        stopSfx();
+
+        int session = ++sfxSession;
+        currentSfxThread = new Thread(
+                () -> playTrack(resourcePath, false, session, () -> sfxVolume),
                 "sfx-once"
         );
-        sfxThread.setDaemon(true);
-        sfxThread.start();
+        currentSfxThread.setDaemon(true);
+        currentSfxThread.start();
     }
 
     // =========================================================
     //  SEQUENZA AUTOMATICA
     // =========================================================
 
-    public void playSequence(String[] resourcePaths) {
+    public synchronized void playSequence(String[] resourcePaths) {
         if (resourcePaths == null || resourcePaths.length == 0) return;
 
-        Thread seqThread = new Thread(() -> {
+        stopSfx();
+        int session = ++sfxSession;
+
+        currentSfxThread = new Thread(() -> {
             for (String path : resourcePaths) {
                 if (path == null || path.isBlank()) continue;
-                playTrack(path, false, -1, () -> sfxVolume);
+                if (session != sfxSession) return;
+                playTrack(path, false, session, () -> sfxVolume);
             }
-        }, "sfx-sequence-auto");
+        }, "sfx-sequence");
 
-        seqThread.setDaemon(true);
-        seqThread.start();
+        currentSfxThread.setDaemon(true);
+        currentSfxThread.start();
     }
 
     // =========================================================
@@ -131,8 +142,18 @@ public class AudioPlayer {
         musicThread = null;
     }
 
+    public synchronized void stopSfx() {
+        sfxSession++;
+        if (currentSfxPlayer != null) {
+            currentSfxPlayer.close();
+            currentSfxPlayer = null;
+        }
+        currentSfxThread = null;
+    }
+
     public void stopAll() {
         stopMusic();
+        stopSfx();
     }
 
     // =========================================================
@@ -176,6 +197,14 @@ public class AudioPlayer {
                         return;
                     }
                     currentMusicPlayer = player;
+                } else {
+                    if (session != -1 && session != sfxSession) {
+                        player.close();
+                        return;
+                    }
+                    if (session != -1) {
+                        currentSfxPlayer = player;
+                    }
                 }
 
                 player.play();
@@ -185,6 +214,10 @@ public class AudioPlayer {
         } finally {
             if (isMusic && session == musicSession) {
                 currentMusicPlayer = null;
+            }
+
+            if (!isMusic && session != -1 && session == sfxSession) {
+                currentSfxPlayer = null;
             }
         }
     }
