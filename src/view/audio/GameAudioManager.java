@@ -113,6 +113,7 @@ public class GameAudioManager {
         nextSfxIndex = (nextSfxIndex + 1) % sfxPool.length;
         return player;
     }
+
     private AudioPlayer currentSfxPlayer() {
         return sfxPool[curIndex];
     }
