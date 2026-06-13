@@ -378,8 +378,13 @@ public class GameModel implements Serializable {
         if (playerStateBeforeUpdate == PlayerState.ATTACKING && player.getState() != PlayerState.ATTACKING) {
             emitAudioEvent(AudioEventType.PLAYER_ATTACK_STOP);
         }
-        if (player.getState() == PlayerState.WALKING) {
-            emitAudioEvent(AudioEventType.PLAYER_WALK);
+        if (playerStateBeforeUpdate != PlayerState.WALKING && player.getState() == PlayerState.WALKING) {
+            emitAudioEvent(AudioEventType.PLAYER_WALK_START);
+            System.out.println("Player started walking");
+        }
+        if (playerStateBeforeUpdate == PlayerState.WALKING && player.getState() != PlayerState.WALKING) {
+            System.out.println("Player stopped walking");
+            emitAudioEvent(AudioEventType.PLAYER_WALK_STOP);
         }
         //----------------------------
     }
@@ -512,13 +517,19 @@ public class GameModel implements Serializable {
                 if (obj.isRemoved()) continue;
                 if (obj instanceof OBJ_Tree tree
                         && !player.isAttackDamageApplied()
-                        && attackArea.intersects(tree.getSolidWorldArea())) {
+                        && attackArea.intersects(tree.getSolidWorldArea())
+                        && tree.isSolid()) {
 
                     player.setAttackDamageApplied(true);
                     tree.interact();
 
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.TREE_HIT);
+                    if (tree.isLastHit()) {
+                        System.out.println("Tree chopped!");
+                        emitAudioEvent(AudioEventType.TREE_FINAL);
+                    }
+
                 }
             }
         }

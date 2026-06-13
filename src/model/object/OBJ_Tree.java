@@ -114,6 +114,10 @@ public class OBJ_Tree extends GameObject {
     public TreeState getState() {
         return state;
     }
+    public boolean isLastHit(){
+        if( health < 1) return true;
+        return false;
+    }
     public Rectangle getSolidWorldArea() { //called by game model to check attack collision with the tree, since the solidArea is relative to the object position we need to get the world coordinates of the solid area
         // We can reuse the worldBoundsInstance to avoid creating a new Rectangle object every time
         worldBoundsInstance.setBounds(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height);

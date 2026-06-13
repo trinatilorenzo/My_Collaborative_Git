@@ -2,11 +2,13 @@ package model.event;
 
 public enum AudioEventType {
     GAME_START,
-    PLAYER_WALK,
+    PLAYER_WALK_START,
+    PLAYER_WALK_STOP,
     PLAYER_ATTACK, //triggered
     PLAYER_ATTACK_STOP,
     PLAYER_DAMAGED, //triggered
     TREE_HIT,
+    TREE_FINAL,
     ENEMY_HIT,
     ENEMY_DEFEATED,
     PROJECTILE_LAUNCHED, //triggered
