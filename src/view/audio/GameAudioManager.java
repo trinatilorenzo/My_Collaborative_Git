@@ -49,6 +49,9 @@ public class GameAudioManager {
                         SWORD_SFX
                 });
             }
+            if(eventType.equals(PLAYER_ATTACK_STOP)){
+                player.stopSfx();
+                }
             if (eventType.equals(PLAYER_DAMAGED)){
                 player.playOnce(PLAYER_DAMAGE_SFX);
             }
