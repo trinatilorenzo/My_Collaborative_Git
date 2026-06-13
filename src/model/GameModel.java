@@ -567,13 +567,11 @@ public class GameModel implements Serializable {
                     currentLevel ++;
                     currentLevelPowerUpCollected = false;
                     System.out.println("Level passed! Current Level: "+currentLevel);
-                    gameState = GameState.WIN;
                 } else {
                     // all levels passed 
                     updateMonkPositionForEndLevel();
                     levelCompleted = true;
                 System.out.println("Level passed! End level "+currentLevel);
-
 
                 }
             }
