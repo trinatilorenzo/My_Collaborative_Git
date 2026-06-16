@@ -42,7 +42,7 @@ public class TNTRenderer {
 
         wanderFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, EntityConfig.TNT_SPRITE_WIDTH, EntityConfig.TNT_SPRITE_HEIGHT);
         triggeredFrames = SpriteLoader.getAnimationFrames(sheetImage, 5, 1, 3, EntityConfig.TNT_SPRITE_WIDTH, EntityConfig.TNT_SPRITE_HEIGHT);
-        explosionFrames = SpriteLoader.getAnimationFrames(explosionSheet, 0, 1, 9, EntityConfig.PLAYER_RENDER_WIDTH, EntityConfig.PLAYER_RENDER_HEIGHT);
+        explosionFrames = SpriteLoader.getAnimationFrames(explosionSheet, 0, 1, 9, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
     }
     //-------------------------------------------------------------
 

@@ -514,9 +514,8 @@ public class GameController {
         if (contains(layout.resFullBounds(), mouse)) return ButtonValue.Settings.RES_FULL;
         if (contains(layout.resHalfBounds(), mouse)) return ButtonValue.Settings.RES_MID;
         if (contains(layout.resMinBounds(), mouse)) return ButtonValue.Settings.RES_MIN;
-        if (contains(layout.fpsBounds1(), mouse)) return ButtonValue.Settings.FPS_60;
-        if (contains(layout.fpsBounds2(), mouse)) return ButtonValue.Settings.FPS_120;
-        if (contains(layout.fpsBounds3(), mouse)) return ButtonValue.Settings.FPS_240;
+        if (contains(layout.quitBounds(), mouse)) return ButtonValue.Settings.QUIT;
+
         return null;
     }
     //-------------------------------------------------------------
@@ -550,17 +549,8 @@ public class GameController {
                 view.setResolution();
                 System.out.println("small");
             }
-            case FPS_60   -> {
-                model.setLowFps();
-                System.out.println("60");
-            }
-            case FPS_120  -> {
-                model.setMediumFps();
-                System.out.println("120");
-            }
-            case FPS_240  -> {
-                model.setHighFps();
-                System.out.println("240");
+            case QUIT ->{
+                System.exit(0);
             }
         }
     }

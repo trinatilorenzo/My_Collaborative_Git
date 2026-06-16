@@ -47,7 +47,7 @@ public class MapRender {
 
         for (int i = topRow; i<= bottomRow; i++){
             for (int j = leftCol; j<= rightCol; j++){
-                
+
                 int tileID = gameMap.getMapTile(layer, i, j);// get the tile id to know witch tile to render
 
                 if (tileID != -1){//-1 = trasparente
@@ -111,7 +111,7 @@ public class MapRender {
 
         Stroke originalStroke = g2.getStroke();
         Font originalFont = g2.getFont();
-int leftCol = Math.max(0, (player.getWorldX() - pScreenX) / screenCfg.TILE_SIZE());
+        int leftCol = Math.max(0, (player.getWorldX() - pScreenX) / screenCfg.TILE_SIZE());
         int rightCol = Math.min(gameMap.getMaxMapCol() - 1, (player.getWorldX() + (screenWidth - pScreenX)) / screenCfg.TILE_SIZE());
         int topRow = Math.max(0, (player.getWorldY() - pScreenY) / screenCfg.TILE_SIZE());
         int bottomRow = Math.min(gameMap.getMaxMapRow() - 1, (player.getWorldY() + (screenHeight - pScreenY)) / screenCfg.TILE_SIZE());

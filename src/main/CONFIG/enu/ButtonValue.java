@@ -14,8 +14,7 @@ public final class ButtonValue {
     public enum Settings {
         MUSIC, SOUND,
         RES_FULL, RES_MID, RES_MIN,
-        FPS_60, FPS_120, FPS_240,
-        SETTINGS_ICON
+        QUIT, SETTINGS_ICON
     }
 
     public enum GameOver {

@@ -335,11 +335,6 @@ public class UI {
             case BLUE   -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);
             case PURPLE -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);
         }
-        switch (model.getFpsValue()) {
-            case 0 -> settingsSelected.put(FPS_60, true);
-            case 1 -> settingsSelected.put(FPS_120, true);
-            case 2 -> settingsSelected.put(FPS_240, true);
-        }
 
         switch (model.getResolutionValue()){
             case 0 -> settingsSelected.put(RES_MIN, true);
@@ -599,7 +594,7 @@ public class UI {
 
         //Audio section
         Rectangle audioRibbon = layout.audioRibbonBounds();
-        redRibbon.draw(g2, audioRibbon.x, audioRibbon.y, audioRibbon.width, audioRibbon.height);
+        yellowRibbon.draw(g2, audioRibbon.x, audioRibbon.y, audioRibbon.width, audioRibbon.height);
 
         String title = "Audio Settings";
         g2.setColor(Color.WHITE);
@@ -646,27 +641,13 @@ public class UI {
 
         // -------------------------------------------------------
 
-        // Fps
-        Rectangle fpsRibbon = layout.fpsRibbonBounds();
-        yellowRibbon.draw(g2, fpsRibbon.x, fpsRibbon.y, fpsRibbon.width, fpsRibbon.height);
+        // Quit
 
-        title = "FPS";
-        drawTextInRibbon(fpsRibbon, title, 0.5, 0.98);
+        drawButton(saveButton, saveButtonSelected,
+                layout.quitBounds().x, layout.quitBounds().y,
+                layout.quitBounds().width, layout.quitBounds().height,
+                "QUIT", settingsHover.get(QUIT) || settingsSelected.get(QUIT));
 
-        drawButton(menuButton, menuButtonSelected,
-                layout.fpsBounds1().x, layout.fpsBounds1().y,
-                layout.fpsBounds1().width, layout.fpsBounds1().height,
-                "60", settingsHover.get(FPS_60) || settingsSelected.get(FPS_60));
-
-        drawButton(menuButton, menuButtonSelected,
-                layout.fpsBounds2().x, layout.fpsBounds2().y,
-                layout.fpsBounds2().width, layout.fpsBounds2().height,
-                "120", settingsHover.get(FPS_120) || settingsSelected.get(FPS_120));
-
-        drawButton(menuButton, menuButtonSelected,
-                layout.fpsBounds3().x, layout.fpsBounds3().y,
-                layout.fpsBounds3().width, layout.fpsBounds3().height,
-                "240", settingsHover.get(FPS_240) || settingsSelected.get(FPS_240));
         // -------------------------------------------------------
     }
     //-------------------------------------------------------------
@@ -1026,15 +1007,14 @@ public class UI {
         Rectangle resHalfBounds = new Rectangle(btnsStartX + btnW + UIConfig.SETTINGS_PADDING, btnY, btnW, btnH);
         Rectangle resMinBounds = new Rectangle(btnsStartX + (btnW + UIConfig.SETTINGS_PADDING) * 2, btnY, btnW, btnH);
 
-        // fps ribbon
-        int fpsRibbonY = btnY + btnH + UIConfig.SETTINGS_PADDING * 2;
-        Rectangle fpsRibbonBounds = new Rectangle(ribbonX, fpsRibbonY, ribbonW, ribbonH);
 
-        // fps button
-        int fpsBtnY = fpsRibbonY + ribbonH + UIConfig.SETTINGS_PADDING;
-        Rectangle fpsBounds1 = new Rectangle(btnsStartX, fpsBtnY, btnW, btnH);
-        Rectangle fpsBounds2 = new Rectangle(btnsStartX + btnW + UIConfig.SETTINGS_PADDING, fpsBtnY, btnW, btnH);
-        Rectangle fpsBounds3 = new Rectangle(btnsStartX + (btnW + UIConfig.SETTINGS_PADDING) * 2, fpsBtnY, btnW, btnH);
+        btnH *= 1.6;
+        // quit button
+        btnsStartX = settingsX + (settingsW - btnW)/ 2;
+        int quitBtnY = btnY + btnH + UIConfig.SETTINGS_PADDING * 8;
+        Rectangle quitBounds = new Rectangle(btnsStartX, quitBtnY, btnW, btnH);
+
+
 
         return new SettingsLayout(
                 settingsBounds,
@@ -1042,10 +1022,7 @@ public class UI {
                 audioRibbonBounds,
                 musicBounds,
                 soundBounds,
-                fpsRibbonBounds,
-                fpsBounds1,
-                fpsBounds2,
-                fpsBounds3,
+                quitBounds,
                 resRibbonBounds,
                 resFullBounds,
                 resHalfBounds,

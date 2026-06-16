@@ -18,7 +18,7 @@ public class GameAudioManager {
     private static final String TNT_EXPLOSION_SFX = "/res/Sound/SFX/tnt_explosion.mp3";
     private static final String TNT_ACTIVATION_SFX = "/res/Sound/SFX/tnt_activation.mp3";
     private static final String PLAYER_DAMAGE_SFX = "/res/Sound/SFX/player_damage_02.mp3";
-    private static final String PLAYER_WALK_SFX = "/res/Sound/SFX/footsteps.mp3";
+    private static final String PLAYER_WALK_SFX = "/res/Sound/SFX/footsteps02.mp3";
     private static final String TREE_HIT_SFX = "/res/Sound/SFX/tree_hit.mp3";
     private static final String TREE_FINAL_SFX = "/res/Sound/SFX/tree_final.mp3";
 

@@ -54,6 +54,9 @@ public class GameView extends JPanel {
     private int screenWidth;
     private int screenHeight;
 
+    private int gameWidth;
+    private int gameHeight;
+
     //model to render
     private final GameModel model;
 
@@ -81,6 +84,8 @@ public class GameView extends JPanel {
         this.screenCfg = GS.screenConfig();
         this.model = model;
 
+        gameHeight = screenHeight /2;
+        gameWidth = screenWidth /2;
         setResolution();
 
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
