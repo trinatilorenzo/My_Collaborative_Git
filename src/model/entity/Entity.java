@@ -14,7 +14,7 @@ public class Entity implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
-    // Settings
+    // SettingsMenu
     protected transient EntityConfig entityConfig;
 
     // Position and movement

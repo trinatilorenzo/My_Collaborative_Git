@@ -1361,25 +1361,7 @@
    </properties>
    <point/>
   </object>
-  <object id="262" name="TNT_spawnPoint" x="4383.27" y="1599.71">
-   <properties>
-    <property name="StartLayer" type="int" value="3"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="263" name="TNT_spawnPoint" x="3762.75" y="1324.54">
-   <properties>
-    <property name="StartLayer" type="int" value="3"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="264" name="TNT_spawnPoint" x="4051.99" y="1508.68">
-   <properties>
-    <property name="StartLayer" type="int" value="3"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="324" name="TNT_spawnPoint" x="5017.26" y="1334.87">
+  <object id="263" name="TNT_spawnPoint" x="2745.49" y="1438.07">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>

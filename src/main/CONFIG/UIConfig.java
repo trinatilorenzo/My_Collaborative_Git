@@ -15,9 +15,10 @@ public record UIConfig() {
 
     //Default button Selection
     public static final ButtonValue.MainMenu MENU_DEFAULT_SELECTION = null ;
-    public static final ButtonValue.Pause PAUSE_DEFAULT_SELECTION = null;
-    public static final ButtonValue.Settings SETTINGS_DEFAULT_SELECTION = null;
-    public static final ButtonValue.GameOver GAME_OVER_DEFAULT_SELECTION = null;
+    public static final ButtonValue.PauseMenu PAUSE_MENU_DEFAULT_SELECTION = null;
+    public static final ButtonValue.SettingsMenu SETTINGS_MENU_DEFAULT_SELECTION = null;
+    public static final ButtonValue.GameOverMenu GAME_OVER_DEFAULT_SELECTION = null;
+    public static final ButtonValue.WinMenu WIN_DEFAULT_SELECTION = null;
 
     public static final int MAX_BUTTON_TEXT_SIZE = 50;
     public static final int MAX_RIBBON_TEXT_SIZE = 90;
