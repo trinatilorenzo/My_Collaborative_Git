@@ -5,6 +5,7 @@ import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
+import model.event.AudioEventType;
 import view.GameView;
 import main.CONFIG.enu.GameState;
 import view.UI.GameOverLayout;
@@ -32,10 +33,14 @@ public class GameController {
 
     private GameState lastKnownState;
 
-    private ButtonValue.MainMenu  mainMenuSelection;
+    private ButtonValue.MainMenu mainMenuSelection;
+    private ButtonValue.MainMenu mainMenuSelectionMouse;
     private ButtonValue.Pause pauseMenuSelection;
+    private ButtonValue.Pause pauseMenuSelectionMouse;
     private ButtonValue.Settings settingsSelection;
+    private ButtonValue.Settings settingsSelectionMouse;
     private ButtonValue.GameOver gameOverSelection;
+    private ButtonValue.GameOver gameOverSelectionMouse;
 
     /**
      * CONSTRUCTOR
@@ -62,9 +67,13 @@ public class GameController {
     //-------------------------------------------------------------
     private void resetSelection(){
         this.mainMenuSelection = UIConfig.MENU_DEFAULT_SELECTION;
+        this.mainMenuSelectionMouse = UIConfig.MENU_DEFAULT_SELECTION;
         this.pauseMenuSelection = UIConfig.PAUSE_DEFAULT_SELECTION;
+        this.pauseMenuSelectionMouse = UIConfig.PAUSE_DEFAULT_SELECTION;
         this.settingsSelection = UIConfig.SETTINGS_DEFAULT_SELECTION;
+        this.settingsSelectionMouse = UIConfig.SETTINGS_DEFAULT_SELECTION;
         this.gameOverSelection = UIConfig.GAME_OVER_DEFAULT_SELECTION;
+        this.gameOverSelectionMouse = UIConfig.GAME_OVER_DEFAULT_SELECTION;
     };
     //-------------------------------------------------------------
 
@@ -126,38 +135,29 @@ public class GameController {
      */
     //-------------------------------------------------------------
     private void updateMainMenu(InputState input) {
-        resetSelection();
-        MainMenuLayout layout = view.getMainMenuLayout();
-        Point mouse = mouseHandler.getMousePosition();
+
 
         // Keyboard
         if (input.menuPrevious()) {
             mainMenuSelection = previousMainMenuItem(mainMenuSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setMainMenuHover(mainMenuSelection);
+
         }
         if (input.menuNext()) {
             mainMenuSelection = nextMainMenuItem(mainMenuSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setMainMenuHover(mainMenuSelection);
         }
         if (input.menuConfirm()) {
             performMainMenuAction(mainMenuSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            view.setMainMenuSelected(mainMenuSelection);
             return;
         }
 
         // Mouse
-        ButtonValue.MainMenu mainMenuHover = mainMenuButtonFromPoint(layout, mouse);
-        if (mainMenuHover != null) {
-            mainMenuSelection = mainMenuHover;
-            view.setMainMenuHover(mainMenuHover);
-        }else {
-            view.resetMainMenuHover();
-        }
-
-        Point click = mouseHandler.consumeLeftClick();
-        ButtonValue.MainMenu clicked = mainMenuButtonFromPoint(layout, click);
-
-        if (clicked != null) {
-            mainMenuSelection = clicked;
-            performMainMenuAction(clicked);
-        }
+        mainMenuMouseUpdate();
     }
     //-------------------------------------------------------------
 
@@ -194,6 +194,40 @@ public class GameController {
         if (contains(layout.togglePurpleBounds(), point)) return ButtonValue.MainMenu.TOGGLE_PURPLE;
 
         return null;
+    }
+    private void mainMenuMouseUpdate(){
+
+        MainMenuLayout layout = view.getMainMenuLayout();
+        Point mouse = mouseHandler.getMousePosition();
+
+        ButtonValue.MainMenu mainMenuHover = mainMenuButtonFromPoint(layout, mouse);
+
+        if (mainMenuHover != mainMenuSelectionMouse) {
+            mainMenuSelectionMouse = mainMenuHover;
+
+            if (mainMenuHover != null) {
+                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+                mainMenuSelection = mainMenuHover;
+            } else {
+                mainMenuSelection = null;
+            }
+        }
+
+        if (mainMenuSelection != null) {
+            view.setMainMenuHover(mainMenuSelection);
+        } else {
+            view.resetMainMenuHover();
+        }
+
+
+        Point click = mouseHandler.consumeLeftClick();
+        ButtonValue.MainMenu clicked = mainMenuButtonFromPoint(layout, click);
+
+        if (clicked != null) {
+            mainMenuSelectionMouse = clicked;
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            performMainMenuAction(clicked);
+        }
     }
     //-------------------------------------------------------------
     private void performMainMenuAction(ButtonValue.MainMenu selection) {
@@ -254,38 +288,27 @@ public class GameController {
      */
     //-------------------------------------------------------------
     private void updatePauseMenu(InputState input) {
-        resetSelection();
-        PauseMenuLayout layout = view.getPauseMenuLayout();
-        Point mouse = mouseHandler.getMousePosition();
 
         // Keyboard
         if (input.menuPrevious()) {
             pauseMenuSelection = previousPauseMenuItem(pauseMenuSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setPauseHover(pauseMenuSelection);
         }
         if (input.menuNext()) {
             pauseMenuSelection = nextPauseMenuItem(pauseMenuSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setPauseHover(pauseMenuSelection);
         }
         if (input.menuConfirm()) {
             performPauseMenuAction(pauseMenuSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            view.setPauseSelected(pauseMenuSelection);
             return;
         }
 
         // Mouse
-        ButtonValue.Pause pauseMenuHover = pauseButtonFromPoint(layout, mouse);
-        if (pauseMenuHover != null) {
-            pauseMenuSelection = pauseMenuHover;
-            view.setPauseHover(pauseMenuHover);
-        }else{
-            view.resetPauseHover();
-        }
-
-        Point click = mouseHandler.consumeLeftClick();
-        ButtonValue.Pause clicked = pauseButtonFromPoint(layout, click);
-
-        if (clicked != null) {
-            pauseMenuSelection = clicked;
-            performPauseMenuAction(clicked);
-        }
+        pauseMenuMouseUpdate();
     }
     //-------------------------------------------------------------
     /**
@@ -309,6 +332,40 @@ public class GameController {
         if (contains(layout.settingsBounds(), mouse)) return ButtonValue.Pause.PAUSE_SETTINGS;
         if (contains(layout.saveBounds(), mouse)) return ButtonValue.Pause.SAVE;
         return null;
+    }
+    private void pauseMenuMouseUpdate(){
+        PauseMenuLayout layout = view.getPauseMenuLayout();
+        Point mouse = mouseHandler.getMousePosition();
+
+        ButtonValue.Pause pauseMenuHover = pauseButtonFromPoint(layout, mouse);
+
+        if (pauseMenuHover != pauseMenuSelectionMouse) {
+            pauseMenuSelectionMouse = pauseMenuHover;
+
+            if (pauseMenuHover != null) {
+                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+                pauseMenuSelection = pauseMenuHover;
+            } else {
+                pauseMenuSelection = null;
+            }
+        }
+
+        if (pauseMenuSelection != null) {
+            view.setPauseHover(pauseMenuSelection);
+        } else {
+            view.resetPauseHover();
+        }
+
+
+        Point click = mouseHandler.consumeLeftClick();
+        ButtonValue.Pause clicked = pauseButtonFromPoint(layout, click);
+
+        if (clicked != null) {
+            pauseMenuSelection = clicked;
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            performPauseMenuAction(clicked);
+        }
+
     }
     //-------------------------------------------------------------
     private void performPauseMenuAction(ButtonValue.Pause selection) {
@@ -343,151 +400,34 @@ public class GameController {
     //end helpers -------------------------------------------------------------
 
 
-    /**
-     * Control the GameOver Menu
-     */
-    //-------------------------------------------------------------
-    private void updateGameOver(InputState input) {
-        resetSelection();
-        GameOverLayout layout = view.getGameOverLayout();
-        Point mouse = mouseHandler.getMousePosition();
-
-        // Keyboard
-        if (input.menuPrevious()) {
-            gameOverSelection = previousGameOverItem(gameOverSelection);
-        }
-        if (input.menuNext()) {
-            gameOverSelection = nextGameOverItem(gameOverSelection);
-        }
-        if (input.menuConfirm()) {
-            performGameOverAction(gameOverSelection);
-            return;
-        }
-
-        // Mouse
-        ButtonValue.GameOver gameOverHover = gameOverButtonFromPoint(layout, mouse);
-        if (gameOverHover != null) {
-            gameOverSelection = gameOverHover;
-            view.setGameOverHover(gameOverHover);
-        }else{
-            view.resetGameOverHover();
-        }
-
-        Point click = mouseHandler.consumeLeftClick();
-        ButtonValue.GameOver clicked = gameOverButtonFromPoint(layout, click);
-
-        if (clicked != null) {
-            gameOverSelection = clicked;
-            performGameOverAction(clicked);
-        }
-    }
-    //-------------------------------------------------------------
-    //-------------------------------------------------------------
-    private void updateWinScreen(InputState input, double deltaMs){
-        view.updateAnimations(deltaMs);
-
-        GameOverLayout layout = view.getGameOverLayout();
-        Point mouse = mouseHandler.getMousePosition();
-
-        // Keyboard
-        if (input.menuPrevious()) {
-            gameOverSelection = previousGameOverItem(gameOverSelection);
-        }
-        if (input.menuNext()) {
-            gameOverSelection = nextGameOverItem(gameOverSelection);
-        }
-        if (input.menuConfirm()) {
-            performGameOverAction(gameOverSelection);
-            return;
-        }
-
-        // Mouse (Hover)
-        ButtonValue.GameOver gameOverHover = gameOverButtonFromPoint(layout, mouse);
-        if (gameOverHover != null) {
-            gameOverSelection = gameOverHover;
-            view.setGameOverHover(gameOverHover);
-        } else {
-            view.resetGameOverHover();
-        }
-
-        // Mouse (Click)
-        Point click = mouseHandler.consumeLeftClick();
-        ButtonValue.GameOver clicked = gameOverButtonFromPoint(layout, click);
-
-        if (clicked != null) {
-            gameOverSelection = clicked;
-            performGameOverAction(clicked);
-        }
-    }
-
-
-    /**
-     * HELPERS METHOD — Settings
-     */
-    //-------------------------------------------------------------
-    private ButtonValue.GameOver previousGameOverItem(ButtonValue.GameOver current) {
-        ButtonValue.GameOver[] items = ButtonValue.GameOver.values();
-        for (int i = 0; i < items.length; i++)
-            if (items[i] == current) return items[(i - 1 + items.length) % items.length];
-        return ButtonValue.GameOver.RESTART;
-    }
-    private ButtonValue.GameOver nextGameOverItem(ButtonValue.GameOver current) {
-        ButtonValue.GameOver[] items = ButtonValue.GameOver.values();
-        for (int i = 0; i < items.length; i++)
-            if (items[i] == current) return items[(i + 1) % items.length];
-        return ButtonValue.GameOver.RESTART;
-    }
-    private ButtonValue.GameOver gameOverButtonFromPoint(GameOverLayout layout, Point mouse) {
-        if (contains(layout.newGameBounds(), mouse)) return ButtonValue.GameOver.RESTART;
-        return null;
-    }
-    //-------------------------------------------------------------
-    private void performGameOverAction(ButtonValue.GameOver selection) {
-        switch (selection) {
-            case RESTART    -> {
-                model.returnToMenu();
-            }
-        }
-    }
-    //-------------------------------------------------------------
-
 
     /**
      * Control the settings screen
      */
     //-------------------------------------------------------------
     private void updateSettings(InputState input) {
-        SettingsLayout layout = view.getSettingsLayout();
-        Point mouse = mouseHandler.getMousePosition();
 
         // Keyboard
         if (input.menuPrevious()) {
             settingsSelection = previousSettingsItem(settingsSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setSettingsHover(settingsSelection);
         }
         if (input.menuNext()) {
             settingsSelection = nextSettingsItem(settingsSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setSettingsHover(settingsSelection);
         }
         if (input.menuConfirm()) {
             performSettingsAction(settingsSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setSettingsHover(settingsSelection);
             return;
         }
 
+
         // Mouse
-        ButtonValue.Settings settingsMenuHover = settingsButtonFromPoint(layout, mouse);
-        if (settingsMenuHover != null) {
-            settingsSelection = settingsMenuHover;
-            view.setSettingsHover(settingsMenuHover);
-        }else{
-            view.resetSettingsHover();
-        }
-
-        Point click = mouseHandler.consumeLeftClick();
-        ButtonValue.Settings clicked = settingsButtonFromPoint(layout, click);
-
-        if (clicked != null) {
-            settingsSelection = clicked;
-            performSettingsAction(clicked);
-        }
+        settingsMouseUpdate();
 
     }
     //-------------------------------------------------------------
@@ -517,6 +457,39 @@ public class GameController {
         if (contains(layout.quitBounds(), mouse)) return ButtonValue.Settings.QUIT;
 
         return null;
+    }
+    private void settingsMouseUpdate(){
+        SettingsLayout layout = view.getSettingsLayout();
+        Point mouse = mouseHandler.getMousePosition();
+
+        ButtonValue.Settings settingsMenuHover = settingsButtonFromPoint(layout, mouse);
+
+        if (settingsMenuHover != settingsSelectionMouse) {
+            settingsSelectionMouse = settingsMenuHover;
+
+            if (settingsMenuHover != null) {
+                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+                settingsSelection = settingsMenuHover;
+            } else {
+                settingsSelection = null;
+            }
+        }
+
+        if (settingsSelection != null) {
+            view.setSettingsHover(settingsSelection);
+        } else {
+            view.resetPauseHover();
+        }
+
+
+        Point click = mouseHandler.consumeLeftClick();
+        ButtonValue.Settings clicked = settingsButtonFromPoint(layout, click);
+
+        if (clicked != null) {
+            settingsSelection = clicked;
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            performSettingsAction(clicked);
+        }
     }
     //-------------------------------------------------------------
     private void performSettingsAction(ButtonValue.Settings selection) {
@@ -556,6 +529,140 @@ public class GameController {
     }
     //-------------------------------------------------------------
     // end helpers -----------------------------------------------------
+
+
+
+    /**
+     * Control the GameOver Menu
+     */
+    //-------------------------------------------------------------
+    private void updateGameOver(InputState input) {
+
+        // Keyboard
+        if (input.menuPrevious()) {
+            gameOverSelection = previousGameOverItem(gameOverSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setGameOverHover(gameOverSelection);
+        }
+        if (input.menuNext()) {
+            gameOverSelection = nextGameOverItem(gameOverSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+            view.setGameOverHover(gameOverSelection);
+        }
+        if (input.menuConfirm()) {
+            performGameOverAction(gameOverSelection);
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            view.setGameOverSelected(gameOverSelection);
+            return;
+        }
+
+
+        // Mouse
+        gameOverMouseUpdate();
+
+    }
+    //-------------------------------------------------------------
+    /**
+     * HELPERS METHOD — Settings
+     */
+    //-------------------------------------------------------------
+    private ButtonValue.GameOver previousGameOverItem(ButtonValue.GameOver current) {
+        ButtonValue.GameOver[] items = ButtonValue.GameOver.values();
+        for (int i = 0; i < items.length; i++)
+            if (items[i] == current) return items[(i - 1 + items.length) % items.length];
+        return ButtonValue.GameOver.RESTART;
+    }
+    private ButtonValue.GameOver nextGameOverItem(ButtonValue.GameOver current) {
+        ButtonValue.GameOver[] items = ButtonValue.GameOver.values();
+        for (int i = 0; i < items.length; i++)
+            if (items[i] == current) return items[(i + 1) % items.length];
+        return ButtonValue.GameOver.RESTART;
+    }
+    private ButtonValue.GameOver gameOverButtonFromPoint(GameOverLayout layout, Point mouse) {
+        if (contains(layout.newGameBounds(), mouse)) return ButtonValue.GameOver.RESTART;
+        return null;
+    }
+    private void gameOverMouseUpdate(){
+        GameOverLayout layout = view.getGameOverLayout();
+        Point mouse = mouseHandler.getMousePosition();
+
+
+        ButtonValue.GameOver gameOverHover = gameOverButtonFromPoint(layout, mouse);
+
+        if (gameOverHover != gameOverSelectionMouse) {
+            gameOverSelectionMouse = gameOverHover;
+
+            if (gameOverHover != null) {
+                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+                gameOverSelection = gameOverHover;
+            } else {
+                gameOverSelection = null;
+            }
+        }
+
+        if (gameOverSelection != null) {
+            view.setGameOverHover(gameOverSelection);
+        } else {
+            view.resetGameOverHover();
+        }
+
+        Point click = mouseHandler.consumeLeftClick();
+        ButtonValue.GameOver clicked = gameOverButtonFromPoint(layout, click);
+
+        if (clicked != null) {
+            gameOverSelection = clicked;
+            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+            performGameOverAction(clicked);
+        }
+    }
+    //-------------------------------------------------------------
+    private void performGameOverAction(ButtonValue.GameOver selection) {
+        switch (selection) {
+            case RESTART    -> {
+                model.returnToMenu();
+            }
+        }
+    }
+    //-------------------------------------------------------------
+
+
+    //-------------------------------------------------------------
+    private void updateWinScreen(InputState input, double deltaMs){
+        view.updateAnimations(deltaMs);
+
+        GameOverLayout layout = view.getGameOverLayout();
+        Point mouse = mouseHandler.getMousePosition();
+
+        // Keyboard
+        if (input.menuPrevious()) {
+            gameOverSelection = previousGameOverItem(gameOverSelection);
+        }
+        if (input.menuNext()) {
+            gameOverSelection = nextGameOverItem(gameOverSelection);
+        }
+        if (input.menuConfirm()) {
+            performGameOverAction(gameOverSelection);
+            return;
+        }
+
+        // Mouse (Hover)
+        ButtonValue.GameOver gameOverHover = gameOverButtonFromPoint(layout, mouse);
+        if (gameOverHover != null) {
+            gameOverSelection = gameOverHover;
+            view.setGameOverHover(gameOverHover);
+        } else {
+            view.resetGameOverHover();
+        }
+
+        // Mouse (Click)
+        Point click = mouseHandler.consumeLeftClick();
+        ButtonValue.GameOver clicked = gameOverButtonFromPoint(layout, click);
+
+        if (clicked != null) {
+            gameOverSelection = clicked;
+            performGameOverAction(clicked);
+        }
+    }
 
 
 

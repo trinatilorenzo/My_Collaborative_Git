@@ -5,8 +5,6 @@ import model.event.AudioEventType;
 
 import java.util.List;
 
-import static model.event.AudioEventType.*;
-
 public class GameAudioManager {
 
     private static final String MENU_MUSIC = "/res/Sound/Music/GameMusic00_cut.mp3";
@@ -21,6 +19,9 @@ public class GameAudioManager {
     private static final String PLAYER_WALK_SFX = "/res/Sound/SFX/footsteps02.mp3";
     private static final String TREE_HIT_SFX = "/res/Sound/SFX/tree_hit.mp3";
     private static final String TREE_FINAL_SFX = "/res/Sound/SFX/tree_final.mp3";
+
+    private static final String BUTTON_CLICKED = "/res/Sound/SFX/button_click.mp3";
+    private static final String BUTTON_HOVER = "/res/Sound/SFX/button_hover.mp3";
 
 
     private final AudioPlayer musicPlayer = new AudioPlayer();
@@ -68,41 +69,25 @@ public class GameAudioManager {
 
         for (AudioEventType eventType : events) {
 
-            if (eventType == PLAYER_ATTACK) {
-                nextSfxPlayer().playSequence(new String[]{
-                        SWORD_SWOOSH_SFX,
-                        SWORD_SFX
-                });
-            }
-            if (eventType == PLAYER_ATTACK_STOP){
-                currentSfxPlayer().stopAll();
-            }
-
-            if (eventType == PLAYER_DAMAGED) {
-                nextSfxPlayer().playOnce(PLAYER_DAMAGE_SFX);
-            }
-
-            if (eventType == TNT_TRIGGERED) {
-                nextSfxPlayer().playOnce(TNT_ACTIVATION_SFX);
-            }
-
-            if (eventType == TNT_EXPLOSION) {
-                nextSfxPlayer().playOnce(TNT_EXPLOSION_SFX);
+            switch (eventType) {
+                case PLAYER_ATTACK -> {
+                    nextSfxPlayer().playSequence(new String[]{
+                            SWORD_SWOOSH_SFX,
+                            SWORD_SFX
+                    });
+                }
+                case PLAYER_ATTACK_STOP -> currentSfxPlayer().stopAll();
+                case PLAYER_DAMAGED -> nextSfxPlayer().playOnce(PLAYER_DAMAGE_SFX);
+                case TNT_TRIGGERED ->  nextSfxPlayer().playOnce(TNT_ACTIVATION_SFX);
+                case TNT_EXPLOSION -> nextSfxPlayer().playOnce(TNT_EXPLOSION_SFX);
+                case PLAYER_WALK_START ->  movementLoopPlayer.playLoop(PLAYER_WALK_SFX);
+                case PLAYER_WALK_STOP ->  movementLoopPlayer.stopMusic();
+                case TREE_HIT -> nextSfxPlayer().playOnce(TREE_HIT_SFX);
+                case TREE_FINAL -> nextSfxPlayer().playOnce(TREE_FINAL_SFX);
+                case BUTTON_CLICKED -> nextSfxPlayer().playOnce(BUTTON_CLICKED);
+                case BUTTON_HOVER -> nextSfxPlayer().playOnce(BUTTON_HOVER);
             }
 
-            if (eventType == PLAYER_WALK_START) {
-                movementLoopPlayer.playLoop(PLAYER_WALK_SFX);
-            }
-
-            if (eventType == PLAYER_WALK_STOP) {
-                    movementLoopPlayer.stopMusic();
-            }
-            if(eventType == TREE_HIT){
-                nextSfxPlayer().playOnce(TREE_HIT_SFX);
-            }
-            if(eventType == TREE_FINAL){
-                nextSfxPlayer().playOnce(TREE_FINAL_SFX);
-            }
         }
     }
 

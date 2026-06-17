@@ -60,7 +60,6 @@ public class GameModel implements Serializable {
     private boolean settingsMenuOpen, settingsPauseOpen;
     private boolean musicEnabled, soundEnabled;
     private int resValue; // 0 = Max , 1 = Mid, 2 = Low
-    private int fpsValue; // 0 = 60 , 1 = 120, 2 = 240
     private PlayerColor playerColor;
 
 
@@ -106,7 +105,6 @@ public class GameModel implements Serializable {
         musicEnabled = true;
         soundEnabled = true;
         resValue = 0;
-        fpsValue = 0;
 
     }
     //-------------------------------------------------------------
@@ -854,7 +852,6 @@ public class GameModel implements Serializable {
         this.musicEnabled = other.musicEnabled;
         this.soundEnabled = other.soundEnabled;
         this.resValue = other.resValue;
-        this.fpsValue = other.fpsValue;
         this.playerColor = other.playerColor;
         this.currentDialogue = other.currentDialogue;
 
@@ -931,6 +928,9 @@ public class GameModel implements Serializable {
     public void returnToMenu() {
         gameState = GameState.MENU;
     }
+    public void addAudioEvent(AudioEventType event){
+        pendingAudioEvents.add(event);
+    }
     //---------------------------------
 
     //UI SETTERS
@@ -962,15 +962,7 @@ public class GameModel implements Serializable {
     }
 
 
-    public void setLowFps(){
-        this.fpsValue = 0;
-    }
-    public void setMediumFps(){
-        this.fpsValue = 1;
-    }
-    public void setHighFps(){
-        this.fpsValue = 2;
-    }
+
 
     public void setPlayerColor(PlayerColor playerColor){
         this.playerColor = playerColor;
@@ -990,9 +982,6 @@ public class GameModel implements Serializable {
     }
     public int getResolutionValue(){
         return resValue;
-    }
-    public int getFpsValue(){
-        return fpsValue;
     }
     public PlayerColor getPlayerColor(){
         if(player != null){
