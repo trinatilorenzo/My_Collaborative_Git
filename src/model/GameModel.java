@@ -573,7 +573,6 @@ public class GameModel implements Serializable {
         if (enemiesDefeated){
             if (currentLevelPowerUpCollected) {
                 if (currentLevel < 3){
-                    gameState = GameState.WIN;
                     currentLevel ++;
                     currentLevelPowerUpCollected = false;
                     System.out.println("Level passed! Current Level: "+currentLevel);

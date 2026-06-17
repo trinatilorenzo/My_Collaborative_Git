@@ -47,6 +47,7 @@ public class PlayerRender {
         //Select the sheet image
 
         BufferedImage sheetImage = resolveSheetImage(PlayerColor);
+        BufferedImage shieldSheetImage = resolveSheetImageShield(PlayerColor);
 
 
         // Select the frames from the sheet image
@@ -57,6 +58,12 @@ public class PlayerRender {
         BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
         BufferedImage[] deathFrames = loadDeathFrames();
 
+        BufferedImage[] idleFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 0, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] walkFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 1, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackRightFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 2, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 4, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 6, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+
         animationManager = new AnimationManager();
         // frame duration in milliseconds
         animationManager.addAnimation("idle", new Animation(idleFrames, 120, true));
@@ -65,6 +72,13 @@ public class PlayerRender {
         animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
         animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
         animationManager.addAnimation("death", new Animation(deathFrames, 80, false));
+
+        animationManager.addAnimation("idle_shield", new Animation(idleFramesShield, 120, true));
+        animationManager.addAnimation("walk_shield", new Animation(walkFramesShield, 90, true));
+        animationManager.addAnimation("attack_right_shield", new Animation(attackRightFramesShield, 60, false));
+        animationManager.addAnimation("attack_down_shield", new Animation(attackDownFramesShield, 60, false));
+        animationManager.addAnimation("attack_up_shield", new Animation(attackUpFramesShield, 60, false));
+
     }
     //-------------------------------------------------------------
     public void setPlayerColor(PlayerColor playerColor) {
@@ -91,6 +105,24 @@ public class PlayerRender {
             }
         }
         return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue.png"); //default BLUE
+    }
+    private BufferedImage resolveSheetImageShield(PlayerColor color) {
+
+        switch (color){
+            case RED -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Red_Shield.png");
+            }
+            case YELLOW -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Yellow_Shield.png");
+            }
+            case PURPLE -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Purple_Shield.png");
+            }
+            case BLUE -> {
+                return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue_Shield.png");
+            }
+        }
+        return SpriteLoader.loadSpriteSheet("/res/player/Warrior_Blue_Shield.png"); //default BLUE
     }
 
     //-------------------------------------------------------------
@@ -125,37 +157,64 @@ public class PlayerRender {
         PlayerState currentState = player.getState();
         boolean attackJustStarted = currentState == PlayerState.ATTACKING && previousState != PlayerState.ATTACKING;
 
-        switch (currentState) {
+        if (!player.isShielded()) {
+            switch (currentState) {
 
-            case IDLE -> animationManager.playAnimation("idle");
-            case WALKING -> animationManager.playAnimation("walk");
-            case ATTACKING -> {
-                //restart the animation
-                if (attackJustStarted) {
-                    animationManager.getCurrent().reset();
+                case IDLE -> animationManager.playAnimation("idle");
+                case WALKING -> animationManager.playAnimation("walk");
+                case ATTACKING -> {
+                    //restart the animation
+                    if (attackJustStarted) {
+                        animationManager.getCurrent().reset();
+                    }
+
+                    if (player.getDirection() == Direction.DOWN) {
+                        animationManager.playAnimation("attack_down");
+                    } else if (player.getDirection() == Direction.UP) {
+                        animationManager.playAnimation("attack_up");
+                    } else {
+                        animationManager.playAnimation("attack_right");
+                    }
+
+                    if (animationManager.getCurrent().isFinished()) {
+                        player.completeAttackAnimation(); //to know when the attack is ended
+                    }
+                }
+                case DYING -> {
+                    animationManager.playAnimation("death");
+                    if (animationManager.getCurrent().isFinished()) {
+                        player.completeDeathAnimation();
+                    }
                 }
 
-                if (player.getDirection() == Direction.DOWN) {
-                    animationManager.playAnimation("attack_down");
-                } else if (player.getDirection() == Direction.UP) {
-                    animationManager.playAnimation("attack_up");
-                } else {
-                    animationManager.playAnimation("attack_right");
-                }
+                case DEAD -> animationManager.playAnimation("death");
+            }
+        }else {
+            switch (currentState) {
 
-                if (animationManager.getCurrent().isFinished()) {
-                    player.completeAttackAnimation(); //to know when the attack is ended
+                case IDLE -> animationManager.playAnimation("idle_shield");
+                case WALKING -> animationManager.playAnimation("walk_shield");
+                case ATTACKING -> {
+                    //restart the animation
+                    if (attackJustStarted) {
+                        animationManager.getCurrent().reset();
+                    }
+
+                    if (player.getDirection() == Direction.DOWN) {
+                        animationManager.playAnimation("attack_down_shield");
+                    } else if (player.getDirection() == Direction.UP) {
+                        animationManager.playAnimation("attack_up_shield");
+                    } else {
+                        animationManager.playAnimation("attack_right_shield");
+                    }
+
+                    if (animationManager.getCurrent().isFinished()) {
+                        player.completeAttackAnimation(); //to know when the attack is ended
+                    }
                 }
             }
-            case DYING -> {
-                animationManager.playAnimation("death");
-                if (animationManager.getCurrent().isFinished()) {
-                    player.completeDeathAnimation();
-                }
-            }
-
-            case DEAD -> animationManager.playAnimation("death");
         }
+
 
         animationManager.update(deltaMs);
         previousState = player.getState();
@@ -210,25 +269,7 @@ public class PlayerRender {
         }
 
         g2.setComposite(originalComposite); // Restore original composite for drawing the player
-        
-        if (player.isShielded()) {
-            double shieldPulse = 1.0 + 0.05 * Math.sin(System.currentTimeMillis() / 200.0);
-            int shieldRadius = (int) ((Math.max(width, height) / 2 + 5) * shieldPulse);
-            
-            // Outer glow
-            g2.setColor(new Color(0, 180, 255, 30));
-            g2.fillOval(screenX - shieldRadius - 8, screenY - shieldRadius - 8, (shieldRadius + 8) * 2, (shieldRadius + 8) * 2);
 
-            // Shield core
-            g2.setColor(new Color(0, 220, 255, 50));
-            g2.fillOval( screenX - shieldRadius, screenY - shieldRadius, shieldRadius * 2, shieldRadius * 2);
-            g2.setStroke(new BasicStroke(2.5f));
-            g2.setColor(new Color(120, 255, 255, 180));
-            g2.drawOval( screenX - shieldRadius, screenY - shieldRadius, shieldRadius * 2, shieldRadius * 2);
-            g2.setStroke(new BasicStroke(1.2f));
-            g2.setColor(new Color(255, 255, 255, 100));
-            g2.drawOval(screenX - shieldRadius + 4, screenY - shieldRadius + 4, (shieldRadius - 4) * 2, (shieldRadius - 4) * 2);
-        }
 
         // Restore original graphics settings before drawing the player
         g2.setStroke(originalStroke);
