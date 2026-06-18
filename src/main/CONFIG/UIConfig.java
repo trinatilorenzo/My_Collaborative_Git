@@ -127,6 +127,11 @@ public record UIConfig() {
     public static final float DIALOUE_HEIGHT_PCT = 0.25f;
     public static final float DIALOUE_PADDING_PCT = 0.03f;
 
+    public static final float MESSAGE_WIDTH_PCT = 0.45f;
+    public static final float MESSAGE_PADDING_PCT = 0.03f;
+    public static final double MESSAGE_TIMER_MS = 3000.0; // 2 seconds
+
+
 
     //HUD PLAYER LIFE
     public static final int HUD_LIFE_X = 20;
@@ -137,8 +142,8 @@ public record UIConfig() {
     //HUD PLAYER SHIELD
     public static final int BAR_SHIELD_WIDTH = 160;
     public static final int BAR_SHIELD_HEIGHT = 18;
-    public static final int ICON_SHIELD_SIZE = 30;
-    public static final int SHIELD_OFFSET_SCREEN = 20;
+    public static final int ICON_SHIELD_SIZE = 60;
+    public static final int SHIELD_OFFSET_SCREEN = 40;
 
 
 }

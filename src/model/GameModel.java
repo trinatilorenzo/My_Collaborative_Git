@@ -65,6 +65,8 @@ public class GameModel implements Serializable {
 
     // Dialogue
     private String currentDialogue; // dialogue currently displayed to the player
+    private String currentMessage;
+    private double messageTimer;
     //-------------------------------------------------------------
 
     // Death sequence
@@ -96,6 +98,8 @@ public class GameModel implements Serializable {
         debugMode = false; // Default debug mode is off
 
         currentDialogue = "";
+        currentMessage = "";
+        messageTimer = 0.0;
         deadStateElapsedMs = 0.0;
         winStateElapsedMs = 0.0;
 
@@ -348,6 +352,7 @@ public class GameModel implements Serializable {
 
         monk.update(player, deltaMs);
         updateInteractions();
+        updateMessage(deltaMs);
 
         updateEvents(lifeBeforeUpdate);
         updateState(input);
@@ -561,6 +566,17 @@ public class GameModel implements Serializable {
         checkLevelProgression();
     }
 
+    private void updateMessage(double deltaMS){
+
+        if (currentMessage.isEmpty()) return;
+
+        messageTimer += deltaMS;
+        if (messageTimer >= UIConfig.MESSAGE_TIMER_MS){
+            currentMessage="";
+            messageTimer = 0;
+        }
+
+    }
     //----------------------------------------------------------------------
     /**
      * Update level progression
@@ -572,6 +588,9 @@ public class GameModel implements Serializable {
 
         if (enemiesDefeated){
             if (currentLevelPowerUpCollected) {
+                if (currentLevel == 1){
+                    currentMessage = "Premi (R) per attivare lo scudo";
+                }
                 if (currentLevel < 3){
                     currentLevel ++;
                     currentLevelPowerUpCollected = false;
@@ -833,6 +852,7 @@ public class GameModel implements Serializable {
         if (this.projectiles == null) this.projectiles = new ArrayList<>();
         if (this.torchEnemies == null) this.torchEnemies = new ArrayList<>();
         if (this.currentDialogue == null) this.currentDialogue = "";
+        if (this.currentMessage == null) this.currentMessage = "";
     }
 
     public void copyFrom(GameModel other) {
@@ -854,6 +874,7 @@ public class GameModel implements Serializable {
         this.resValue = other.resValue;
         this.playerColor = other.playerColor;
         this.currentDialogue = other.currentDialogue;
+        this.currentMessage = other.currentMessage;
 
         this.deadStateElapsedMs = other.deadStateElapsedMs;
         this.currentLevel = other.currentLevel;
@@ -885,6 +906,7 @@ public class GameModel implements Serializable {
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
     public String getCurrentDialogue() { return currentDialogue; }
+    public String getCurrentMessage() { return currentMessage; }
     public List<DynamiteProjectile> getProjectiles(){ return projectiles; }
     public List<EnemyTorch> getTorchEnemies() { return torchEnemies; }
     public GameConfig getGameConfig() { return gameConfig; }

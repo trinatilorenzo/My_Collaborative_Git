@@ -61,9 +61,9 @@ public class UI {
 
     private final SliceSprite goldButton;
     private final SliceSprite goldButtonSelected;
-    private final SliceSprite ribbonBlueWide;
     private final SliceSprite pauseBanner;
     private final SliceSprite dialogueBanner;
+    private final SliceSprite blueBanner;
 
     private final SliceSprite blueButton;
     private final SliceSprite blueButtonSelected;
@@ -207,9 +207,9 @@ public class UI {
 
         goldButton = new SliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png",  tileSize, tileSize);
         goldButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Hover_3Slides.png", tileSize, tileSize);
-        ribbonBlueWide = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", tileSize, tileSize);
         pauseBanner = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png",tileSize,tileSize );
         dialogueBanner = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png", tileSize, tileSize);
+        blueBanner = new SliceSprite("src/res/UI/Banners/sword_Banner.png", tileSize*2, tileSize);
 
         blueButton = new SliceSprite("src/res/UI/Buttons/Button_Cyan_3Slides.png", tileSize, tileSize);
         blueButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Cyan_3Slides_Pressed.png", tileSize, tileSize);
@@ -317,6 +317,7 @@ public class UI {
                 drawPlayerLife();
                 drawShield();
                 if (!model.getCurrentDialogue().isEmpty()) drawDialogueWindow();
+                if (!model.getCurrentMessage().isEmpty()) drawMessageWindow();
             }
             case PAUSED    -> {
                 drawPlayerLife(); drawPauseScreen(); }
@@ -475,6 +476,40 @@ public class UI {
                 dialogue,
                 maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_DIALOGUE_TEXT_SIZE),
                 new Color(60, 40, 20)
+        );
+    }
+
+    private void drawMessageWindow(){
+        int width = (int) (screenWidth * UIConfig.MESSAGE_WIDTH_PCT);
+        int height =  blueBanner.getImageHeight();
+
+        int x = (screenWidth - width) / 2;
+        int y = (int) (screenHeight * UIConfig.MESSAGE_PADDING_PCT);
+
+        blueBanner.draw(g2, x, y, width, height);
+
+
+        String allert = model.getCurrentMessage(); // model.getAllert();
+        if (allert == null || allert.isBlank()) return;
+
+        int textBoxWidth = (int) (width * 0.75f);
+        int textBoxHeight = (int) (height * 0.5f);
+
+
+        Rectangle textBounds = new Rectangle(
+                x + (width - textBoxWidth + 40) / 2,
+                y + (height -  textBoxHeight)/ 2,
+                textBoxWidth,
+                textBoxHeight
+        );
+        g2.setColor(Color.RED);;
+
+
+        drawWrappedText(
+                textBounds,
+                allert,
+                maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_DIALOGUE_TEXT_SIZE),
+                new Color(66, 80, 98)
         );
     }
     //-------------------------------------------------------------
@@ -1200,18 +1235,27 @@ public class UI {
     private Font fitFontToBox(Graphics2D g2, String text, Font baseFont, int maxWidth, int maxHeight) {
         int size = baseFont.getSize();
 
-        while (size > UIConfig.MIN_BUTTON_TEXT_SIZE) {
+        while (size >= UIConfig.MIN_BUTTON_TEXT_SIZE) {
             Font testFont = baseFont.deriveFont((float) size);
             FontMetrics fm = g2.getFontMetrics(testFont);
 
-            if (fm.stringWidth(text) <= maxWidth && fm.getHeight() <= maxHeight) {
+            java.util.List<String> lines = wrapText(text, fm, maxWidth);
+
+            int totalHeight = lines.size() * fm.getHeight();
+            int maxLineWidth = 0;
+
+            for (String line : lines) {
+                maxLineWidth = Math.max(maxLineWidth, fm.stringWidth(line));
+            }
+
+            if (maxLineWidth <= maxWidth && totalHeight <= maxHeight) {
                 return testFont;
             }
 
             size--;
         }
 
-        return baseFont;
+        return baseFont.deriveFont((float) UIConfig.MIN_BUTTON_TEXT_SIZE);
     }
     //-------------------------------------------------------------
 
