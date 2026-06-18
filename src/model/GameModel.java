@@ -684,7 +684,7 @@ public class GameModel implements Serializable {
         }
         if (deadStateElapsedMs >= UIConfig.GAME_OVER_DELAY_MS) {
             System.out.println("GAME OVER");
-            gameState = GameState.GAME_OVER;
+            gameState = GameState.WIN;
             deadStateElapsedMs = 0.0;
         }
     }

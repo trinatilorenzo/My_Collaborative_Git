@@ -20,14 +20,14 @@ public record UIConfig() {
     public static final ButtonValue.GameOverMenu GAME_OVER_DEFAULT_SELECTION = null;
     public static final ButtonValue.WinMenu WIN_DEFAULT_SELECTION = null;
 
-    public static final int MAX_BUTTON_TEXT_SIZE = 50;
-    public static final int MAX_RIBBON_TEXT_SIZE = 90;
-    public static final int MIN_BUTTON_TEXT_SIZE = 8;
+    public static final int MAX_BUTTON_TEXT_SIZE = 90;
+    public static final int MIN_BUTTON_TEXT_SIZE = 15;
+    public static final int MAX_RIBBON_TEXT_SIZE = 150;
 
     //MENU
     //-------------------------------------------------------------
 
-    public static final int MENU_LOGO_WIDTH = 500;
+
 
     public static final int MENU_PADDING = 25;
 
@@ -89,6 +89,48 @@ public record UIConfig() {
     public static final int SETTINGS_BUTTON_WIDTH = 64 * 3;
     public static final int SETTINGS_BUTTON_HEIGHT = 64;
     //-------------------------------------------------------------
+
+    public static final float BUTTON_INSIDE_PADDING_W = 0.84f;
+    public static final float BUTTON_INSIDE_PADDING_H = 0.44f;
+
+    // --- Main Menu ---
+    public static final float MENU_LOGO_WIDTH = 0.35f; // % screenWidth
+    public static final float MENU_BUTTON_WIDTH_PCT          = 0.28f;  // % screenWidth
+    public static final float MENU_BUTTON_HEIGHT_PCT         = 0.12f; // % screenHeight
+    public static final float MENU_BUTTON_SETTINGS_SIZE_PCT  = 0.1f;  // % min(width,height)
+    public static final float MENU_RIBBON_SIZE_PCT           = 0.12f; // % min(width,height)
+    public static final float MENU_PADDING_PCT               = 0.02f;// % screenHeight
+
+    // --- Settings ---
+    public static final float SETTINGS_RIBBON_HEIGHT_PCT     = 0.09f; // % screenHeight
+    public static final float SETTINGS_PADDING_PCT           = 0.02f;// % screenHeight
+    public static final float SETTINGS_ICON_SIZE_PCT         = 0.1f; // % min(width,height)
+    public static final float SETTINGS_BUTTON_WIDTH_PCT      = 0.16f; // % screenWidth
+    public static final float SETTINGS_BUTTON_HEIGHT_PCT     = 0.09f; // % screenHeight
+
+    // --- Game Over ---
+    public static final float GAME_OVER_RIBBON_WIDTH_PCT     = 0.55f; // % screenWidth
+    public static final float GAME_OVER_RIBBON_HEIGHT_PCT    = 0.18f; // % screenHeight
+    public static final float GAME_OVER_PADDING_PCT          = 0.08f; // % screenHeight
+    public static final float GAME_OVER_BUTTON_WIDTH_PCT        = 0.24f; // % screenWidth
+    public static final float GAME_OVER_BUTTON_HEIGHT_PCT       = 0.12f;// % screenHeight
+
+    // --- Win ---
+    public static final float WIN_RIBBON_WIDTH_PCT     = 0.55f; // % screenWidth
+    public static final float WIN_RIBBON_HEIGHT_PCT    = 0.18f; // % screenHeight
+    public static final float WIN_PADDING_PCT          = 0.08f; // % screenHeight
+    public static final float WIN_BUTTON_WIDTH_PCT        = 0.24f; // % screenWidth
+    public static final float WIN_BUTTON_HEIGHT_PCT       = 0.12f;// % screenHeight
+
+    // --- Pause Menu ---
+    public static final float BANNER_WIDTH_PCT               = 0.45f; // % screenWidth
+    public static final int BANNER_ASPECT_RATIO      = 3;
+    public static final float PAUSE_RIBBON_OFFSET_Y_PCT      = 0.2f; // % screenHeight
+    public static final float PAUSE_BUTTON_WIDTH_PCT          = 0.20f; // % screenWidth
+    public static final float PAUSE_BUTTON_HEIGHT_PCT         = 0.10f;// % screenHeight
+    public static final float PAUSE_PADDING_PCT              = 0.02f;// % screenHeight
+
+
 
 
 }

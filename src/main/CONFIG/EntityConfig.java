@@ -28,7 +28,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
         //PlayerConfig
         //-------------------------------------------------------------
-        public static final int PLAYER_MAX_LIFE = 1;
+        public static final int PLAYER_MAX_LIFE = 0;
         public static final int START_PLAYER_SPEED = 384; // pixels per second
         public static final int PLAYER_SCALE = 1;
         public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;

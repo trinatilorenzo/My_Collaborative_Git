@@ -9,7 +9,8 @@ public class GameAudioManager {
 
     private static final String MENU_MUSIC = "/res/Sound/Music/GameMusic00_cut.mp3";
     private static final String GAME_MUSIC = "/res/Sound/Music/GameMusic01.mp3";
-    private static final String GAME_OVER_MUSIC = "/res/Sound/Music/GameMusic03.mp3";
+    private static final String GAME_OVER_MUSIC = "/res/Sound/Music/GameMusic04.mp3";
+    private static final String WIN_MUSIC = "/res/Sound/Music/GameMusic03.mp3";
 
     private static final String SWORD_SFX = "/res/Sound/SFX/sword-slash.mp3";
     private static final String SWORD_SWOOSH_SFX = "/res/Sound/SFX/sword-swoosh.mp3";
@@ -41,27 +42,15 @@ public class GameAudioManager {
     private GameState currentState;
 
     public void syncBackgroundMusic(GameState newState) {
-        if (newState == null || newState == currentState) return;
-        currentState = newState;
 
-        if (newState != GameState.PLAYING) {
-            movementLoopPlayer.stopSfx();
+        switch (newState) {
+            case WIN -> musicPlayer.playLoop(WIN_MUSIC);
+            case GAME_OVER -> musicPlayer.playLoop(GAME_OVER_MUSIC);
+            case MENU, SETTINGS -> musicPlayer.playLoop(MENU_MUSIC);
+            case PLAYING, PAUSED -> musicPlayer.playLoop(GAME_MUSIC);
+
+            default -> musicPlayer.stopAll();
         }
-
-        if (newState == GameState.MENU) {
-            musicPlayer.playLoop(MENU_MUSIC);
-            return;
-        }
-
-        if (newState == GameState.PLAYING || newState == GameState.PAUSED) {
-            musicPlayer.playLoop(GAME_MUSIC);
-            return;
-        }
-
-        if (newState == GameState.GAME_OVER) {
-            musicPlayer.playLoop(GAME_OVER_MUSIC);
-        }
-
     }
 
     public void playEvents(List<AudioEventType> events) {

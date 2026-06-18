@@ -85,7 +85,6 @@ public class Player extends Entity {
 
         // update shield timer
         if (shieldTimerMs > 0 && input.shield()) {
-            System.out.println(shieldTimerMs);
             shieldTimerMs -= deltaMs;
             isShielded = true;
             if (shieldTimerMs <= 0) {
@@ -199,7 +198,7 @@ public class Player extends Entity {
      */
     //--------------------------------------------------------------
     public void takeDamage() {
-        if (shieldTimerMs > 0) {
+        if (isShielded) {
             // player is shielded, ignore damage
             return;
         }
@@ -244,7 +243,7 @@ public class Player extends Entity {
         switch (type) {
             case SHIELD:
                 this.shieldTimerMs = EntityConfig.SHIELD_DURATION_MS;
-                this.isShielded = true;
+                this.isShielded = false;
                 this.hasShield = true;
                 break;
             case HEALTH_RESTORE:

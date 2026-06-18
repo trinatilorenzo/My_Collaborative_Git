@@ -173,7 +173,7 @@ public class UI {
             this.x = (float) (Math.random() * screenWidth);
             this.y = randomInitialY ? (float) (Math.random() * - screenHeight) : -20; 
             this.speed = (float) (Math.random() * 3 + 2); // Fall speed
-            this.size = (float) (Math.random() * 10 + 8);  // Coin's size
+            this.size = (float) (Math.random() * 10 + 14);  // Coin's size
             this.angle = (float) (Math.random() * Math.PI * 2);
             this.rotationSpeed = (float) (Math.random() * 0.08 + 0.04); // Speed rotation
         }
@@ -485,10 +485,7 @@ public class UI {
         g2.drawRect(0, 0, w - 1, h - 1);
         drawClouds(0, 0, w, h, cloudPlacementsMenu);
 
-        //logo
-        int logoWidth = UIConfig.MENU_LOGO_WIDTH;
-        int logoHeight = (int) (((double) menuLogo.getHeight() / menuLogo.getWidth()) * logoWidth); //scale no distortion
-        g2.drawImage(menuLogo, (w - logoWidth) / 2, 40, logoWidth, logoHeight, null);
+
 
         // Button
         MainMenuLayout layout = getMainMenuLayout();
@@ -496,6 +493,7 @@ public class UI {
         int hoveredRibbon = this.hoveredRibbon;
         int activeRibbon = this.activeRibbon;*/
 
+        Rectangle logoBounds = layout.logoBounds();
         Rectangle newGameBounds = layout.newGameBounds();
         Rectangle continueBounds = layout.continueBounds();
         Rectangle settingsBounds = layout.settingsBounds();
@@ -503,6 +501,9 @@ public class UI {
         Rectangle ribbonRedBounds = layout.toggleRedBounds();
         Rectangle ribbonBlueBounds = layout.toggleBlueBounds();
         Rectangle ribbonPurpleBounds = layout.togglePurpleBounds();
+
+
+        g2.drawImage(menuLogo, logoBounds.x, logoBounds.y, logoBounds.width, logoBounds.height, null);
 
         //draw ribbon
         g2.drawImage(mainMenuHover.get(ButtonValue.MainMenu.TOGGLE_BLUE) || mainMenuSelected.get(ButtonValue.MainMenu.TOGGLE_BLUE)
@@ -549,6 +550,44 @@ public class UI {
         }
 
     }
+    private void drawCoinRain(Graphics2D g2, int currentWidth, int currentHeight) {
+
+        final double BASE_WIDTH = 1152; // TODO no magic numbers
+        double scale = currentWidth / BASE_WIDTH;
+
+        for (CoinParticle coin : coinParticles) {
+
+            double scaledSpeed = coin.speed * scale;
+            coin.y += scaledSpeed;
+            coin.angle += coin.rotationSpeed;
+
+            // coin reset out of screen
+            if (coin.y > currentHeight) {
+                coin.reset(currentWidth, currentHeight, false);
+            }
+
+            double scaledSize = coin.size * scale;
+
+            int animatedWidth = (int) (scaledSize * Math.abs(Math.cos(coin.angle)));
+            int animatedHeight = (int) scaledSize;
+
+            int drawX = (int) (coin.x + (scaledSize - animatedWidth) / 2);
+            int drawY = (int) coin.y;
+
+            // shadow
+            int shadowOffset = Math.max(1, (int)(2 * scale));
+            g2.setColor(new Color(150, 100, 0, 100));
+            g2.fillOval(drawX + shadowOffset, drawY + shadowOffset, animatedWidth, animatedHeight);
+
+            // Coin
+            g2.setColor(new Color(255, 215, 0));
+            g2.fillOval(drawX, drawY, animatedWidth, animatedHeight);
+
+            // border
+            g2.setColor(new Color(200, 140, 0));
+            g2.drawOval(drawX, drawY, animatedWidth, animatedHeight);
+        }
+    }
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void drawPauseScreen() {
@@ -563,10 +602,10 @@ public class UI {
         Rectangle saveBounds = layout.saveBounds();
 
         // PauseMenu text
-        pauseBanner.draw(g2, ribbonBounds.x, ribbonBounds.y, ribbonBounds.width);
+        pauseBanner.draw(g2, ribbonBounds.x, ribbonBounds.y, ribbonBounds.width, ribbonBounds.height);
         String title = "PAUSE";
         g2.setColor(new Color(60, 40, 20, 200));
-        drawTextInRibbon(ribbonBounds, title, 1, 1);
+        drawTextInRibbon(ribbonBounds, title, 0.5, 1);
 
         drawButton(blueButton, blueButtonSelected, resumeBounds.x, resumeBounds.y, resumeBounds.width, resumeBounds.height,
                 "Resume", pauseHover.get(RESUME) || pauseSelected.get(RESUME));
@@ -607,7 +646,7 @@ public class UI {
         Rectangle audioRibbon = layout.audioRibbonBounds();
         yellowRibbon.draw(g2, audioRibbon.x, audioRibbon.y, audioRibbon.width, audioRibbon.height);
 
-        String title = "Audio SettingsMenu";
+        String title = "Audio Settings";
         g2.setColor(Color.WHITE);
         drawTextInRibbon(audioRibbon, title, 0.5 , 0.9);
 
@@ -638,17 +677,17 @@ public class UI {
         drawButton(goldButton, goldButtonSelected,
                 layout.resFullBounds().x, layout.resFullBounds().y,
                 layout.resFullBounds().width, layout.resFullBounds().height,
-                "FULL", settingsHover.get(RES_FULL) || settingsSelected.get(RES_FULL));
+                "Full Screen", settingsHover.get(RES_FULL) || settingsSelected.get(RES_FULL));
 
         drawButton(goldButton, goldButtonSelected,
                 layout.resHalfBounds().x, layout.resHalfBounds().y,
                 layout.resHalfBounds().width, layout.resHalfBounds().height,
-                "MID", settingsHover.get(RES_MID) || settingsSelected.get(RES_MID));
+                "Full Window", settingsHover.get(RES_MID) || settingsSelected.get(RES_MID));
 
         drawButton(goldButton, goldButtonSelected,
                 layout.resMinBounds().x, layout.resMinBounds().y,
                 layout.resMinBounds().width, layout.resMinBounds().height,
-                "SMAL", settingsHover.get(RES_MIN) || settingsSelected.get(RES_MIN));
+                "Small Window", settingsHover.get(RES_MIN) || settingsSelected.get(RES_MIN));
 
         // -------------------------------------------------------
 
@@ -689,50 +728,21 @@ public class UI {
                 "Quit", gameOverHover.get(QUIT_OVER) || gameOverSelected.get(QUIT_OVER));
     }
     //-------------------------------------------------------------
-    private void drawWinScreen(){
+    private void drawWinScreen() {
 
-        if (coinParticles == null){
+        if (coinParticles == null) {
             coinParticles = new java.util.ArrayList<>();
-            for (int i=0; i<60; i++){
+            for (int i = 0; i < 60; i++) {
                 coinParticles.add(new CoinParticle(screenWidth, screenHeight));
             }
         }
 
-        // Overlay
+        //bg
         g2.setColor(new Color(8, 8, 8, 150));
         g2.fillRect(0, 0, screenWidth, screenHeight);
 
-        // Rain of coins
-        g2.setColor(new Color (255, 215, 0));
-        for (CoinParticle coin: coinParticles){
-            coin.y += coin.speed;
-            coin.angle += coin.rotationSpeed; // Spin the coin
-
-            // If it leaves the bottom of the screen, it respawns at the top
-            if (coin.y > screenHeight) {
-                coin.reset (screenWidth, screenHeight, false);
-            }
-
-            // Simulate 3D rotation by changing the width of the coin using the cosine of the angle
-            int animatedWidth = (int) (coin.size * Math.abs(Math.cos(coin.angle)));
-            int animatedHeight = (int) coin.size;
-
-            // Calculate position
-            int drawX = (int) (coin.x + (coin.size - animatedWidth) / 2);
-            int drawY = (int) coin.y;
-
-            // Draw the shadow of the coin
-            g2.setColor(new Color(150, 100, 0, 100));
-            g2.fillOval(drawX+ 2, drawY + 2, animatedWidth, animatedHeight);
-
-            // Draw the coin
-            g2.setColor(new Color(255, 215, 0));
-            g2.fillOval(drawX, drawY, animatedWidth, animatedHeight);
-
-            // Internal edge for depth
-            g2.setColor(new Color(200, 140, 0));
-            g2.drawOval(drawX, drawY, animatedWidth, animatedHeight);
-        }
+        //coin
+        drawCoinRain(g2, screenWidth, screenHeight);
 
         WinLayout layout = getWinLayout();
         Rectangle ribbonBounds = layout.winRibbonBounds();
@@ -752,7 +762,6 @@ public class UI {
         // quit button
         drawButton(grayButton, redButtonSelected, quitButtonBounds.x, quitButtonBounds.y, quitButtonBounds.width, quitButtonBounds.height,
                 "Quit", winHover.get(QUIT_WIN) || winSelected.get(QUIT_WIN));
-
     }
     //-------------------------------------------------------------
 
@@ -764,7 +773,7 @@ public class UI {
 
         g2.setColor(Color.WHITE);
         Font fittedFont = fitFontToBox(g2, label, maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_BUTTON_TEXT_SIZE),
-                (int) (width*0.7) , (int) (height * 0.5));
+                (int) (width*UIConfig.BUTTON_INSIDE_PADDING_W) , (int) (height * UIConfig.BUTTON_INSIDE_PADDING_H));
         g2.setFont(fittedFont);
 
         int constant = 2;
@@ -786,6 +795,7 @@ public class UI {
         Font fittedFont = fitFontToBox(g2, title, maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_RIBBON_TEXT_SIZE),
                 (int)(ribbonBounds.width * ribbonScale), (int)(ribbonBounds.height * ribbonScale) );
         g2.setFont(fittedFont);
+
 
         Rectangle2D fontBounds = g2.getFontMetrics().getStringBounds(title, g2);
         int textX = ribbonBounds.x + (int) Math.round((ribbonBounds.width - fontBounds.getWidth()) / 2.0 - fontBounds.getX());
@@ -876,58 +886,66 @@ public class UI {
     //-------------------------------------------------------------
     public MainMenuLayout getMainMenuLayout() {
 
-        int buttonWidth = UIConfig.MENU_BUTTON_WIDTH;
-        int buttonHeight = UIConfig.MENU_BUTTON_HEIGHT;
-        int centerX = screenWidth / 2;
-        int firstY = (screenHeight / 2) + screenConfig.TILE_SIZE();
-        int gap = UIConfig.MENU_PADDING;
+        int minDim = Math.min(screenWidth, screenHeight);
 
+        int buttonWidth  = (int) (screenWidth  * UIConfig.MENU_BUTTON_WIDTH_PCT);
+        int buttonHeight = (int) (screenHeight * UIConfig.MENU_BUTTON_HEIGHT_PCT);
+        int centerX = screenWidth / 2;
+
+        int gap = (int) (screenHeight * UIConfig.MENU_PADDING_PCT);
+
+        //logo
+        int logoWidth = (int) (screenWidth * UIConfig.MENU_LOGO_WIDTH);
+        int logoHeight = (int) (((double) menuLogo.getHeight() / menuLogo.getWidth()) * logoWidth); //scale no distortion
+        int logoX = centerX - logoWidth / 2;
+
+        int firstY = logoHeight + gap*6;
+
+        Rectangle logoBounds = new Rectangle(logoX, gap, logoWidth, logoHeight);
         Rectangle newGameBounds  = new Rectangle(centerX - buttonWidth / 2, firstY, buttonWidth, buttonHeight);
         Rectangle continueBounds = new Rectangle(centerX - buttonWidth / 2, firstY + buttonHeight + gap, buttonWidth, buttonHeight);
 
-        int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
-        Rectangle settingsBounds = new Rectangle(screenWidth - settingsSize - UIConfig.MENU_PADDING,
-                UIConfig.MENU_PADDING,
+        int settingsSize = (int) (minDim * UIConfig.MENU_BUTTON_SETTINGS_SIZE_PCT);
+        Rectangle settingsBounds = new Rectangle(screenWidth - settingsSize - gap*2,
+                gap*2,
                 settingsSize,
                 settingsSize);
 
-        int ribbonX = UIConfig.MENU_RIBBON_X;
-        int ribbonY = UIConfig.MENU_RIBBON_Y;
-        int ribbonW = UIConfig.MENU_RIBBON_SIZE;
-        int ribbonH = UIConfig.MENU_RIBBON_SIZE;
+        int ribbonX = (int) (screenWidth  * UIConfig.MENU_PADDING_PCT);
+        int ribbonY = (int) (screenHeight * UIConfig.MENU_PADDING_PCT);
+        int ribbonW = (int) (minDim * UIConfig.MENU_RIBBON_SIZE_PCT);
+        int ribbonH = ribbonW;
 
-        Rectangle ribbonBlueBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
+        Rectangle ribbonBlueBounds   = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
         Rectangle ribbonYellowBounds = new Rectangle(ribbonX, ribbonY + ribbonH, ribbonW, ribbonH);
-        Rectangle ribbonRedBounds = new Rectangle(ribbonX, ribbonY + ribbonH*2,ribbonW, ribbonH);
-        Rectangle ribbonPurpleBounds = new Rectangle(ribbonX, ribbonY + ribbonH*3,ribbonW, ribbonH);
+        Rectangle ribbonRedBounds    = new Rectangle(ribbonX, ribbonY + ribbonH * 2, ribbonW, ribbonH);
+        Rectangle ribbonPurpleBounds = new Rectangle(ribbonX, ribbonY + ribbonH * 3, ribbonW, ribbonH);
 
-        return new MainMenuLayout(newGameBounds, continueBounds, settingsBounds,
+        return new MainMenuLayout(logoBounds, newGameBounds, continueBounds, settingsBounds,
                 ribbonYellowBounds, ribbonRedBounds, ribbonBlueBounds, ribbonPurpleBounds);
     }
     //-------------------------------------------------------------
     public GameOverLayout getGameOverLayout() {
         int centerX = screenWidth / 2;
-        int centerY = screenHeight / 2;
 
         //banner
-        int ribbonW = (int) (screenWidth * 0.55f);
-        int ribbonH = UIConfig.GAME_OVER_RIBBON_HEIGHT;
-        int ribbonX =  (screenWidth - ribbonW) / 2;
+        int ribbonW = (int) (screenWidth  * UIConfig.GAME_OVER_RIBBON_WIDTH_PCT);
+        int ribbonH = (int) (screenHeight * UIConfig.GAME_OVER_RIBBON_HEIGHT_PCT);
+        int ribbonX = (screenWidth - ribbonW) / 2;
+        int ribbonY = (int) (screenHeight * UIConfig.GAME_OVER_PADDING_PCT);
 
-        int ribbonY =  UIConfig.GAME_OVER_PADDING;
         Rectangle gameOverRibbonBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
 
-
         //button
-        int buttonWidth  = UIConfig.RESUME_BUTTON_WIDTH;
-        int buttonHeight = UIConfig.RESUME_BUTTON_HEIGHT;
-        int gap = UIConfig.GAME_OVER_PADDING ;
+        int buttonWidth  = (int) (screenWidth  * UIConfig.GAME_OVER_BUTTON_WIDTH_PCT);
+        int buttonHeight = (int) (screenHeight * UIConfig.GAME_OVER_BUTTON_HEIGHT_PCT);
+        int gap = (int) (screenHeight * UIConfig.GAME_OVER_PADDING_PCT);
 
         int buttonY = screenHeight - buttonHeight - gap;
-        int buttonX = centerX - buttonWidth - gap/2;
+        int buttonX = centerX - buttonWidth - gap / 2;
 
         Rectangle homeButtonBounds = new Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
-        buttonX = centerX + gap/2;
+        buttonX = centerX + gap / 2;
         Rectangle quitButtonBounds = new Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
 
         return new GameOverLayout(gameOverRibbonBounds, homeButtonBounds, quitButtonBounds);
@@ -939,27 +957,29 @@ public class UI {
         int centerY = screenHeight / 2;
 
         //banner
-        int ribbonW = (int) (screenWidth * 0.55f);
-        int ribbonH = UIConfig.GAME_OVER_RIBBON_HEIGHT;
-        int ribbonX =  (screenWidth - ribbonW) / 2;
+        int ribbonW = (int) (screenWidth  * UIConfig.WIN_RIBBON_WIDTH_PCT);
+        int ribbonH = (int) (screenHeight * UIConfig.WIN_RIBBON_HEIGHT_PCT);
+        int ribbonX = (screenWidth - ribbonW) / 2;
+        int ribbonY = centerY - ribbonH;
 
-        int ribbonY =  centerY - ribbonH;
         Rectangle winRibbonBounds = new Rectangle(ribbonX, ribbonY, ribbonW, ribbonH);
 
-
         //button
-        int buttonWidth  = UIConfig.RESUME_BUTTON_WIDTH;
-        int buttonHeight = UIConfig.RESUME_BUTTON_HEIGHT;
-        int gap = UIConfig.GAME_OVER_PADDING ;
+        int buttonWidth  = (int) (screenWidth  * UIConfig.WIN_BUTTON_WIDTH_PCT);
+        int buttonHeight = (int) (screenHeight * UIConfig.WIN_BUTTON_HEIGHT_PCT);
+        int gap = (int) (screenHeight * UIConfig.WIN_PADDING_PCT);
 
         int buttonY = screenHeight - buttonHeight - gap;
-        int buttonX = centerX - buttonWidth - gap/2;
+        int buttonX = centerX - buttonWidth - gap / 2;
 
         Rectangle homeButtonBounds = new Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
-        buttonX = centerX + gap/2;
+        buttonX = centerX + gap / 2;
         Rectangle quitButtonBounds = new Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
 
         return new WinLayout(winRibbonBounds, homeButtonBounds, quitButtonBounds);
+
+
+
     }
     //-------------------------------------------------------------
 
@@ -968,26 +988,29 @@ public class UI {
         int centerX = screenWidth / 2;
         int centerY = screenHeight / 2;
 
-        int bannerWidth  = UIConfig.BANNER_WIDTH;
-        int bannerHeight = pauseBanner.getImageHeight();
+        int bannerWidth = (int) (screenWidth * UIConfig.BANNER_WIDTH_PCT);
+        int bannerHeight = bannerWidth / UIConfig.BANNER_ASPECT_RATIO;
+
         int bannerX = centerX - bannerWidth / 2;
-        int bannerY = centerY - bannerHeight / 2 - UIConfig.PAUSE_RIBBON_OFFSET_Y;
+        int bannerY = centerY - bannerHeight / 2  ;
 
         Rectangle pauseRibbonBounds = new Rectangle(bannerX, bannerY, bannerWidth, bannerHeight);
 
-        int resumButtonWidth  = UIConfig.RESUME_BUTTON_WIDTH;
-        int resumeButtonHeight = UIConfig.RESUME_BUTTON_HEIGHT;
-        int saveButtonWidth  = UIConfig.SAVE_BUTTON_WIDTH;
-        int saveButtonHeight = UIConfig.SAVE_BUTTON_HEIGHT;
-        int gap = UIConfig.PAUSE_PADDING;
-        int firstButtonY = bannerY + bannerHeight + gap;
 
-        Rectangle resumeBounds = new Rectangle(centerX - resumButtonWidth / 2, firstButtonY, resumButtonWidth, resumeButtonHeight);
-        Rectangle saveBounds   = new Rectangle(centerX - saveButtonWidth / 2, firstButtonY + saveButtonHeight + gap, saveButtonWidth, saveButtonHeight);
+        int buttonWidth    = (int) (screenWidth  * UIConfig.PAUSE_BUTTON_WIDTH_PCT);
+        int buttonHeight   = (int) (screenHeight * UIConfig.PAUSE_BUTTON_HEIGHT_PCT);
+        int gap = (int) (screenHeight * UIConfig.PAUSE_PADDING_PCT);
+        int firstButtonY = bannerY + bannerHeight + gap *4;
+        int firstButtonX = centerX - buttonWidth/2;
 
-        int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
-        Rectangle settingsBounds = new Rectangle(screenWidth - settingsSize - UIConfig.MENU_PADDING,
-                UIConfig.MENU_PADDING,
+        Rectangle resumeBounds = new Rectangle(firstButtonX, firstButtonY, buttonWidth, buttonHeight);
+        Rectangle saveBounds   = new Rectangle(firstButtonX, firstButtonY + buttonHeight + gap, buttonWidth, buttonHeight);
+
+        int minDim = Math.min(screenWidth, screenHeight);
+        int settingsSize = (int) (minDim * UIConfig.MENU_BUTTON_SETTINGS_SIZE_PCT);
+        int menuPadding  = (int) (screenHeight * UIConfig.MENU_PADDING_PCT);
+        Rectangle settingsBounds = new Rectangle(screenWidth - settingsSize - menuPadding,
+                menuPadding,
                 settingsSize,
                 settingsSize);
 
@@ -998,6 +1021,7 @@ public class UI {
 
         int sw = screenWidth;
         int sh = screenHeight;
+        int minDim = Math.min(sw, sh);
 
         //bg
         int settingsW = (int) (sw * 0.98f);
@@ -1007,56 +1031,54 @@ public class UI {
         Rectangle settingsBounds = new Rectangle(settingsX, settingsY, settingsW, settingsH);
 
         // settings icon
-        int settingsSize = UIConfig.MENU_BUTTON_SETTINGS_SIZE;
+        int menuPadding = (int) (sh * UIConfig.MENU_PADDING_PCT);
+        int settingsSize = (int) (minDim * UIConfig.MENU_BUTTON_SETTINGS_SIZE_PCT);
         Rectangle settingsIconBounds = new Rectangle(
-                sw - settingsSize - UIConfig.MENU_PADDING,
-                UIConfig.MENU_PADDING,
+                sw - settingsSize - menuPadding*2,
+                menuPadding*2,
                 settingsSize,
                 settingsSize
         );
 
-        // audio rubbon
+        // audio ribbon
+        int settingsPadding = (int) (sh * UIConfig.SETTINGS_PADDING_PCT);
         int ribbonW = (int) (settingsW * 0.55f);
-        int ribbonH = UIConfig.SETTINGS_RIBBON_HEIGHT;
+        int ribbonH = (int) (sh * UIConfig.SETTINGS_RIBBON_HEIGHT_PCT);
         int ribbonX = settingsX + (settingsW - ribbonW) / 2;
 
-        int audioRibbonY = settingsY + UIConfig.SETTINGS_PADDING *3;
+        int audioRibbonY = settingsY + settingsPadding * 3;
         Rectangle audioRibbonBounds = new Rectangle(ribbonX, audioRibbonY, ribbonW, ribbonH);
 
-
         // audio icon
-        int iconSize = UIConfig.SETTINGS_ICON_SIZE;
-        int iconsY = audioRibbonY + ribbonH + UIConfig.SETTINGS_PADDING;
-        int totalIconsW = iconSize * 2 + UIConfig.SETTINGS_PADDING;
+        int iconSize = (int) (minDim * UIConfig.SETTINGS_ICON_SIZE_PCT);
+        int iconsY = audioRibbonY + ribbonH + settingsPadding;
+        int totalIconsW = iconSize * 2 + settingsPadding;
         int iconsStartX = settingsX + (settingsW - totalIconsW) / 2;
 
         Rectangle musicBounds = new Rectangle(iconsStartX, iconsY, iconSize, iconSize);
-        Rectangle soundBounds = new Rectangle(iconsStartX + iconSize + UIConfig.SETTINGS_PADDING, iconsY, iconSize, iconSize);
+        Rectangle soundBounds = new Rectangle(iconsStartX + iconSize + settingsPadding, iconsY, iconSize, iconSize);
 
         // screen ribbon
-        int screenRibbonY = iconsY + iconSize + UIConfig.SETTINGS_PADDING * 2;
+        int screenRibbonY = iconsY + iconSize + settingsPadding * 2;
         Rectangle resRibbonBounds = new Rectangle(ribbonX, screenRibbonY, ribbonW, ribbonH);
 
         // screen button
-        int btnW = UIConfig.SETTINGS_BUTTON_WIDTH;
-        int btnH = UIConfig.SETTINGS_BUTTON_HEIGHT;
-        int btnY = screenRibbonY + ribbonH + UIConfig.SETTINGS_PADDING;
+        int btnW = (int) (sw * UIConfig.SETTINGS_BUTTON_WIDTH_PCT);
+        int btnH = (int) (sh * UIConfig.SETTINGS_BUTTON_HEIGHT_PCT);
+        int btnY = screenRibbonY + ribbonH + settingsPadding;
 
-        int totalBtnsW = btnW * 3 + UIConfig.SETTINGS_PADDING * 2;
+        int totalBtnsW = btnW * 3 + settingsPadding * 2;
         int btnsStartX = settingsX + (settingsW - totalBtnsW) / 2;
 
         Rectangle resFullBounds = new Rectangle(btnsStartX, btnY, btnW, btnH);
-        Rectangle resHalfBounds = new Rectangle(btnsStartX + btnW + UIConfig.SETTINGS_PADDING, btnY, btnW, btnH);
-        Rectangle resMinBounds = new Rectangle(btnsStartX + (btnW + UIConfig.SETTINGS_PADDING) * 2, btnY, btnW, btnH);
-
+        Rectangle resHalfBounds = new Rectangle(btnsStartX + btnW + settingsPadding, btnY, btnW, btnH);
+        Rectangle resMinBounds  = new Rectangle(btnsStartX + (btnW + settingsPadding) * 2, btnY, btnW, btnH);
 
         btnH *= 1.6;
         // quit button
-        btnsStartX = settingsX + (settingsW - btnW)/ 2;
-        int quitBtnY = btnY + btnH + UIConfig.SETTINGS_PADDING * 8;
+        btnsStartX = settingsX + (settingsW - btnW) / 2;
+        int quitBtnY = btnY + btnH + settingsPadding * 8;
         Rectangle quitBounds = new Rectangle(btnsStartX, quitBtnY, btnW, btnH);
-
-
 
         return new SettingsLayout(
                 settingsBounds,
