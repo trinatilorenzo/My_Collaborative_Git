@@ -21,6 +21,7 @@ public record UIConfig() {
     public static final ButtonValue.WinMenu WIN_DEFAULT_SELECTION = null;
 
     public static final int MAX_BUTTON_TEXT_SIZE = 90;
+    public static final int MAX_DIALOGUE_TEXT_SIZE = 45;
     public static final int MIN_BUTTON_TEXT_SIZE = 15;
     public static final int MAX_RIBBON_TEXT_SIZE = 150;
 
@@ -40,18 +41,6 @@ public record UIConfig() {
     public static final int MENU_RIBBON_Y = 16;
     public static final int MENU_RIBBON_SIZE = 100;
     //-------------------------------------------------------------
-
-    //HUD PLAYER LIFE
-    public static final int HUD_LIFE_X = 20;
-    public static final int HUD_LIFE_Y = 20;
-
-    public static final long DAMAGE_FLASH_DURATION_NS = 1500_000_000;
-
-    //HUD PLAYER SHIELD
-    public static final int BAR_SHIELD_WIDTH = 160;
-    public static final int BAR_SHIELD_HEIGHT = 18;
-    public static final int ICON_SHIELD_SIZE = 30;
-    public static final int SHIELD_OFFSET_SCREEN = 20;
 
     //PAUSE
     //-------------------------------------------------------------
@@ -131,6 +120,25 @@ public record UIConfig() {
     public static final float PAUSE_PADDING_PCT              = 0.02f;// % screenHeight
 
 
+    // --- HUD ---
+
+    //DIALOUGE
+    public static final float DIALOUE_WIDTH_PCT = 0.75f;
+    public static final float DIALOUE_HEIGHT_PCT = 0.25f;
+    public static final float DIALOUE_PADDING_PCT = 0.03f;
+
+
+    //HUD PLAYER LIFE
+    public static final int HUD_LIFE_X = 20;
+    public static final int HUD_LIFE_Y = 20;
+
+    public static final long DAMAGE_FLASH_DURATION_NS = 1500_000_000;
+
+    //HUD PLAYER SHIELD
+    public static final int BAR_SHIELD_WIDTH = 160;
+    public static final int BAR_SHIELD_HEIGHT = 18;
+    public static final int ICON_SHIELD_SIZE = 30;
+    public static final int SHIELD_OFFSET_SCREEN = 20;
 
 
 }

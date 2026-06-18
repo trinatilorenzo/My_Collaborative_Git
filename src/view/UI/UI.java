@@ -151,7 +151,7 @@ public class UI {
     // =========================================================================
     private long shieldEffectStart = -1;
     private final double shieldDuration = EntityConfig.SHIELD_DURATION_MS;
-    
+
     // =========================================================================
     // Win Screen & Particle State
     // =========================================================================
@@ -171,7 +171,7 @@ public class UI {
         // Reset position of the coin
         public void reset(int screenWidth, int screenHeight, boolean randomInitialY) {
             this.x = (float) (Math.random() * screenWidth);
-            this.y = randomInitialY ? (float) (Math.random() * - screenHeight) : -20; 
+            this.y = randomInitialY ? (float) (Math.random() * - screenHeight) : -20;
             this.speed = (float) (Math.random() * 3 + 2); // Fall speed
             this.size = (float) (Math.random() * 10 + 14);  // Coin's size
             this.angle = (float) (Math.random() * Math.PI * 2);
@@ -448,31 +448,34 @@ public class UI {
     //-------------------------------------------------------------
     public void drawDialogueWindow() {
 
-        int width = screenWidth- (screenConfig.TILE_SIZE() * 2);
-        int height = screenConfig.TILE_SIZE() * 4;
+        int width = (int) (screenWidth * UIConfig.DIALOUE_WIDTH_PCT);
+        int height = (int) (screenHeight * UIConfig.DIALOUE_HEIGHT_PCT);
 
         int x = (screenWidth - width) / 2;
-        int y = screenHeight - height;
+        int y = screenHeight - height - (int) (screenHeight * UIConfig.DIALOUE_PADDING_PCT);
 
-        dialogueBanner.draw(g2, x, y, width);
+        dialogueBanner.draw(g2, x, y, width, height);
 
         String dialogue = model.getCurrentDialogue();
-        if (dialogue == null || dialogue.isEmpty()) return;
+        if (dialogue == null || dialogue.isBlank()) return;
 
-        g2.setColor(new Color(60, 40, 20));
-        g2.setFont(maruMonica.deriveFont(Font.BOLD, 28F));
+        int textBoxWidth = (int) (width * 0.85f);
+        int textBoxHeight = (int) (height * 0.35f);
 
-        int textX = x + 60;
-        int textY = y + 80;
-        int maxTextWidth = width - 120;
+        Rectangle textBounds = new Rectangle(
+                x + (width - textBoxWidth) / 2,
+                y + (height -  textBoxHeight)/ 2,
+                textBoxWidth,
+                textBoxHeight
+        );
 
-        for (String line : wrapText(dialogue, g2.getFontMetrics(), maxTextWidth)) {
-            g2.drawString(line, textX, textY);
-            textY += 40;
-        }
 
-        g2.setFont(maruMonica.deriveFont(Font.ITALIC, 22F));
-        g2.drawString("Press M to continue...", x + width - 300, y + height - 30);
+        drawWrappedText(
+                textBounds,
+                dialogue,
+                maruMonica.deriveFont(Font.BOLD, UIConfig.MAX_DIALOGUE_TEXT_SIZE),
+                new Color(60, 40, 20)
+        );
     }
     //-------------------------------------------------------------
     //-------------------------------------------------------------
@@ -1211,6 +1214,28 @@ public class UI {
         return baseFont;
     }
     //-------------------------------------------------------------
+
+    private void drawWrappedText(Rectangle bounds, String text, Font baseFont, Color color) {
+        if (text == null || text.isBlank()) return;
+
+        int fontSize = Math.max(UIConfig.MIN_BUTTON_TEXT_SIZE, (int)(bounds.height * 0.45));
+
+        Font fittedFont = baseFont.deriveFont((float) fontSize);
+        g2.setFont(fittedFont);
+        g2.setColor(color);
+
+        FontMetrics fm = g2.getFontMetrics();
+        java.util.List<String> lines = wrapText(text, fm, bounds.width);
+
+        int x = bounds.x;
+        int y = bounds.y + fm.getAscent();
+        int lineHeight = fm.getHeight();
+
+        for (String line : lines) {
+            g2.drawString(line, x, y);
+            y += lineHeight;
+        }
+    }
 
 
     // SETTER
