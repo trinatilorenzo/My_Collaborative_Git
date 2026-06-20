@@ -197,51 +197,37 @@ public class GameObjectRenderer {
      * Draws object hitboxes in debug mode.
      */
     //-------------------------------------------------------------
-    public void drawDebugSolidAreas(Graphics2D g2, List<GameObject> objects, Player player, ScreenConfig screenCfg, int screenWidth, int screenHeight) {
+    public void drawDebugObject(Graphics2D g2, GameObject object, int screenX, int screenY, int playerCurrentLayer) {
+        if (object == null || object.isRemoved() || object.getSolidArea() == null) {
+            return;
+        }
 
-        int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
+        Rectangle solidArea = object.getSolidArea();
+
+        int boxScreenX = screenX + solidArea.x;
+        int boxScreenY = screenY + solidArea.y;
 
         Color previousColor = g2.getColor();
         Stroke previousStroke = g2.getStroke();
-        Font previousFont = g2.getFont();
 
         g2.setStroke(new BasicStroke(2));
 
-        for (GameObject object : objects) {
-            if (object == null || object.isRemoved() || object.getSolidArea() == null) {
-                continue;
-            }
+        // Red for objects on the same layer as the player, orange for others
+        boolean sameLayer = object.getLayer() == playerCurrentLayer;
+        g2.setColor(sameLayer ? new Color(255, 40, 40, 90) : new Color(255, 180, 0, 55));
+        g2.fillRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);
 
-            Rectangle solidArea = object.getSolidArea();
-            int screenX = object.getWorldX() + solidArea.x - player.getWorldX() + pScreenX;
-            int screenY = object.getWorldY() + solidArea.y - player.getWorldY() + pScreenY;
-
-            if (screenX + solidArea.width < 0 || screenX > screenWidth ||
-                    screenY + solidArea.height < 0 || screenY > screenHeight) {
-                continue;
-            }
-
-            // Red for objects on the same layer as the player, orange for others
-            boolean sameLayer = object.getLayer() == player.getCurrentLayer();
-            g2.setColor(sameLayer ? new Color(255, 40, 40, 90) : new Color(255, 180, 0, 55));
-            g2.fillRect(screenX, screenY, solidArea.width, solidArea.height);
-
-            g2.setColor(sameLayer ? new Color(255, 40, 40, 220) : new Color(255, 180, 0, 160));
-            g2.drawRect(screenX, screenY, solidArea.width, solidArea.height);
+        g2.setColor(sameLayer ? new Color(255, 40, 40, 220) : new Color(255, 180, 0, 160));
+        g2.drawRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);     
         
-
-            // Light blue for trees whit power-ups
-            if (object instanceof OBJ_Tree tree && tree.hasPowerUp()) {
-                g2.setColor(new Color(40, 200, 255, 110));
-                g2.fillRect(screenX, screenY, solidArea.width, solidArea.height);
-
-            }
+        // Light blue for trees whit power-ups
+        if (object instanceof OBJ_Tree tree && tree.hasPowerUp()) {
+            g2.setColor(new Color(40, 200, 255, 110));
+            g2.fillRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);
         }
 
         g2.setStroke(previousStroke);
         g2.setColor(previousColor);
-        g2.setFont(previousFont);
     }
     //-------------------------------------------------------------
 

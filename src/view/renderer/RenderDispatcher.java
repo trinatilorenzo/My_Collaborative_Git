@@ -28,7 +28,7 @@ public class RenderDispatcher {
     /**
      * Manages the drawing of the entity and, if debugMode is active, automatically draws the Solid Area
      */
-    public void draw(Graphics2D g2, IRenderable obj, int screenX, int screenY, boolean debugMode) {
+    public void draw(Graphics2D g2, IRenderable obj, int screenX, int screenY, boolean debugMode, model.entity.Player player) {
         if (obj instanceof model.entity.Player p) {
             playerRender.draw(g2, p, screenX, screenY);
             if (debugMode) {
@@ -67,8 +67,9 @@ public class RenderDispatcher {
         } 
         else if (obj instanceof model.object.GameObject o) {
             objectRenderer.draw(g2, o, screenX, screenY);
-            // Se objectRenderer ha un metodo specifico per le hitbox dei GameObject, aggiungilo qui sotto:
-            // if (debugMode) { objectRenderer.drawDebugSolidArea(g2, o, screenX, screenY); }
+            if (debugMode) {
+                objectRenderer.drawDebugObject(g2, o, screenX, screenY, player.getCurrentLayer());
+            }
         }
     }
     

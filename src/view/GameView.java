@@ -197,7 +197,7 @@ public class GameView extends JPanel {
                 continue;
             }
 
-            renderDispatcher.draw(g2, obj, screenX, screenY, model.isDebugMode());
+            renderDispatcher.draw(g2, obj, screenX, screenY, model.isDebugMode(), player);
 
         }
     }
