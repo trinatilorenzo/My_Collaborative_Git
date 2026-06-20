@@ -36,7 +36,7 @@ import java.util.List;
  * visual elements.
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameView extends JPanel {
+public class GameView extends JPanel implements IGameView {
 
     private final ScreenConfig screenCfg;
 
@@ -215,10 +215,7 @@ public class GameView extends JPanel {
                 screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
             }
             case 1 -> {
-                Rectangle r = GraphicsEnvironment
-                        .getLocalGraphicsEnvironment()
-                        .getMaximumWindowBounds();
-
+                Rectangle r = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
                 screenWidth = r.width;
                 screenHeight = r.height;
             }
@@ -356,68 +353,100 @@ public class GameView extends JPanel {
     public void updatePlayerColor() {
         renderDispatcher.updatePlayerColor(model.getPlayerColor());
     }
-   
-    // GETTER ----------------------
-    public MainMenuLayout getMainMenuLayout() {
-        return ui_render.getMainMenuLayout();
+
+    @Override
+    public void applyMenuState(GameState screen, Enum<?> hovered, Enum<?> selected) {
+        if (screen == null) return;
+
+        switch (screen) {
+            case MENU -> {
+                if (hovered instanceof ButtonValue.MainMenu h) ui_render.setMainMenuHover(h);
+                if (selected instanceof ButtonValue.MainMenu s) ui_render.setMainMenuSelected(s);
+                if (hovered == null) ui_render.resetMainMenuHover();
+            }
+            case PAUSED -> {
+                if (hovered instanceof ButtonValue.PauseMenu h) ui_render.setPauseHover(h);
+                if (selected instanceof ButtonValue.PauseMenu s) ui_render.setPauseSelected(s);
+                if (hovered == null) ui_render.resetPauseHover();
+            }
+            case SETTINGS -> {
+                if (hovered instanceof ButtonValue.SettingsMenu h) ui_render.setSettingsHover(h);
+                if (selected instanceof ButtonValue.SettingsMenu s) ui_render.setSettingsSelected(s);
+                if (hovered == null) ui_render.resetSettingsHover();
+            }
+            case GAME_OVER -> {
+                if (hovered instanceof ButtonValue.GameOverMenu h) ui_render.setGameOverHover(h);
+                if (selected instanceof ButtonValue.GameOverMenu s) ui_render.setGameOverSelected(s);
+                if (hovered == null) ui_render.resetGameOverHover();
+            }
+            case WIN -> {
+                if (hovered instanceof ButtonValue.WinMenu h) ui_render.setWinHover(h);
+                if (selected instanceof ButtonValue.WinMenu s) ui_render.setWinSelected(s);
+                if (hovered == null) ui_render.resetWinHover();
+            }
+        }
     }
-    public GameOverLayout getGameOverLayout() {
-        return ui_render.getGameOverLayout();
+
+    @Override
+    public Enum<?> getButtonAtPoint(GameState screen, Point point) {
+        if (point == null) return null;
+        switch (screen) {
+            case MENU -> {
+                MainMenuLayout l = ui_render.getMainMenuLayout();
+                if (contains(l.newGameBounds(),     point)) return ButtonValue.MainMenu.NEW_GAME;
+                if (contains(l.continueBounds(),    point)) return ButtonValue.MainMenu.LOAD_GAME;
+                if (contains(l.settingsBounds(),    point)) return ButtonValue.MainMenu.SETTINGS;
+                if (contains(l.toggleBlueBounds(),  point)) return ButtonValue.MainMenu.TOGGLE_BLUE;
+                if (contains(l.toggleYellowBounds(),point)) return ButtonValue.MainMenu.TOGGLE_YELLOW;
+                if (contains(l.toggleRedBounds(),   point)) return ButtonValue.MainMenu.TOGGLE_RED;
+                if (contains(l.togglePurpleBounds(),point)) return ButtonValue.MainMenu.TOGGLE_PURPLE;
+            }
+            case PAUSED -> {
+                PauseMenuLayout l = ui_render.getPauseMenuLayout();
+                if (contains(l.resumeBounds(),   point)) return ButtonValue.PauseMenu.RESUME;
+                if (contains(l.settingsBounds(), point)) return ButtonValue.PauseMenu.PAUSE_SETTINGS;
+                if (contains(l.saveBounds(),     point)) return ButtonValue.PauseMenu.SAVE;
+            }
+            case SETTINGS -> {
+                SettingsLayout l = ui_render.getSettingsLayout();
+                if (contains(l.settingsIconBounds(), point)) return ButtonValue.SettingsMenu.SETTINGS_ICON;
+                if (contains(l.musicBounds(),        point)) return ButtonValue.SettingsMenu.MUSIC;
+                if (contains(l.soundBounds(),        point)) return ButtonValue.SettingsMenu.SOUND;
+                if (contains(l.resFullBounds(),      point)) return ButtonValue.SettingsMenu.RES_FULL;
+                if (contains(l.resHalfBounds(),      point)) return ButtonValue.SettingsMenu.RES_MID;
+                if (contains(l.resMinBounds(),       point)) return ButtonValue.SettingsMenu.RES_MIN;
+                if (contains(l.quitBounds(),         point)) return ButtonValue.SettingsMenu.QUIT;
+            }
+            case GAME_OVER -> {
+                GameOverLayout l = ui_render.getGameOverLayout();
+                if (contains(l.homeButtonBounds(), point)) return ButtonValue.GameOverMenu.HOME_OVER;
+                if (contains(l.quitButtonBounds(), point)) return ButtonValue.GameOverMenu.QUIT_OVER;
+            }
+            case WIN -> {
+                WinLayout l = ui_render.getWinLayout();
+                if (contains(l.homeButtonBounds(), point)) return ButtonValue.WinMenu.HOME_WIN;
+                if (contains(l.quitButtonBounds(), point)) return ButtonValue.WinMenu.QUIT_WIN;
+            }
+        }
+        return null;
     }
-    public PauseMenuLayout getPauseMenuLayout() {return ui_render.getPauseMenuLayout();}
-    public SettingsLayout getSettingsLayout() {return ui_render.getSettingsLayout();}
-    public WinLayout getWinLayout() {return ui_render.getWinLayout();};
+
+    /**
+     * Checks if a rectangle contains a point
+     * (used to check mouse hovers and clicks)
+     */
+    private boolean contains(Rectangle bounds, Point p) {
+        return bounds != null && p != null && bounds.contains(p);
+    }
+
+    @Override
+    public void render(){
+        this.repaint();
+    }
+
+    // Getter
     public Cursor getCustomGameCursor() {
         return customGameCursor;
-    }
-    //---------------------------------
-
-    //SETTER ----------------------
-    public void setMainMenuHover(ButtonValue.MainMenu key) {
-        ui_render.setMainMenuHover(key);
-    }
-    public void setMainMenuSelected(ButtonValue.MainMenu key) {
-        ui_render.setMainMenuSelected(key);
-    }
-    public void resetMainMenuHover() {
-        ui_render.resetMainMenuHover();
-    }
-    public void setPauseHover(ButtonValue.PauseMenu key) {
-        ui_render.setPauseHover(key);
-    }
-    public void setPauseSelected(ButtonValue.PauseMenu key) {
-        ui_render.setPauseSelected(key);
-    }
-    public void resetPauseHover(){
-        ui_render.resetPauseHover();
-    }
-    public void setSettingsHover(ButtonValue.SettingsMenu key) {
-        ui_render.setSettingsHover(key);
-    }
-    public void setSettingsSelected(ButtonValue.SettingsMenu key) {
-        ui_render.setSettingsSelected(key);
-    }
-    public void resetSettingsHover(){
-        ui_render.resetSettingsHover();
-    }
-    public void setGameOverHover(ButtonValue.GameOverMenu key) {
-        ui_render.setGameOverHover(key);
-    }
-    public void setGameOverSelected(ButtonValue.GameOverMenu key) {
-        ui_render.setGameOverSelected(key);
-    }
-    public void resetGameOverHover(){
-        ui_render.resetGameOverHover();
-    }
-
-    public void setWinHover(ButtonValue.WinMenu key) {
-        ui_render.setWinHover(key);
-    }
-    public void setWinSelected(ButtonValue.WinMenu key) {
-        ui_render.setWinSelected(key);
-    }
-    public void resetWinHover(){
-        ui_render.resetWinHover();
     }
 
 }
