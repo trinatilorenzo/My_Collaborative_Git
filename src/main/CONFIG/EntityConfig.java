@@ -28,7 +28,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
         //PlayerConfig
         //-------------------------------------------------------------
-        public static final int PLAYER_MAX_LIFE = 1;
+        public static final int PLAYER_MAX_LIFE = 6;
         public static final int START_PLAYER_SPEED = 384; // pixels per second
         public static final int PLAYER_SCALE = 1;
         public static final int PLAYER_RENDER_WIDTH = SPRITE_WIDTH * PLAYER_SCALE;
@@ -64,9 +64,12 @@ public record EntityConfig(ScreenConfig screenConfig,
         public int MONK_START_LAYER(){return monkSpawnPoint().layer();}
 
         public static String[] MONK_DIALOUGES = new String[] {
-                "Benvenuto nell'isola delle Piccole Spade, giovane eroe.",
-                "Da quando i goblin hanno invaso l'isola, la pace è stata spezzata e il tesoro dell'isola è stato rubato.",
-                "Recupera il tesoro e riporta l'armonia. Buona fortuna!"
+
+                "Benvenuto nell'isola delle Piccole Spade, giovane eroe. \n Premi per andare avanti (M)",
+                "Da quando i goblin hanno invaso l'isola, la pace è stata spezzata. Il tesoro dell'isola è stato rubato. (M)",
+                "Se sei qui è perche devi aiutarci a sconfigerli, se ci riuscirai potrai tenerti il bottino. (M)",
+                "Potrai trovare sotto qualche albero degli aiuti per la tua missione. Buona fortuna! (M)",
+                "Non potrai scendere le scale finché non sarai abbastanza forte. Ripulisci l'isola dai goblin e riporta l'armonia! (M)"
         };
 
         public static final double  MONK_DISAPPEAR_DURATION_MS = 1650.0;

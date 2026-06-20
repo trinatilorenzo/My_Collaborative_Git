@@ -7,7 +7,6 @@ import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.GameState;
-import main.CONFIG.enu.PlayerColor;
 import model.GameModel;
 import model.object.GameObject;
 import model.entity.DynamiteProjectile;
@@ -54,6 +53,9 @@ public class GameView extends JPanel {
     private int screenWidth;
     private int screenHeight;
 
+    private int gameWidth;
+    private int gameHeight;
+
     //model to render
     private final GameModel model;
 
@@ -81,6 +83,8 @@ public class GameView extends JPanel {
         this.screenCfg = GS.screenConfig();
         this.model = model;
 
+        gameHeight = screenHeight /2;
+        gameWidth = screenWidth /2;
         setResolution();
 
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -519,6 +523,7 @@ public class GameView extends JPanel {
     }
     public PauseMenuLayout getPauseMenuLayout() {return ui_render.getPauseMenuLayout();}
     public SettingsLayout getSettingsLayout() {return ui_render.getSettingsLayout();}
+    public WinLayout getWinLayout() {return ui_render.getWinLayout();};
     public Cursor getCustomGameCursor() {
         return customGameCursor;
     }
@@ -534,32 +539,42 @@ public class GameView extends JPanel {
     public void resetMainMenuHover() {
         ui_render.resetMainMenuHover();
     }
-    public void setPauseHover(ButtonValue.Pause key) {
+    public void setPauseHover(ButtonValue.PauseMenu key) {
         ui_render.setPauseHover(key);
     }
-    public void setPauseSelected(ButtonValue.Pause key) {
+    public void setPauseSelected(ButtonValue.PauseMenu key) {
         ui_render.setPauseSelected(key);
     }
     public void resetPauseHover(){
         ui_render.resetPauseHover();
     }
-    public void setSettingsHover(ButtonValue.Settings key) {
+    public void setSettingsHover(ButtonValue.SettingsMenu key) {
         ui_render.setSettingsHover(key);
     }
-    public void setSettingsSelected(ButtonValue.Settings key) {
+    public void setSettingsSelected(ButtonValue.SettingsMenu key) {
         ui_render.setSettingsSelected(key);
     }
     public void resetSettingsHover(){
         ui_render.resetSettingsHover();
     }
-    public void setGameOverHover(ButtonValue.GameOver key) {
+    public void setGameOverHover(ButtonValue.GameOverMenu key) {
         ui_render.setGameOverHover(key);
     }
-    public void setGameOverSelected(ButtonValue.GameOver key) {
+    public void setGameOverSelected(ButtonValue.GameOverMenu key) {
         ui_render.setGameOverSelected(key);
     }
     public void resetGameOverHover(){
         ui_render.resetGameOverHover();
+    }
+
+    public void setWinHover(ButtonValue.WinMenu key) {
+        ui_render.setWinHover(key);
+    }
+    public void setWinSelected(ButtonValue.WinMenu key) {
+        ui_render.setWinSelected(key);
+    }
+    public void resetWinHover(){
+        ui_render.resetWinHover();
     }
 
 

@@ -12,7 +12,8 @@ public record MapConfig(int ORIGINAL_TILESIZE,
     public static final int TILES_NUM = MAX_TILESET_COL * MAX_TILESET_ROW;
     public static final String COLL_TAG = "collision";
     public static final int COLL_ID = 2;
+    public static final int STAIRS_ID = 3;
+
+
 }
 
-//LAYER1 COLLISON FOR BRIDGE x : 42, 43, 44 y:25
-//LAYER2 COLLISON FOR BRIDGE x : 57, 58, 59 y:43
