@@ -1,7 +1,8 @@
 package model.event;
 
 public enum AudioEventType {
-    GAME_START,
+    BUTTON_CLICKED,
+    BUTTON_HOVER,
     PLAYER_WALK_START,
     PLAYER_WALK_STOP,
     PLAYER_ATTACK, //triggered
@@ -19,7 +20,7 @@ public enum AudioEventType {
     DIALOGUE_CLOSE,
     STAIRS_LOCKED,
     STAIRS_UNLOCKED,
-    BUTTON_CLICKED,
-    BUTTON_HOVER,
+    LEVEL_UP,
+    POWERUP_COLLECTED
 }
 

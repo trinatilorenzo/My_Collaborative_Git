@@ -11,6 +11,7 @@ import model.entity.*;
 import model.event.AudioEventType;
 import model.object.*;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -79,7 +80,7 @@ public class GameModel implements Serializable {
     private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
     // Level and progression
-    private int currentLevel = 1;
+    private int currentLevel = 0;
     private boolean levelCompleted;
     private boolean currentLevelPowerUpCollected = false;
 
@@ -91,7 +92,6 @@ public class GameModel implements Serializable {
     //-------------------------------------------------------------
     public GameModel(GameConfig GS) {
         gameConfig = GS;
-        worldGameMap = new GameMap(GS.mapConfig(), GS.mapDoc());
         collisionChecker = new CollisionChecker(this);
 
         gameState = GameState.MENU; // Default game state is the menu state
@@ -118,6 +118,8 @@ public class GameModel implements Serializable {
      */
     //-------------------------------------------------------------
     public void initializeNewGame(){
+        worldGameMap = new GameMap(gameConfig.mapConfig(), gameConfig.mapDoc());
+
         player = new Player(gameConfig.entityConfig(), playerColor);
 
         //initialize NPC
@@ -155,7 +157,7 @@ public class GameModel implements Serializable {
         // Power ups settings
         assignRandomPowerUps(objC);
         currentLevelPowerUpCollected = false;
-        currentLevel = 1; 
+        currentLevel = 0;
 
         // START THE GAME
         gameState = GameState.PLAYING;
@@ -383,10 +385,8 @@ public class GameModel implements Serializable {
         }
         if (playerStateBeforeUpdate != PlayerState.WALKING && player.getState() == PlayerState.WALKING) {
             emitAudioEvent(AudioEventType.PLAYER_WALK_START);
-            System.out.println("Player started walking");
         }
         if (playerStateBeforeUpdate == PlayerState.WALKING && player.getState() != PlayerState.WALKING) {
-            System.out.println("Player stopped walking");
             emitAudioEvent(AudioEventType.PLAYER_WALK_STOP);
         }
         //----------------------------
@@ -489,6 +489,7 @@ public class GameModel implements Serializable {
                     player.setAttackDamageApplied(true);
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.ENEMY_HIT);
+
                 }
             }
             // -------------------
@@ -500,6 +501,9 @@ public class GameModel implements Serializable {
                     player.setAttackDamageApplied(true);
                     //Audio ----------------------
                     emitAudioEvent(AudioEventType.ENEMY_HIT);
+                    if (dynamite.getState() == DynamiteState.DEAD) {
+                        emitAudioEvent(AudioEventType.ENEMY_DEFEATED);
+                    }
                 }
             }
             // -------------------
@@ -542,8 +546,7 @@ public class GameModel implements Serializable {
                 if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
                     // Handle win state 
                     if (currentLevel == 3 && levelCompleted) {
-                        gameState = GameState.WIN;
-                        System.out.println("YOU WIN! Il giocatore ha raggiunto la miniera.");
+                        gameState = GameState.WIN; //TODO fermare il gioco
                         break; 
                     }
                 }
@@ -557,9 +560,14 @@ public class GameModel implements Serializable {
                 powerUp.remove(); // Remove the power-up from the game world
                 if (isPowerUpForCurrentLevel(powerUp.getType())) {
                     currentLevelPowerUpCollected = true; // Mark the power-up as collected for level progression
+
+                    if (powerUp.getType() == PowerUpType.SHIELD) {
+                        currentMessage = "Premi (R) per attivare lo scudo";
+                    }
+
                 }
                 //Audio ----------------------
-                //TODO: emitAudioEvent(AudioEventType.POWERUP_COLLECTED);
+                TODO: emitAudioEvent(AudioEventType.POWERUP_COLLECTED);
             }
         }
         // -------------------
@@ -582,46 +590,43 @@ public class GameModel implements Serializable {
      * Update level progression
      */
     private void checkLevelProgression() {
-       boolean enemiesDefeated = allEnemiesDefeated();
-        
-        updateFlashingEffect(enemiesDefeated);
 
-        if (enemiesDefeated){
-            if (currentLevelPowerUpCollected) {
-                if (currentLevel == 1){
-                    currentMessage = "Premi (R) per attivare lo scudo";
-                }
-                if (currentLevel < 3){
-                    currentLevel ++;
-                    currentLevelPowerUpCollected = false;
-                    System.out.println("Level passed! Current Level: "+currentLevel);
-                } else {
-                    // all levels passed 
-                    updateMonkPositionForEndLevel();
-                    levelCompleted = true;
-                System.out.println("Level passed! End level "+currentLevel);
+        boolean enemiesDefeated = allEnemiesDefeated();
 
-                }
+        if (enemiesDefeated) {
+            if (currentLevel < 3) {
+                updateFlashingEffect(enemiesDefeated);
+
+                addAudioEvent(AudioEventType.LEVEL_UP);
+                currentLevel++;
+
+                currentLevelPowerUpCollected = false;
+                currentMessage = "Livello "+ currentLevel + " completato! Scale sbloccate";
+                worldGameMap.unlockStairsLevel(player.getCurrentLayer());
+
+            } else {
+                updateMonkPositionForEndLevel();
+                levelCompleted = true;
+                currentMessage = "Livello "+ currentLevel + " completato. Vai alla miniera!";
             }
         } else {
-            levelCompleted = false;
-
+            //levelCompleted = false;
         }
     }
     //-----------------------------------------------------------------------------------
     private void updateFlashingEffect(boolean enemiesDefeated){
         PowerUpType targetType = switch (currentLevel) {
-            case 1 -> PowerUpType.SHIELD;
-            case 2 -> PowerUpType.HEALTH_RESTORE;
-            case 3 -> PowerUpType.SPEED_BOOST;
+            case 0 -> PowerUpType.SHIELD;
+            case 1 -> PowerUpType.HEALTH_RESTORE;
+            case 2 -> PowerUpType.SPEED_BOOST;
             default -> null;
         };
-
+        System.out.println("Target type: " + targetType + "cur" + currentLevelPowerUpCollected);
         for (GameObject obj : objects) {
             if (obj instanceof OBJ_Tree tree) {
                 // If the enemies are defeated and the power-up has not been taken it flashes.
-                if (enemiesDefeated && tree.getHiddenPowerUp() == targetType && !currentLevelPowerUpCollected) 
-                    tree.setFlashingActive(true); 
+                if (enemiesDefeated && tree.getHiddenPowerUp() == targetType)
+                    tree.setFlashingActive(true);
                 else {
                     tree.setFlashingActive(false);
                 }
@@ -703,13 +708,14 @@ public class GameModel implements Serializable {
         }
         if (deadStateElapsedMs >= UIConfig.GAME_OVER_DELAY_MS) {
             System.out.println("GAME OVER");
-            gameState = GameState.WIN;
+            gameState = GameState.GAME_OVER;
             deadStateElapsedMs = 0.0;
         }
     }
     //-------------------------------------------------------------
     private void updateState(InputState input) {
         if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) return;
+
         if (player.isDying() || player.isDead()) {
             gameState = GameState.PLAYING;
             return;
@@ -746,9 +752,9 @@ public class GameModel implements Serializable {
     
     //-------------------------------------------------------------
     private boolean isPowerUpForCurrentLevel(PowerUpType type) {
-        return (currentLevel == 1 && type == PowerUpType.SHIELD) ||
-               (currentLevel == 2 && type == PowerUpType.HEALTH_RESTORE) ||
-               (currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
+        return (currentLevel == 0 || currentLevel == 1 && type == PowerUpType.SHIELD) ||
+               (currentLevel == 1 || currentLevel == 2 && type == PowerUpType.HEALTH_RESTORE) ||
+               (currentLevel == 2 || currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
     }
     //-------------------------------------------------------------
     
@@ -758,9 +764,10 @@ public class GameModel implements Serializable {
     private boolean allEnemiesDefeated () {
         boolean allEnemiesDefeated = false;
         switch (currentLevel) {
-            case 1 -> allEnemiesDefeated = tntEnemies.isEmpty();
-            case 2 -> allEnemiesDefeated = dynamiteEnemies.isEmpty();
-            case 3 -> allEnemiesDefeated = torchEnemies.isEmpty();
+            case 0 -> allEnemiesDefeated = tntEnemies.isEmpty();
+            case 1 -> allEnemiesDefeated = dynamiteEnemies.isEmpty();
+            case 2 -> allEnemiesDefeated = torchEnemies.isEmpty();
+            case 3 -> allEnemiesDefeated = true;
         }
         return allEnemiesDefeated;
     }
@@ -858,6 +865,7 @@ public class GameModel implements Serializable {
     public void copyFrom(GameModel other) {
         this.gameState = other.gameState;
         this.debugMode = other.debugMode;
+        this.worldGameMap = other.worldGameMap;
 
         this.objects = other.objects;
         this.player = other.player;

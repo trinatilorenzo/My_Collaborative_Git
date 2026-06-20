@@ -5,7 +5,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.awt.*;
 import java.io.Serializable;
+import java.io.SyncFailedException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +31,16 @@ public class GameMap implements Serializable {
     private final int[][][] mapLayer; // [level][row][col]
     private final boolean[][][] collisionMap; // [level][row][col]
 
+    private final Point[][] stairs;
+
     // a record use to convert an array list to a fixed size array
 
     //-------------------------------------------------------------
     private record LoadedMapData(
-            //MapLayer[] graphicLayers,
+
             int[][][] mapLayer,
-            boolean[][][] collisionMap
+            boolean[][][] collisionMap,
+            Point[][] stairs
     ) {}
     //-------------------------------------------------------------
 
@@ -50,10 +55,14 @@ public class GameMap implements Serializable {
         LoadedMapData data = loadMap(mapDoc);
 
         this.mapLayer = data.mapLayer();
-        //this.graphicLayers = data.graphicLayers();
+        this.stairs = data.stairs();
         this.collisionMap = data.collisionMap();
         this.GRAPHIC_LAYER_NUM = mapLayer.length;
         this.GAME_LAYER_NUM = collisionMap.length;
+
+        /*unlockStairsLevel(3);
+        unlockStairsLevel(2);
+        unlockStairsLevel(1);*/
     }
     //-------------------------------------------------------------
 
@@ -67,6 +76,7 @@ public class GameMap implements Serializable {
 
         List<int[][]> graphicList = new ArrayList<>();
         List<boolean[][]> collisionList = new ArrayList<>();
+        List<Point[]> stairsList = new ArrayList<>();
 
         int colLayer = 0;
         for (int i = 0; i < layers.getLength(); i++) {
@@ -74,7 +84,11 @@ public class GameMap implements Serializable {
             Element dataElement = (Element) layer.getElementsByTagName("data").item(0);
 
             if (layer.getAttribute("class").equals(MapConfig.COLL_TAG)) {
-                collisionList.add(buildCollisionLayer(dataElement));
+                List<Point> currentLayerStairs = new ArrayList<>();
+                boolean[][] collisionLayer = buildCollisionLayer(dataElement, currentLayerStairs);
+
+                collisionList.add(collisionLayer);
+                stairsList.add(currentLayerStairs.toArray(new Point[0]));
             } else {
                 // add a single graphic layer
                 graphicList.add(buildMapLayer(dataElement));
@@ -83,7 +97,7 @@ public class GameMap implements Serializable {
 
 
         return new LoadedMapData(graphicList.toArray(new int[graphicList.size()][][]),
-                collisionList.toArray(new boolean[collisionList.size()][][]));
+                collisionList.toArray(new boolean[collisionList.size()][][]), stairsList.toArray(new Point[0][]));
 
     }
     /**
@@ -91,7 +105,7 @@ public class GameMap implements Serializable {
      */
     //Loads a single collision layer from the provided XML data.
     //-------------------------------------------------------------
-    private boolean[][] buildCollisionLayer(Element dataElement){
+    private boolean[][] buildCollisionLayer(Element dataElement, List<Point> stairsList){
         boolean[][] collisionMap = new boolean[mConf.MAX_WORLD_ROW()][mConf.MAX_WORLD_COL()];
 
         String[] num = dataElement.getTextContent().trim().strip().replaceAll("[^0-9,]", "").split(",");
@@ -99,8 +113,15 @@ public class GameMap implements Serializable {
         for (int row = 0; row < mConf.MAX_WORLD_ROW(); row++) {
 
             for (int col = 0; col < mConf.MAX_WORLD_COL(); col++) {
-                collisionMap[row][col] = Integer.parseInt(num[index++]) == mConf.COLL_ID;
+                boolean isStairs = Integer.parseInt(num[index]) == mConf.STAIRS_ID;
+                collisionMap[row][col] = Integer.parseInt(num[index]) == mConf.COLL_ID || isStairs;
+                if (isStairs){
+                    stairsList.add(new Point(col, row));
+                }
+
+                index++;
             }
+
         }
         return collisionMap;
     }
@@ -140,6 +161,7 @@ public class GameMap implements Serializable {
     //-------------------------------------------------------------
 
     // GETTER ----------------------
+
     public int getMapTile(int layer, int row, int col) {
         return mapLayer[layer][row][col];
     }
@@ -148,6 +170,9 @@ public class GameMap implements Serializable {
     }
     public int getMaxMapRow() {
         return mConf.MAX_WORLD_ROW();
+    }
+    public Point[] getStairs(int layer) {
+        return stairs[layer];
     }
     public int getGraphicLayerNum() {
         return GRAPHIC_LAYER_NUM;
@@ -167,6 +192,15 @@ public class GameMap implements Serializable {
 
     public void mConf(MapConfig mConf){
         this.mConf = mConf;
+    }
+
+    public void unlockStairsLevel(int level) {
+        Point[] stairs = getStairs(level);
+
+        for (Point p : stairs) {
+            setCollisionTile(level, p.y, p.x, false);
+            System.out.println("unlock stairs"+ level + " " + p.x + " " + p.y);
+        }
     }
     //---------------------------------
 
