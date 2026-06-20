@@ -903,7 +903,7 @@ public class GameModel implements Serializable {
     }
 
     // GETTER ----------------------
-    public List<IRenderable> getRenderableEntities(){
+    public List<IRenderable> getAllRenderables(){
         List<IRenderable> allRenderables = new ArrayList<>();
 
         // Entities

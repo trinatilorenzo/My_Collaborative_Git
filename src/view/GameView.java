@@ -9,25 +9,13 @@ import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.GameState;
 import model.GameModel;
 import model.IRenderable;
-import model.object.GameObject;
-import model.entity.DynamiteProjectile;
-import model.entity.EnemyDynamite;
-import model.entity.EnemyTNT;
-import model.entity.Monk;
 import model.entity.Player;
-import model.entity.EnemyTorch;
 import model.event.AudioEventType;
 import view.UI.*;
 import view.audio.GameAudioManager;
-import view.renderer.entity.PlayerRender;
 import view.renderer.map.MapRender;
 import view.renderer.map.TileSet;
-
-import view.renderer.entity.DynamiteRender;
-import view.renderer.entity.MonkRenderer;
-import view.renderer.entity.TNTRenderer;
-import view.renderer.entity.TorchRenderer;
-import view.renderer.GameObjectRenderer;
+import view.renderer.RenderDispatcher;
 
 import javax.swing.*;
 import javax.imageio.ImageIO;
@@ -39,7 +27,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
 
 /**
  * ALL THE RENDERING STAFF HERE
@@ -65,15 +52,11 @@ public class GameView extends JPanel {
     // renderers
     private final MapRender mapRender;
     private final TileSet tileSet;
-    private final PlayerRender playerRender;
-    private final MonkRenderer monkRenderer;
-    private final TNTRenderer tntRenderer;
-    private final DynamiteRender dynamiteRender;
-    private final TorchRenderer torchRenderer;
     private final UI ui_render;
-    private final GameObjectRenderer objectRenderer;
     private Cursor customGameCursor;
 
+
+    private final RenderDispatcher renderDispatcher;
     //audio
     private final GameAudioManager audioManager;
 
@@ -103,18 +86,12 @@ public class GameView extends JPanel {
         //import the map Render
         this.mapRender = new MapRender();
 
-        // import the entity Render
-        this.playerRender = new PlayerRender(GS.entityConfig(), model.getPlayerColor());
-        this.monkRenderer = new MonkRenderer(GS.entityConfig());
-        this.tntRenderer = new TNTRenderer(GS.entityConfig());
-        this.dynamiteRender = new DynamiteRender(GS.entityConfig());
-        this.torchRenderer = new TorchRenderer(GS.entityConfig());
-
-        // object renderer
-        this.objectRenderer = new GameObjectRenderer();
+        // import the audio manager
         this.audioManager = new GameAudioManager();
         this.audioManager.syncBackgroundMusic(model.getGameState());
 
+
+        this.renderDispatcher = new RenderDispatcher(GS, model.getPlayerColor());
         //import the UI
         this.ui_render = new UI(model, screenCfg, screenWidth, screenHeight);
     }
@@ -188,39 +165,8 @@ public class GameView extends JPanel {
 
     private void drawWorldDebug(Graphics2D g2) {
         Player player = model.getPlayer();
-        int pScreenX = screenWidth/ 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
-
         mapRender.drawAllGameLayers(model.getWorldMap(), player, g2, screenWidth, screenHeight);
-        playerRender.drawSolidArea(g2, player, pScreenX, pScreenY);
-
-        for (EnemyDynamite ed : model.getDynamiteEnemies()) {
-            dynamiteRender.drawSolidArea(g2, ed, screenX(ed.getWorldX(), player, pScreenX), screenY(ed.getWorldY(), player, pScreenY));
-        }
-        for (Object proj : model.getProjectiles()) {
-            if (proj instanceof DynamiteProjectile dp) {
-                dynamiteRender.drawProjectileSolidArea(g2, dp, screenX(dp.getWorldX(), player, pScreenX), screenY(dp.getWorldY(), player, pScreenY));
-            }
-        }
-        for (EnemyTNT tnt : model.getTntEnemies()) {
-            tntRenderer.drawSolidArea(g2, tnt, screenX(tnt.getWorldX(), player, pScreenX), screenY(tnt.getWorldY(), player, pScreenY));
-        }
-        for (EnemyTorch torch : model.getTorchEnemies()) {
-            torchRenderer.drawSolidArea(g2, torch, screenX(torch.getWorldX(), player, pScreenX), screenY(torch.getWorldY(), player, pScreenY));
-        }
-
-        objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), player, screenCfg, screenWidth, screenHeight);
-
-        Monk monk = model.getMonk();
-        monkRenderer.drawSolidArea(g2, monk, screenX(monk.getWorldX(), player, pScreenX), screenY(monk.getWorldY(), player, pScreenY));
-    }
-
-    private int screenX(int worldX, Player player, int pScreenX) {
-        return worldX - player.getWorldX() + pScreenX;
-    }
-
-    private int screenY(int worldY, Player player, int pScreenY) {
-        return worldY - player.getWorldY() + pScreenY;
+        //objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), player, screenCfg, screenWidth, screenHeight);
     }
 
     //--------------------------------------------------------------
@@ -233,7 +179,7 @@ public class GameView extends JPanel {
         int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
         // Renderable entities and object
-        List<IRenderable> renderList = new ArrayList<>(model.getRenderableEntities());
+        List<IRenderable> renderList = new ArrayList<>(model.getAllRenderables());
 
         // Universal y-sorting
         renderList.sort(Comparator.comparingInt(obj -> obj.getWorldY() + obj.getSolidArea().y + obj.getSolidArea().height));
@@ -251,64 +197,14 @@ public class GameView extends JPanel {
                 continue;
             }
 
-            if (obj instanceof Player p) {
-                playerRender.draw(g2, p, screenX, screenY);
-                if (model.isDebugMode()) {
-                    playerRender.drawSolidArea(g2, p, screenX, screenY);
-                }
-            } 
-            else if (obj instanceof Monk m) {
-                monkRenderer.draw(g2, m, screenX, screenY);
-                if (model.isDebugMode()) {
-                    monkRenderer.drawSolidArea(g2, m, screenX, screenY);
-                }
-            } 
-            else if (obj instanceof EnemyTNT tnt) {
-                tntRenderer.draw(g2, tnt, screenX, screenY);
-                if (model.isDebugMode()) {
-                    tntRenderer.drawSolidArea(g2, tnt, screenX, screenY);
-                }
-            }
-            else if (obj instanceof EnemyDynamite dynamite) {
-                dynamiteRender.draw(g2, dynamite, screenX, screenY);
-                if (model.isDebugMode()) {
-                    dynamiteRender.drawSolidArea(g2, dynamite, screenX, screenY);
-                }
-            }
-            else if (obj instanceof DynamiteProjectile proj) {
-                dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
-                if (model.isDebugMode()) {
-                    dynamiteRender.drawProjectileSolidArea(g2, proj, screenX, screenY);
-                }
-            }
-            else if (obj instanceof EnemyTorch torch) {
-                torchRenderer.draw(g2, torch, screenX, screenY);
-                if (model.isDebugMode()) {
-                    torchRenderer.drawSolidArea(g2, torch, screenX, screenY);
-                }
-            }
-            else if (obj instanceof GameObject o) {
-                objectRenderer.draw(g2, o, screenX, screenY);
-            }
+            renderDispatcher.draw(g2, obj, screenX, screenY, model.isDebugMode());
+
         }
     }
 
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
-        playerRender.update(model.getPlayer(), deltaMs);
-        monkRenderer.update(model.getMonk(), deltaMs);
-        for (EnemyTNT tnt : model.getTntEnemies()) {
-            tntRenderer.update(tnt, deltaMs);
-        }
-        for (EnemyDynamite enemyDynamite : model.getDynamiteEnemies()){
-            dynamiteRender.update(enemyDynamite, deltaMs);
-        }
-        for (EnemyTorch enemyTorch : model.getTorchEnemies()) {
-            torchRenderer.update(enemyTorch, deltaMs);
-        }
-        updateObjectAnimations(deltaMs);
-
-
+        renderDispatcher.update(model, deltaMs);
     }
     //-------------------------------------------------------------
 
@@ -435,12 +331,6 @@ public class GameView extends JPanel {
     }
     //-------------------------------------------------------------
 
-    private void updateObjectAnimations(double deltaMs) {
-        for (GameObject obj : model.getObjects()) {
-            objectRenderer.update(obj, deltaMs);
-        }
-    }
-
     public void onGameStateChanged(GameState gameState) {
         audioManager.syncBackgroundMusic(gameState);
     }
@@ -463,12 +353,11 @@ public class GameView extends JPanel {
         audioManager.stopAll();
     }
 
-
     public void updatePlayerColor() {
-        playerRender.setPlayerColor(model.getPlayerColor());
+        renderDispatcher.updatePlayerColor(model.getPlayerColor());
     }
+   
     // GETTER ----------------------
-    public PlayerRender getPlayerRender() {return playerRender;}
     public MainMenuLayout getMainMenuLayout() {
         return ui_render.getMainMenuLayout();
     }
