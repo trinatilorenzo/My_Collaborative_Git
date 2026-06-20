@@ -54,7 +54,7 @@ public class Main {
 
         window.setLocationRelativeTo(null);
         window.setVisible(true);
-        view.requestFocusInWindow();
+        view.requestFocusInWindow(); // force active state directly on the view
         view.setResolution();
 
         // ------------------------------------------------------------------------------------------------------------

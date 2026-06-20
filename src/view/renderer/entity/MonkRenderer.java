@@ -2,9 +2,7 @@ package view.renderer.entity;
 
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.MonkState;
-import model.entity.EnemyTNT;
 import model.entity.Monk;
-import model.entity.Player;
 import view.Animation.Animation;
 import view.Animation.AnimationManager;
 import view.SpriteLoader;

@@ -2,7 +2,7 @@ package model.object;
 
 import main.CONFIG.ObjConfig;
 import main.CONFIG.SpawnPoint;
-
+import model.IRenderable;
 import java.awt.Rectangle;
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import java.io.Serializable;
  * providing common properties such as position, collision handling, and rendering information.
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameObject implements Serializable {
+public class GameObject implements Serializable, IRenderable {
 
     private static final long serialVersionUID = 1L;
 

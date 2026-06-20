@@ -88,7 +88,6 @@ public final class GameConfig {
         SpawnPoint playerSpawnPoint = loadEntitySpawns(PLAYER_NAME).get(0);
         SpawnPoint monkSpawnPoint = loadEntitySpawns(MONK_NAME).get(0);
         ArrayList<SpawnPoint> tntSpawPoint = loadEntitySpawns(TNT_NAME);
-        // TODO load all the other spawn point
         ArrayList<SpawnPoint> dynamiteSpawnPoint = loadEntitySpawns(DYNAMITE_NAME);
         ArrayList<SpawnPoint> torchSpawnPoint = loadEntitySpawns(TORCH_NAME);
 

@@ -8,6 +8,7 @@ import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.GameState;
 import model.GameModel;
+import model.IRenderable;
 import model.object.GameObject;
 import model.entity.DynamiteProjectile;
 import model.entity.EnemyDynamite;
@@ -35,6 +36,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -221,123 +224,74 @@ public class GameView extends JPanel {
     }
 
     //--------------------------------------------------------------
-    private void drawEntities(Graphics2D g2) {
-        Player player = model.getPlayer();
-        Monk monk = model.getMonk();
+   
+    private void drawEntities(Graphics2D g2){
 
         // Player's coordinates
+        Player player = model.getPlayer();
         int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
         int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
-        // List to hold all entities for sorting
-        java.util.List<Object> renderList = new java.util.ArrayList<>();
+        // Renderable entities and object
+        List<IRenderable> renderList = new ArrayList<>(model.getRenderableEntities());
 
-        renderList.add(player);
-        renderList.add(monk);
-        renderList.addAll(model.getTntEnemies());
-        renderList.addAll(model.getDynamiteEnemies());
-        renderList.addAll(model.getProjectiles());
-        renderList.addAll(model.getObjects());
-        renderList.addAll(model.getTorchEnemies());
+        // Universal y-sorting
+        renderList.sort(Comparator.comparingInt(obj -> obj.getWorldY() + obj.getSolidArea().y + obj.getSolidArea().height));
 
-        // Sort for "bottom_y"
-        renderList.sort(java.util.Comparator.comparingInt(obj -> {
-            if (obj instanceof Player p) {
-                return p.getWorldY() + p.getSolidArea().height / 2;
-            } else if (obj instanceof Monk m) {
-                return m.getWorldY() + m.getSolidArea().height / 2;
-            } else if (obj instanceof EnemyTNT tnt) {
-                return tnt.getWorldY() + tnt.getSolidArea().height / 2;
-            } else if (obj instanceof GameObject o) {
-                return o.getWorldY() + o.getSolidArea().y + o.getSolidArea().height;
-            } else if (obj instanceof EnemyDynamite ed) {
-                return ed.getWorldY() + ed.getSolidArea().height / 2;
-            } else if (obj instanceof DynamiteProjectile d) {
-                return d.getWorldY() + d.getSolidArea().height/2;
-            } else if (obj instanceof EnemyTorch torch) {
-                return torch.getWorldY() + torch.getSolidArea().height / 2;
+        // Render
+        for (IRenderable obj : renderList) {
+        
+            // Screen Coordinates
+            int screenX = obj.getWorldX() - player.getWorldX() + pScreenX;
+            int screenY = obj.getWorldY() - player.getWorldY() + pScreenY;
+
+            // Universal culling: If the object is off-screen, we don't waste resources drawing it.
+            if (screenX + obj.getWidth() < 0 || screenX > screenWidth ||
+                screenY + obj.getHeight() < 0 || screenY > screenHeight) {
+                continue;
             }
-            return 0;
-        }));
-
-        for (Object obj : renderList) {
 
             if (obj instanceof Player p) {
-                playerRender.draw(g2, p, pScreenX, pScreenY);
-            }
+                playerRender.draw(g2, p, screenX, screenY);
+                if (model.isDebugMode()) {
+                    playerRender.drawSolidArea(g2, p, screenX, screenY);
+                }
+            } 
             else if (obj instanceof Monk m) {
-                int screenX = m.getWorldX() - player.getWorldX() + pScreenX;
-                int screenY = m.getWorldY() - player.getWorldY() + pScreenY;
                 monkRenderer.draw(g2, m, screenX, screenY);
-            }
+                if (model.isDebugMode()) {
+                    monkRenderer.drawSolidArea(g2, m, screenX, screenY);
+                }
+            } 
             else if (obj instanceof EnemyTNT tnt) {
-                int screenX = tnt.getWorldX() - player.getWorldX() + pScreenX;
-                int screenY = tnt.getWorldY() - player.getWorldY() + pScreenY;
-
-                int halfW = EntityConfig.TNT_SPRITE_WIDTH / 2;
-                int halfH = EntityConfig.TNT_SPRITE_HEIGHT / 2;
-                if (screenX + halfW < 0 || screenX - halfW > screenWidth||
-                        screenY + halfH < 0 || screenY - halfH > screenHeight) {
-                    continue;
-                }
-
                 tntRenderer.draw(g2, tnt, screenX, screenY);
-            }
-            else if (obj instanceof EnemyDynamite enemyDynamite) {
-                int screenX = enemyDynamite.getWorldX() - player.getWorldX() + pScreenX;
-                int screenY = enemyDynamite.getWorldY() - player.getWorldY() + pScreenY;
-                int halfW = EntityConfig.DYNAMITE_SPRITE_WIDTH / 2;
-                int halfH = EntityConfig.DYNAMITE_SPRITE_HEIGHT / 2;
-                if (screenX + halfW < 0 || screenX - halfW > screenWidth ||
-                        screenY + halfH < 0 || screenY - halfH > screenHeight) {
-                    continue;
+                if (model.isDebugMode()) {
+                    tntRenderer.drawSolidArea(g2, tnt, screenX, screenY);
                 }
-                dynamiteRender.draw(g2, enemyDynamite, screenX, screenY);
+            }
+            else if (obj instanceof EnemyDynamite dynamite) {
+                dynamiteRender.draw(g2, dynamite, screenX, screenY);
+                if (model.isDebugMode()) {
+                    dynamiteRender.drawSolidArea(g2, dynamite, screenX, screenY);
+                }
             }
             else if (obj instanceof DynamiteProjectile proj) {
-                int screenX = proj.getWorldX() - player.getWorldX() + pScreenX;
-                int screenY = proj.getWorldY() - player.getWorldY() + pScreenY;
-
-                int halfW = EntityConfig.PROJECTILE_SPRITE_WIDTH / 2;
-                int halfH = EntityConfig.PROJECTILE_SPRITE_HEIGHT / 2;
-
-                if (screenX + halfW < 0 || screenX - halfW > screenWidth ||
-                        screenY + halfH < 0 || screenY - halfH > screenHeight) {
-                    continue;
-                }
-
                 dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
+                if (model.isDebugMode()) {
+                    dynamiteRender.drawProjectileSolidArea(g2, proj, screenX, screenY);
+                }
             }
             else if (obj instanceof EnemyTorch torch) {
-                int screenX = torch.getWorldX() - player.getWorldX() + pScreenX;
-                int screenY = torch.getWorldY() - player.getWorldY() + pScreenY;
-
-                int halfW = EntityConfig.TORCH_SPRITE_WIDTH / 2;
-                int halfH = EntityConfig.TORCH_SPRITE_HEIGHT / 2;
-
-                if (screenX + halfW < 0 || screenX - halfW > screenWidth ||
-                        screenY + halfH < 0 || screenY - halfH >screenHeight) {
-                    continue;
-                }
-
                 torchRenderer.draw(g2, torch, screenX, screenY);
+                if (model.isDebugMode()) {
+                    torchRenderer.drawSolidArea(g2, torch, screenX, screenY);
+                }
             }
             else if (obj instanceof GameObject o) {
-                int screenX = o.getWorldX() - player.getWorldX() + pScreenX;
-                int screenY = o.getWorldY() - player.getWorldY() + pScreenY;
-
-                // culling: draw only if visible on screen
-                if (screenX + o.getWidth() < 0 || screenX > screenWidth ||
-                        screenY + o.getHeight() < 0 || screenY > screenHeight) {
-                    continue;
-                }
-
                 objectRenderer.draw(g2, o, screenX, screenY);
             }
         }
     }
-    //--------------------------------------------------------------
-
 
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
@@ -576,10 +530,6 @@ public class GameView extends JPanel {
     public void resetWinHover(){
         ui_render.resetWinHover();
     }
-
-
-
-
 
 }
 //-------------------------------------------------------------------------------------------------------------------

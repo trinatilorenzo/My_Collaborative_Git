@@ -903,6 +903,21 @@ public class GameModel implements Serializable {
     }
 
     // GETTER ----------------------
+    public List<IRenderable> getRenderableEntities(){
+        List<IRenderable> allRenderables = new ArrayList<>();
+
+        // Entities
+        if (player != null) { allRenderables.add(player);}
+        if (monk != null) { allRenderables.add(monk);}
+        if (tntEnemies != null) { allRenderables.addAll(tntEnemies);}
+        if (torchEnemies != null) { allRenderables.addAll(torchEnemies);}
+        if (dynamiteEnemies != null) { allRenderables.addAll(dynamiteEnemies);}
+        
+        // Objects
+        if (objects != null) {allRenderables.addAll(objects); }
+        return allRenderables;
+    }
+
     public Player getPlayer() { return player; }
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}

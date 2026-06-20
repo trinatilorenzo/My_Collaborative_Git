@@ -1,6 +1,7 @@
 package model.entity;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.enu.Direction;
+import model.IRenderable;
 import java.awt.Rectangle;
 import java.io.Serializable;
 
@@ -9,10 +10,9 @@ import java.io.Serializable;
  * and functionality such as position, movement, collision handling, and layer management.
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class Entity implements Serializable {
+public class Entity implements Serializable, IRenderable {
 
     private static final long serialVersionUID = 1L;
-
 
     // SettingsMenu
     protected transient EntityConfig entityConfig;
@@ -133,7 +133,12 @@ public class Entity implements Serializable {
     }
     public int getLife() {return life;}
     public int getMaxLife() {return maxLife;}
-
+    public int getWidth(){
+        return solidArea.width;
+    }
+    public int getHeight(){
+        return solidArea.height;
+    }
     
     public Rectangle getSolidWorldArea() {
         worldBoundsInstance.setBounds(
