@@ -1369,7 +1369,7 @@
   </object>
   <object id="358" name="Dynamite_spawnPoint" x="3552.64" y="2589.45">
    <properties>
-    <property name="StartLayer" type="int" value="3"/>
+    <property name="StartLayer" type="int" value="2"/>
    </properties>
    <point/>
   </object>

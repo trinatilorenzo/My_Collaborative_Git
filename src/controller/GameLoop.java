@@ -4,7 +4,7 @@ import java.util.concurrent.locks.LockSupport;
 import static main.CONFIG.ScreenConfig.*;
 
 /**
- * GAME LOOP CLAS
+ * GAME LOOP CLASS
  * This class is a Thread that control the game update every n FPS
  */
 //-------------------------------------------------------------------------------------------------------------------

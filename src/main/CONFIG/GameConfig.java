@@ -58,6 +58,8 @@ public final class GameConfig {
     private Document tilesetDoc;
     //-------------------------------------------------------------
 
+    // LEVEL
+    private int maxLevel;
     /**
      * GameConfig Constructor
      */
@@ -243,11 +245,11 @@ public final class GameConfig {
         return "";
     }
     //-------------------------------------------------------------
-
-    private record OBJ_dim(int width, int height){};
-
     //GETTER
     //-------------------------------------------------------------
+    public int getMaxLevel(){
+        return maxLevel;
+    }
     public ScreenConfig screenConfig() {
         return screenConfig;
     }

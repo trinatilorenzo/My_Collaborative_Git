@@ -543,7 +543,7 @@ public class GameModel implements Serializable, IGameModel {
                 // Check if the player's hitbox intersects the mine's hitbox
                 if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
                     // Handle win state 
-                    if (currentLevel == 3 && levelCompleted) {
+                    if (currentLevel ==  gameConfig.getMaxLevel() && levelCompleted) {
                         gameState = GameState.WIN; //TODO fermare il gioco
                         break; 
                     }
