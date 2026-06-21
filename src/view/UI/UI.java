@@ -1,8 +1,6 @@
 package view.UI;
 
 import main.CONFIG.enu.ButtonValue;
-import model.GameModel;
-import model.entity.Player;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
@@ -13,9 +11,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.ImageIO;
+
+import controller.IController;
 
 import static main.CONFIG.enu.ButtonValue.MainMenu.*;
 import static main.CONFIG.enu.ButtonValue.PauseMenu.*;
@@ -39,16 +39,14 @@ public class UI {
     // =========================================================================
 
     private final ScreenConfig screenConfig;
-    private final GameModel model;
+    private final IController controller;
     private Graphics2D g2;
 
     // =========================================================================
-    // Fonts
+    // Font
     // =========================================================================
 
     private final Font maruMonica;
-    private final Font dungeonFont;
-
     // =========================================================================
     // Assets — loaded once at construction time
     // =========================================================================
@@ -116,21 +114,8 @@ public class UI {
     // Menu's Botton
     // =========================================================================
 
-    // HOVER
-    private final Map<ButtonValue.MainMenu, Boolean> mainMenuHover = new EnumMap<>(ButtonValue.MainMenu.class);
-    private final Map<ButtonValue.PauseMenu, Boolean> pauseHover = new EnumMap<>(ButtonValue.PauseMenu.class);
-    private final Map<ButtonValue.SettingsMenu, Boolean> settingsHover = new EnumMap<>(ButtonValue.SettingsMenu.class);
-    private final Map<ButtonValue.GameOverMenu, Boolean> gameOverHover = new EnumMap<>(ButtonValue.GameOverMenu.class);
-    private final Map<ButtonValue.WinMenu, Boolean> winHover = new EnumMap<>(ButtonValue.WinMenu.class);
-
-    // SELECTED
-    private final Map<ButtonValue.MainMenu, Boolean> mainMenuSelected = new EnumMap<>(ButtonValue.MainMenu.class);
-    private final Map<ButtonValue.PauseMenu, Boolean> pauseSelected = new EnumMap<>(ButtonValue.PauseMenu.class);
-    private final Map<ButtonValue.SettingsMenu, Boolean> settingsSelected = new EnumMap<>(ButtonValue.SettingsMenu.class);
-    private final Map<ButtonValue.GameOverMenu, Boolean> gameOverSelected = new EnumMap<>(ButtonValue.GameOverMenu.class);
-    private final Map<ButtonValue.WinMenu, Boolean> winSelected = new EnumMap<>(ButtonValue.WinMenu.class);
-
-
+    private final Map<Enum<?>, Boolean> hoverState  = new HashMap<>();
+    private final Map<Enum<?>, Boolean> selectedState = new HashMap<>();
 
     // =========================================================================
     // Damage flash state
@@ -146,12 +131,7 @@ public class UI {
 
     private static final int DAMAGE_ALPHA_STEPS = 24;
     private static final float[] DAMAGE_GRADIENT_DIST = { 0.0f, 0.60f, 0.82f, 1.0f };
-    // =========================================================================
-    // Shield state
-    // =========================================================================
-    private long shieldEffectStart = -1;
-    private final double shieldDuration = EntityConfig.SHIELD_DURATION_MS;
-
+    
     // =========================================================================
     // Win Screen & Particle State
     // =========================================================================
@@ -188,15 +168,13 @@ public class UI {
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public UI(GameModel gameModel, ScreenConfig screenConfig, int screenWidth, int screenHeight) {
-        this.model = gameModel;
+    public UI(IController controller, ScreenConfig screenConfig, int screenWidth, int screenHeight) {
+        this.controller = controller;
         this.screenConfig = screenConfig;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
 
         maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
-        dungeonFont = loadFont("/res/fonts/DungeonFont.ttf");
-
 
         int tileSize = this.screenConfig.TILE_SIZE();
         heartFull = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),  tileSize, tileSize);
@@ -276,27 +254,22 @@ public class UI {
 
 
         //initialize button state
-        for (ButtonValue.MainMenu k : ButtonValue.MainMenu.values()) {
-            mainMenuHover.put(k, false);
-            mainMenuSelected.put(k, false);
+        for (ButtonValue.MainMenu k  : ButtonValue.MainMenu.values())  { 
+            hoverState.put(k, false); 
+            selectedState.put(k, false); 
+        } for (ButtonValue.PauseMenu k : ButtonValue.PauseMenu.values()) { 
+            hoverState.put(k, false); 
+            selectedState.put(k, false); 
+        } for (ButtonValue.SettingsMenu k : ButtonValue.SettingsMenu.values()) { 
+            hoverState.put(k, false); 
+            selectedState.put(k, false); 
+        } for (ButtonValue.GameOverMenu k : ButtonValue.GameOverMenu.values()) { 
+            hoverState.put(k, false); 
+            selectedState.put(k, false); 
+        } for (ButtonValue.WinMenu k : ButtonValue.WinMenu.values()) { 
+            hoverState.put(k, false); 
+            selectedState.put(k, false); 
         }
-        for (ButtonValue.PauseMenu k : ButtonValue.PauseMenu.values()) {
-            pauseHover.put(k, false);
-            pauseSelected.put(k, false);
-        }
-        for (ButtonValue.SettingsMenu k : ButtonValue.SettingsMenu.values()) {
-            settingsHover.put(k, false);
-            settingsSelected.put(k, false);
-        }
-        for (ButtonValue.GameOverMenu k : ButtonValue.GameOverMenu.values()) {
-            gameOverHover.put(k, false);
-            gameOverSelected.put(k, false);
-        }
-        for (ButtonValue.WinMenu k : ButtonValue.WinMenu.values()) {
-            winHover.put(k, false);
-            winSelected.put(k, false);
-        }
-
     }
     //-------------------------------------------------------------
 
@@ -308,7 +281,7 @@ public class UI {
     public void draw(Graphics2D g2) {
         this.g2 = g2;
 
-        switch (model.getGameState()) {
+        switch (controller.getGameState()) {
             case MENU      -> {
                 updateModelStatus();
                 drawMainMenu();
@@ -316,8 +289,8 @@ public class UI {
             case PLAYING   -> {
                 drawPlayerLife();
                 drawShield();
-                if (!model.getCurrentDialogue().isEmpty()) drawDialogueWindow();
-                if (!model.getCurrentMessage().isEmpty()) drawMessageWindow();
+                if (!controller.getCurrentDialogue().isEmpty()) drawDialogueWindow();
+                if (!controller.getCurrentMessage().isEmpty()) drawMessageWindow();
             }
             case PAUSED    -> {
                 drawPlayerLife(); drawPauseScreen(); }
@@ -329,7 +302,7 @@ public class UI {
             case WIN -> drawWinScreen();
         }
 
-        if (model.isDebugMode()) drawFpsOverlay();
+        if (controller.isDebugMode()) drawFpsOverlay();
     }
 
     /**
@@ -337,28 +310,32 @@ public class UI {
      */
     //-------------------------------------------------------------
     private void updateModelStatus(){
-        //Set start value based on model
-        resetMainMenuSelected();
-        resetSettingsSelected();
+        // reset selected for MainMenu
+        ButtonValue.MainMenu[] mainItems = ButtonValue.MainMenu.values();
+        for (ButtonValue.MainMenu k : mainItems) selectedState.put(k, false);
 
-        switch (model.getPlayerColor()) {
-            case YELLOW -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_YELLOW, true);
-            case RED    -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_RED, true);
-            case BLUE   -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);
-            case PURPLE -> mainMenuSelected.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);
+        // reset selected for SettingsMenu
+        ButtonValue.SettingsMenu[] settingsItems = ButtonValue.SettingsMenu.values();
+        for (ButtonValue.SettingsMenu k : settingsItems) selectedState.put(k, false);
+
+        switch (controller.getPlayerColor()) {
+            case YELLOW -> selectedState.put(ButtonValue.MainMenu.TOGGLE_YELLOW, true);
+            case RED    -> selectedState.put(ButtonValue.MainMenu.TOGGLE_RED, true);
+            case BLUE   -> selectedState.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);
+            case PURPLE -> selectedState.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);
         }
 
-        switch (model.getResolutionValue()){
-            case 0 -> settingsSelected.put(RES_MIN, true);
-            case 1 -> settingsSelected.put(RES_MID, true);
-            case 2 -> settingsSelected.put(RES_FULL, true);
+        switch (controller.getResolutionValue()){
+            case 0 -> selectedState.put(RES_MIN, true);
+            case 1 -> selectedState.put(RES_MID, true);
+            case 2 -> selectedState.put(RES_FULL, true);
         }
 
-        if (!model.isMusicEnabled()){
-            settingsSelected.put(ButtonValue.SettingsMenu.MUSIC, true);
+        if (!controller.isMusicEnabled()){
+            selectedState.put(ButtonValue.SettingsMenu.MUSIC, true);
         }
-        if (!model.isSoundEnabled()){
-            settingsSelected.put(ButtonValue.SettingsMenu.SOUND, true);
+        if (!controller.isSoundEnabled()){
+            selectedState.put(ButtonValue.SettingsMenu.SOUND, true);
         }
     }
     //-------------------------------------------------------------
@@ -368,8 +345,8 @@ public class UI {
     //-------------------------------------------------------------
     private void drawPlayerLife() {
 
-        int playerLife = model.getPlayer().getLife();
-        int maxLife = model.getPlayer().getMaxLife();
+        int playerLife = controller.getPlayerLife();
+        int maxLife = controller.getPlayerMaxLife();
         int totalHearts = (maxLife + 1) / 2;
 
         int heartWidth = heartFull.getWidth();
@@ -400,12 +377,12 @@ public class UI {
         }
     }
     //-------------------------------------------------------------
-    public void drawShield() {
-        if (!model.getPlayer().hasShield()) {
+    private void drawShield() {
+        if (!controller.playerHasShield()) {
             return;
         }
 
-        double remainingMs = model.getPlayer().getShieldTimerMs();
+        double remainingMs = controller.getPlayerShieldTimerMs();
         double maxMs = EntityConfig.SHIELD_DURATION_MS;
 
         float progress = (float) (remainingMs / maxMs);
@@ -447,7 +424,7 @@ public class UI {
         g2.setStroke(originalStroke);
     }
     //-------------------------------------------------------------
-    public void drawDialogueWindow() {
+    private void drawDialogueWindow() {
 
         int width = (int) (screenWidth * UIConfig.DIALOUE_WIDTH_PCT);
         int height = (int) (screenHeight * UIConfig.DIALOUE_HEIGHT_PCT);
@@ -457,7 +434,7 @@ public class UI {
 
         dialogueBanner.draw(g2, x, y, width, height);
 
-        String dialogue = model.getCurrentDialogue();
+        String dialogue = controller.getCurrentDialogue();
         if (dialogue == null || dialogue.isBlank()) return;
 
         int textBoxWidth = (int) (width * 0.85f);
@@ -489,7 +466,7 @@ public class UI {
         blueBanner.draw(g2, x, y, width, height);
 
 
-        String allert = model.getCurrentMessage(); // model.getAllert();
+        String allert = controller.getCurrentMessage(); 
         if (allert == null || allert.isBlank()) return;
 
         int textBoxWidth = (int) (width * 0.75f);
@@ -544,30 +521,30 @@ public class UI {
         g2.drawImage(menuLogo, logoBounds.x, logoBounds.y, logoBounds.width, logoBounds.height, null);
 
         //draw ribbon
-        g2.drawImage(mainMenuHover.get(ButtonValue.MainMenu.TOGGLE_BLUE) || mainMenuSelected.get(ButtonValue.MainMenu.TOGGLE_BLUE)
+        g2.drawImage(hoverState.get(ButtonValue.MainMenu.TOGGLE_BLUE) || selectedState.get(ButtonValue.MainMenu.TOGGLE_BLUE)
                         ? avatarBluePressed : avatarBlue,
                 ribbonBlueBounds.x, ribbonBlueBounds.y, ribbonBlueBounds.width, ribbonBlueBounds.height, null);
 
-        g2.drawImage(mainMenuHover.get(TOGGLE_YELLOW) || mainMenuSelected.get(TOGGLE_YELLOW)
+        g2.drawImage(hoverState.get(TOGGLE_YELLOW) || selectedState.get(TOGGLE_YELLOW)
                         ? avatarYellowPressed : avatarYellow,
                 ribbonYellowBounds.x, ribbonYellowBounds.y, ribbonYellowBounds.width, ribbonYellowBounds.height, null);
 
-        g2.drawImage(mainMenuHover.get(TOGGLE_RED) || mainMenuSelected.get(TOGGLE_RED)
+        g2.drawImage(hoverState.get(TOGGLE_RED) || selectedState.get(TOGGLE_RED)
                         ? avatarRedPressed : avatarRed,
                 ribbonRedBounds.x, ribbonRedBounds.y, ribbonRedBounds.width, ribbonRedBounds.height, null);
 
-        g2.drawImage(mainMenuHover.get(TOGGLE_PURPLE) || mainMenuSelected.get(TOGGLE_PURPLE)
+        g2.drawImage(hoverState.get(TOGGLE_PURPLE) || selectedState.get(TOGGLE_PURPLE)
                         ? avatarPurplePressed : avatarPurple,
                 ribbonPurpleBounds.x, ribbonPurpleBounds.y, ribbonPurpleBounds.width, ribbonPurpleBounds.height, null);
 
         //draw button
         drawButton(goldButton, goldButtonSelected, newGameBounds.x,  newGameBounds.y,  newGameBounds.width,  newGameBounds.height,
-                "New Game", mainMenuHover.get(NEW_GAME)  || mainMenuSelected.get(NEW_GAME));
+                "New Game", hoverState.get(NEW_GAME)  || selectedState.get(NEW_GAME));
         drawButton(goldButton, goldButtonSelected, continueBounds.x, continueBounds.y, continueBounds.width, continueBounds.height,
-                "Resume",   mainMenuHover.get(LOAD_GAME)  || mainMenuSelected.get(LOAD_GAME));
+                "Resume",   hoverState.get(LOAD_GAME)  || selectedState.get(LOAD_GAME));
 
         //draw settings icon
-        g2.drawImage(mainMenuHover.get(SETTINGS) || mainMenuSelected.get(SETTINGS)
+        g2.drawImage(hoverState.get(SETTINGS) || selectedState.get(SETTINGS)
                         ? settingsIconPressed : settingsIcon,
                 settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
     }
@@ -646,12 +623,12 @@ public class UI {
         drawTextInRibbon(ribbonBounds, title, 0.5, 1);
 
         drawButton(blueButton, blueButtonSelected, resumeBounds.x, resumeBounds.y, resumeBounds.width, resumeBounds.height,
-                "Resume", pauseHover.get(RESUME) || pauseSelected.get(RESUME));
+                "Resume", hoverState.get(RESUME) || selectedState.get(RESUME));
 
         drawButton(redButton, redButtonSelected, saveBounds.x, saveBounds.y, saveBounds.width, saveBounds.height,
-                "Save & Exit", pauseHover.get(SAVE) || pauseSelected.get(SAVE));
+                "Save & Exit", hoverState.get(SAVE) || selectedState.get(SAVE));
 
-        g2.drawImage(pauseHover.get(PAUSE_SETTINGS) || pauseSelected.get(PAUSE_SETTINGS) ? settingsIconPressed : settingsIcon,
+        g2.drawImage(hoverState.get(PAUSE_SETTINGS) || selectedState.get(PAUSE_SETTINGS) ? settingsIconPressed : settingsIcon,
                 settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
 
     }
@@ -673,7 +650,7 @@ public class UI {
 
         // SettingsMenu icon
         Rectangle settingsBounds = layout.settingsIconBounds();
-        g2.drawImage(settingsHover.get(SETTINGS_ICON) || settingsSelected.get(SETTINGS_ICON)
+        g2.drawImage(hoverState.get(SETTINGS_ICON) || selectedState.get(SETTINGS_ICON)
                         ? settingsIconPressed : settingsIcon,
                 settingsBounds.x, settingsBounds.y, settingsBounds.width, settingsBounds.height, null);
 
@@ -689,18 +666,18 @@ public class UI {
         drawTextInRibbon(audioRibbon, title, 0.5 , 0.9);
 
         Rectangle musicB = layout.musicBounds();
-        if(settingsSelected.get(MUSIC)){
+        if(selectedState.get(MUSIC)){
             g2.drawImage(buttonMusicPressed, musicB.x, musicB.y, musicB.width, musicB.height, null);
         }else{
-            g2.drawImage(settingsHover.get(MUSIC) ? buttonMusicSelected : buttonMusic,
+            g2.drawImage(hoverState.get(MUSIC) ? buttonMusicSelected : buttonMusic,
                     musicB.x, musicB.y, musicB.width, musicB.height, null);}
 
 
         Rectangle soundB = layout.soundBounds();
-        if(settingsSelected.get(SOUND)){
+        if(selectedState.get(SOUND)){
             g2.drawImage(buttonSoundPressed, soundB.x, soundB.y, soundB.width, soundB.height, null);
         }else{
-            g2.drawImage(settingsHover.get(SOUND) ? buttonSoundSelected : buttonSound,
+            g2.drawImage(hoverState.get(SOUND) ? buttonSoundSelected : buttonSound,
                     soundB.x, soundB.y, soundB.width, soundB.height, null);
         }
         // -------------------------------------------------------
@@ -715,17 +692,17 @@ public class UI {
         drawButton(goldButton, goldButtonSelected,
                 layout.resFullBounds().x, layout.resFullBounds().y,
                 layout.resFullBounds().width, layout.resFullBounds().height,
-                "Full Screen", settingsHover.get(RES_FULL) || settingsSelected.get(RES_FULL));
+                "Full Screen", hoverState.get(RES_FULL) || selectedState.get(RES_FULL));
 
         drawButton(goldButton, goldButtonSelected,
                 layout.resHalfBounds().x, layout.resHalfBounds().y,
                 layout.resHalfBounds().width, layout.resHalfBounds().height,
-                "Full Window", settingsHover.get(RES_MID) || settingsSelected.get(RES_MID));
+                "Full Window", hoverState.get(RES_MID) || selectedState.get(RES_MID));
 
         drawButton(goldButton, goldButtonSelected,
                 layout.resMinBounds().x, layout.resMinBounds().y,
                 layout.resMinBounds().width, layout.resMinBounds().height,
-                "Small Window", settingsHover.get(RES_MIN) || settingsSelected.get(RES_MIN));
+                "Small Window", hoverState.get(RES_MIN) || selectedState.get(RES_MIN));
 
         // -------------------------------------------------------
 
@@ -734,7 +711,7 @@ public class UI {
         drawButton(grayButton, redButtonSelected,
                 layout.quitBounds().x, layout.quitBounds().y,
                 layout.quitBounds().width, layout.quitBounds().height,
-                "QUIT", settingsHover.get(QUIT) || settingsSelected.get(QUIT));
+                "QUIT", hoverState.get(QUIT) || selectedState.get(QUIT));
 
         // -------------------------------------------------------
     }
@@ -759,11 +736,11 @@ public class UI {
 
         // home button
         drawButton(blueButton, blueButtonSelected, homeButtonBounds.x, homeButtonBounds.y, homeButtonBounds.width, homeButtonBounds.height,
-                "Main Menu", gameOverHover.get(HOME_OVER) || gameOverSelected.get(HOME_OVER));
+                "Main Menu", hoverState.get(HOME_OVER) || selectedState.get(HOME_OVER));
 
         // quit button
         drawButton(grayButton, redButtonSelected, quitButtonBounds.x, quitButtonBounds.y, quitButtonBounds.width, quitButtonBounds.height,
-                "Quit", gameOverHover.get(QUIT_OVER) || gameOverSelected.get(QUIT_OVER));
+                "Quit", hoverState.get(QUIT_OVER) || selectedState.get(QUIT_OVER));
     }
     //-------------------------------------------------------------
     private void drawWinScreen() {
@@ -795,11 +772,11 @@ public class UI {
 
         // home button
         drawButton(blueButton, blueButtonSelected, homeButtonBounds.x, homeButtonBounds.y, homeButtonBounds.width, homeButtonBounds.height,
-                "Main Menu", winHover.get(HOME_WIN) || winSelected.get(HOME_WIN));
+                "Main Menu", hoverState.get(HOME_WIN) || selectedState.get(HOME_WIN));
 
         // quit button
         drawButton(grayButton, redButtonSelected, quitButtonBounds.x, quitButtonBounds.y, quitButtonBounds.width, quitButtonBounds.height,
-                "Quit", winHover.get(QUIT_WIN) || winSelected.get(QUIT_WIN));
+                "Quit", hoverState.get(QUIT_WIN) || selectedState.get(QUIT_WIN));
     }
     //-------------------------------------------------------------
 
@@ -912,7 +889,7 @@ public class UI {
 
         g.dispose();
         long elapsedMs = (System.nanoTime() - startNs) / 1_000_000L;
-        if (model.isDebugMode() && elapsedMs >= 4) {
+        if (controller.isDebugMode() && elapsedMs >= 4) {
             System.out.println("[UI] damage overlay cache rebuilt in " + elapsedMs + "ms (alphaStep="
                     + damageOverlayAlphaStep + ", " + w + "x" + h + ")");
         }
@@ -1146,15 +1123,14 @@ public class UI {
             fpsTimer = now;
         }
 
-        Player player = model.getPlayer();
-        int xTile = (player.getWorldX() + player.getSolidArea().x) / screenConfig.TILE_SIZE();
-        int yTile = (player.getWorldY() + player.getSolidArea().y) / screenConfig.TILE_SIZE();
+        int xTile = (controller.getPlayerWorldX() + controller.getPlayerSolidArea().x) / screenConfig.TILE_SIZE();
+        int yTile = (controller.getPlayerWorldY() + controller.getPlayerSolidArea().y) / screenConfig.TILE_SIZE();
 
         g2.setColor(Color.YELLOW);
         g2.setFont(new Font("Monospaced", Font.BOLD, 18));
         g2.drawString("FPS: " + fps
                 + "  PLAYER X: " + xTile + ", Y: " + yTile
-                + "  L: " + player.getCurrentLayer(), 10, 18);
+                + "  L: " + controller.getPlayerCurrentLayer(), 10, 18);
     }
     //-------------------------------------------------------------
 
@@ -1172,7 +1148,7 @@ public class UI {
     /**
      *  Returns a new BufferedImage that is a scaled copy of original. */
     //-------------------------------------------------------------
-    public BufferedImage scaleImage(BufferedImage original, int width, int height) {
+    private BufferedImage scaleImage(BufferedImage original, int width, int height) {
         BufferedImage scaled = new BufferedImage(width, height, original.getType());
         Graphics2D    g      = scaled.createGraphics();
         g.drawImage(original, 0, 0, width, height, null);
@@ -1295,74 +1271,14 @@ public class UI {
     }
 
     // MainMenu
-    public void setMainMenuHover(ButtonValue.MainMenu key) {
-        mainMenuHover.replaceAll((k, v) -> key != null && k == key);
+    public void setHover(Enum<?> key) {
+    hoverState.replaceAll((k, v) -> k.getClass() == key.getClass() && k == key);
     }
-    public void setMainMenuSelected(ButtonValue.MainMenu key) {
-        mainMenuSelected.replaceAll((k, v) -> key != null && k == key);
+    public void resetHover(Class<? extends Enum<?>> menuClass) {
+        hoverState.replaceAll((k, v) -> k.getClass() != menuClass && v);
     }
-    public void resetMainMenuHover() {
-        mainMenuHover.replaceAll((k, v) -> false);
-    }
-    public void resetMainMenuSelected() {
-        mainMenuSelected.replaceAll((k, v) -> false);
-    }
-
-    // PauseMenu
-    public void setPauseHover(ButtonValue.PauseMenu key) {
-        pauseHover.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void setPauseSelected(ButtonValue.PauseMenu key) {
-        pauseSelected.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void resetPauseHover() {
-        pauseHover.replaceAll((k, v) -> false);
-    }
-    public void resetPauseSelected() {
-        pauseSelected.replaceAll((k, v) -> false);
-    }
-
-    // SettingsMenu
-    public void setSettingsHover(ButtonValue.SettingsMenu key) {
-        settingsHover.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void setSettingsSelected(ButtonValue.SettingsMenu key) {
-        settingsSelected.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void resetSettingsHover() {
-        settingsHover.replaceAll((k, v) -> false);
-    }
-    public void resetSettingsSelected() {
-        settingsSelected.replaceAll((k, v) -> false);
-    }
-
-    // GameOverMenu
-    public void setGameOverHover(ButtonValue.GameOverMenu key) {
-        gameOverHover.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void setGameOverSelected(ButtonValue.GameOverMenu key) {
-        gameOverSelected.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void resetGameOverHover() {
-        gameOverHover.replaceAll((k, v) -> false);
-    }
-    public void resetGameOverSelected() {
-        gameOverSelected.replaceAll((k, v) -> false);
-    }
-    //-------------------------------------------------------------
-
-    // WinMenu
-    public void setWinHover(ButtonValue.WinMenu key) {
-        winHover.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void setWinSelected(ButtonValue.WinMenu key) {
-        winSelected.replaceAll((k, v) -> key != null && k == key);
-    }
-    public void resetWinHover() {
-        winHover.replaceAll((k, v) -> false);
-    }
-    public void resetWinSelected() {
-        winSelected.replaceAll((k, v) -> false);
+    public void setSelected(Enum<?> key) {
+        selectedState.replaceAll((k, v) -> k.getClass() == key.getClass() && k == key);
     }
 
 }

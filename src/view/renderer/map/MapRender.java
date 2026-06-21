@@ -2,7 +2,6 @@ package view.renderer.map;
 
 import main.CONFIG.ScreenConfig;
 import model.GameMap;
-import model.entity.Player;
 
 import java.awt.*;
 
@@ -18,12 +17,12 @@ public class MapRender {
      * Draw all the layers of the gameMap
      */
     // -----------------------------------------------------
-    public void DrawMap(ScreenConfig screenCfg, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2, int screenWidth, int screenHeight){
+    public void DrawMap(ScreenConfig screenCfg, GameMap gameMap, TileSet tileSet, int playerWorldX, int playerWorldY, Graphics2D g2, int screenWidth, int screenHeight){
 
        this.screenCfg = screenCfg;
 
         for (int i = 0; i < gameMap.getGraphicLayerNum(); i++) {
-            drawLayer(i, gameMap, tileSet, player, g2, screenWidth, screenHeight);
+            drawLayer(i, gameMap, tileSet, playerWorldX, playerWorldY, g2, screenWidth, screenHeight);
         }
     }
     //-----------------------------------------------------
@@ -32,18 +31,18 @@ public class MapRender {
      * Draw the single layer of the map
      */
     // -----------------------------------------------------
-    void drawLayer(int layer, GameMap gameMap, TileSet tileSet, Player player, Graphics2D g2, int screenWidth, int screenHeight ){
+    void drawLayer(int layer, GameMap gameMap, TileSet tileSet, int playerWorldX, int playerWorldY, Graphics2D g2, int screenWidth, int screenHeight ){
         // player position in the screen
         int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
         int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
-        int leftCol = Math.max(0, (player.getWorldX() - pScreenX)/ screenCfg.TILE_SIZE());
-        int rightCol = Math.min(gameMap.getMaxMapCol()-1, (player.getWorldX() + (screenWidth - pScreenX)) / screenCfg.TILE_SIZE() );
-        int topRow = Math.max(0, (player.getWorldY() - pScreenY) / screenCfg.TILE_SIZE() );
-        int bottomRow = Math.min(gameMap.getMaxMapRow()-1, (player.getWorldY() + (screenHeight - pScreenY)) / screenCfg.TILE_SIZE() );
+        int leftCol = Math.max(0, (playerWorldX - pScreenX)/ screenCfg.TILE_SIZE());
+        int rightCol = Math.min(gameMap.getMaxMapCol()-1, (playerWorldX + (screenWidth - pScreenX)) / screenCfg.TILE_SIZE() );
+        int topRow = Math.max(0, (playerWorldY - pScreenY) / screenCfg.TILE_SIZE() );
+        int bottomRow = Math.min(gameMap.getMaxMapRow()-1, (playerWorldY + (screenHeight - pScreenY)) / screenCfg.TILE_SIZE() );
 
-        int camOffsetX = -player.getWorldX() + pScreenX;
-        int camOffsetY = -player.getWorldY() + pScreenY;
+        int camOffsetX = -playerWorldX + pScreenX;
+        int camOffsetY = -playerWorldY + pScreenY;
 
         for (int i = topRow; i<= bottomRow; i++){
             for (int j = leftCol; j<= rightCol; j++){
@@ -94,7 +93,7 @@ public class MapRender {
      * Draws a semi-transparent overlay on all collision tiles across all game layers.
      * The player is needed only to compute the camera offset (world → screen conversion).
      */
-    public void drawAllGameLayers(GameMap gameMap, Player player, Graphics2D g2, int screenWidth, int screenHeight) {
+    public void drawAllGameLayers(GameMap gameMap, int playerWorldX, int playerWorldY, Graphics2D g2, int screenWidth, int screenHeight) {
 
         Color[] layerColors = {
                 new Color(255, 0, 0, 80),    // layer 0
@@ -106,15 +105,15 @@ public class MapRender {
         int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
         int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
-        int camOffsetX = -player.getWorldX() + pScreenX;
-        int camOffsetY = -player.getWorldY() + pScreenY;
+        int camOffsetX = -playerWorldX + pScreenX;
+        int camOffsetY = -playerWorldY + pScreenY;
 
         Stroke originalStroke = g2.getStroke();
         Font originalFont = g2.getFont();
-        int leftCol = Math.max(0, (player.getWorldX() - pScreenX) / screenCfg.TILE_SIZE());
-        int rightCol = Math.min(gameMap.getMaxMapCol() - 1, (player.getWorldX() + (screenWidth - pScreenX)) / screenCfg.TILE_SIZE());
-        int topRow = Math.max(0, (player.getWorldY() - pScreenY) / screenCfg.TILE_SIZE());
-        int bottomRow = Math.min(gameMap.getMaxMapRow() - 1, (player.getWorldY() + (screenHeight - pScreenY)) / screenCfg.TILE_SIZE());
+        int leftCol = Math.max(0, (playerWorldX - pScreenX) / screenCfg.TILE_SIZE());
+        int rightCol = Math.min(gameMap.getMaxMapCol() - 1, (playerWorldX + (screenWidth - pScreenX)) / screenCfg.TILE_SIZE());
+        int topRow = Math.max(0, (playerWorldY - pScreenY) / screenCfg.TILE_SIZE());
+        int bottomRow = Math.min(gameMap.getMaxMapRow() - 1, (playerWorldY + (screenHeight - pScreenY)) / screenCfg.TILE_SIZE());
 
         for (int row = topRow; row <= bottomRow; row++) {
             for (int col = leftCol; col <= rightCol; col++) {

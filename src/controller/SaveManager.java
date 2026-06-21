@@ -1,6 +1,7 @@
 package controller;
 
 import model.GameModel;
+import model.IGameModel;
 
 import java.io.*;
 import java.nio.file.*;
@@ -20,7 +21,7 @@ public final class SaveManager {
 
     private SaveManager() {}
 
-    public static Path saveGame(GameModel model) throws IOException {
+    public static Path saveGame(IGameModel model) throws IOException {
         Files.createDirectories(SAVE_DIR);
 
         String timestamp = LocalDateTime.now().format(FORMATTER);
@@ -35,7 +36,7 @@ public final class SaveManager {
         return savePath;
     }
 
-    public static GameModel loadLatestGame() throws IOException, ClassNotFoundException {
+    public static IGameModel loadLatestGame() throws IOException, ClassNotFoundException {
         Path latest = getLatestSavePath();
         if (latest == null) {
             throw new FileNotFoundException("Nessun file di salvataggio trovato in " + SAVE_DIR.toAbsolutePath());
@@ -43,7 +44,7 @@ public final class SaveManager {
 
         try (ObjectInputStream in =
                      new ObjectInputStream(Files.newInputStream(latest))) {
-            return (GameModel) in.readObject();
+            return (IGameModel) in.readObject();
         }
     }
 

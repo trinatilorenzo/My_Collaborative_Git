@@ -1,6 +1,7 @@
 package model;
 
 import controller.InputState;
+import controller.SaveManager;
 import main.CONFIG.EntityConfig;
 import main.CONFIG.GameConfig;
 import main.CONFIG.ObjConfig;
@@ -25,7 +26,7 @@ import java.util.List;
  * world map, entity, combat, AI, events ...
 */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameModel implements Serializable {
+public class GameModel implements Serializable, IGameModel {
     private transient GameConfig gameConfig;
 
     @Serial
@@ -73,9 +74,6 @@ public class GameModel implements Serializable {
     // Death sequence
     private double deadStateElapsedMs;
 
-    // Win sequence
-    private double winStateElapsedMs;
-
     //Audio events
     private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>();
 
@@ -101,8 +99,6 @@ public class GameModel implements Serializable {
         currentMessage = "";
         messageTimer = 0.0;
         deadStateElapsedMs = 0.0;
-        winStateElapsedMs = 0.0;
-
         settingsMenuOpen = false;
         settingsPauseOpen = false;
         playerColor = GS.entityConfig().DEFAULT_COLOR;
@@ -162,6 +158,8 @@ public class GameModel implements Serializable {
         // START THE GAME
         gameState = GameState.PLAYING;
     }
+    //-------------------------------------------------------------------
+    
     /**
      * HELPERS METHOD
      */
@@ -862,34 +860,6 @@ public class GameModel implements Serializable {
         if (this.currentMessage == null) this.currentMessage = "";
     }
 
-    public void copyFrom(GameModel other) {
-        this.gameState = other.gameState;
-        this.debugMode = other.debugMode;
-        this.worldGameMap = other.worldGameMap;
-
-        this.objects = other.objects;
-        this.player = other.player;
-        this.monk = other.monk;
-        this.tntEnemies = other.tntEnemies;
-        this.dynamiteEnemies = other.dynamiteEnemies;
-        this.projectiles = other.projectiles;
-        this.torchEnemies = other.torchEnemies;
-
-        this.settingsMenuOpen = other.settingsMenuOpen;
-        this.settingsPauseOpen = other.settingsPauseOpen;
-        this.musicEnabled = other.musicEnabled;
-        this.soundEnabled = other.soundEnabled;
-        this.resValue = other.resValue;
-        this.playerColor = other.playerColor;
-        this.currentDialogue = other.currentDialogue;
-        this.currentMessage = other.currentMessage;
-
-        this.deadStateElapsedMs = other.deadStateElapsedMs;
-        this.currentLevel = other.currentLevel;
-        this.levelCompleted = other.levelCompleted;
-        this.currentLevelPowerUpCollected = other.currentLevelPowerUpCollected;
-    }
-
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -917,8 +887,8 @@ public class GameModel implements Serializable {
         if (objects != null) {allRenderables.addAll(objects); }
         return allRenderables;
     }
-
-    public Player getPlayer() { return player; }
+    @Override
+    public Player getPlayer() {return player; }
     public GameMap getWorldMap() { return worldGameMap; }
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
     public GameState getGameState() { return gameState; }

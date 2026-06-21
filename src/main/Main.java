@@ -29,8 +29,9 @@ public class Main {
         // Define the tre basic object Model View Controller
         // ------------------------------------------------------------------------------------------------------------
         GameModel model = new GameModel(GS);
-        GameView view = new GameView(GS, model);
-        GameController controller = new GameController(model, view);
+        GameController controller = new GameController(model);
+        GameView view = new GameView(GS, controller);
+        controller.setView(view);
         // ------------------------------------------------------------------------------------------------------------
 
         // main application window: contains the whole game

@@ -1,12 +1,13 @@
 package view.renderer;
 
 import model.IRenderable;
-import model.GameModel;
 import view.renderer.entity.*;
 import main.CONFIG.GameConfig;
 import main.CONFIG.enu.PlayerColor;
 
 import java.awt.Graphics2D;
+
+import controller.IController;
 
 public class RenderDispatcher {
     private final PlayerRender playerRender;
@@ -28,7 +29,7 @@ public class RenderDispatcher {
     /**
      * Manages the drawing of the entity and, if debugMode is active, automatically draws the Solid Area
      */
-    public void draw(Graphics2D g2, IRenderable obj, int screenX, int screenY, boolean debugMode, model.entity.Player player) {
+    public void draw(Graphics2D g2, IRenderable obj, int screenX, int screenY, boolean debugMode, int playerWorldX, int playerWorldY, int playerCurrentLayer) {
         if (obj instanceof model.entity.Player p) {
             playerRender.draw(g2, p, screenX, screenY);
             if (debugMode) {
@@ -68,7 +69,7 @@ public class RenderDispatcher {
         else if (obj instanceof model.object.GameObject o) {
             objectRenderer.draw(g2, o, screenX, screenY);
             if (debugMode) {
-                objectRenderer.drawDebugObject(g2, o, screenX, screenY, player.getCurrentLayer());
+                objectRenderer.drawDebugObject(g2, o, screenX, screenY, playerCurrentLayer);
             }
         }
     }
@@ -76,24 +77,14 @@ public class RenderDispatcher {
     /**
      * Updates the animations of all entities and game objects in the model.
      */
-    public void update(GameModel model, double deltaMs) {
-        if (model.getPlayer() != null) {
-            playerRender.update(model.getPlayer(), deltaMs);
-        }
-        if (model.getMonk() != null) {
-            monkRenderer.update(model.getMonk(), deltaMs);
-        }
-        for (model.entity.EnemyTNT tnt : model.getTntEnemies()) {
-            tntRenderer.update(tnt, deltaMs);
-        }
-        for (model.entity.EnemyDynamite ed : model.getDynamiteEnemies()){
-            dynamiteRender.update(ed, deltaMs);
-        }
-        for (model.entity.EnemyTorch et : model.getTorchEnemies()) {
-            torchRenderer.update(et, deltaMs);
-        }
-        for (model.object.GameObject obj : model.getObjects()) {
-            objectRenderer.update(obj, deltaMs);
+    public void update(IController controller, double deltaMs) {
+        for (IRenderable obj : controller.getAllRenderables()) {
+            if (obj instanceof model.entity.Player p)          playerRender.update(p, deltaMs);
+            else if (obj instanceof model.entity.Monk m)       monkRenderer.update(m, deltaMs);
+            else if (obj instanceof model.entity.EnemyTNT tnt) tntRenderer.update(tnt, deltaMs);
+            else if (obj instanceof model.entity.EnemyDynamite ed) dynamiteRender.update(ed, deltaMs);
+            else if (obj instanceof model.entity.EnemyTorch et) torchRenderer.update(et, deltaMs);
+            else if (obj instanceof model.object.GameObject o)  objectRenderer.update(o, deltaMs);
         }
     }
     

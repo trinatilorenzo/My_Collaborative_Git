@@ -4,13 +4,17 @@ import main.CONFIG.GameConfig;
 import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.PlayerColor;
-import model.GameModel;
+import model.GameMap;
+import model.IGameModel;
+import model.IRenderable;
 import model.event.AudioEventType;
 import view.IGameView;
 import main.CONFIG.enu.GameState;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -18,10 +22,10 @@ import java.io.IOException;
  * input, game loop, system ...
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameController {
+public class GameController implements IController{
 
-    private GameModel model;
-    private final IGameView view;
+    private IGameModel model;
+    private IGameView view;
     private final KeyHandler keyHandler;
     private final MouseHandler mouseHandler;
     private final GameLoop loop;
@@ -35,9 +39,8 @@ public class GameController {
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public GameController(GameModel model, IGameView view) {
+    public GameController(IGameModel model) {
         this.model = model;
-        this.view = view;
 
         this.keyHandler = new KeyHandler();
         this.mouseHandler = new MouseHandler();
@@ -45,14 +48,15 @@ public class GameController {
         this.lastKnownState = model.getGameState();
 
         resetSelection();
-        
-        view.addKeyListener(keyHandler); // add key listener to the view to capture keyboard input
-        view.addMouseListener(mouseHandler);
-        view.addMouseMotionListener(mouseHandler);
-        view.setFocusable(true); // ensure the view can receive keyboard focus
     }
     //-------------------------------------------------------------
-
+    public void setView(IGameView view) {
+        this.view = view; 
+        view.addKeyListener(keyHandler);
+        view.addMouseListener(mouseHandler);
+        view.addMouseMotionListener(mouseHandler);
+        view.setFocusable(true);
+    }
     //-------------------------------------------------------------
     private void resetSelection(){
         currentKeyboardSelection = UIConfig.MENU_DEFAULT_SELECTION;
@@ -207,15 +211,11 @@ public class GameController {
 
             case LOAD_GAME:
                 try {
-                    GameConfig config = model.getGameConfig();
-                    GameModel loaded = SaveManager.loadLatestGame();
-
-                    loaded.restoreTransientState(config);
-                    model.copyFrom(loaded);
-
-                    model.forcePlayingState();          
+                    IGameModel loaded = SaveManager.loadLatestGame();
+                    loaded.restoreTransientState(model.getGameConfig());
+                    loaded.forcePlayingState();
+                    this.model = loaded;  // sostituisci il model
                     keyHandler.resetPauseToggle();
-
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -356,7 +356,7 @@ public class GameController {
             lastKnownState = currentState;
             resetSelection();
         }
-        view.processGameEvents();
+        view.processGameEvents(model.consumeAudioEvents());
     }
     //-------------------------------------------------------------
 
@@ -370,7 +370,26 @@ public class GameController {
     }
     //-------------------------------------------------------------
 
-
+    // GETTER
+    @Override public GameState getGameState()                  { return model.getGameState(); }
+    @Override public boolean isDebugMode()                     { return model.isDebugMode(); }
+    @Override public int getPlayerWorldX()                     { return model.getPlayer().getWorldX(); }
+    @Override public int getPlayerWorldY()                     { return model.getPlayer().getWorldY(); }
+    @Override public int getPlayerCurrentLayer()               { return model.getPlayer().getCurrentLayer(); }
+    @Override public int getPlayerLife()                       { return model.getPlayer().getLife(); }
+    @Override public int getPlayerMaxLife()                    { return model.getPlayer().getMaxLife(); }
+    @Override public boolean playerHasShield()                 { return model.getPlayer().hasShield(); }
+    @Override public double getPlayerShieldTimerMs()           { return model.getPlayer().getShieldTimerMs(); }
+    @Override public Rectangle getPlayerSolidArea()            { return model.getPlayer().getSolidArea(); }
+    @Override public GameMap getWorldMap()                     { return model.getWorldMap(); }
+    @Override public List<IRenderable> getAllRenderables()     { return model.getAllRenderables(); }
+    @Override public String getCurrentDialogue()               { return model.getCurrentDialogue(); }
+    @Override public String getCurrentMessage()                { return model.getCurrentMessage(); }
+    @Override public boolean isSoundEnabled()                  { return model.isSoundEnabled(); }
+    @Override public boolean isMusicEnabled()                  { return model.isMusicEnabled(); }
+    @Override public int getResolutionValue()                  { return model.getResolutionValue(); }
+    @Override public PlayerColor getPlayerColor()              { return model.getPlayerColor(); }
+    @Override public List<AudioEventType> consumeAudioEvents() { return model.consumeAudioEvents(); }
 }
 
 //-------------------------------------------------------------------------------------------------------------------

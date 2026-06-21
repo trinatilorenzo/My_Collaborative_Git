@@ -7,9 +7,7 @@ import main.CONFIG.ScreenConfig;
 import main.CONFIG.UIConfig;
 import main.CONFIG.enu.ButtonValue;
 import main.CONFIG.enu.GameState;
-import model.GameModel;
 import model.IRenderable;
-import model.entity.Player;
 import model.event.AudioEventType;
 import view.UI.*;
 import view.audio.GameAudioManager;
@@ -18,6 +16,9 @@ import view.renderer.map.TileSet;
 import view.renderer.RenderDispatcher;
 
 import javax.swing.*;
+
+import controller.IController;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -46,28 +47,27 @@ public class GameView extends JPanel implements IGameView {
     private int gameWidth;
     private int gameHeight;
 
-    //model to render
-    private final GameModel model;
+    private final IController controller;
 
     // renderers
-    private final MapRender mapRender;
-    private final TileSet tileSet;
-    private final UI ui_render;
+    private MapRender mapRender;
+    private TileSet tileSet;
+    private UI ui_render;
     private Cursor customGameCursor;
 
 
-    private final RenderDispatcher renderDispatcher;
+    private RenderDispatcher renderDispatcher;
     //audio
-    private final GameAudioManager audioManager;
+    private GameAudioManager audioManager;
 
 
     /**
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public GameView(GameConfig GS, GameModel model) {
+    public GameView(GameConfig GS, IController controller) {
         this.screenCfg = GS.screenConfig();
-        this.model = model;
+        this.controller = controller;
 
         gameHeight = screenHeight /2;
         gameWidth = screenWidth /2;
@@ -88,14 +88,18 @@ public class GameView extends JPanel implements IGameView {
 
         // import the audio manager
         this.audioManager = new GameAudioManager();
-        this.audioManager.syncBackgroundMusic(model.getGameState());
+        this.audioManager.syncBackgroundMusic(controller.getGameState());
 
 
-        this.renderDispatcher = new RenderDispatcher(GS, model.getPlayerColor());
-        //import the UI
-        this.ui_render = new UI(model, screenCfg, screenWidth, screenHeight);
+        this.renderDispatcher = new RenderDispatcher(GS, controller.getPlayerColor());
+
+        //initialize after 
+        this.ui_render = new UI(controller, screenCfg, screenWidth, screenHeight);
+        setResolution();
+
     }
     //-------------------------------------------------------------
+
     private void applyCustomCursor(String cursorPath) {
         try {
             BufferedImage cursorImage = null;
@@ -128,26 +132,26 @@ public class GameView extends JPanel implements IGameView {
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenWidth, screenHeight);
 
-        switch (model.getGameState()) {
+        switch (controller.getGameState()) {
 
             case PLAYING, PAUSED, GAME_OVER, WIN -> {
 
                 // DRAW THE WORLD MAP
-                mapRender.DrawMap(screenCfg, model.getWorldMap(), tileSet, model.getPlayer(), g2, screenWidth, screenHeight);
+                mapRender.DrawMap(screenCfg, controller.getWorldMap(), tileSet, controller.getPlayerWorldX(), controller.getPlayerWorldY(), g2, screenWidth, screenHeight);
                 // Y-sorting logic: sort objects by their worldY coordinate
                 drawEntities(g2);
 
-                if (model.isDebugMode()) {
+                if (controller.isDebugMode()) {
                     drawWorldDebug(g2);
                 }
             }
             case SETTINGS -> {
-                if(model.isSoundEnabled()){
+                if(controller.isSoundEnabled()){
                     audioManager.setSfxVolume(1);
                 }else{
                     audioManager.setSfxVolume(0);
                 }
-                if (model.isMusicEnabled()) {
+                if (controller.isMusicEnabled()) {
                     audioManager.setMusicVolume(1);
                 }else {
                     audioManager.setMusicVolume(0);
@@ -164,9 +168,8 @@ public class GameView extends JPanel implements IGameView {
     //-------------------------------------------------------------
 
     private void drawWorldDebug(Graphics2D g2) {
-        Player player = model.getPlayer();
-        mapRender.drawAllGameLayers(model.getWorldMap(), player, g2, screenWidth, screenHeight);
-        //objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), player, screenCfg, screenWidth, screenHeight);
+        mapRender.drawAllGameLayers(controller.getWorldMap(), controller.getPlayerWorldX(), controller.getPlayerWorldY(), g2, screenWidth, screenHeight);
+        //objectRenderer.drawDebugSolidAreas(g2, model.getObjects(), playerWorldX, playerWorldY, screenCfg, screenWidth, screenHeight);
     }
 
     //--------------------------------------------------------------
@@ -174,12 +177,13 @@ public class GameView extends JPanel implements IGameView {
     private void drawEntities(Graphics2D g2){
 
         // Player's coordinates
-        Player player = model.getPlayer();
+        int playerWorldX = controller.getPlayerWorldX();
+        int playerWorldY = controller.getPlayerWorldY();
         int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
         int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
 
         // Renderable entities and object
-        List<IRenderable> renderList = new ArrayList<>(model.getAllRenderables());
+        List<IRenderable> renderList = new ArrayList<>(controller.getAllRenderables());
 
         // Universal y-sorting
         renderList.sort(Comparator.comparingInt(obj -> obj.getWorldY() + obj.getSolidArea().y + obj.getSolidArea().height));
@@ -188,8 +192,8 @@ public class GameView extends JPanel implements IGameView {
         for (IRenderable obj : renderList) {
         
             // Screen Coordinates
-            int screenX = obj.getWorldX() - player.getWorldX() + pScreenX;
-            int screenY = obj.getWorldY() - player.getWorldY() + pScreenY;
+            int screenX = obj.getWorldX() - playerWorldX + pScreenX;
+            int screenY = obj.getWorldY() - playerWorldY + pScreenY;
 
             // Universal culling: If the object is off-screen, we don't waste resources drawing it.
             if (screenX + obj.getWidth() < 0 || screenX > screenWidth ||
@@ -197,19 +201,19 @@ public class GameView extends JPanel implements IGameView {
                 continue;
             }
 
-            renderDispatcher.draw(g2, obj, screenX, screenY, model.isDebugMode(), player);
+            renderDispatcher.draw(g2, obj, screenX, screenY, controller.isDebugMode(), playerWorldX, playerWorldY, controller.getPlayerCurrentLayer());
 
         }
     }
 
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
-        renderDispatcher.update(model, deltaMs);
+        renderDispatcher.update(controller, deltaMs);
     }
     //-------------------------------------------------------------
 
     private void applyResolutionValuesOnly() {
-        switch (model.getResolutionValue()) {
+        switch (controller.getResolutionValue()) {
             case 0 -> {
                 screenWidth = screenCfg.MIN_SCREEN_WIDTH();
                 screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
@@ -256,7 +260,7 @@ public class GameView extends JPanel implements IGameView {
         frame.dispose();
         frame.setExtendedState(JFrame.NORMAL);
 
-        switch (model.getResolutionValue()) {
+        switch (controller.getResolutionValue()) {
             case 0 -> {
                 screenWidth = screenCfg.MIN_SCREEN_WIDTH();
                 screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
@@ -332,8 +336,7 @@ public class GameView extends JPanel implements IGameView {
         audioManager.syncBackgroundMusic(gameState);
     }
 
-    public void processGameEvents() {
-        List<AudioEventType> events = model.consumeAudioEvents();
+    public void processGameEvents(List<AudioEventType> events) {
         if (events.isEmpty()) {
             return;
         }
@@ -351,40 +354,33 @@ public class GameView extends JPanel implements IGameView {
     }
 
     public void updatePlayerColor() {
-        renderDispatcher.updatePlayerColor(model.getPlayerColor());
+        renderDispatcher.updatePlayerColor(controller.getPlayerColor());
     }
 
     @Override
     public void applyMenuState(GameState screen, Enum<?> hovered, Enum<?> selected) {
         if (screen == null) return;
-
-        switch (screen) {
-            case MENU -> {
-                if (hovered instanceof ButtonValue.MainMenu h) ui_render.setMainMenuHover(h);
-                if (selected instanceof ButtonValue.MainMenu s) ui_render.setMainMenuSelected(s);
-                if (hovered == null) ui_render.resetMainMenuHover();
-            }
-            case PAUSED -> {
-                if (hovered instanceof ButtonValue.PauseMenu h) ui_render.setPauseHover(h);
-                if (selected instanceof ButtonValue.PauseMenu s) ui_render.setPauseSelected(s);
-                if (hovered == null) ui_render.resetPauseHover();
-            }
-            case SETTINGS -> {
-                if (hovered instanceof ButtonValue.SettingsMenu h) ui_render.setSettingsHover(h);
-                if (selected instanceof ButtonValue.SettingsMenu s) ui_render.setSettingsSelected(s);
-                if (hovered == null) ui_render.resetSettingsHover();
-            }
-            case GAME_OVER -> {
-                if (hovered instanceof ButtonValue.GameOverMenu h) ui_render.setGameOverHover(h);
-                if (selected instanceof ButtonValue.GameOverMenu s) ui_render.setGameOverSelected(s);
-                if (hovered == null) ui_render.resetGameOverHover();
-            }
-            case WIN -> {
-                if (hovered instanceof ButtonValue.WinMenu h) ui_render.setWinHover(h);
-                if (selected instanceof ButtonValue.WinMenu s) ui_render.setWinSelected(s);
-                if (hovered == null) ui_render.resetWinHover();
-            }
+        if (hovered != null) {
+            ui_render.setHover(hovered);
+        } else {
+            // reset hover per la categoria corrispondente allo screen
+            Class<? extends Enum<?>> menuClass = menuClassForScreen(screen);
+            if (menuClass != null) ui_render.resetHover(menuClass);
         }
+        if (selected != null) {
+            ui_render.setSelected(selected);
+        }
+    }
+
+    private Class<? extends Enum<?>> menuClassForScreen(GameState screen) {
+        return switch (screen) {
+            case MENU      -> ButtonValue.MainMenu.class;
+            case PAUSED    -> ButtonValue.PauseMenu.class;
+            case SETTINGS  -> ButtonValue.SettingsMenu.class;
+            case GAME_OVER -> ButtonValue.GameOverMenu.class;
+            case WIN       -> ButtonValue.WinMenu.class;
+            default        -> null;
+        };
     }
 
     @Override
