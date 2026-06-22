@@ -882,6 +882,8 @@ public class GameModel implements Serializable, IGameModel {
         if (tntEnemies != null) { allRenderables.addAll(tntEnemies);}
         if (torchEnemies != null) { allRenderables.addAll(torchEnemies);}
         if (dynamiteEnemies != null) { allRenderables.addAll(dynamiteEnemies);}
+        if (projectiles != null) { allRenderables.addAll(projectiles);}
+
         
         // Objects
         if (objects != null) {allRenderables.addAll(objects); }

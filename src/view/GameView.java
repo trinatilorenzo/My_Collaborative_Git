@@ -44,9 +44,6 @@ public class GameView extends JPanel implements IGameView {
     private int screenWidth;
     private int screenHeight;
 
-    private int gameWidth;
-    private int gameHeight;
-
     private final IController controller;
 
     // renderers
@@ -69,8 +66,6 @@ public class GameView extends JPanel implements IGameView {
         this.screenCfg = GS.screenConfig();
         this.controller = controller;
 
-        gameHeight = screenHeight /2;
-        gameWidth = screenWidth /2;
         setResolution();
 
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));

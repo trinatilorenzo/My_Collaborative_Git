@@ -5,8 +5,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
-
-import controller.IController;
 import main.CONFIG.enu.GameState;
 import model.event.AudioEventType;
 
