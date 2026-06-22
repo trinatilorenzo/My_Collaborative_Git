@@ -10,7 +10,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * MAP CLASS <-- all the map layer
  * It supports graphical layers for visual representation
