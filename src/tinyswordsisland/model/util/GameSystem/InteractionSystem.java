@@ -1,4 +1,4 @@
-package tinyswordsisland.model.util;
+package tinyswordsisland.model.util.GameSystem;
 
 import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.GameModel;
@@ -41,6 +41,7 @@ public final class InteractionSystem {
                 dynamite.takeDamage();
                 player.setAttackDamageApplied(true);
                 model.addAudioEvent(AudioEventType.ENEMY_HIT);
+
                 if (dynamite.getState() == DynamiteState.DEAD) {
                     model.addAudioEvent(AudioEventType.ENEMY_DEFEATED);
                 }
@@ -65,8 +66,8 @@ public final class InteractionSystem {
 
                 player.setAttackDamageApplied(true);
                 tree.interact();
-                model.addAudioEvent(AudioEventType.TREE_HIT);
 
+                model.addAudioEvent(AudioEventType.TREE_HIT);
                 if (tree.isLastHit()) {
                     model.addAudioEvent(AudioEventType.TREE_FINAL);
                 }
@@ -76,6 +77,7 @@ public final class InteractionSystem {
 
     private void handleObjectInteractions(GameModel model, Player player) {
         for (GameObject obj : model.getObjects()) {
+
             if (obj.getName().equals(model.getGameConfig().ObjConfig().GOLDMINE_TAG())) {
                 if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
                     if (model.getCurrentLevel() == model.getGameConfig().getMaxLevel() && model.isLevelCompleted()) {
@@ -86,17 +88,22 @@ public final class InteractionSystem {
             }
 
             if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
-                if (!powerUp.isCollectible()) continue;
+                if (!powerUp.isCollectible()) {
+                    continue;
+                }
 
                 player.applyPowerUpEffect(powerUp.getType());
                 powerUp.remove();
 
                 if (levelManager.isPowerUpForCurrentLevel(model, powerUp.getType())) {
                     model.setCurrentLevelPowerUpCollected(true);
+
                     if (powerUp.getType() == PowerUpType.SHIELD) {
-                        model.setCurrentMessage("Premi (R) per attivare lo scudo");
+                        model.showMessage("Premi (R) per attivare lo scudo");
                     }
                 }
+
+                model.addAudioEvent(AudioEventType.POWERUP_COLLECTED);
             }
         }
     }

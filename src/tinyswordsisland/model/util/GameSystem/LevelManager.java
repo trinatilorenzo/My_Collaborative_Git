@@ -1,4 +1,4 @@
-package tinyswordsisland.model.util;
+package tinyswordsisland.model.util.GameSystem;
 
 import tinyswordsisland.config.enu.PowerUpType;
 import tinyswordsisland.model.GameModel;
@@ -20,11 +20,11 @@ public final class LevelManager {
                 model.addAudioEvent(AudioEventType.LEVEL_UP);
                 model.setCurrentLevel(model.getCurrentLevel() + 1);
                 model.setCurrentLevelPowerUpCollected(false);
-                model.setCurrentMessage("Livello " + model.getCurrentLevel() + " completato! Scale sbloccate");
+                model.showMessage("Livello " + model.getCurrentLevel() + " completato! Scale sbloccate");
                 model.getWorldMap().unlockStairsLevel(model.getPlayer().getCurrentLayer());
             } else {
                 model.setLevelCompleted(true);
-                model.setCurrentMessage("Livello " + model.getCurrentLevel() + " completato. Vai alla miniera!");
+                model.showMessage("Livello " + model.getCurrentLevel() + " completato. Vai alla miniera!");
             }
         }
     }

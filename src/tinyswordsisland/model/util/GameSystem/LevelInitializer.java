@@ -1,4 +1,4 @@
-package tinyswordsisland.model.util;
+package tinyswordsisland.model.util.GameSystem;
 
 
 import tinyswordsisland.config.EntityConfig;
