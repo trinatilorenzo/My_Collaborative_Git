@@ -174,8 +174,8 @@ public class GameView extends JPanel implements IGameView {
         // Player's coordinates
         int playerWorldX = controller.getPlayerWorldX();
         int playerWorldY = controller.getPlayerWorldY();
-        int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenX = screenWidth / 2;
+        int pScreenY = screenHeight / 2;
 
         // Renderable entities and object
         List<IRenderable> renderList = new ArrayList<>(controller.getAllRenderables());

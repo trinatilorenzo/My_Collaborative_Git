@@ -33,8 +33,8 @@ public class MapRender {
     // -----------------------------------------------------
     void drawLayer(int layer, GameMap gameMap, TileSet tileSet, int playerWorldX, int playerWorldY, Graphics2D g2, int screenWidth, int screenHeight ){
         // player position in the screen
-        int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenX = screenWidth / 2;
+        int pScreenY = screenHeight / 2;
 
         int leftCol = Math.max(0, (playerWorldX - pScreenX)/ screenCfg.TILE_SIZE());
         int rightCol = Math.min(gameMap.getMaxMapCol()-1, (playerWorldX + (screenWidth - pScreenX)) / screenCfg.TILE_SIZE() );
@@ -102,8 +102,8 @@ public class MapRender {
                 new Color(255, 97, 0, 80)    // layer 3
         };
 
-        int pScreenX = screenWidth / 2 - (screenCfg.TILE_SIZE() / 2);
-        int pScreenY = screenHeight / 2 - (screenCfg.TILE_SIZE() / 2);
+        int pScreenX = screenWidth / 2;
+        int pScreenY = screenHeight / 2;
 
         int camOffsetX = -playerWorldX + pScreenX;
         int camOffsetY = -playerWorldY + pScreenY;
