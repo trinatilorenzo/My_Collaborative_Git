@@ -50,7 +50,7 @@ public class Entity implements Serializable, IRenderable {
      * Resets per-frame movement state. Called at the start of each update.
      */
     //-------------------------------------------------------------
-    public void update() {
+    protected void update() {
         dx = 0;
         dy = 0;
         fullSpeedX = 0;
@@ -131,15 +131,19 @@ public class Entity implements Serializable, IRenderable {
     public Rectangle getSolidArea() {
         return solidArea;
     }
-    public int getLife() {return life;}
-    public int getMaxLife() {return maxLife;}
+    public int getLife() {
+        return life;
+    }
+    public int getMaxLife() {
+        return maxLife;
+    }
     public int getWidth(){
         return solidArea.width;
     }
     public int getHeight(){
         return solidArea.height;
     }
-    
+    // worldx and worldy centered in the solid area
     public Rectangle getSolidWorldArea() {
         worldBoundsInstance.setBounds(
             worldX - solidArea.width / 2,
