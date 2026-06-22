@@ -1,0 +1,55 @@
+package tinyswordsisland.view;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * SPRITE LOADER CLAS
+ * a utility class that loads and caches spritesheets to avoid redundant loading
+ */
+//-------------------------------------------------------------------------------------------------------------------
+public class SpriteLoader {
+
+    private static final Map<String, BufferedImage> spriteSheets = new HashMap<>();
+
+    //-------------------------------------------------------------
+    public static BufferedImage loadSpriteSheet(String path){
+        if (spriteSheets.containsKey(path)){
+            return spriteSheets.get(path);
+        }
+        try {
+            BufferedImage spriteSheet = ImageIO.read(SpriteLoader.class.getResourceAsStream(path));
+            spriteSheets.put(path, spriteSheet);
+            return spriteSheet;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load sprite sheet: " + path, e);
+        }
+    }
+    //-------------------------------------------------------------
+
+    /**
+     * Extracts individual frames from a sprite sheet based on the specified parameters
+      */
+    //-------------------------------------------------------------
+    public static BufferedImage[] getAnimationFrames(BufferedImage sheet, int startRow, int rows, int cols,
+                                                     int spriteWidth, int spriteHeight){
+        BufferedImage[] frames = new BufferedImage[rows * cols];
+        int index = 0;
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                frames[index++] = sheet.getSubimage(
+                    j * spriteWidth,
+                    (startRow + i) * spriteHeight,
+                    spriteWidth,
+                    spriteHeight
+                );
+            }
+        }
+        return frames;
+    }
+    //-------------------------------------------------------------
+}
+//-------------------------------------------------------------------------------------------------------------------
