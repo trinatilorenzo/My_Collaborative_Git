@@ -176,8 +176,11 @@ public class GameController implements IController{
             }
         } 
      
-        view.applyMenuState(screen, currentKeyboardSelection, null);
-
+        if (hovered == null) {
+            view.applyMenuState(screen, null, null);
+        } else {
+            view.applyMenuState(screen, currentKeyboardSelection, null);
+        }
         // click
         Point click = mouseHandler.consumeLeftClick();
         Enum<?> clicked = view.getButtonAtPoint(screen, click);
@@ -354,6 +357,7 @@ public class GameController implements IController{
         if (currentState != lastKnownState) {
             view.onGameStateChanged(currentState);
             lastKnownState = currentState;
+            
             resetSelection();
         }
         view.processGameEvents(model.consumeAudioEvents());
