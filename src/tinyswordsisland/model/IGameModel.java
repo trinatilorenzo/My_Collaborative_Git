@@ -2,7 +2,7 @@ package tinyswordsisland.model;
 
 import java.util.List;
 
-import tinyswordsisland.controller.InputState;
+import tinyswordsisland.input.InputState;
 import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.config.enu.GameState;
 import tinyswordsisland.config.enu.PlayerColor;
@@ -11,25 +11,22 @@ import tinyswordsisland.model.event.AudioEventType;
 
 public interface IGameModel {
 
-    // states
     GameState getGameState();
     boolean isDebugMode();
     void setDebugMode(boolean debug);
     void update(InputState input, double deltaMs);
 
-    // game life cycle
     void initializeNewGame();
     void forcePlayingState();
     void restoreTransientState(GameConfig config);
+    void beforeSave();
 
-    // states navigation
     void resumeFromPause();
     void returnToMenu();
-    void toggleSetingsFormMenu();
-    void toggleSetingsFormPause();
+    void toggleSettingsFromMenu();
+    void toggleSettingsFromPause();
     void closeSettings();
 
-    // settings
     void toggleMusic();
     void toggleSound();
     void setMaxResolution();
@@ -42,13 +39,10 @@ public interface IGameModel {
     PlayerColor getPlayerColor();
     List<AudioEventType> consumeAudioEvents();
 
-    // audio
     void addAudioEvent(AudioEventType event);
 
-    // config (for load)
     GameConfig getGameConfig();
 
-    // getter for rendering
     GameMap getWorldMap();
     List<IRenderable> getAllRenderables();
     String getCurrentDialogue();

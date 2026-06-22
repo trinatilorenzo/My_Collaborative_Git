@@ -125,6 +125,8 @@ public final class GameConfig {
                 goblinHomeSpawns
         );
         this.UIConfig = new UIConfig();
+
+        this.maxLevel = 3;
     }//end constructor
     //-------------------------------------------------------------
 

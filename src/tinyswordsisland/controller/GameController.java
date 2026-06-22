@@ -1,17 +1,16 @@
 package tinyswordsisland.controller;
 
+import tinyswordsisland.input.InputState;
 import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.config.enu.ButtonValue;
 import tinyswordsisland.config.enu.PlayerColor;
-import tinyswordsisland.model.GameMap;
-import tinyswordsisland.model.IGameModel;
-import tinyswordsisland.model.IRenderable;
-import tinyswordsisland.model.event.AudioEventType;
-import tinyswordsisland.view.IGameView;
 import tinyswordsisland.config.enu.GameState;
+import tinyswordsisland.model.IGameModel;
+import tinyswordsisland.model.event.AudioEventType;
+import tinyswordsisland.view.GameViewState;
+import tinyswordsisland.view.IGameView;
 
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.List;
 
@@ -239,7 +238,7 @@ public class GameController implements IController{
                 }
                 break;
             case SETTINGS:
-                model.toggleSetingsFormMenu();
+                model.toggleSettingsFromMenu();
                 break;
 
             case TOGGLE_BLUE:
@@ -286,19 +285,15 @@ public class GameController implements IController{
             case SAVE:
                 try {
                     SaveManager.saveGame(model);
-                    System.out.println("Partita salvata.");
                     model.returnToMenu();
                     keyHandler.resetPauseToggle();
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
                 break;
 
             case PAUSE_SETTINGS:
-                model.toggleSetingsFormPause();
+                model.toggleSettingsFromPause();
                 break;
         }
     }
@@ -309,36 +304,22 @@ public class GameController implements IController{
     private void performSettingsAction(ButtonValue.SettingsMenu selection) {
 
         switch (selection) {
-            case SETTINGS_ICON -> {
-                model.closeSettings();
-                System.out.println("settings");
-            }
-            case MUSIC    -> {
-                model.toggleMusic();
-                System.out.println("music");
-            }
-            case SOUND    -> {
-                model.toggleSound();
-                System.out.println("sound");
-            }
+            case SETTINGS_ICON -> model.closeSettings();
+            case MUSIC -> model.toggleMusic();
+            case SOUND -> model.toggleSound();
             case RES_FULL -> {
                 model.setMaxResolution();
                 view.setResolution();
-                System.out.println("full");
             }
-            case RES_MID  -> {
+            case RES_MID -> {
                 model.setMidResolution();
                 view.setResolution();
-                System.out.println("mid");
             }
-            case RES_MIN  -> {
+            case RES_MIN -> {
                 model.setMinResolution();
                 view.setResolution();
-                System.out.println("small");
             }
-            case QUIT ->{
-                System.exit(0);
-            }
+            case QUIT -> System.exit(0);
         }
     }
     //-------------------------------------------------------------
@@ -389,26 +370,43 @@ public class GameController implements IController{
     }
     //-------------------------------------------------------------
 
-    // GETTER
-    @Override public GameState getGameState()                  { return model.getGameState(); }
-    @Override public boolean isDebugMode()                     { return model.isDebugMode(); }
-    @Override public int getPlayerWorldX()                     { return model.getPlayer().getWorldX(); }
-    @Override public int getPlayerWorldY()                     { return model.getPlayer().getWorldY(); }
-    @Override public int getPlayerCurrentLayer()               { return model.getPlayer().getCurrentLayer(); }
-    @Override public int getPlayerLife()                       { return model.getPlayer().getLife(); }
-    @Override public int getPlayerMaxLife()                    { return model.getPlayer().getMaxLife(); }
-    @Override public boolean playerHasShield()                 { return model.getPlayer().hasShield(); }
-    @Override public double getPlayerShieldTimerMs()           { return model.getPlayer().getShieldTimerMs(); }
-    @Override public Rectangle getPlayerSolidArea()            { return model.getPlayer().getSolidArea(); }
-    @Override public GameMap getWorldMap()                     { return model.getWorldMap(); }
-    @Override public List<IRenderable> getAllRenderables()     { return model.getAllRenderables(); }
-    @Override public String getCurrentDialogue()               { return model.getCurrentDialogue(); }
-    @Override public String getCurrentMessage()                { return model.getCurrentMessage(); }
-    @Override public boolean isSoundEnabled()                  { return model.isSoundEnabled(); }
-    @Override public boolean isMusicEnabled()                  { return model.isMusicEnabled(); }
-    @Override public int getResolutionValue()                  { return model.getResolutionValue(); }
-    @Override public PlayerColor getPlayerColor()              { return model.getPlayerColor(); }
-    @Override public List<AudioEventType> consumeAudioEvents() { return model.consumeAudioEvents(); }
-}
+    @Override
+    public GameViewState snapshot() {
+        var player = model.getPlayer();
+        if (player == null) {
+            return new GameViewState(
+                    model.getGameState(), model.isDebugMode(),
+                    0, 0, 0, 0, 0, false, 0, new java.awt.Rectangle(),
+                    model.getWorldMap(), model.getAllRenderables(),
+                    model.getCurrentDialogue(), model.getCurrentMessage(),
+                    model.isSoundEnabled(), model.isMusicEnabled(),
+                    model.getResolutionValue(), model.getPlayerColor()
+            );
+        }
+        return new GameViewState(
+                model.getGameState(),
+                model.isDebugMode(),
+                player.getWorldX(),
+                player.getWorldY(),
+                player.getCurrentLayer(),
+                player.getLife(),
+                player.getMaxLife(),
+                player.hasShield(),
+                player.getShieldTimerMs(),
+                player.getSolidArea(),
+                model.getWorldMap(),
+                model.getAllRenderables(),
+                model.getCurrentDialogue(),
+                model.getCurrentMessage(),
+                model.isSoundEnabled(),
+                model.isMusicEnabled(),
+                model.getResolutionValue(),
+                model.getPlayerColor()
+        );
+    }
 
-//-------------------------------------------------------------------------------------------------------------------
+    @Override
+    public List<AudioEventType> consumeAudioEvents() {
+        return model.consumeAudioEvents();
+    }
+}

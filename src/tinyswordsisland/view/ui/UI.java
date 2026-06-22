@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
-import tinyswordsisland.controller.IController;
+import tinyswordsisland.view.GameViewState;
 
 import static tinyswordsisland.config.enu.ButtonValue.MainMenu.*;
 import static tinyswordsisland.config.enu.ButtonValue.PauseMenu.*;
@@ -39,8 +39,8 @@ public class UI {
     // =========================================================================
 
     private final ScreenConfig screenConfig;
-    private final IController controller;
     private Graphics2D g2;
+    private GameViewState viewState;
 
     // =========================================================================
     // Font
@@ -168,8 +168,7 @@ public class UI {
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public UI(IController controller, ScreenConfig screenConfig, int screenWidth, int screenHeight) {
-        this.controller = controller;
+    public UI(ScreenConfig screenConfig, int screenWidth, int screenHeight) {
         this.screenConfig = screenConfig;
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
@@ -278,10 +277,11 @@ public class UI {
      * Main draw - called once per frame from the game loop.
      * */
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2) {
+    public void draw(Graphics2D g2, GameViewState state) {
         this.g2 = g2;
+        this.viewState = state;
 
-        switch (controller.getGameState()) {
+        switch (state.gameState()) {
             case MENU      -> {
                 updateModelStatus();
                 drawMainMenu();
@@ -289,8 +289,8 @@ public class UI {
             case PLAYING   -> {
                 drawPlayerLife();
                 drawShield();
-                if (!controller.getCurrentDialogue().isEmpty()) drawDialogueWindow();
-                if (!controller.getCurrentMessage().isEmpty()) drawMessageWindow();
+                if (!state.currentDialogue().isEmpty()) drawDialogueWindow();
+                if (!state.currentMessage().isEmpty()) drawMessageWindow();
             }
             case PAUSED    -> {
                 drawPlayerLife(); drawPauseScreen(); }
@@ -302,7 +302,7 @@ public class UI {
             case WIN -> drawWinScreen();
         }
 
-        if (controller.isDebugMode()) drawFpsOverlay();
+        if (state.debugMode()) drawFpsOverlay();
     }
 
     /**
@@ -318,23 +318,23 @@ public class UI {
         ButtonValue.SettingsMenu[] settingsItems = ButtonValue.SettingsMenu.values();
         for (ButtonValue.SettingsMenu k : settingsItems) selectedState.put(k, false);
 
-        switch (controller.getPlayerColor()) {
+        switch (viewState.playerColor()) {
             case YELLOW -> selectedState.put(ButtonValue.MainMenu.TOGGLE_YELLOW, true);
             case RED    -> selectedState.put(ButtonValue.MainMenu.TOGGLE_RED, true);
             case BLUE   -> selectedState.put(ButtonValue.MainMenu.TOGGLE_BLUE, true);
             case PURPLE -> selectedState.put(ButtonValue.MainMenu.TOGGLE_PURPLE, true);
         }
 
-        switch (controller.getResolutionValue()){
+        switch (viewState.resolutionValue()) {
             case 0 -> selectedState.put(RES_MIN, true);
             case 1 -> selectedState.put(RES_MID, true);
             case 2 -> selectedState.put(RES_FULL, true);
         }
 
-        if (!controller.isMusicEnabled()){
+        if (!viewState.musicEnabled()) {
             selectedState.put(ButtonValue.SettingsMenu.MUSIC, true);
         }
-        if (!controller.isSoundEnabled()){
+        if (!viewState.soundEnabled()) {
             selectedState.put(ButtonValue.SettingsMenu.SOUND, true);
         }
     }
@@ -345,8 +345,8 @@ public class UI {
     //-------------------------------------------------------------
     private void drawPlayerLife() {
 
-        int playerLife = controller.getPlayerLife();
-        int maxLife = controller.getPlayerMaxLife();
+        int playerLife = viewState.playerLife();
+        int maxLife = viewState.playerMaxLife();
         int totalHearts = (maxLife + 1) / 2;
 
         int heartWidth = heartFull.getWidth();
@@ -378,11 +378,11 @@ public class UI {
     }
     //-------------------------------------------------------------
     private void drawShield() {
-        if (!controller.playerHasShield()) {
+        if (!viewState.playerHasShield()) {
             return;
         }
 
-        double remainingMs = controller.getPlayerShieldTimerMs();
+        double remainingMs = viewState.playerShieldTimerMs();
         double maxMs = EntityConfig.SHIELD_DURATION_MS;
 
         float progress = (float) (remainingMs / maxMs);
@@ -434,7 +434,7 @@ public class UI {
 
         dialogueBanner.draw(g2, x, y, width, height);
 
-        String dialogue = controller.getCurrentDialogue();
+        String dialogue = viewState.currentDialogue();
         if (dialogue == null || dialogue.isBlank()) return;
 
         int textBoxWidth = (int) (width * 0.85f);
@@ -466,7 +466,7 @@ public class UI {
         blueBanner.draw(g2, x, y, width, height);
 
 
-        String allert = controller.getCurrentMessage(); 
+        String allert = viewState.currentMessage();
         if (allert == null || allert.isBlank()) return;
 
         int textBoxWidth = (int) (width * 0.75f);
@@ -889,7 +889,7 @@ public class UI {
 
         g.dispose();
         long elapsedMs = (System.nanoTime() - startNs) / 1_000_000L;
-        if (controller.isDebugMode() && elapsedMs >= 4) {
+        if (viewState.debugMode() && elapsedMs >= 4) {
             System.out.println("[UI] damage overlay cache rebuilt in " + elapsedMs + "ms (alphaStep="
                     + damageOverlayAlphaStep + ", " + w + "x" + h + ")");
         }
@@ -1123,14 +1123,14 @@ public class UI {
             fpsTimer = now;
         }
 
-        int xTile = (controller.getPlayerWorldX() + controller.getPlayerSolidArea().x) / screenConfig.TILE_SIZE();
-        int yTile = (controller.getPlayerWorldY() + controller.getPlayerSolidArea().y) / screenConfig.TILE_SIZE();
+        int xTile = (viewState.playerWorldX() + viewState.playerSolidArea().x) / screenConfig.TILE_SIZE();
+        int yTile = (viewState.playerWorldY() + viewState.playerSolidArea().y) / screenConfig.TILE_SIZE();
 
         g2.setColor(Color.YELLOW);
         g2.setFont(new Font("Monospaced", Font.BOLD, 18));
         g2.drawString("FPS: " + fps
                 + "  PLAYER X: " + xTile + ", Y: " + yTile
-                + "  L: " + controller.getPlayerCurrentLayer(), 10, 18);
+                + "  L: " + viewState.playerCurrentLayer(), 10, 18);
     }
     //-------------------------------------------------------------
 

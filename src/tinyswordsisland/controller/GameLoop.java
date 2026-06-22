@@ -62,7 +62,6 @@ public class GameLoop extends Thread {
             // debug console
             drawCount++;
             if (currentTime - lastFpsTime >= 1_000_000_000L) {
-                System.out.println("FPS: " + drawCount);
                 drawCount = 0;
                 lastFpsTime = currentTime;
             }

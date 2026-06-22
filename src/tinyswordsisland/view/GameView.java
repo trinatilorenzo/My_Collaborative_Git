@@ -73,22 +73,14 @@ public class GameView extends JPanel implements IGameView {
         this.setFocusable(true);
         applyCustomCursor(UIConfig.CURSOR_PATH);
 
-        //  import the tileset Asset
-        System.out.println("tileset path: " + GS.TILESET_IMG_PATH());
         this.tileSet = new TileSet(GS.TILESET_IMG_PATH(), GS.mapConfig().ORIGINAL_TILESIZE(), MapConfig.MAX_TILESET_ROW, MapConfig.MAX_TILESET_COL, GS.tilesetDoc());
-
-        //import the map Render
         this.mapRender = new MapRender();
-
-        // import the audio manager
         this.audioManager = new GameAudioManager();
-        this.audioManager.syncBackgroundMusic(controller.getGameState());
+        this.audioManager.syncBackgroundMusic(controller.snapshot().gameState());
 
+        this.renderDispatcher = new RenderDispatcher(GS, controller.snapshot().playerColor());
 
-        this.renderDispatcher = new RenderDispatcher(GS, controller.getPlayerColor());
-
-        //initialize after 
-        this.ui_render = new UI(controller, screenCfg, screenWidth, screenHeight);
+        this.ui_render = new UI(screenCfg, screenWidth, screenHeight);
         setResolution();
 
     }
@@ -126,88 +118,73 @@ public class GameView extends JPanel implements IGameView {
         g2.setColor(screenCfg.GAME_BG_COLOR());
         g2.fillRect(0,0, screenWidth, screenHeight);
 
-        switch (controller.getGameState()) {
+        GameViewState state = controller.snapshot();
+
+        switch (state.gameState()) {
 
             case PLAYING, PAUSED, GAME_OVER, WIN -> {
+                mapRender.DrawMap(screenCfg, state.worldMap(), tileSet, state.playerWorldX(), state.playerWorldY(), g2, screenWidth, screenHeight);
+                drawEntities(g2, state);
 
-                // DRAW THE WORLD MAP
-                mapRender.DrawMap(screenCfg, controller.getWorldMap(), tileSet, controller.getPlayerWorldX(), controller.getPlayerWorldY(), g2, screenWidth, screenHeight);
-                // Y-sorting logic: sort objects by their worldY coordinate
-                drawEntities(g2);
-
-                if (controller.isDebugMode()) {
-                    drawWorldDebug(g2);
+                if (state.debugMode()) {
+                    drawWorldDebug(g2, state);
                 }
             }
             case SETTINGS -> {
-                if(controller.isSoundEnabled()){
+                if (state.soundEnabled()) {
                     audioManager.setSfxVolume(1);
-                }else{
+                } else {
                     audioManager.setSfxVolume(0);
                 }
-                if (controller.isMusicEnabled()) {
+                if (state.musicEnabled()) {
                     audioManager.setMusicVolume(1);
-                }else {
+                } else {
                     audioManager.setMusicVolume(0);
                 }
             }
         }
 
-        // draw the UI
-        ui_render.draw(g2);
+        ui_render.draw(g2, state);
         g2.dispose();
 
     }
 
     //-------------------------------------------------------------
 
-    private void drawWorldDebug(Graphics2D g2) {
-        mapRender.drawAllGameLayers(controller.getWorldMap(), controller.getPlayerWorldX(), controller.getPlayerWorldY(), g2, screenWidth, screenHeight);
-        //objectRenderer.drawDebugSolidAreas(g2, tinyswordsisland.model.getObjects(), playerWorldX, playerWorldY, screenCfg, screenWidth, screenHeight);
+    private void drawWorldDebug(Graphics2D g2, GameViewState state) {
+        mapRender.drawAllGameLayers(state.worldMap(), state.playerWorldX(), state.playerWorldY(), g2, screenWidth, screenHeight);
     }
 
-    //--------------------------------------------------------------
-   
-    private void drawEntities(Graphics2D g2){
-
-        // Player's coordinates
-        int playerWorldX = controller.getPlayerWorldX();
-        int playerWorldY = controller.getPlayerWorldY();
+    private void drawEntities(Graphics2D g2, GameViewState state) {
+        int playerWorldX = state.playerWorldX();
+        int playerWorldY = state.playerWorldY();
         int pScreenX = screenWidth / 2;
         int pScreenY = screenHeight / 2;
 
-        // Renderable entities and object
-        List<IRenderable> renderList = new ArrayList<>(controller.getAllRenderables());
-
-        // Universal y-sorting
+        List<IRenderable> renderList = new ArrayList<>(state.renderables());
         renderList.sort(Comparator.comparingInt(obj -> obj.getWorldY() + obj.getSolidArea().y + obj.getSolidArea().height));
 
-        // Render
         for (IRenderable obj : renderList) {
-        
-            // Screen Coordinates
             int screenX = obj.getWorldX() - playerWorldX + pScreenX;
             int screenY = obj.getWorldY() - playerWorldY + pScreenY;
 
-            // Universal culling: If the object is off-screen, we don't waste resources drawing it.
-            if (screenX + obj.getWidth() < 0 || screenX > screenWidth ||
-                screenY + obj.getHeight() < 0 || screenY > screenHeight) {
+            if (screenX + obj.getWidth() < 0 || screenX > screenWidth
+                    || screenY + obj.getHeight() < 0 || screenY > screenHeight) {
                 continue;
             }
 
-            renderDispatcher.draw(g2, obj, screenX, screenY, controller.isDebugMode(), playerWorldX, playerWorldY, controller.getPlayerCurrentLayer());
-
+            renderDispatcher.draw(g2, obj, screenX, screenY, state.debugMode(), state.playerCurrentLayer());
         }
     }
 
     public void updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
-        renderDispatcher.update(controller, deltaMs);
+        renderDispatcher.update(controller.snapshot().renderables(), deltaMs);
     }
     //-------------------------------------------------------------
 
     private void applyResolutionValuesOnly() {
-        switch (controller.getResolutionValue()) {
+        switch (controller.snapshot().resolutionValue()) {
             case 0 -> {
                 screenWidth = screenCfg.MIN_SCREEN_WIDTH();
                 screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
@@ -254,7 +231,7 @@ public class GameView extends JPanel implements IGameView {
         frame.dispose();
         frame.setExtendedState(JFrame.NORMAL);
 
-        switch (controller.getResolutionValue()) {
+        switch (controller.snapshot().resolutionValue()) {
             case 0 -> {
                 screenWidth = screenCfg.MIN_SCREEN_WIDTH();
                 screenHeight = screenCfg.MIN_SCREEN_HEIGHT();
@@ -321,8 +298,6 @@ public class GameView extends JPanel implements IGameView {
         repaint();
         frame.revalidate();
         frame.repaint();
-
-        System.out.println("screenWidth: " + screenWidth + " screenHeight: " + screenHeight);
     }
     //-------------------------------------------------------------
 
@@ -348,7 +323,7 @@ public class GameView extends JPanel implements IGameView {
     }
 
     public void updatePlayerColor() {
-        renderDispatcher.updatePlayerColor(controller.getPlayerColor());
+        renderDispatcher.updatePlayerColor(controller.snapshot().playerColor());
     }
 
     @Override
@@ -379,58 +354,17 @@ public class GameView extends JPanel implements IGameView {
 
     @Override
     public Enum<?> getButtonAtPoint(GameState screen, Point point) {
-        if (point == null) return null;
-        switch (screen) {
-            case MENU -> {
-                MainMenuLayout l = ui_render.getMainMenuLayout();
-                if (contains(l.newGameBounds(),     point)) return ButtonValue.MainMenu.NEW_GAME;
-                if (contains(l.continueBounds(),    point)) return ButtonValue.MainMenu.LOAD_GAME;
-                if (contains(l.settingsBounds(),    point)) return ButtonValue.MainMenu.SETTINGS;
-                if (contains(l.toggleBlueBounds(),  point)) return ButtonValue.MainMenu.TOGGLE_BLUE;
-                if (contains(l.toggleYellowBounds(),point)) return ButtonValue.MainMenu.TOGGLE_YELLOW;
-                if (contains(l.toggleRedBounds(),   point)) return ButtonValue.MainMenu.TOGGLE_RED;
-                if (contains(l.togglePurpleBounds(),point)) return ButtonValue.MainMenu.TOGGLE_PURPLE;
-            }
-            case PAUSED -> {
-                PauseMenuLayout l = ui_render.getPauseMenuLayout();
-                if (contains(l.resumeBounds(),   point)) return ButtonValue.PauseMenu.RESUME;
-                if (contains(l.settingsBounds(), point)) return ButtonValue.PauseMenu.PAUSE_SETTINGS;
-                if (contains(l.saveBounds(),     point)) return ButtonValue.PauseMenu.SAVE;
-            }
-            case SETTINGS -> {
-                SettingsLayout l = ui_render.getSettingsLayout();
-                if (contains(l.settingsIconBounds(), point)) return ButtonValue.SettingsMenu.SETTINGS_ICON;
-                if (contains(l.musicBounds(),        point)) return ButtonValue.SettingsMenu.MUSIC;
-                if (contains(l.soundBounds(),        point)) return ButtonValue.SettingsMenu.SOUND;
-                if (contains(l.resFullBounds(),      point)) return ButtonValue.SettingsMenu.RES_FULL;
-                if (contains(l.resHalfBounds(),      point)) return ButtonValue.SettingsMenu.RES_MID;
-                if (contains(l.resMinBounds(),       point)) return ButtonValue.SettingsMenu.RES_MIN;
-                if (contains(l.quitBounds(),         point)) return ButtonValue.SettingsMenu.QUIT;
-            }
-            case GAME_OVER -> {
-                GameOverLayout l = ui_render.getGameOverLayout();
-                if (contains(l.homeButtonBounds(), point)) return ButtonValue.GameOverMenu.HOME_OVER;
-                if (contains(l.quitButtonBounds(), point)) return ButtonValue.GameOverMenu.QUIT_OVER;
-            }
-            case WIN -> {
-                WinLayout l = ui_render.getWinLayout();
-                if (contains(l.homeButtonBounds(), point)) return ButtonValue.WinMenu.HOME_WIN;
-                if (contains(l.quitButtonBounds(), point)) return ButtonValue.WinMenu.QUIT_WIN;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Checks if a rectangle contains a point
-     * (used to check mouse hovers and clicks)
-     */
-    private boolean contains(Rectangle bounds, Point p) {
-        return bounds != null && p != null && bounds.contains(p);
+        return MenuHitTester.hitTest(screen, point, new MenuHitTester.MenuLayouts(
+                ui_render::getMainMenuLayout,
+                ui_render::getPauseMenuLayout,
+                ui_render::getSettingsLayout,
+                ui_render::getGameOverLayout,
+                ui_render::getWinLayout
+        ));
     }
 
     @Override
-    public void render(){
+    public void render() {
         this.repaint();
     }
 

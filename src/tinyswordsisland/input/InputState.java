@@ -1,9 +1,8 @@
-package tinyswordsisland.controller;
+package tinyswordsisland.input;
 
 /**
- * Represents the state of player input, encapsulating the status of directional keys (up, down, left, right).
+ * Snapshot of player and menu input for a single game frame.
  */
-
 public record InputState(
         boolean up,
         boolean down,

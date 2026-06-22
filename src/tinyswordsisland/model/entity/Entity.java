@@ -60,6 +60,11 @@ public class Entity implements Serializable, IRenderable {
     }
     //-------------------------------------------------------------
 
+    public boolean supportsLayerChange() {
+        return false;
+    }
+    //-------------------------------------------------------------
+
     /**
      * Applies movement based on dx/dy, respecting per-axis collision.
      */

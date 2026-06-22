@@ -1,6 +1,6 @@
 package tinyswordsisland.model.entity;
 
-import tinyswordsisland.controller.InputState;
+import tinyswordsisland.input.InputState;
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.enu.Direction;
 import tinyswordsisland.config.enu.PlayerColor;
@@ -323,6 +323,11 @@ public class Player extends Entity {
         this.attackDamageApplied = applied; 
     }
     public void setColor(PlayerColor color) {this.color = color;    }
+
+    @Override
+    public boolean supportsLayerChange() {
+        return true;
+    }
     //---------------------------------
 
 

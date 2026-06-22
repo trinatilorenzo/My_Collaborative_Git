@@ -1,5 +1,7 @@
 package tinyswordsisland.controller;
 
+import tinyswordsisland.input.InputState;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 

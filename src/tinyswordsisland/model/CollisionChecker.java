@@ -6,8 +6,6 @@ import tinyswordsisland.model.object.GameObject;
 import java.awt.Rectangle;
 import java.util.List;
 
-import tinyswordsisland.model.entity.Player;
-
 /**
  * The COLLISIONCHEKER CLASS is responsible for determining whether an entity
  * within the game world collides with the game's tilemap, objects, or other entities.
@@ -15,19 +13,11 @@ import tinyswordsisland.model.entity.Player;
 //-------------------------------------------------------------------------------------------------------------------
 public class CollisionChecker {
 
-    private final GameModel gameModel; // dependency from the class
+    private final CollisionWorld world;
 
-    /**
-     * the enty bounds is the way to represent the area of the entity inside the tinyswordsisland.model
-     * it is the basics value to check the collision between the entity and the game world
-     */
     private record EntityBounds(int leftX, int rightX, int topY, int bottomY, int layer) {
-
-        //methods to create the bounds of the entity
         static EntityBounds of(Entity entity) {
-            // worldX & worldY = center of solid area
             Rectangle r = entity.getSolidWorldArea();
-            
             int leftX = r.x;
             int rightX = r.x + r.width - 1;
             int topY = r.y;
@@ -40,8 +30,8 @@ public class CollisionChecker {
      * COSTRUCTOR
      */
     //-------------------------------------------------------------
-    public CollisionChecker(GameModel model) {
-        this.gameModel = model;
+    public CollisionChecker(CollisionWorld world) {
+        this.world = world;
     }
     //-------------------------------------------------------------
 
@@ -63,10 +53,10 @@ public class CollisionChecker {
         if (dx == 0) return; // not moving
 
         //anticipate the entity movement (move left or right)
-        int projectedLeftCol = (bounds.leftX + dx) / gameModel.getTILE_SIZE();
-        int projectedRightCol = (bounds.rightX + dx) / gameModel.getTILE_SIZE();
-        int rowTop = bounds.topY / gameModel.getTILE_SIZE();
-        int rowBottom = bounds.bottomY / gameModel.getTILE_SIZE();
+        int projectedLeftCol = (bounds.leftX + dx) / world.getTileSize();
+        int projectedRightCol = (bounds.rightX + dx) / world.getTileSize();
+        int rowTop = bounds.topY / world.getTileSize();
+        int rowBottom = bounds.bottomY / world.getTileSize();
 
         int checkCol;
         if (dx < 0) {
@@ -87,10 +77,10 @@ public class CollisionChecker {
         if (dy == 0) return; // not moving
 
         //anticipate the entity movement (move up or down)
-        int colLeft = bounds.leftX / gameModel.getTILE_SIZE();
-        int colRight = bounds.rightX / gameModel.getTILE_SIZE();
-        int projectedTopRow = (bounds.topY + dy) / gameModel.getTILE_SIZE();
-        int projectedBottomRow = (bounds.bottomY + dy) / gameModel.getTILE_SIZE();
+        int colLeft = bounds.leftX / world.getTileSize();
+        int colRight = bounds.rightX / world.getTileSize();
+        int projectedTopRow = (bounds.topY + dy) / world.getTileSize();
+        int projectedBottomRow = (bounds.bottomY + dy) / world.getTileSize();
 
 
         int checkRow;
@@ -103,9 +93,7 @@ public class CollisionChecker {
         }
 
         if (isCollision(bounds.layer, checkRow, colLeft) || isCollision(bounds.layer, checkRow, colRight)) {
-            // check if the entity is on the stairs and update the layer
-            if (entity instanceof Player){
-                //only update the player layer, other entities simply can't move on the stairs
+            if (entity.supportsLayerChange()) {
                 entity.setCollisionY(true);
                 updateEntityLayer(entity, bounds, checkRow, colLeft);
                 return;
@@ -137,13 +125,13 @@ public class CollisionChecker {
         if (isOutOfBounds(row, col)) {
             return true;
         }
-        return gameModel.getWorldMap().hasCollision(layer, row, col); // just check the collision map
+        return world.getWorldMap().hasCollision(layer, row, col);
     }
     //-------------------------------------------------------------
     private boolean isOutOfBounds(int row, int col) {
         return row < 0 || col < 0
-                || row >= gameModel.getWorldMap().getMaxMapRow()
-                || col >= gameModel.getWorldMap().getMaxMapCol();
+                || row >= world.getWorldMap().getMaxMapRow()
+                || col >= world.getWorldMap().getMaxMapCol();
     }
     //-------------------------------------------------------------
     // end checkTile -------------------------------------------------------------
@@ -155,7 +143,7 @@ public class CollisionChecker {
      */
     //-------------------------------------------------------------
     public void checkObjects(Entity entity) {
-        List<GameObject> objects = gameModel.getObjects();
+        List<GameObject> objects = world.getObjects();
         if (objects == null || objects.isEmpty()) return;
 
         EntityBounds bounds = EntityBounds.of(entity);

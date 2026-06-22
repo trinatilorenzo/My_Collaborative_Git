@@ -23,6 +23,8 @@ public final class SaveManager {
     public static Path saveGame(IGameModel model) throws IOException {
         Files.createDirectories(SAVE_DIR);
 
+        model.beforeSave();
+
         String timestamp = LocalDateTime.now().format(FORMATTER);
         String fileName = PREFIX + timestamp + EXT;
         Path savePath = SAVE_DIR.resolve(fileName);
