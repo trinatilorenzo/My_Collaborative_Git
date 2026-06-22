@@ -10,6 +10,10 @@ import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.entity.*;
 import tinyswordsisland.model.event.AudioEventType;
 import tinyswordsisland.model.object.*;
+import tinyswordsisland.model.util.GameSettings;
+import tinyswordsisland.model.util.InteractionSystem;
+import tinyswordsisland.model.util.LevelInitializer;
+import tinyswordsisland.model.util.LevelInitializer.InitializedWorld;
 
 import java.awt.*;
 import java.io.IOException;
@@ -25,20 +29,23 @@ import java.util.List;
 */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel implements Serializable, IGameModel {
-    private transient GameConfig gameConfig;
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    private transient GameConfig gameConfig;
+    private transient CollisionChecker collisionChecker;
+    private transient InteractionSystem interactionSystem;
     //-------------------------------------------------------------
 
     // Game status
     private GameState gameState;
-    private boolean debugMode;
+
+    private int currentLevel;
+    private boolean levelCompleted;
+    private boolean currentLevelPowerUpCollected;
     //-------------------------------------------------------------
 
-    // Collision
-    private transient CollisionChecker collisionChecker;
-    //-------------------------------------------------------------
 
     // Map & OBJ
     private  GameMap worldGameMap;
@@ -46,7 +53,6 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
 
     // Player & NPC
-    //-------------------------------------------------------------
     private Player player;
     private Monk monk;
     private List<EnemyTNT> tntEnemies;
@@ -56,29 +62,22 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
 
     //UI State
-
     private boolean settingsMenuOpen, settingsPauseOpen;
-    private boolean musicEnabled, soundEnabled;
-    private int resValue; // 0 = Max , 1 = Mid, 2 = Low
-    private PlayerColor playerColor;
-
+    private GameSettings settings;
+    //-------------------------------------------------------------
 
     // Dialogue
     private String currentDialogue; // dialogue currently displayed to the player
     private String currentMessage;
-    private double messageTimer;
+    private double messageTimer; //TODO forse da rimuovere
     //-------------------------------------------------------------
 
     // Death sequence
-    private double deadStateElapsedMs;
+    private double deadStateElapsedMs; // TODO da spostare in view ?
 
     //Audio events
-    private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>();
+    private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>(); // TODO da spostare in view
 
-    // Level and progression
-    private int currentLevel = 0;
-    private boolean levelCompleted;
-    private boolean currentLevelPowerUpCollected = false;
 
 
     //-------------------------------------------------------------
@@ -91,7 +90,6 @@ public class GameModel implements Serializable, IGameModel {
         collisionChecker = new CollisionChecker(this);
 
         gameState = GameState.MENU; // Default game state is the menu state
-        debugMode = false; // Default debug mode is off
 
         currentDialogue = "";
         currentMessage = "";
@@ -99,10 +97,7 @@ public class GameModel implements Serializable, IGameModel {
         deadStateElapsedMs = 0.0;
         settingsMenuOpen = false;
         settingsPauseOpen = false;
-        playerColor = GS.entityConfig().DEFAULT_COLOR;
-        musicEnabled = true;
-        soundEnabled = true;
-        resValue = 0;
+        settings = new GameSettings();
 
     }
     //-------------------------------------------------------------
@@ -111,178 +106,24 @@ public class GameModel implements Serializable, IGameModel {
      * Start a new game from scratch
      */
     //-------------------------------------------------------------
-    public void initializeNewGame(){
-        worldGameMap = new GameMap(gameConfig.mapConfig(), gameConfig.mapDoc());
+    @Override
+    public void initializeNewGame() {
+        InitializedWorld world = LevelInitializer.createNewWorld(gameConfig, settings.getPlayerColor());
+        worldGameMap = world.worldGameMap();
+        player = world.player();
+        monk = world.monk();
+        tntEnemies = world.tntEnemies();
+        dynamiteEnemies = world.dynamiteEnemies();
+        projectiles = world.projectiles();
+        torchEnemies = world.torchEnemies();
+        objects = world.objects();
 
-        player = new Player(gameConfig.entityConfig(), playerColor);
-
-        //initialize NPC
-        EntityConfig entityConfig = gameConfig.entityConfig();
-        monk = new Monk(entityConfig.MONK_START_X(), entityConfig.MONK_START_Y(), entityConfig);
-        tntEnemies = spawnTntEnemies(entityConfig);
-        projectiles = new ArrayList<>();
-        dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles);
-        torchEnemies = spawnTorchEnemies(entityConfig);
-        
-        //initialize Objects
-        ObjConfig objC = gameConfig.ObjConfig();
-        objects = new ArrayList<>();
-
-        // first level tree
-        spawnTrees(objC.TREES_03_SPAWNPOINT(), objC.TREE_TAG_03(), objC.TREE_03_WIDTH, objC.TREE_03_HEIGHT,
-                new Dimension(objC.TREE_03_HITBOX_WIDTH, objC.TREE_03_HITBOX_HEIGHT), objC.TREE_03_HITBOX_OFFSET_Y, objC);
-        // second level tree
-        spawnTrees(objC.TREES_02_SPAWNPOINT(), objC.TREE_TAG_02(), objC.TREE_02_WIDTH, objC.TREE_02_HEIGHT,
-                new Dimension(objC.TREE_02_HITBOX_WIDTH, objC.TREE_02_HITBOX_HEIGHT) ,objC.TREE_02_HITBOX_OFFSET_Y, objC);
-        // third level tree
-        spawnTrees(objC.TREES_01_SPAWNPOINT(), objC.TREE_TAG_01(), objC.TREE_01_WIDTH, objC.TREE_01_HEIGHT,
-                new Dimension(objC.TREE_01_HITBOX_WIDTH, objC.TREE_01_HITBOX_HEIGHT), objC.TREE_01_HITBOX_OFFSET_Y, objC);
-
-        // buildings
-        spawnBuildings(objC.CASTLE_SPAWNPOINT(), objC.CASTLE_TAG(), ObjConfig.CASTLE_WIDTH, ObjConfig.CASTLE_HEIGHT,
-                ObjConfig.CASTLE_HITBOX_WIDTH, ObjConfig.CASTLE_HITBOX_HEIGHT, ObjConfig.CASTLE_HITBOX_OFFSET_Y, objC);
-        spawnBuildings(objC.TOWER_SPAWNPOINT(), objC.TOWER_TAG(), ObjConfig.TOWER_WIDTH, ObjConfig.TOWER_HEIGHT,
-                ObjConfig.TOWER_HITBOX_WIDTH, ObjConfig.TOWER_HITBOX_HEIGHT, ObjConfig.TOWER_HITBOX_OFFSET_Y, objC);
-        spawnBuildings(objC.GOLDMINE_SPAWNPOINT(), objC.GOLDMINE_TAG(), ObjConfig.GOLDMINE_WIDTH, ObjConfig.GOLDMINE_HEIGHT,
-                ObjConfig.GOLDMINE_HITBOX_WIDTH, ObjConfig.GOLDMINE_HITBOX_HEIGHT, ObjConfig.GOLDMINE_HITBOX_OFFSET_Y, objC);
-        spawnBuildings(objC.GOBLIN_HOME_SPAWNPOINT(), objC.GOBLIN_HOME_TAG(), ObjConfig.GOBLIN_HOME_WIDTH, ObjConfig.GOBLIN_HOME_HEIGHT,
-                ObjConfig.GOBLIN_HOME_HITBOX_WIDTH, ObjConfig.GOBLIN_HOME_HITBOX_HEIGHT, ObjConfig.GOBLIN_HOME_HITBOX_OFFSET_Y, objC);
-
-        // Power ups settings
-        assignRandomPowerUps(objC);
         currentLevelPowerUpCollected = false;
         currentLevel = 0;
-
-        // START THE GAME
+        levelCompleted = false;
         gameState = GameState.PLAYING;
     }
     //-------------------------------------------------------------------
-    
-    /**
-     * HELPERS METHOD
-     */
-    private List<EnemyTNT> spawnTntEnemies(EntityConfig entityConfig) {
-        List<EnemyTNT> enemies = new ArrayList<>();
-        for (SpawnPoint spawnPoint : entityConfig.TNT_SPAWNPOINT()) {
-            for (int i = 0; i < entityConfig.TNT_FOR_SPAWNPOINT; i++) {
-                enemies.add(new EnemyTNT(spawnPoint, entityConfig));
-            }
-        }
-        return enemies;
-    }
-    //-------------------------------------------------------------
-    /**
-     * Helper method to spawn dynamite enemies based on the spawn points defined.
-      * It creates an EnemyDynamite instance for each spawn point and adds it to the list of enemies.
-     */
-    private List<EnemyDynamite> spawnDynamiteEnemies(EntityConfig entityConfig, List<DynamiteProjectile> projectileStore) {
-        List<EnemyDynamite> enemies = new ArrayList<>();
-        for (SpawnPoint spawnPoint : entityConfig.DYNAMITE_SPAWNPOINT()) {
-            for (int i = 0; i < entityConfig.DYNAMITE_FOR_SPAWNPOINT; i++) {
-                enemies.add(new EnemyDynamite(spawnPoint, entityConfig, projectileStore));
-            }
-        }
-        return enemies;
-    }
-    //-------------------------------------------------------------
-    /**
-     * Helper method to spawn torch enemies based on the spawn points.
-     * It creates an EnemyTorch instance for each spawn point and adds it to the list of enemies.
-    */
-    private List<EnemyTorch> spawnTorchEnemies(EntityConfig entityConfig) {
-        List<EnemyTorch> enemies = new ArrayList<>();
-        for (SpawnPoint spawnPoint : entityConfig.TORCH_SPAWNPOINT()) {
-            for (int i = 0; i < entityConfig.TORCH_FOR_SPAWNPOINT; i++) {
-                enemies.add(new EnemyTorch(spawnPoint, entityConfig));
-            }
-        }
-        return enemies;
-    }
-    //-------------------------------------------------------------
-    /**
-     * Helper method to spawn trees based on the spawn points defined in the ObjConfig.
-      * It creates an OBJ_Tree instance for each spawn point and adds it to the list of game objects.
-     */
-    private void spawnTrees(List<SpawnPoint> spawnPoints, String treeTag, int treeWidth, int treeHeight, Dimension hitboxDim, int hitboxOffsetY, ObjConfig objConfig) {
-        for (SpawnPoint spawnPoint : spawnPoints) {
-            objects.add(new OBJ_Tree(objConfig, treeTag, spawnPoint, treeWidth, treeHeight,
-                    createTreeSolidArea(treeWidth, hitboxDim, hitboxOffsetY, objConfig)
-            ));
-        }
-    }
-    //-------------------------------------------------------------
-    /**
-     * Helper method to spawn buildings based on the spawn points defined in the ObjConfig.
-     */
-    private void spawnBuildings(List<SpawnPoint> spawnPoints, String buildingTag, int buildingWidth, int buildingHeight,
-                                int hitboxWidth, int hitboxHeight, int hitboxOffsetY, ObjConfig objConfig) {
-        for (SpawnPoint spawnPoint : spawnPoints) {
-            GameObject building = new GameObject(
-                    objConfig,
-                    buildingTag,
-                    spawnPoint,
-                    buildingWidth,
-                    buildingHeight,
-                    createBuildingSolidArea(buildingWidth, hitboxWidth, hitboxHeight, hitboxOffsetY),
-                    ObjConfig.BUILDING_SOLID
-            );
-
-            // Makes the gold mine not solid
-            if (buildingTag.equals(objConfig.GOLDMINE_TAG())) {
-                building.setSolid(false); 
-            }
-
-            objects.add(building);
-        }
-    }
-    //-------------------------------------------------------------
-    /**
-     * Helper method to create a solid area for trees. 
-      * It calculates the position and size of the solid area relative to the tree's visual representation.
-     */
-    private Rectangle createTreeSolidArea(int treeWidth, Dimension treeHitbox, int hitboxOffsetY, ObjConfig objConfig) {
-        return new Rectangle(
-                treeWidth / 2 - ( treeHitbox.width/ 2),
-                hitboxOffsetY, treeHitbox.width, treeHitbox.height);
-    }
-    //-------------------------------------------------------------
-    /**
-     * Helper method to create a solid area for buildings.
-     */
-    private Rectangle createBuildingSolidArea(int buildingWidth, int hitboxWidth, int hitboxHeight, int hitboxOffsetY) {
-        return new Rectangle(
-                buildingWidth / 2 - (hitboxWidth / 2),
-                hitboxOffsetY,
-                hitboxWidth,
-                hitboxHeight
-        );
-    }
-    /**
-     * Assigns random power-ups to a subset of trees in the game world.
-     */
-    private void assignRandomPowerUps(ObjConfig objC){
-        assignPowerUpToRandomTree(objC.TREE_TAG_03(), PowerUpType.SHIELD); 
-        assignPowerUpToRandomTree(objC.TREE_TAG_02(), PowerUpType.HEALTH_RESTORE); 
-        assignPowerUpToRandomTree(objC.TREE_TAG_01(), PowerUpType.SPEED_BOOST); 
-
-    }
-    //---------------------------------------------
-    private void assignPowerUpToRandomTree(String treeTag, PowerUpType type){
-        List<OBJ_Tree> validTrees = new ArrayList<>();
-        for (GameObject obj: objects) {
-            if (obj instanceof OBJ_Tree tree && tree.getName().equals(treeTag)){
-                validTrees.add(tree);
-            }
-        }
-        if (!validTrees.isEmpty()) {
-            int randomIndex = (int) (Math.random() * validTrees.size());
-            validTrees.get(randomIndex).setHiddenPowerUp(type);
-            System.out.println("Assigned " + type + " to tree: " + validTrees.get(randomIndex).getName() + " at (" + validTrees.get(randomIndex).getWorldX() + ", " + validTrees.get(randomIndex).getWorldY() + ")");
-        }
-    }
-    //end helpers -------------------------------------------------
-
-
 
     /**
      * MAIN METHOD OF THE CLASS
@@ -464,7 +305,7 @@ public class GameModel implements Serializable, IGameModel {
                 torch.move();
 
                 //Audio ----------------------
-              
+
                 //----------------------------
             }
 
@@ -540,10 +381,10 @@ public class GameModel implements Serializable, IGameModel {
             if (obj.getName().equals(gameConfig.ObjConfig().GOLDMINE_TAG())){
                 // Check if the player's hitbox intersects the mine's hitbox
                 if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
-                    // Handle win state 
+                    // Handle win state
                     if (currentLevel ==  gameConfig.getMaxLevel() && levelCompleted) {
                         gameState = GameState.WIN; //TODO fermare il gioco
-                        break; 
+                        break;
                     }
                 }
             }
@@ -662,7 +503,7 @@ public class GameModel implements Serializable, IGameModel {
     }
     //-------------------------------------------------------------
     private void updateMonkPositionForEndLevel(){
-        //TODO 
+        //TODO
     }
     //-------------------------------------------------------------
     private void updateEvents(int lifeBeforeUpdate) {
@@ -745,7 +586,7 @@ public class GameModel implements Serializable, IGameModel {
         return false;
     }
     //-------------------------------------------------------------
-    
+
     //-------------------------------------------------------------
     private boolean isPowerUpForCurrentLevel(PowerUpType type) {
         return (currentLevel == 0 || currentLevel == 1 && type == PowerUpType.SHIELD) ||
@@ -753,7 +594,7 @@ public class GameModel implements Serializable, IGameModel {
                (currentLevel == 2 || currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
     }
     //-------------------------------------------------------------
-    
+
     /**
      * Check if all enemies of current level are defeated
      */
@@ -767,7 +608,7 @@ public class GameModel implements Serializable, IGameModel {
         }
         return allEnemiesDefeated;
     }
-    
+
     /**
      * Audio event emitter
       */
@@ -882,7 +723,7 @@ public class GameModel implements Serializable, IGameModel {
         if (dynamiteEnemies != null) { allRenderables.addAll(dynamiteEnemies);}
         if (projectiles != null) { allRenderables.addAll(projectiles);}
 
-        
+
         // Objects
         if (objects != null) {allRenderables.addAll(objects); }
         return allRenderables;
@@ -893,7 +734,7 @@ public class GameModel implements Serializable, IGameModel {
     public CollisionChecker getCollisionChecker() { return collisionChecker;}
     public GameState getGameState() { return gameState; }
     public List<GameObject> getObjects() { return objects; }
-    public boolean isDebugMode() { return debugMode; }
+
     public int getTILE_SIZE(){ return gameConfig.screenConfig().TILE_SIZE(); }
     public Monk getMonk() { return monk; }
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
@@ -906,7 +747,7 @@ public class GameModel implements Serializable, IGameModel {
     //---------------------------------
 
     // SETTER ----------------------
-    public void setDebugMode(boolean debugMode) { this.debugMode = debugMode; }
+
     public void resumeFromPause() {
         if (gameState == GameState.PAUSED){
             gameState = GameState.PLAYING;
@@ -949,61 +790,42 @@ public class GameModel implements Serializable, IGameModel {
     //---------------------------------
 
     //UI SETTERS
+    public void setDebugMode(boolean debugMode) {
+        settings.setDebugMode(debugMode);
+    }
     public void toggleSound(){
-        if (soundEnabled){
-            this.soundEnabled = false;
-        }else{
-            this.soundEnabled = true;
-        }
-
+        settings.toggleSound();
     }
     public void toggleMusic(){
-        if (musicEnabled){
-            this.musicEnabled = false;
-        }else{
-            this.musicEnabled = true;
-        }
-
+        settings.toggleMusic();
     }
-
     public void setMinResolution(){
-        this.resValue = 0;
+        settings.setMinResolution();
     }
     public void setMidResolution(){
-        this.resValue = 1;
+        settings.setMidResolution();
     }
     public void setMaxResolution(){
-        this.resValue = 2;
+        settings.setMaxResolution();
     }
-
-
-
-
     public void setPlayerColor(PlayerColor playerColor){
-        this.playerColor = playerColor;
-        if(player != null){
-            player.setColor(playerColor);
-        }
+        settings.setPlayerColor(playerColor);
     }
-
     //---------------------------------
 
     //UI GETTERS
+    public boolean isDebugMode() { return settings.isDebugMode(); }
     public boolean isSoundEnabled(){
-        return soundEnabled;
+        return settings.isSoundEnabled();
     }
     public boolean isMusicEnabled(){
-        return musicEnabled;
+        return settings.isMusicEnabled();
     }
     public int getResolutionValue(){
-        return resValue;
+        return settings.getResolutionValue();
     }
     public PlayerColor getPlayerColor(){
-        if(player != null){
-            playerColor = player.getColor();
-        }
-
-        return playerColor;
+        return settings.getPlayerColor();
     }
 
 }
