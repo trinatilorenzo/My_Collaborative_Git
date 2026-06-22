@@ -12,10 +12,11 @@ import tinyswordsisland.model.event.AudioEventType;
 public interface IGameModel {
 
     // states
+    void update(InputState input, double deltaMs);
+
     GameState getGameState();
     boolean isDebugMode();
     void setDebugMode(boolean debug);
-    void update(InputState input, double deltaMs);
 
     // game life cycle
     void initializeNewGame();

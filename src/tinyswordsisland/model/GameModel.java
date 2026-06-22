@@ -88,13 +88,10 @@ public class GameModel implements Serializable, IGameModel {
     public GameModel(GameConfig GS) {
         gameConfig = GS;
         collisionChecker = new CollisionChecker(this);
+        interactionSystem = new InteractionSystem();
 
         gameState = GameState.MENU; // Default game state is the menu state
 
-        currentDialogue = "";
-        currentMessage = "";
-        messageTimer = 0.0;
-        deadStateElapsedMs = 0.0;
         settingsMenuOpen = false;
         settingsPauseOpen = false;
         settings = new GameSettings();
@@ -121,6 +118,12 @@ public class GameModel implements Serializable, IGameModel {
         currentLevelPowerUpCollected = false;
         currentLevel = 0;
         levelCompleted = false;
+
+        currentDialogue = "";
+        currentMessage = "";
+        messageTimer = 0.0;
+        deadStateElapsedMs = 0.0;
+
         gameState = GameState.PLAYING;
     }
     //-------------------------------------------------------------------
@@ -130,29 +133,13 @@ public class GameModel implements Serializable, IGameModel {
      * Update the tinyswordsisland.model status, Called by the tinyswordsisland.controller every frame
      */
     //-------------------------------------------------------------
+    @Override
     public void update(InputState input, double deltaMs) {
-
         switch (gameState) {
-            case MENU:
-                // no update for menu state
-                break;
-            case PLAYING:
-                updatePlayingState(input, deltaMs);
-                break;
-            case PAUSED:
-                updateState(input);
-                break;
-            case SETTINGS:
-                // no update for settings state
-                break;
-            case GAME_OVER:
-                // no update for game over state
-                break;
-            case WIN:
-                // no update for game win state
-                break;
+            case MENU, SETTINGS, GAME_OVER, WIN -> { } //no update needed
+            case PLAYING -> updatePlayingState(input, deltaMs);
+            case PAUSED -> updateState(input);
         }
-
     }
     //-------------------------------------------------------------
 
@@ -190,7 +177,7 @@ public class GameModel implements Serializable, IGameModel {
         objects.removeIf(GameObject::isRemoved);
 
         monk.update(player, deltaMs);
-        updateInteractions();
+        interactionSystem.update(this);
         updateMessage(deltaMs);
 
         updateEvents(lifeBeforeUpdate);
@@ -313,103 +300,6 @@ public class GameModel implements Serializable, IGameModel {
         torchEnemies.removeIf(EnemyTorch::isDead);
     }
     //-------------------------------------------------------------
-    private void updateInteractions() {
-
-        //Player attack with sword
-        if (player.getState() == PlayerState.ATTACKING) {
-            Rectangle attackArea = player.getAttackArea();
-
-            // TNT -------------------
-            for (EnemyTNT tnt : tntEnemies) {
-                if (!player.isAttackDamageApplied() && attackArea.intersects(tnt.getSolidWorldArea())) {
-                    tnt.takeDamage();
-                    player.setAttackDamageApplied(true);
-                    //Audio ----------------------
-                    emitAudioEvent(AudioEventType.ENEMY_HIT);
-
-                }
-            }
-            // -------------------
-
-            // Dynamite -------------------
-            for (EnemyDynamite dynamite : dynamiteEnemies) {
-                if (!player.isAttackDamageApplied() && attackArea.intersects(dynamite.getSolidWorldArea())) {
-                    dynamite.takeDamage();
-                    player.setAttackDamageApplied(true);
-                    //Audio ----------------------
-                    emitAudioEvent(AudioEventType.ENEMY_HIT);
-                    if (dynamite.getState() == DynamiteState.DEAD) {
-                        emitAudioEvent(AudioEventType.ENEMY_DEFEATED);
-                    }
-                }
-            }
-            // -------------------
-
-            // Torch -------------------
-            for (EnemyTorch torch : torchEnemies) {
-                if (!player.isAttackDamageApplied() && attackArea.intersects(torch.getSolidWorldArea())) {
-                    torch.takeDamage();
-                    player.setAttackDamageApplied(true);
-                    //Audio ----------------------
-                    emitAudioEvent(AudioEventType.ENEMY_HIT);
-                }
-            }
-            // -------------------
-
-            //Tree -----------
-            for (GameObject obj : objects) {
-                if (obj.isRemoved()) continue;
-                if (obj instanceof OBJ_Tree tree
-                        && !player.isAttackDamageApplied()
-                        && attackArea.intersects(tree.getSolidWorldArea())
-                        && tree.isSolid()) {
-
-                    player.setAttackDamageApplied(true);
-                    tree.interact();
-
-                    //Audio ----------------------
-                    emitAudioEvent(AudioEventType.TREE_HIT);
-                    if (tree.isLastHit()) {
-                        System.out.println("Tree chopped!");
-                        emitAudioEvent(AudioEventType.TREE_FINAL);
-                    }
-
-                }
-            }
-        }
-        for (GameObject obj: objects){
-            if (obj.getName().equals(gameConfig.ObjConfig().GOLDMINE_TAG())){
-                // Check if the player's hitbox intersects the mine's hitbox
-                if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
-                    // Handle win state
-                    if (currentLevel ==  gameConfig.getMaxLevel() && levelCompleted) {
-                        gameState = GameState.WIN; //TODO fermare il gioco
-                        break;
-                    }
-                }
-            }
-
-            if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
-                if (!powerUp.isCollectible()) {
-                    continue; // Skip if the power-up is not yet collectible
-                }
-                player.applyPowerUpEffect(powerUp.getType());
-                powerUp.remove(); // Remove the power-up from the game world
-                if (isPowerUpForCurrentLevel(powerUp.getType())) {
-                    currentLevelPowerUpCollected = true; // Mark the power-up as collected for level progression
-
-                    if (powerUp.getType() == PowerUpType.SHIELD) {
-                        currentMessage = "Premi (R) per attivare lo scudo";
-                    }
-
-                }
-                //Audio ----------------------
-                TODO: emitAudioEvent(AudioEventType.POWERUP_COLLECTED);
-            }
-        }
-        // -------------------
-        checkLevelProgression();
-    }
 
     private void updateMessage(double deltaMS){
 
@@ -423,53 +313,7 @@ public class GameModel implements Serializable, IGameModel {
 
     }
     //----------------------------------------------------------------------
-    /**
-     * Update level progression
-     */
-    private void checkLevelProgression() {
 
-        boolean enemiesDefeated = allEnemiesDefeated();
-
-        if (enemiesDefeated) {
-            if (currentLevel < 3) {
-                updateFlashingEffect(enemiesDefeated);
-
-                addAudioEvent(AudioEventType.LEVEL_UP);
-                currentLevel++;
-
-                currentLevelPowerUpCollected = false;
-                currentMessage = "Livello "+ currentLevel + " completato! Scale sbloccate";
-                worldGameMap.unlockStairsLevel(player.getCurrentLayer());
-
-            } else {
-                updateMonkPositionForEndLevel();
-                levelCompleted = true;
-                currentMessage = "Livello "+ currentLevel + " completato. Vai alla miniera!";
-            }
-        } else {
-            //levelCompleted = false;
-        }
-    }
-    //-----------------------------------------------------------------------------------
-    private void updateFlashingEffect(boolean enemiesDefeated){
-        PowerUpType targetType = switch (currentLevel) {
-            case 0 -> PowerUpType.SHIELD;
-            case 1 -> PowerUpType.HEALTH_RESTORE;
-            case 2 -> PowerUpType.SPEED_BOOST;
-            default -> null;
-        };
-        System.out.println("Target type: " + targetType + "cur" + currentLevelPowerUpCollected);
-        for (GameObject obj : objects) {
-            if (obj instanceof OBJ_Tree tree) {
-                // If the enemies are defeated and the power-up has not been taken it flashes.
-                if (enemiesDefeated && tree.getHiddenPowerUp() == targetType)
-                    tree.setFlashingActive(true);
-                else {
-                    tree.setFlashingActive(false);
-                }
-            }
-        }
-    }
 
     //-------------------------------------------------------
     private void updateMonk(InputState input) {
@@ -587,27 +431,8 @@ public class GameModel implements Serializable, IGameModel {
     }
     //-------------------------------------------------------------
 
-    //-------------------------------------------------------------
-    private boolean isPowerUpForCurrentLevel(PowerUpType type) {
-        return (currentLevel == 0 || currentLevel == 1 && type == PowerUpType.SHIELD) ||
-               (currentLevel == 1 || currentLevel == 2 && type == PowerUpType.HEALTH_RESTORE) ||
-               (currentLevel == 2 || currentLevel == 3 && type == PowerUpType.SPEED_BOOST);
-    }
-    //-------------------------------------------------------------
 
-    /**
-     * Check if all enemies of current level are defeated
-     */
-    private boolean allEnemiesDefeated () {
-        boolean allEnemiesDefeated = false;
-        switch (currentLevel) {
-            case 0 -> allEnemiesDefeated = tntEnemies.isEmpty();
-            case 1 -> allEnemiesDefeated = dynamiteEnemies.isEmpty();
-            case 2 -> allEnemiesDefeated = torchEnemies.isEmpty();
-            case 3 -> allEnemiesDefeated = true;
-        }
-        return allEnemiesDefeated;
-    }
+
 
     /**
      * Audio event emitter
@@ -712,6 +537,10 @@ public class GameModel implements Serializable, IGameModel {
     }
 
     // GETTER ----------------------
+
+    public int getCurrentLevel() { return currentLevel; }
+    public boolean isLevelCompleted() { return levelCompleted; }
+
     public List<IRenderable> getAllRenderables(){
         List<IRenderable> allRenderables = new ArrayList<>();
 
@@ -747,6 +576,23 @@ public class GameModel implements Serializable, IGameModel {
     //---------------------------------
 
     // SETTER ----------------------
+
+    public void setCurrentLevelPowerUpCollected(boolean currentLevelPowerUpCollected) {
+        this.currentLevelPowerUpCollected = currentLevelPowerUpCollected;
+    }
+    public void setGameState(GameState gameState) {
+        this.gameState = gameState;
+    }
+    public void setCurrentLevel(int currentLevel){
+        this.currentLevel = currentLevel;
+    }
+    public void setCurrentMessage(String currentMessage) {
+        this.currentMessage = currentMessage;
+    }
+    public void setLevelCompleted(boolean levelCompleted) {
+        this.levelCompleted = levelCompleted;
+    }
+
 
     public void resumeFromPause() {
         if (gameState == GameState.PAUSED){
@@ -814,7 +660,9 @@ public class GameModel implements Serializable, IGameModel {
     //---------------------------------
 
     //UI GETTERS
-    public boolean isDebugMode() { return settings.isDebugMode(); }
+    public boolean isDebugMode() {
+        return settings.isDebugMode();
+    }
     public boolean isSoundEnabled(){
         return settings.isSoundEnabled();
     }
