@@ -34,6 +34,8 @@ public class GameController implements IController{
     private Enum<?> currentKeyboardSelection;
     private Enum<?> currentMouseSelection;
 
+    private boolean keyboardNavigationActive = false;
+
     /**
      * CONSTRUCTOR
      */
@@ -90,40 +92,47 @@ public class GameController implements IController{
     public void update(double deltaMs) {
 
         InputState input = keyHandler.getInputState();
-        GameState state = model.getGameState();
 
         model.setDebugMode(input.debug());
         model.update(input, deltaMs);
 
+        GameState state = model.getGameState();
+
         if (state == GameState.PLAYING || state == GameState.WIN) {
             view.updateAnimations(deltaMs);
         }
+
         if (state != GameState.PLAYING) {
 
             if (input.menuPrevious()) {
+                keyboardNavigationActive = true;
                 currentKeyboardSelection = previousItem(state, currentKeyboardSelection);
                 model.addAudioEvent(AudioEventType.BUTTON_HOVER);
                 view.applyMenuState(state, currentKeyboardSelection, null);
+
             } else if (input.menuNext()) {
+                keyboardNavigationActive = true;
                 currentKeyboardSelection = nextItem(state, currentKeyboardSelection);
                 model.addAudioEvent(AudioEventType.BUTTON_HOVER);
                 view.applyMenuState(state, currentKeyboardSelection, null);
+
             } else if (input.menuConfirm()) {
+                keyboardNavigationActive = true;
                 model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
                 view.applyMenuState(state, currentKeyboardSelection, null);
                 performAction(state, currentKeyboardSelection);
+
             } else {
                 updateMenuMouse(state);
-            } 
+            }
         }
 
         syncAudio();
-
     }
     //-------------------------------------------------------------
     private Enum<?> previousItem(GameState screen, Enum<?> current) {
         Enum<?>[] items = itemsForScreen(screen);
-        if (items == null || current == null) return defaultForScreen(screen);
+         if (items == null || current == null) return defaultForScreen(screen);
         for (int i = 0; i < items.length; i++)
             if (items[i] == current) return items[(i - 1 + items.length) % items.length];
         return defaultForScreen(screen);
@@ -150,45 +159,52 @@ public class GameController implements IController{
 
     private Enum<?> defaultForScreen(GameState screen) {
         return switch (screen) {
-            case MENU      -> UIConfig.MENU_DEFAULT_SELECTION;
-            case PAUSED    -> UIConfig.PAUSE_MENU_DEFAULT_SELECTION;
-            case SETTINGS  -> UIConfig.SETTINGS_MENU_DEFAULT_SELECTION;
-            case GAME_OVER -> UIConfig.GAME_OVER_DEFAULT_SELECTION;
-            case WIN       -> UIConfig.WIN_DEFAULT_SELECTION;
+            case MENU      -> ButtonValue.MainMenu.NEW_GAME;
+            case PAUSED    -> ButtonValue.PauseMenu.RESUME;
+            case SETTINGS  -> ButtonValue.SettingsMenu.SETTINGS_ICON;
+            case GAME_OVER -> ButtonValue.GameOverMenu.HOME_OVER;
+            case WIN       -> ButtonValue.WinMenu.HOME_WIN;
             default        -> null;
         };
     }
     
     //-------------------------------------------------------------
-    
+
     private void updateMenuMouse(GameState screen) {
         Point mouse = mouseHandler.getMousePosition();
         Enum<?> hovered = view.getButtonAtPoint(screen, mouse);
 
-        // update hover only if changed
-        Enum<?> previousMouse = currentMouseSelection;
-        if (hovered != previousMouse) {
+        if (hovered != currentMouseSelection) {
             currentMouseSelection = hovered;
+
             if (hovered != null) {
+                keyboardNavigationActive = false;
                 currentKeyboardSelection = hovered;
                 model.addAudioEvent(AudioEventType.BUTTON_HOVER);
             }
-        } 
-     
-        if (hovered == null) {
-            view.applyMenuState(screen, null, null);
-        } else {
-            view.applyMenuState(screen, currentKeyboardSelection, null);
         }
-        // click
+
         Point click = mouseHandler.consumeLeftClick();
-        Enum<?> clicked = view.getButtonAtPoint(screen, click);
-        if (clicked != null) {
-            currentMouseSelection = clicked;
-            currentKeyboardSelection = clicked;
-            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
-            performAction(screen, clicked);
+        if (click != null) {
+            Enum<?> clicked = view.getButtonAtPoint(screen, click);
+            if (clicked != null) {
+                keyboardNavigationActive = false;
+                currentMouseSelection = clicked;
+                currentKeyboardSelection = clicked;
+                model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+                performAction(screen, clicked);
+                return;
+            }
         }
+
+        Enum<?> visualSelection;
+        if (keyboardNavigationActive) {
+            visualSelection = currentKeyboardSelection;
+        } else {
+            visualSelection = currentMouseSelection; // può essere null ed è giusto così
+        }
+
+        view.applyMenuState(screen, visualSelection, null);
     }
 
     private void performAction(GameState screen, Enum<?> selection) {
