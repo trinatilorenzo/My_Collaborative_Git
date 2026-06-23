@@ -90,7 +90,7 @@ public class Player extends Entity {
         }
 
         // update shield timer
-        if (shieldTimerMs > 0) {
+        if (shieldTimerMs > 0 && input.shield()) {
             shieldTimerMs -= deltaMs;
             isShielded = true;
             if (shieldTimerMs <= 0) {
@@ -323,7 +323,6 @@ public class Player extends Entity {
     public boolean isFacingRightRender() { return facingDirection == Direction.RIGHT; }
     @Override
     public boolean isShieldedRender() { return isShielded(); }
-
     @Override
     public boolean isSpeedBoostedRender() { return isSpeedBoosted(); }
     @Override
