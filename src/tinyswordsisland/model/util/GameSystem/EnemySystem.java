@@ -21,7 +21,7 @@ public final class EnemySystem {
             TNTState previousState = tnt.getState();
 
             if (tnt.getState() != TNTState.EXPLODED) {
-                tnt.update(model.getPlayer(), deltaMs);
+                tnt.update(deltaMs);
                 model.getCollisionChecker().checkEntity(model.getPlayer(), tnt);
                 model.getCollisionChecker().checkTile(tnt);
                 model.getCollisionChecker().checkObjects(tnt);
@@ -44,7 +44,7 @@ public final class EnemySystem {
             DynamiteState previousState = dynamite.getState();
 
             if (dynamite.getState() != DynamiteState.DEAD) {
-                dynamite.update(model.getPlayer(), deltaMs);
+                dynamite.update(deltaMs);
                 model.getCollisionChecker().checkEntity(model.getPlayer(), dynamite);
                 model.getCollisionChecker().checkTile(dynamite);
                 model.getCollisionChecker().checkObjects(dynamite);
@@ -80,7 +80,7 @@ public final class EnemySystem {
     private void updateTorch(GameModel model, double deltaMs) {
         for (EnemyTorch torch : model.getTorchEnemies()) {
             if (torch.getState() != TorchState.DEAD) {
-                torch.update(model.getPlayer(), deltaMs);
+                torch.update(deltaMs);
                 model.getCollisionChecker().checkEntity(torch, model.getPlayer());
                 model.getCollisionChecker().checkEntity(model.getPlayer(), torch);
                 model.getCollisionChecker().checkTile(torch);

@@ -27,13 +27,16 @@ public class EnemyDynamite extends Entity {
     private final List<DynamiteProjectile> globalProjectiles;
     private int attackCount;
 
+    //Relative to another entity
+    private final Entity target;
+
     /**
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig, List<DynamiteProjectile> globalProjectiles) {
+    public EnemyDynamite(SpawnPoint spawnPoint, EntityConfig entityConfig, List<DynamiteProjectile> globalProjectiles, Entity target) {
         super(entityConfig);
-
+        this.target = target;
         initializeDefaultValues(spawnPoint);
         this.globalProjectiles = globalProjectiles;
     }
@@ -63,14 +66,15 @@ public class EnemyDynamite extends Entity {
      * Updates the enemy state and movement
      */
     //------------------------------------------------------------------------
-    public void update(Player player, double deltaMs) {
-        super.update(); // Reset movement and collision states
+    @Override
+    public void update(double deltaMs) {
+        super.resetFrameState(); // Reset movement and collision states
 
         if (attackCooldownMs > 0) {
             attackCooldownMs -= deltaMs;
         }
 
-        checkPlayerProximity(player);
+        checkProximity(target);
 
         switch (state) {
             case DEAD:
@@ -81,14 +85,14 @@ public class EnemyDynamite extends Entity {
                 break;
 
             case CHASING:
-                chasePlayer(player, deltaMs);
-                facePlayer(player);
+                chasePlayer(target, deltaMs);
+                facePlayer(target);
                 break;
 
             case ATTACKING:
-                facePlayer(player);
+                facePlayer(target);
                 if (attackCooldownMs <= 0) {
-                    attack(player);
+                    attack(target);
                     attackCooldownMs = EntityConfig.DYNAMITE_ATTACK_INTERVAL;
                 }
                 break;
@@ -119,9 +123,9 @@ public class EnemyDynamite extends Entity {
      * Checks if the player is within the detection radius
      * and triggers the attack or the chase state if so
      */
-    private void checkPlayerProximity(Player player) {
-        long distanceX = player.getWorldX() - worldX;
-        long distanceY = player.getWorldY() - worldY;
+    private void checkProximity(Entity target) {
+        long distanceX = target.getWorldX() - worldX;
+        long distanceY = target.getWorldY() - worldY;
         long distanceSq = distanceX * distanceX + distanceY * distanceY;
 
         double attackRadSq = (double) EntityConfig.DYNAMITE_ATTACKING_RADIUS * EntityConfig.DYNAMITE_ATTACKING_RADIUS;
@@ -139,10 +143,10 @@ public class EnemyDynamite extends Entity {
     /**
      * Set the direction to follow the player
      */
-    private void chasePlayer(Player player, double deltaMs) {
+    private void chasePlayer(Entity target, double deltaMs) {
         // distance from the player
-        double dxPlayer = player.getWorldX() - this.worldX; //distance in x
-        double dyPlayer = player.getWorldY() - this.worldY; //distance in y
+        double dxPlayer = target.getWorldX() - this.worldX; //distance in x
+        double dyPlayer = target.getWorldY() - this.worldY; //distance in y
         double distance = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
         if (distance > 0) {
@@ -155,8 +159,8 @@ public class EnemyDynamite extends Entity {
 
     }
     //-------------------------------------------------------------
-    private void facePlayer(Player player) {
-        if (player.getWorldX() >= worldX ){
+    private void facePlayer(Entity target) {
+        if (target.getWorldX() >= worldX ){
             facingDirection = Direction.RIGHT;
         }else {
             facingDirection = Direction.LEFT;
@@ -174,11 +178,11 @@ public class EnemyDynamite extends Entity {
     /**
      * Attack by launching a projectile towards the player
      */
-    private void attack(Player player) {
-        if (player.isDying() || player.isDead()) return; // no attack a dead player
+    private void attack(Entity target) {
+        if (target.isDead()) return; // no attack a dead player
 
-        int distanceX = player.getWorldX() - worldX;
-        int distanceY = player.getWorldY() - worldY;
+        int distanceX = target.getWorldX() - worldX;
+        int distanceY = target.getWorldY() - worldY;
         double distanceSquared = (double) distanceX * distanceX + (double) distanceY * distanceY;
         double maxRadiusSquared = (double) EntityConfig.DYNAMITE_ATTACKING_RADIUS * EntityConfig.DYNAMITE_ATTACKING_RADIUS;
         if (distanceSquared > maxRadiusSquared) {
@@ -187,9 +191,9 @@ public class EnemyDynamite extends Entity {
         DynamiteProjectile proj = new DynamiteProjectile(
                 worldX,
                 worldY,
-                player.getWorldX(),
-                player.getWorldY(),
-                player.getCurrentLayer(),
+                target.getWorldX(),
+                target.getWorldY(),
+                target.getCurrentLayer(),
                 entityConfig
         );
         globalProjectiles.add(proj);

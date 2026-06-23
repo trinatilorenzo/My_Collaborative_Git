@@ -122,7 +122,6 @@ public class GameModel implements Serializable, IGameModel {
         projectiles = world.projectiles();
         torchEnemies = world.torchEnemies();
         objects = world.objects();
-
         currentLevelPowerUpCollected = false;
         currentLevel = 0;
         levelCompleted = false;
@@ -164,7 +163,7 @@ public class GameModel implements Serializable, IGameModel {
 
         worldObjectSystem.update(this, deltaMs);
 
-        monk.update(player, deltaMs);
+        monk.update(deltaMs);
         messageSystem.update(this, input, deltaMs);
         interactionSystem.update(this);
 
@@ -182,7 +181,8 @@ public class GameModel implements Serializable, IGameModel {
             return;
         }
 
-        player.update(input, deltaMs);
+        player.handleInput(input);
+        player.update(deltaMs);
 
         collisionChecker.checkTile(player);
         collisionChecker.checkObjects(player);
@@ -216,11 +216,11 @@ public class GameModel implements Serializable, IGameModel {
      * Called when player is dying or dead to update only necessary logic and animations
      */
     private void updateDeathSequence(double deltaMs) {
-        monk.update(player, deltaMs);
+        monk.update(deltaMs);
         // Keep only finite transitions running; do not start new gameplay logic.
         for (EnemyTNT tnt : tntEnemies) {
             if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
-                tnt.update(player, deltaMs);
+                tnt.update(deltaMs);
             }
         }
         tntEnemies.removeIf(EnemyTNT::isExploded);

@@ -17,9 +17,7 @@ import javax.swing.*;
 
 public class Main {
 
-
     public static void main(String[] args) {
-
 
         // load the game configuration from the XML file
         // this class is specific for our game and contains all the game's constants'
@@ -63,7 +61,6 @@ public class Main {
         // start the game-loop in a separated thread
         controller.startGame();
 
-        
     }// end of main method
 
 }//end of main class

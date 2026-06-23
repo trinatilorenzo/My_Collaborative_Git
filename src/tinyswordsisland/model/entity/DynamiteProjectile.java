@@ -64,6 +64,7 @@ public class DynamiteProjectile extends Entity {
      * use the basic parabolic motion folmulas to move the projectile
      */
     //-------------------------------------------------------------
+    @Override
     public void update(double deltaMs) {
         if (exploded) return;
 
