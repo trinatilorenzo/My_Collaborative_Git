@@ -51,6 +51,12 @@ public class GameController implements IController, IGameListener {
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
 
+        try {
+            System.out.println("Save dir: " + SaveManager.getSaveDirectoryPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         resetSelection();
     }
     //-------------------------------------------------------------

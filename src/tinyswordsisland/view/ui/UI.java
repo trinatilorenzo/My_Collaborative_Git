@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -177,59 +176,59 @@ public class UI {
         maruMonica = loadFont("/res/fonts/x12y16pxMaruMonica.ttf");
 
         int tileSize = this.screenConfig.TILE_SIZE();
-        heartFull = scaleImage(loadUiImage("src/res/UI/heart/heart_full.png"),  tileSize, tileSize);
-        heartHalf = scaleImage(loadUiImage("src/res/UI/heart/heart_half.png"),  tileSize, tileSize);
-        heartBlank = scaleImage(loadUiImage("src/res/UI/heart/heart_blank.png"), tileSize, tileSize);
+        heartFull = scaleImage(loadUiImage("/res/UI/heart/heart_full.png"),  tileSize, tileSize);
+        heartHalf = scaleImage(loadUiImage("/res/UI/heart/heart_half.png"),  tileSize, tileSize);
+        heartBlank = scaleImage(loadUiImage("/res/UI/heart/heart_blank.png"), tileSize, tileSize);
 
-        shield = loadUiImage("src/res/object/powerups/Icon_06.png");
+        shield = loadUiImage("/res/object/powerups/Icon_06.png");
 
-        goldButton = new SliceSprite("src/res/UI/Buttons/Button_Blue_3Slides.png",  tileSize, tileSize);
-        goldButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Hover_3Slides.png", tileSize, tileSize);
-        pauseBanner = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png",tileSize,tileSize );
-        dialogueBanner = new SliceSprite("src/res/UI/Banners/Banner_Horizontal.png", tileSize, tileSize);
-        blueBanner = new SliceSprite("src/res/UI/Banners/sword_Banner.png", tileSize*2, tileSize);
+        goldButton = new SliceSprite("/res/UI/Buttons/Button_Blue_3Slides.png",  tileSize, tileSize);
+        goldButtonSelected = new SliceSprite("/res/UI/Buttons/Button_Hover_3Slides.png", tileSize, tileSize);
+        pauseBanner = new SliceSprite("/res/UI/Banners/Banner_Horizontal.png",tileSize,tileSize );
+        dialogueBanner = new SliceSprite("/res/UI/Banners/Banner_Horizontal.png", tileSize, tileSize);
+        blueBanner = new SliceSprite("/res/UI/Banners/sword_Banner.png", tileSize*2, tileSize);
 
-        blueButton = new SliceSprite("src/res/UI/Buttons/Button_Cyan_3Slides.png", tileSize, tileSize);
-        blueButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Cyan_3Slides_Pressed.png", tileSize, tileSize);
-        redButtonSelected = new SliceSprite("src/res/UI/Buttons/Button_Red_3Slides_Pressed.png", tileSize, tileSize);
-        redButton = new SliceSprite("src/res/UI/Buttons/Button_GrayRed_3Slides.png", tileSize, tileSize);
+        blueButton = new SliceSprite("/res/UI/Buttons/Button_Cyan_3Slides.png", tileSize, tileSize);
+        blueButtonSelected = new SliceSprite("/res/UI/Buttons/Button_Cyan_3Slides_Pressed.png", tileSize, tileSize);
+        redButtonSelected = new SliceSprite("/res/UI/Buttons/Button_Red_3Slides_Pressed.png", tileSize, tileSize);
+        redButton = new SliceSprite("/res/UI/Buttons/Button_GrayRed_3Slides.png", tileSize, tileSize);
 
-        grayButton = new SliceSprite("src/res/UI/Buttons/Button_Gray_3Slides.png", tileSize, tileSize);
+        grayButton = new SliceSprite("/res/UI/Buttons/Button_Gray_3Slides.png", tileSize, tileSize);
 
-        menuLogo = loadUiImage("src/res/UI/Icons/logo_gioco.png");
-        settingsIcon = scaleImage(loadUiImage("src/res/UI/Icons/Regular_11.png"), tileSize, tileSize);
-        settingsIconPressed = scaleImage(loadUiImage("src/res/UI/Icons/Pressed_11.png"), tileSize, tileSize);
+        menuLogo = loadUiImage("/res/UI/Icons/logo_gioco.png");
+        settingsIcon = scaleImage(loadUiImage("/res/UI/Icons/Regular_11.png"), tileSize, tileSize);
+        settingsIconPressed = scaleImage(loadUiImage("/res/UI/Icons/Pressed_11.png"), tileSize, tileSize);
 
-        avatarYellow = loadUiImage("src/res/UI/Human_Avatars/Avatar_Yellow.png");
-        avatarRed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Red.png");
-        avatarBlue = loadUiImage("src/res/UI/Human_Avatars/Avatar_Blue.png");
-        avatarPurple = loadUiImage("src/res/UI/Human_Avatars/Avatar_Purple.png");
-        avatarYellowPressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Yellow_Selected.png");
-        avatarRedPressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Red_Selected.png");
-        avatarBluePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Blue_Selected.png");
-        avatarPurplePressed = loadUiImage("src/res/UI/Human_Avatars/Avatar_Purple_Selected.png");
+        avatarYellow = loadUiImage("/res/UI/Human_Avatars/Avatar_Yellow.png");
+        avatarRed = loadUiImage("/res/UI/Human_Avatars/Avatar_Red.png");
+        avatarBlue = loadUiImage("/res/UI/Human_Avatars/Avatar_Blue.png");
+        avatarPurple = loadUiImage("/res/UI/Human_Avatars/Avatar_Purple.png");
+        avatarYellowPressed = loadUiImage("/res/UI/Human_Avatars/Avatar_Yellow_Selected.png");
+        avatarRedPressed = loadUiImage("/res/UI/Human_Avatars/Avatar_Red_Selected.png");
+        avatarBluePressed = loadUiImage("/res/UI/Human_Avatars/Avatar_Blue_Selected.png");
+        avatarPurplePressed = loadUiImage("/res/UI/Human_Avatars/Avatar_Purple_Selected.png");
 
-        buttonMusic = loadUiImage("src/res/UI/Buttons/ButtonMusic.png");
-        buttonMusicSelected = loadUiImage("src/res/UI/Buttons/ButtonMusic_Hover.png");
-        buttonMusicPressed = loadUiImage("src/res/UI/Buttons/ButtonMusic_Pressed.png");
-        buttonSound = loadUiImage("src/res/UI/Buttons/ButtonSound.png");
-        buttonSoundSelected = loadUiImage("src/res/UI/Buttons/ButtonSound_Hover.png");
-        buttonSoundPressed = loadUiImage("src/res/UI/Buttons/ButtonSound_Pressed.png");
+        buttonMusic = loadUiImage("/res/UI/Buttons/ButtonMusic.png");
+        buttonMusicSelected = loadUiImage("/res/UI/Buttons/ButtonMusic_Hover.png");
+        buttonMusicPressed = loadUiImage("/res/UI/Buttons/ButtonMusic_Pressed.png");
+        buttonSound = loadUiImage("/res/UI/Buttons/ButtonSound.png");
+        buttonSoundSelected = loadUiImage("/res/UI/Buttons/ButtonSound_Hover.png");
+        buttonSoundPressed = loadUiImage("/res/UI/Buttons/ButtonSound_Pressed.png");
 
-        blueRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Blue_3Slides.png", tileSize, tileSize);
-        redRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Red_3Slides.png", tileSize, tileSize);
-        yellowRibbon = new SliceSprite("src/res/UI/Ribbons/Ribbon_Yellow_3Slides.png", tileSize, tileSize);
+        blueRibbon = new SliceSprite("/res/UI/Ribbons/Ribbon_Blue_3Slides.png", tileSize, tileSize);
+        redRibbon = new SliceSprite("/res/UI/Ribbons/Ribbon_Red_3Slides.png", tileSize, tileSize);
+        yellowRibbon = new SliceSprite("/res/UI/Ribbons/Ribbon_Yellow_3Slides.png", tileSize, tileSize);
 
 
         menuClouds = new BufferedImage[] {
-                loadUiImage("src/res/UI/Clouds/Clouds_01.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_02.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_03.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_04.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_05.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_06.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_07.png"),
-                loadUiImage("src/res/UI/Clouds/Clouds_08.png")
+                loadUiImage("/res/UI/Clouds/Clouds_01.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_02.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_03.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_04.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_05.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_06.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_07.png"),
+                loadUiImage("/res/UI/Clouds/Clouds_08.png")
         };
 
         // Each entry: { relativeX, relativeY, drawWidth }
@@ -1160,8 +1159,11 @@ public class UI {
      * Loads an image from the given file-system path, throwing on failure. */
     //-------------------------------------------------------------
     private BufferedImage loadUiImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
+        try (InputStream is = getClass().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new IllegalArgumentException("UI image not found in classpath: " + path);
+            }
+            return ImageIO.read(is);
         } catch (IOException e) {
             throw new IllegalArgumentException("Unable to load UI image: " + path, e);
         }
