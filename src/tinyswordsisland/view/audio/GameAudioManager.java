@@ -1,7 +1,6 @@
 package tinyswordsisland.view.audio;
 
 import tinyswordsisland.config.enu.GameState;
-import tinyswordsisland.model.event.AudioEventType;
 
 import java.util.List;
 
@@ -28,6 +27,9 @@ public class GameAudioManager {
     private static final String MOB_MAGIC = "/res/Sound/SFX/magic.mp3";
     private static final String ENEMY_HIT = "/res/Sound/SFX/pouch.mp3";
     private static final String ENEMY_DEAD = "/res/Sound/SFX/goblin-kill.mp3";
+
+    private static final String PROJECTILE_LAUNCHED = "/res/Sound/SFX/goblin-sound02.mp3";
+    private static final String PROJECTILE_EXPLOSION = "/res/Sound/SFX/dynamite_explosion.mp3";
 
     private static final String BUTTON_CLICKED = "/res/Sound/SFX/button_click.mp3";
     private static final String BUTTON_HOVER = "/res/Sound/SFX/button_hover.mp3";
@@ -62,46 +64,41 @@ public class GameAudioManager {
         }
     }
 
-    public void playEvents(List<AudioEventType> events) {
-        if (events == null || events.isEmpty()) return;
+    public void playEvents(AudioEffect effect) {
+        if (effect == null) return;
 
-        for (AudioEventType eventType : events) {
+        switch (effect) {
+            case BUTTON_CLICKED -> nextSfxPlayer().playOnce(BUTTON_CLICKED);
+            case BUTTON_HOVER -> nextSfxPlayer().playOnce(BUTTON_HOVER);
 
-            switch (eventType) {
-                case BUTTON_CLICKED -> nextSfxPlayer().playOnce(BUTTON_CLICKED);
-                case BUTTON_HOVER -> nextSfxPlayer().playOnce(BUTTON_HOVER);
-
-                case PLAYER_WALK_START ->  movementLoopPlayer.playLoop(PLAYER_WALK_SFX);
-                case PLAYER_WALK_STOP ->  movementLoopPlayer.stopMusic();
-                case PLAYER_ATTACK -> {
-                    nextSfxPlayer().playSequence(new String[]{
-                            SWORD_SWOOSH_SFX,
-                            SWORD_SFX
-                    });
-                }
-                case PLAYER_ATTACK_STOP -> currentSfxPlayer().stopAll();
-                case PLAYER_DAMAGED -> nextSfxPlayer().playOnce(PLAYER_DAMAGE_SFX);
-
-                case DIALOGUE_ADVANCE -> nextSfxPlayer().playOnce(MOB_TALK);
-                case DIALOGUE_CLOSE -> nextSfxPlayer().playOnce(MOB_MAGIC);
-
-                case TREE_HIT -> nextSfxPlayer().playOnce(TREE_HIT_SFX);
-                case TREE_FINAL -> nextSfxPlayer().playOnce(TREE_FINAL_SFX);
-
-                case TNT_TRIGGERED ->  nextSfxPlayer().playOnce(TNT_ACTIVATION_SFX);
-                case TNT_EXPLOSION -> nextSfxPlayer().playOnce(TNT_EXPLOSION_SFX);
-                case ENEMY_HIT -> nextSfxPlayer().playOnce(ENEMY_HIT);
-                case ENEMY_DEFEATED -> nextSfxPlayer().playOnce(ENEMY_DEAD);
-                case POWERUP_COLLECTED -> nextSfxPlayer().playOnce(POWER_UP);
-                case LEVEL_UP -> nextSfxPlayer().playOnce(LEVEL_UP);
-
-
-
-
-
+            case PLAYER_WALK_START ->  movementLoopPlayer.playLoop(PLAYER_WALK_SFX);
+            case PLAYER_WALK_STOP ->  movementLoopPlayer.stopMusic();
+            case PLAYER_ATTACK -> {
+                nextSfxPlayer().playSequence(new String[]{
+                        SWORD_SWOOSH_SFX,
+                        SWORD_SFX
+                });
             }
+            case PLAYER_ATTACK_STOP -> currentSfxPlayer().stopAll();
+            case PLAYER_DAMAGED -> nextSfxPlayer().playOnce(PLAYER_DAMAGE_SFX);
 
+            case DIALOGUE_ADVANCE -> nextSfxPlayer().playOnce(MOB_TALK);
+            case DIALOGUE_CLOSE -> nextSfxPlayer().playOnce(MOB_MAGIC);
+
+            case TREE_HIT -> nextSfxPlayer().playOnce(TREE_HIT_SFX);
+            case TREE_FINAL -> nextSfxPlayer().playOnce(TREE_FINAL_SFX);
+
+            case TNT_TRIGGERED ->  nextSfxPlayer().playOnce(TNT_ACTIVATION_SFX);
+            case TNT_EXPLOSION -> nextSfxPlayer().playOnce(TNT_EXPLOSION_SFX);
+            case ENEMY_HIT -> nextSfxPlayer().playOnce(ENEMY_HIT);
+            case ENEMY_DEFEATED -> nextSfxPlayer().playOnce(ENEMY_DEAD);
+            case POWERUP_COLLECTED -> nextSfxPlayer().playOnce(POWER_UP);
+            case LEVEL_UP -> nextSfxPlayer().playOnce(LEVEL_UP);
+
+            case PROJECTILE_LAUNCHED -> nextSfxPlayer().playOnce(PROJECTILE_LAUNCHED);
+            case PROJECTILE_EXPLODED -> nextSfxPlayer().playOnce(PROJECTILE_EXPLOSION);
         }
+
     }
 
     private AudioPlayer nextSfxPlayer() {

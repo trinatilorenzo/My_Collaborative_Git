@@ -4,7 +4,6 @@ import tinyswordsisland.config.enu.GameState;
 import tinyswordsisland.config.enu.PlayerColor;
 import tinyswordsisland.model.GameMap;
 import tinyswordsisland.model.IRenderable;
-import tinyswordsisland.model.event.AudioEventType;
 
 import java.awt.Rectangle;
 import java.util.List;
@@ -28,5 +27,4 @@ public interface IController {
     boolean isMusicEnabled();
     int getResolutionValue();
     PlayerColor getPlayerColor();
-    List<AudioEventType> consumeAudioEvents();
 }

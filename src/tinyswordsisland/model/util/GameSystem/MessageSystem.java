@@ -4,7 +4,7 @@ import tinyswordsisland.controller.InputState;
 import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.config.enu.MonkState;
 import tinyswordsisland.model.GameModel;
-import tinyswordsisland.model.event.AudioEventType;
+
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -35,7 +35,7 @@ public final class MessageSystem implements Serializable {
 
         if (model.getMonk().getState() == MonkState.TALKING && currentDialogue.isEmpty()) {
             currentDialogue = model.getMonk().getCurrentDialogue();
-            model.addAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
+            model.getEventDispatcher().notifyDialogueAdvanced();
         }
 
         if (model.getMonk().getState() == MonkState.TALKING && input.interact()) {
@@ -43,11 +43,11 @@ public final class MessageSystem implements Serializable {
 
             if (!model.getMonk().hasFinishedDialogue()) {
                 currentDialogue = model.getMonk().getCurrentDialogue();
-                model.addAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
+                model.getEventDispatcher().notifyDialogueAdvanced();
             } else {
                 currentDialogue = "";
                 model.getMonk().setState(MonkState.DISAPPEARING);
-                model.addAudioEvent(AudioEventType.DIALOGUE_CLOSE);
+                model.getEventDispatcher().notifyDialogueClosed();
             }
         }
     }

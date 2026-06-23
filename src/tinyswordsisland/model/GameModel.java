@@ -7,7 +7,8 @@ import tinyswordsisland.config.ObjConfig;
 import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.entity.*;
-import tinyswordsisland.model.event.AudioEventType;
+import tinyswordsisland.model.event.GameEventDispatcher;
+import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.model.object.*;
 import tinyswordsisland.model.util.GameSettings;
 import tinyswordsisland.model.util.GameSystem.*;
@@ -20,6 +21,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * ALL THE GAME MODEL STAFF HERE
@@ -36,6 +38,7 @@ public class GameModel implements Serializable, IGameModel {
     private transient InteractionSystem interactionSystem;
     private transient EnemySystem enemySystem;
     private transient WorldObjectSystem worldObjectSystem;
+    private transient GameEventDispatcher eventDispatcher;
     //-------------------------------------------------------------
 
     // Game status
@@ -74,7 +77,7 @@ public class GameModel implements Serializable, IGameModel {
     private double deadStateElapsedMs; // TODO da spostare in view ?
 
     //Audio events
-    private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>(); // TODO da spostare in view
+    private transient List<IGameListener> listeners = new ArrayList<>();
 
 
 
@@ -89,6 +92,7 @@ public class GameModel implements Serializable, IGameModel {
         interactionSystem = new InteractionSystem();
         enemySystem = new EnemySystem();
         worldObjectSystem = new WorldObjectSystem();
+        eventDispatcher = new GameEventDispatcher();
 
         gameState = GameState.MENU; // Default game state is the menu state
 
@@ -183,16 +187,16 @@ public class GameModel implements Serializable, IGameModel {
 
         //Audio ----------------------
         if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
-            emitAudioEvent(AudioEventType.PLAYER_ATTACK);
+            eventDispatcher.notifyPlayerAttackStart();
         }
         if (playerStateBeforeUpdate == PlayerState.ATTACKING && player.getState() != PlayerState.ATTACKING) {
-            emitAudioEvent(AudioEventType.PLAYER_ATTACK_STOP);
+            eventDispatcher.notifyPlayerAttackStop();
         }
         if (playerStateBeforeUpdate != PlayerState.WALKING && player.getState() == PlayerState.WALKING) {
-            emitAudioEvent(AudioEventType.PLAYER_WALK_START);
+            eventDispatcher.notifyPlayerWalkStart();
         }
         if (playerStateBeforeUpdate == PlayerState.WALKING && player.getState() != PlayerState.WALKING) {
-            emitAudioEvent(AudioEventType.PLAYER_WALK_STOP);
+            eventDispatcher.notifyPlayerWalkStop();
         }
         //----------------------------
     }
@@ -202,7 +206,7 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
     private void updateEvents(int lifeBeforeUpdate) {
         if (player.getLife() < lifeBeforeUpdate) {
-            emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
+            eventDispatcher.notifyPlayerDamaged(player.getLife(), player.getMaxLife());
         }
     }
     //-------------------------------------------------------------
@@ -282,33 +286,19 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
 
 
+    @Override
+    public void addGameListener(IGameListener listener) {
+        eventDispatcher.addListener(listener);
+    }
 
 
-    /**
-     * Audio event emitter
-      */
-    //-------------------------------------------------------------
-    private void emitAudioEvent(AudioEventType audioEventType) {
-        pendingAudioEvents.add(audioEventType);
-    }
-    public List<AudioEventType> consumeAudioEvents() {
-        if (pendingAudioEvents.isEmpty()) {
-            return List.of();
-        }
-        List<AudioEventType> snapshot = List.copyOf(pendingAudioEvents);
-        pendingAudioEvents.clear();
-        return snapshot;
-    }
+
+
     //-------------------------------------------------------------
 
 
     //save and load
 
-    public void beforeSave() {
-        if (pendingAudioEvents != null) {
-            pendingAudioEvents.clear();
-        }
-    }
 
     public void restoreTransientState(GameConfig config) {
         this.gameConfig = config;
@@ -317,11 +307,6 @@ public class GameModel implements Serializable, IGameModel {
         this.enemySystem = new EnemySystem();
         this.worldObjectSystem = new WorldObjectSystem();
 
-        if (this.pendingAudioEvents == null) {
-            this.pendingAudioEvents = new ArrayList<>();
-        } else {
-            this.pendingAudioEvents.clear();
-        }
         ObjConfig objC = config.ObjConfig();
         EntityConfig entC = config.entityConfig();
 
@@ -363,12 +348,7 @@ public class GameModel implements Serializable, IGameModel {
         this.interactionSystem = new InteractionSystem();
         this.enemySystem = new EnemySystem();
         this.worldObjectSystem = new WorldObjectSystem();
-
-        if (this.pendingAudioEvents == null) {
-            this.pendingAudioEvents = new ArrayList<>();
-        } else {
-            this.pendingAudioEvents.clear();
-        }
+        this.eventDispatcher = new GameEventDispatcher();
 
         if (this.objects == null) this.objects = new ArrayList<>();
         if (this.tntEnemies == null) this.tntEnemies = new ArrayList<>();
@@ -398,6 +378,9 @@ public class GameModel implements Serializable, IGameModel {
 
     public int getCurrentLevel() { return currentLevel; }
     public boolean isLevelCompleted() { return levelCompleted; }
+    public GameEventDispatcher getEventDispatcher() {
+        return eventDispatcher;
+    }
 
     public List<IRenderable> getAllRenderables(){
         List<IRenderable> allRenderables = new ArrayList<>();
@@ -497,9 +480,7 @@ public class GameModel implements Serializable, IGameModel {
     public void returnToMenu() {
         gameState = GameState.MENU;
     }
-    public void addAudioEvent(AudioEventType event){
-        pendingAudioEvents.add(event);
-    }
+
     //---------------------------------
 
     //UI SETTERS

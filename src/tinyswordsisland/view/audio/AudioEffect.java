@@ -1,0 +1,33 @@
+package tinyswordsisland.view.audio;
+
+public enum AudioEffect {
+
+    // UI
+    BUTTON_CLICKED,
+    BUTTON_HOVER,
+
+    // Player
+    PLAYER_WALK_START,
+    PLAYER_WALK_STOP,
+    PLAYER_ATTACK,
+    PLAYER_ATTACK_STOP,
+    PLAYER_DAMAGED,
+
+    // world and enemis
+
+    DIALOGUE_ADVANCE,
+    DIALOGUE_CLOSE,
+    TREE_HIT,
+    TREE_FINAL,
+    TNT_TRIGGERED,
+    TNT_EXPLOSION,
+    ENEMY_HIT,
+    ENEMY_DEFEATED,
+    POWERUP_COLLECTED,
+    LEVEL_UP,
+    STAIRS_UNLOCKED,
+    STAIRS_LOCKED,
+    PROJECTILE_LAUNCHED,
+    PROJECTILE_EXPLODED,
+
+}

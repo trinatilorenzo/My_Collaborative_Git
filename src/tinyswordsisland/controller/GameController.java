@@ -1,19 +1,21 @@
 package tinyswordsisland.controller;
 
-import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.config.enu.ButtonValue;
 import tinyswordsisland.config.enu.PlayerColor;
 import tinyswordsisland.model.GameMap;
 import tinyswordsisland.model.IGameModel;
 import tinyswordsisland.model.IRenderable;
-import tinyswordsisland.model.event.AudioEventType;
+
+import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.view.IGameView;
 import tinyswordsisland.config.enu.GameState;
+import tinyswordsisland.view.audio.AudioEffect;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,7 +24,7 @@ import java.util.List;
  * input, game loop, system ...
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameController implements IController{
+public class GameController implements IController, IGameListener {
 
     private IGameModel model;
     private IGameView view;
@@ -104,33 +106,37 @@ public class GameController implements IController{
         }
 
         if (state != GameState.PLAYING) {
-
-            if (input.menuPrevious()) {
-                keyboardNavigationActive = true;
-                currentKeyboardSelection = previousItem(state, currentKeyboardSelection);
-                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
-                view.applyMenuState(state, currentKeyboardSelection, null);
-
-            } else if (input.menuNext()) {
-                keyboardNavigationActive = true;
-                currentKeyboardSelection = nextItem(state, currentKeyboardSelection);
-                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
-                view.applyMenuState(state, currentKeyboardSelection, null);
-
-            } else if (input.menuConfirm()) {
-                keyboardNavigationActive = true;
-                model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
-                view.applyMenuState(state, currentKeyboardSelection, null);
-                performAction(state, currentKeyboardSelection);
-
-            } else {
-                updateMenuMouse(state);
-            }
+            handelUiNavigation(state, input);
         }
 
-        syncAudio();
+        syncViewEvent();
     }
     //-------------------------------------------------------------
+
+    private void handelUiNavigation(GameState state, InputState input){
+        if (input.menuPrevious()) {
+            keyboardNavigationActive = true;
+            currentKeyboardSelection = previousItem(state, currentKeyboardSelection);
+            view.playAudio(AudioEffect.BUTTON_HOVER);
+            view.applyMenuState(state, currentKeyboardSelection, null);
+
+        } else if (input.menuNext()) {
+            keyboardNavigationActive = true;
+            currentKeyboardSelection = nextItem(state, currentKeyboardSelection);
+            view.playAudio(AudioEffect.BUTTON_HOVER);
+            view.applyMenuState(state, currentKeyboardSelection, null);
+
+        } else if (input.menuConfirm()) {
+            keyboardNavigationActive = true;
+            view.playAudio(AudioEffect.BUTTON_CLICKED);
+            view.applyMenuState(state, currentKeyboardSelection, null);
+            performAction(state, currentKeyboardSelection);
+
+        } else {
+            updateMenuMouse(state);
+        }
+    }
+
     private Enum<?> previousItem(GameState screen, Enum<?> current) {
         Enum<?>[] items = itemsForScreen(screen);
         if (items == null || current == null) return defaultForScreen(screen);
@@ -181,7 +187,7 @@ public class GameController implements IController{
             if (hovered != null) {
                 keyboardNavigationActive = false;
                 currentKeyboardSelection = hovered;
-                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+                view.playAudio(AudioEffect.BUTTON_HOVER);
             }
         }
 
@@ -192,7 +198,7 @@ public class GameController implements IController{
                 keyboardNavigationActive = false;
                 currentMouseSelection = clicked;
                 currentKeyboardSelection = clicked;
-                model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
+               view.playAudio(AudioEffect.BUTTON_CLICKED);
                 performAction(screen, clicked);
                 return;
             }
@@ -225,7 +231,8 @@ public class GameController implements IController{
 
         switch (selection) {
             case NEW_GAME:
-                model.initializeNewGame();
+                this.model.initializeNewGame();
+                this.model.addGameListener(this);
                 break;
 
             case LOAD_GAME:
@@ -234,6 +241,8 @@ public class GameController implements IController{
                     loaded.restoreTransientState(model.getGameConfig());
                     loaded.forcePlayingState();
                     this.model = loaded;  // sostituisci il model
+
+                    this.model.addGameListener(this);
                     keyHandler.resetPauseToggle();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -368,15 +377,13 @@ public class GameController implements IController{
      * Sync the audio with the game state
      */
     //-------------------------------------------------------------
-    private void syncAudio() {
+    private void syncViewEvent() {
         GameState currentState = model.getGameState();
         if (currentState != lastKnownState) {
             view.onGameStateChanged(currentState);
             lastKnownState = currentState;
-
             resetSelection();
         }
-        view.processGameEvents(model.consumeAudioEvents());
     }
     //-------------------------------------------------------------
 
@@ -409,7 +416,105 @@ public class GameController implements IController{
     @Override public boolean isMusicEnabled()                  { return model.isMusicEnabled(); }
     @Override public int getResolutionValue()                  { return model.getResolutionValue(); }
     @Override public PlayerColor getPlayerColor()              { return model.getPlayerColor(); }
-    @Override public List<AudioEventType> consumeAudioEvents() { return model.consumeAudioEvents(); }
+
+
+
+    @Override
+    public void onPlayerWalkStart() {
+        System.out.println("player walk start");
+        view.playAudio(AudioEffect.PLAYER_WALK_START);
+    }
+
+    @Override
+    public void onPlayerWalkStop() {
+        view.playAudio(AudioEffect.PLAYER_WALK_STOP);
+    }
+
+    @Override
+    public void onPlayerAttackStart() {
+        view.playAudio(AudioEffect.PLAYER_ATTACK);
+    }
+
+    @Override
+    public void onPlayerAttackStop() {
+        view.playAudio(AudioEffect.PLAYER_ATTACK_STOP);
+    }
+
+    @Override
+    public void onPlayerDamaged(int currentLife, int maxLife) {
+        view.playAudio(AudioEffect.PLAYER_DAMAGED);
+        view.triggerDamageFlash();
+    }
+
+    @Override
+    public void onEnemyHit() {
+        view.playAudio(AudioEffect.ENEMY_HIT);
+    }
+
+    @Override
+    public void onEnemyDefeated() {
+        view.playAudio(AudioEffect.ENEMY_DEFEATED);
+    }
+
+    @Override
+    public void onTreeHit() {
+        view.playAudio(AudioEffect.TREE_HIT);
+    }
+
+    @Override
+    public void onTreeDestroyed() {
+        view.playAudio(AudioEffect.TREE_FINAL);
+    }
+
+    @Override
+    public void onStairsUnlocked() {
+        view.playAudio(AudioEffect.STAIRS_UNLOCKED);
+    }
+
+    @Override
+    public void onStairsLocked() {
+        view.playAudio(AudioEffect.STAIRS_LOCKED);
+    }
+
+    @Override
+    public void onTntTriggered() {
+        view.playAudio(AudioEffect.TNT_TRIGGERED);
+    }
+
+    @Override
+    public void onTntExploded() {
+        view.playAudio(AudioEffect.TNT_EXPLOSION);
+    }
+
+    @Override
+    public void onProjectileLaunched() {
+        view.playAudio(AudioEffect.PROJECTILE_LAUNCHED);
+    }
+
+    @Override
+    public void onProjectileExploded() {
+        view.playAudio(AudioEffect.PROJECTILE_EXPLODED);
+    }
+
+    @Override
+    public void onLevelUp() {
+        view.playAudio(AudioEffect.LEVEL_UP);
+    }
+
+    @Override
+    public void onPowerUpCollected() {
+        view.playAudio(AudioEffect.POWERUP_COLLECTED);
+    }
+
+    @Override
+    public void onDialogueAdvanced() {
+        view.playAudio(AudioEffect.DIALOGUE_ADVANCE);
+    }
+
+    @Override
+    public void onDialogueClosed() {
+        view.playAudio(AudioEffect.DIALOGUE_CLOSE);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------          case SETTINGS  -> performSettingsAction((ButtonValue.SettingsMenu) selection);

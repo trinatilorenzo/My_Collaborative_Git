@@ -3,7 +3,7 @@ package tinyswordsisland.model.util.GameSystem;
 import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.GameModel;
 import tinyswordsisland.model.entity.*;
-import tinyswordsisland.model.event.AudioEventType;
+
 
 public final class EnemySystem {
 
@@ -27,10 +27,10 @@ public final class EnemySystem {
             }
 
             if (previousState != tnt.getState() && tnt.getState() == TNTState.EXPLODING) {
-                model.addAudioEvent(AudioEventType.TNT_EXPLOSION);
+                model.getEventDispatcher().notifyTntExploded();
             }
             if (previousState != tnt.getState() && tnt.getState() == TNTState.TRIGGERED) {
-                model.addAudioEvent(AudioEventType.TNT_TRIGGERED);
+                model.getEventDispatcher().notifyTntTriggered();
             }
         }
 
@@ -49,7 +49,7 @@ public final class EnemySystem {
                 dynamite.move();
 
                 if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
-                    model.addAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
+                    model.getEventDispatcher().notifyProjectileLaunched();
                 }
             }
         }
@@ -68,7 +68,7 @@ public final class EnemySystem {
             }
 
             if (proj.isExploded()) {
-                model.addAudioEvent(AudioEventType.PROJECTILE_EXPLODED);
+                model.getEventDispatcher().notifyProjectileExploded();
             }
         }
 

@@ -44,7 +44,7 @@ public class GameObject implements Serializable, IRenderable {
         // Default interaction behavior (can be overridden by subclasses)
     }
 
-    protected void update(double deltaMs){
+    public void update(double deltaMs){
         // Default update behavior (can be overridden by subclasses)
     }
 

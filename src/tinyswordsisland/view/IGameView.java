@@ -6,13 +6,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
 import tinyswordsisland.config.enu.GameState;
-import tinyswordsisland.model.event.AudioEventType;
+import tinyswordsisland.view.audio.AudioEffect;
 
 public interface IGameView {
+
     void render();
     void updateAnimations(double deltaMs);
     void onGameStateChanged(GameState state);
-    void processGameEvents(List<AudioEventType> events);
     void shutdownAudio();
     void updatePlayerColor();
     void setResolution();
@@ -24,5 +24,7 @@ public interface IGameView {
     void addMouseListener(MouseListener l);
     void addMouseMotionListener(MouseMotionListener l);
     void setFocusable(boolean focusable);
-    
+
+    void playAudio(AudioEffect audio);
+    void triggerDamageFlash();
 }
