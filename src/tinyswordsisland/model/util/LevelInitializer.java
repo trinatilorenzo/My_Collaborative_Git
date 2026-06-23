@@ -47,11 +47,11 @@ public final class LevelInitializer {
         Player player = new Player(gameConfig.entityConfig(), playerColor);
 
         EntityConfig entityConfig = gameConfig.entityConfig();
-        Monk monk = new Monk(entityConfig.MONK_START_X(), entityConfig.MONK_START_Y(), entityConfig);
-        List<EnemyTNT> tntEnemies = spawnTntEnemies(entityConfig);
+        Monk monk = new Monk(entityConfig.MONK_START_X(), entityConfig.MONK_START_Y(), entityConfig, player);
+        List<EnemyTNT> tntEnemies = spawnTntEnemies(entityConfig, player);
         List<DynamiteProjectile> projectiles = new ArrayList<>();
-        List<EnemyDynamite> dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles);
-        List<EnemyTorch> torchEnemies = spawnTorchEnemies(entityConfig);
+        List<EnemyDynamite> dynamiteEnemies = spawnDynamiteEnemies(entityConfig, projectiles, player);
+        List<EnemyTorch> torchEnemies = spawnTorchEnemies(entityConfig, player);
 
         ObjConfig objC = gameConfig.ObjConfig();
         List<GameObject> objects = new ArrayList<>();
@@ -85,11 +85,11 @@ public final class LevelInitializer {
     /**
      * HELPERS METHOD
      */
-    private static List<EnemyTNT> spawnTntEnemies(EntityConfig entityConfig) {
+    private static List<EnemyTNT> spawnTntEnemies(EntityConfig entityConfig, Player player) {
         List<EnemyTNT> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.TNT_SPAWNPOINT()) {
             for (int i = 0; i < entityConfig.TNT_FOR_SPAWNPOINT; i++) {
-                enemies.add(new EnemyTNT(spawnPoint, entityConfig));
+                enemies.add(new EnemyTNT(spawnPoint, entityConfig, player));
             }
         }
         return enemies;
@@ -99,11 +99,11 @@ public final class LevelInitializer {
      * Helper method to spawn dynamite enemies based on the spawn points defined.
      * It creates an EnemyDynamite instance for each spawn point and adds it to the list of enemies.
      */
-    private static List<EnemyDynamite> spawnDynamiteEnemies(EntityConfig entityConfig, List<DynamiteProjectile> projectileStore) {
+    private static List<EnemyDynamite> spawnDynamiteEnemies(EntityConfig entityConfig, List<DynamiteProjectile> projectileStore, Player player) {
         List<EnemyDynamite> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.DYNAMITE_SPAWNPOINT()) {
             for (int i = 0; i < entityConfig.DYNAMITE_FOR_SPAWNPOINT; i++) {
-                enemies.add(new EnemyDynamite(spawnPoint, entityConfig, projectileStore));
+                enemies.add(new EnemyDynamite(spawnPoint, entityConfig, projectileStore, player));
             }
         }
         return enemies;
@@ -113,11 +113,11 @@ public final class LevelInitializer {
      * Helper method to spawn torch enemies based on the spawn points.
      * It creates an EnemyTorch instance for each spawn point and adds it to the list of enemies.
      */
-    private static List<EnemyTorch> spawnTorchEnemies(EntityConfig entityConfig) {
+    private static List<EnemyTorch> spawnTorchEnemies(EntityConfig entityConfig, Player player) {
         List<EnemyTorch> enemies = new ArrayList<>();
         for (SpawnPoint spawnPoint : entityConfig.TORCH_SPAWNPOINT()) {
             for (int i = 0; i < entityConfig.TORCH_FOR_SPAWNPOINT; i++) {
-                enemies.add(new EnemyTorch(spawnPoint, entityConfig));
+                enemies.add(new EnemyTorch(spawnPoint, entityConfig, player));
             }
         }
         return enemies;

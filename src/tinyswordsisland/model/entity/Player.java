@@ -18,6 +18,7 @@ public class Player extends Entity {
     private PlayerState state;
     private Direction facingDirection;
     private PlayerColor color;
+    private InputState input; // current input
 
     private boolean deathAnimationCompleted;
     private boolean attackAnimationCompleted;
@@ -37,7 +38,6 @@ public class Player extends Entity {
     //-------------------------------------------------------------
     public Player(EntityConfig entityConfig, PlayerColor color) {
         super(entityConfig);
-
         // Initialize the player's solid area for collision detection
         solidArea = new Rectangle(0,0, EntityConfig.PLAYER_HITBOX_WIDTH, EntityConfig.PLAYER_HITBOX_HEIGHT);
         initializeDefaultValues();
@@ -72,11 +72,18 @@ public class Player extends Entity {
     //-------------------------------------------------------------
 
     /**
+     * Riceve l'input dal controller PRIMA dell'aggiornamento logico
+     */
+    public void handleInput(InputState input) {
+        this.input = input;
+    }
+    /**
      * Updates the player's state and movement each frame based on input
      */
     //-------------------------------------------------------------
-    public void update(InputState input, double deltaMs) {
-        super.update(); // reset dx, dy, collisions
+    @Override 
+    public void update(double deltaMs) {
+        super.resetFrameState(); // reset dx, dy, collisions
 
         // player DEAD no update
         if (state == PlayerState.DYING || state == PlayerState.DEAD) {
@@ -84,7 +91,7 @@ public class Player extends Entity {
         }
 
         // update shield timer
-        if (shieldTimerMs > 0 && input.shield()) {
+        if (shieldTimerMs > 0) {
             shieldTimerMs -= deltaMs;
             isShielded = true;
             if (shieldTimerMs <= 0) {
@@ -96,8 +103,10 @@ public class Player extends Entity {
             isShielded = false;
         }
 
-        boolean isMoving = updateMovement(input, deltaMs);
-        updateState(input, isMoving);
+        if (input != null) {
+            boolean isMoving = updateMovement(input, deltaMs);
+            updateState(input, isMoving);
+        }
     }
     //-------------------------------------------------------------
 
@@ -197,15 +206,15 @@ public class Player extends Entity {
      * If the player's life reaches 0, it is considered dead.
      */
     //--------------------------------------------------------------
+    @Override
     public void takeDamage() {
         if (isShielded) {
             // player is shielded, ignore damage
             return;
         }
-        life --;
+        super.takeDamage();
         // the player is dying
-        if (life <= 0) {
-            life = 0;
+        if (life == 0) {
             state = PlayerState.DYING;
             deathAnimationCompleted = false;
         }

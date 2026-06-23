@@ -20,20 +20,22 @@ public class EnemyTNT extends Entity{
 
     //movement
     private double moveTimer; // Timer to control wandering movement
-    private Random random;
+    private static final Random random = new Random();
     private double dirX; //save the current direction of TNT
     private double dirY;
 
     private boolean hasDealtDamage;  // Flag to ensure damage is applied only once per explosion
 
+    //Enemy is relative to another entity ( Player)
+    private final Entity target;
 
     /**
      * CONSTRUCTOR
      */
     //--------------------------------------------------------------
-    public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig) {
+    public EnemyTNT(SpawnPoint spawnPoint, EntityConfig entityConfig, Entity target) {
         super(entityConfig);
-        random = new Random();
+        this.target = target;
         initializeDefaultValues(spawnPoint);
     }
     //--------------------------------------------------------------
@@ -61,13 +63,14 @@ public class EnemyTNT extends Entity{
      * Updates the enemy state and movement
      */
     //-----------------------------------------------------------------------
-    public void update(Player player, double deltaMs) {
-        super.update(); // Reset movement and collision states
+    @Override
+    public void update(double deltaMs) {
+        super.resetFrameState(); // Reset movement and collision states
 
         switch (state) {
             case WANDER: 
                 wander(deltaMs);
-                checkPlayerProximity(player);
+                checkProximity(target);
                 break;
             case HIT: 
                 state = TNTState.WANDER;
@@ -81,7 +84,7 @@ public class EnemyTNT extends Entity{
                 break;
 
             case EXPLODING: 
-                explode(player);
+                explode(target);
                 explosionTimer += deltaMs; 
                 if (explosionTimer >= EntityConfig.TNT_EXPLOSION_DURATION) {
                     state = TNTState.EXPLODED;
@@ -130,9 +133,9 @@ public class EnemyTNT extends Entity{
      * and triggers the TNT if so
      */
     //-------------------------------------------------------------
-    private void checkPlayerProximity(Player player) {
-        long distanceX = player.getWorldX() - worldX;
-        long distanceY = player.getWorldY() - worldY;
+    private void checkProximity(Entity target) {
+        long distanceX = target.getWorldX() - worldX;
+        long distanceY = target.getWorldY() - worldY;
         long distanceSq = distanceX * distanceX + distanceY * distanceY;
         double radiusSq = (double) EntityConfig.TNT_DETECTION_RADIUS * EntityConfig.TNT_DETECTION_RADIUS;
         if (distanceSq < radiusSq) {
@@ -145,16 +148,16 @@ public class EnemyTNT extends Entity{
      * Handles the explosion logic, damaging the player if within the explosion radius
      */
     //--------------------------------------------------------------
-    private void explode(Player player) {
+    private void explode(Entity target) {
         if (hasDealtDamage) return; // Ensure damage is applied only once per explosion
 
-        long distanceX = player.getWorldX()- worldX;
-        long distanceY = player.getWorldY() - worldY;
+        long distanceX = target.getWorldX()- worldX;
+        long distanceY = target.getWorldY() - worldY;
         long distanceSq = distanceX * distanceX + distanceY * distanceY;
         double radiusSq = (double) EntityConfig.TNT_EXPLOSION_RADIUS * EntityConfig.TNT_EXPLOSION_RADIUS;
 
         if (distanceSq < radiusSq) {
-            player.takeDamage();
+            target.takeDamage();
             hasDealtDamage = true; // Set flag to prevent further damage
         }
     }
@@ -165,9 +168,10 @@ public class EnemyTNT extends Entity{
      *  Method to apply damage to the TNT
      */
     //-------------------------------------------------------------
+    @Override
     public void takeDamage() {
         if (state == TNTState.EXPLODED) return; // Already exploded, no further damage
-        life--;
+        super.takeDamage();
         state = TNTState.HIT;
         if (life <= 0) {
             state = TNTState.EXPLODED;

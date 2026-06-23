@@ -40,11 +40,11 @@ public class GameObject implements Serializable, IRenderable {
         this.solid = solid;
     }
 
-    protected void interact() {
+    public void interact() {
         // Default interaction behavior (can be overridden by subclasses)
     }
 
-    protected void update(double deltaMs){
+    public void update(double deltaMs){
         // Default update behavior (can be overridden by subclasses)
     }
 

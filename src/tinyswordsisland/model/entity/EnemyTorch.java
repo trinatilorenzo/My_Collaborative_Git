@@ -19,7 +19,6 @@ public class EnemyTorch extends Entity {
 
     // Timers
     private double stateTimer;
-    private double attackCooldownMs;
 
     // Movement
     private Direction facingDirection;
@@ -28,12 +27,16 @@ public class EnemyTorch extends Entity {
     private boolean attackDamageApplied;
     private int attackCount;
 
+    // Target
+    private final Entity target;
+
     /**
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public EnemyTorch(SpawnPoint spawnPoint, EntityConfig entityConfig) {
+    public EnemyTorch(SpawnPoint spawnPoint, EntityConfig entityConfig, Entity target) {
         super(entityConfig);
+        this.target = target;
         initializeDefaultValues(spawnPoint);
     }
     //-------------------------------------------------------------
@@ -74,20 +77,21 @@ public class EnemyTorch extends Entity {
      * Updates the enemy state and movement.
      */
     //-------------------------------------------------------------
-    public void update(Player player, double deltaMs) {
+    @Override
+    public void update(double deltaMs) {
 
-        super.update();
+        super.resetFrameState();
         stateTimer += deltaMs;
-        facePlayer(player);
+        facePlayer(target);
 
         switch (state) {
 
             case APPROACH:
-                updateApproachState(player, deltaMs);
+                updateApproachState(target, deltaMs);
                 break;
 
             case ATTACK_COMBO:
-                updateAttackState(player, deltaMs);
+                updateAttackState(target, deltaMs);
                 break;
 
             case RECOVERY:
@@ -110,8 +114,8 @@ public class EnemyTorch extends Entity {
      * Standard chase behaviour.
      */
     //-------------------------------------------------------------
-    private void updateApproachState(Player player, double deltaMs) {
-        moveTowardsPlayer(player, deltaMs);
+    private void updateApproachState(Entity target, double deltaMs) {
+        moveTowardsPlayer(target, deltaMs);
         if (stateTimer>=EntityConfig.TORCH_APPROACH_TIME) {
             state = TorchState.ATTACK_COMBO;
             stateTimer = 0;
@@ -124,17 +128,17 @@ public class EnemyTorch extends Entity {
      * Handles flame attack logic.
      */
     //-------------------------------------------------------------
-    private void updateAttackState(Player player, double deltaMs) {
+    private void updateAttackState(Entity target, double deltaMs) {
 
-        moveTowardsPlayer(player, deltaMs);
+        moveTowardsPlayer(target, deltaMs);
 
         if (!attackDamageApplied) {
 
             Rectangle flameArea = getAttackArea();
-            Rectangle playerHitbox = player.getSolidWorldArea();
+            Rectangle playerHitbox = target.getSolidWorldArea();
 
             if (flameArea.intersects(playerHitbox)) {
-                player.takeDamage();
+                target.takeDamage();
                 attackDamageApplied = true;
             }
         }
@@ -176,11 +180,11 @@ public class EnemyTorch extends Entity {
      * Moves the enemy towards the player.
      */
     //-------------------------------------------------------------
-    private void moveTowardsPlayer(Player player, double deltaMs) {
+    private void moveTowardsPlayer(Entity target, double deltaMs) {
 
         // distance from the player
-        double dxPlayer = player.getWorldX() - this.worldX; //distance in x
-        double dyPlayer = player.getWorldY() - this.worldY; //distance in y
+        double dxPlayer = target.getWorldX() - this.worldX; //distance in x
+        double dyPlayer = target.getWorldY() - this.worldY; //distance in y
         double distance = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
         if (distance > 0) {
@@ -258,7 +262,7 @@ public class EnemyTorch extends Entity {
         if (state == TorchState.DEAD || state == TorchState.GUARD) {
             return;
         }
-        life--;
+        super.takeDamage();
         if (life <= 0) {
             state = TorchState.DEAD;
         }
@@ -290,9 +294,9 @@ public class EnemyTorch extends Entity {
      * Updates visual facing direction.
      */
     //-------------------------------------------------------------
-    private void facePlayer(Player player) {
+    private void facePlayer(Entity target) {
 
-        facingDirection = (player.getWorldX() >= worldX)? Direction.RIGHT: Direction.LEFT;
+        facingDirection = (target.getWorldX() >= worldX)? Direction.RIGHT: Direction.LEFT;
     }
     //-------------------------------------------------------------
     // GETTERS ----------------------------------------------------

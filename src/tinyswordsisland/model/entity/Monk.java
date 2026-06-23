@@ -17,14 +17,15 @@ public class Monk extends Entity {
     //dialogues
     private String[] dialogues;
     private int dialogueIndex;
-
+    //monk is relative to another Entity
+    private final Entity target;
     /**
      * CONSTRUCTOR
      */
     //-------------------------------------------------------------
-    public Monk(int worldX, int worldY, EntityConfig entityConfig) {
+    public Monk(int worldX, int worldY, EntityConfig entityConfig, Entity target) {
         super(entityConfig);
-
+        this.target = target;
         initializeDefaultValues(worldX, worldY);
     }
     //-------------------------------------------------------------
@@ -51,7 +52,8 @@ public class Monk extends Entity {
      * called every frame
      */
     //-------------------------------------------------------------
-    public void update(Player player, double deltaMs) {
+    @Override
+    public void update(double deltaMs) {
 
         // make the monk disappear
         if (state == MonkState.DISAPPEARING) {
@@ -67,31 +69,17 @@ public class Monk extends Entity {
 
             return;
         }
-        checkPlayerProximity(player);
+        checkProximity(target);
     }
     //-------------------------------------------------------------
-
-    /**
-     * Move the monk to a new point on the map and set up new dialogues.
-     */
-    //-------------------------------------------------------------
-    public void moveToNextLocation(int newX, int newY, String[] nextDialogues) {
-        this.worldX = newX;
-        this.worldY = newY;
-        this.dialogues = nextDialogues;
-        this.dialogueIndex = 0;
-        this.disappearElapsedMs = 0.0;
-        this.state = MonkState.IDLE; 
-    }
-
 
     /**
      * Checks if the player is within the detection radius
      */
     //-------------------------------------------------------------
-    private void checkPlayerProximity(Player player) {
-        long distanceX = player.worldX - worldX;
-        long distanceY = player.worldY - worldY;
+    private void checkProximity(Entity target) {
+        long distanceX = target.getWorldX() - worldX;
+        long distanceY = target.getWorldY() - worldY;
         long distanceSq = (distanceX * distanceX + distanceY * distanceY);
         double radius = entityConfig.MONK_ACTIVATION_RADIUS;
         double radiusSq = radius * radius;

@@ -114,7 +114,6 @@ public class GameModel implements Serializable, IGameModel {
         projectiles = world.projectiles();
         torchEnemies = world.torchEnemies();
         objects = world.objects();
-
         currentLevelPowerUpCollected = false;
         currentLevel = 0;
         levelCompleted = false;
@@ -176,7 +175,7 @@ public class GameModel implements Serializable, IGameModel {
         }
         objects.removeIf(GameObject::isRemoved);
 
-        monk.update(player, deltaMs);
+        monk.update(deltaMs);
         interactionSystem.update(this);
         updateMessage(deltaMs);
 
@@ -195,7 +194,8 @@ public class GameModel implements Serializable, IGameModel {
             return;
         }
 
-        player.update(input, deltaMs);
+        player.handleInput(input);
+        player.update(deltaMs);
 
         collisionChecker.checkTile(player);
         collisionChecker.checkObjects(player);
@@ -222,7 +222,7 @@ public class GameModel implements Serializable, IGameModel {
             TNTState previousState = tnt.getState();
             if (tnt.getState() != TNTState.EXPLODED) {
 
-                tnt.update(player, deltaMs);
+                tnt.update(deltaMs);
                 collisionChecker.checkEntity(player, tnt);
                 collisionChecker.checkTile(tnt);
                 collisionChecker.checkObjects(tnt);
@@ -245,7 +245,7 @@ public class GameModel implements Serializable, IGameModel {
             DynamiteState previousState = dynamite.getState();
             if (dynamite.getState() != DynamiteState.DEAD){
 
-                dynamite.update(player, deltaMs);
+                dynamite.update(deltaMs);
                 collisionChecker.checkEntity(player, dynamite);
                 collisionChecker.checkTile(dynamite);
                 collisionChecker.checkObjects(dynamite);
@@ -284,7 +284,7 @@ public class GameModel implements Serializable, IGameModel {
             TorchState previousState = torch.getState();
             if (torch.getState() != TorchState.DEAD){
 
-                torch.update(player, deltaMs);
+                torch.update(deltaMs);
                 collisionChecker.checkEntity(torch, player);
                 collisionChecker.checkEntity(player, torch);
                 collisionChecker.checkTile(torch);
@@ -360,11 +360,11 @@ public class GameModel implements Serializable, IGameModel {
      * Called when player is dying or dead to update only necessary logic and animations
       */
     private void updateDeathSequence(double deltaMs) {
-        monk.update(player, deltaMs);
+        monk.update(deltaMs);
         // Keep only finite transitions running; do not start new gameplay logic.
         for (EnemyTNT tnt : tntEnemies) {
             if (tnt.getState() == TNTState.TRIGGERED || tnt.getState() == TNTState.EXPLODING) {
-                tnt.update(player, deltaMs);
+                tnt.update(deltaMs);
             }
         }
         tntEnemies.removeIf(EnemyTNT::isExploded);

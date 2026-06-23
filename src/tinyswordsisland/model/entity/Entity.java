@@ -10,7 +10,7 @@ import java.io.Serializable;
  * and functionality such as position, movement, collision handling, and layer management.
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class Entity implements Serializable, IRenderable {
+public abstract class Entity implements Serializable, IRenderable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,11 +46,16 @@ public class Entity implements Serializable, IRenderable {
     }
     //-------------------------------------------------------------
 
+    // Every entity must implement it
+    //-------------------------------------------------------------
+    public abstract void update(double deltaMs); 
+    //-------------------------------------------------------------
+
     /**
      * Resets per-frame movement state. Called at the start of each update.
      */
     //-------------------------------------------------------------
-    protected void update() {
+    protected void resetFrameState(){
         dx = 0;
         dy = 0;
         fullSpeedX = 0;
@@ -58,12 +63,10 @@ public class Entity implements Serializable, IRenderable {
         collisionX = false;
         collisionY = false;
     }
-    //-------------------------------------------------------------
 
     /**
      * Applies movement based on dx/dy, respecting per-axis collision.
      */
-
     //-------------------------------------------------------------
     public void move() {
         int appliedDx = dx;
@@ -90,8 +93,19 @@ public class Entity implements Serializable, IRenderable {
         }
     }
     //-------------------------------------------------------------
-
+    /**
+     * Generic damage logic for all entities.
+     */
+    public void takeDamage() {
+        life--;
+        if (life <= 0) {
+            life = 0;
+        }
+    }
     // GETTER ----------------------
+    public boolean isDead(){
+        return life<=0;
+    }
     public boolean isCollisionX() {
         return collisionX;
     }
