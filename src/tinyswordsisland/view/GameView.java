@@ -292,23 +292,28 @@ public class GameView extends JPanel implements IGameView {
             }
 
             case 2 -> {
-
-                screenWidth = gd.getDisplayMode().getWidth();
-                screenHeight = gd.getDisplayMode().getHeight();
-
                 frame.setUndecorated(true);
                 frame.setResizable(false);
-
-                setPreferredSize(new Dimension(screenWidth, screenHeight));
-
                 frame.setContentPane(this);
-                frame.pack();
-                frame.setVisible(true);
 
                 if (gd.isFullScreenSupported()) {
                     gd.setFullScreenWindow(frame);
+
+                    Dimension d = frame.getContentPane().getSize();
+                    screenWidth = d.width;
+                    screenHeight = d.height;
                 } else {
-                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                    Rectangle r = gd.getDefaultConfiguration().getBounds();
+
+                    frame.setUndecorated(true);
+                    frame.setResizable(false);
+                    frame.setContentPane(this);
+                    frame.setBounds(r);
+                    frame.setVisible(true);
+
+                    Dimension d = frame.getContentPane().getSize();
+                    screenWidth = d.width;
+                    screenHeight = d.height;
                 }
             }
         }
