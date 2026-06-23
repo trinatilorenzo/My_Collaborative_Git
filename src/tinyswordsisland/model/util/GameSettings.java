@@ -1,8 +1,7 @@
 package tinyswordsisland.model.util;
 
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.GameConfig;
-import tinyswordsisland.config.enu.PlayerColor;
+import tinyswordsisland.model.enu.PlayerColor;
 
 import java.io.Serial;
 import java.io.Serializable;

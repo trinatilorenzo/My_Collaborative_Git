@@ -1,6 +1,6 @@
 package tinyswordsisland.model.util.GameSystem;
 
-import tinyswordsisland.config.enu.PowerUpType;
+import tinyswordsisland.model.enu.PowerUpType;
 import tinyswordsisland.model.GameModel;
 import tinyswordsisland.model.object.GameObject;
 import tinyswordsisland.model.object.OBJ_Tree;

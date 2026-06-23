@@ -1,7 +1,8 @@
 package tinyswordsisland.model.entity;
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.Direction;
+import tinyswordsisland.model.enu.Direction;
 import tinyswordsisland.model.IRenderable;
+import tinyswordsisland.model.RenderableType;
 import java.awt.Rectangle;
 import java.io.Serializable;
 
@@ -82,7 +83,7 @@ public class Entity implements Serializable, IRenderable {
             }
         }
 
-        if (!collisionX) { 
+        if (!collisionX) {
             worldX += appliedDx;
         }
         if (!collisionY) {
@@ -143,13 +144,21 @@ public class Entity implements Serializable, IRenderable {
     public int getHeight(){
         return solidArea.height;
     }
+    @Override
+    public int getRenderLayer() {
+        return currentLayer;
+    }
+    @Override
+    public RenderableType getRenderableType() {
+        return RenderableType.GAME_OBJECT;
+    }
     // worldx and worldy centered in the solid area
     public Rectangle getSolidWorldArea() {
         worldBoundsInstance.setBounds(
-            worldX - solidArea.width / 2,
-            worldY - solidArea.height / 2,
-            solidArea.width,
-            solidArea.height
+                worldX - solidArea.width / 2,
+                worldY - solidArea.height / 2,
+                solidArea.width,
+                solidArea.height
         );
         return worldBoundsInstance;
     }
@@ -176,7 +185,7 @@ public class Entity implements Serializable, IRenderable {
     }
     public void setWorldX(int worldX) {
         this.worldX = worldX;
-    }  
+    }
     public void setWorldY(int worldY) {
         this.worldY = worldY;
     }

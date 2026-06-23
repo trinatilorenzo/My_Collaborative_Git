@@ -1,8 +1,11 @@
 package tinyswordsisland.model.util.GameSystem;
 
-import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.GameModel;
 import tinyswordsisland.model.entity.*;
+import tinyswordsisland.model.enu.DynamiteState;
+import tinyswordsisland.model.enu.GameState;
+import tinyswordsisland.model.enu.PlayerState;
+import tinyswordsisland.model.enu.PowerUpType;
 import tinyswordsisland.model.object.GameObject;
 import tinyswordsisland.model.object.OBJ_PowerUp;
 import tinyswordsisland.model.object.OBJ_Tree;

@@ -1,8 +1,8 @@
 package tinyswordsisland.view.renderer.entity;
 
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.TNTState;
-import tinyswordsisland.model.entity.EnemyTNT;
+import tinyswordsisland.model.enu.TNTState;
+import tinyswordsisland.model.IRenderable;
 import tinyswordsisland.view.animation.Animation;
 import tinyswordsisland.view.animation.AnimationManager;
 import tinyswordsisland.view.SpriteLoader;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 //-------------------------------------------------------------------------------------------------------------------
 public class TNTRenderer {
 
-    private final ConcurrentHashMap<EnemyTNT, AnimationManager> managerByTNT;
+    private final ConcurrentHashMap<IRenderable, AnimationManager> managerByTNT;
     private final EntityConfig entityConfig;
 
     private BufferedImage[] wanderFrames;
@@ -50,7 +50,7 @@ public class TNTRenderer {
      * An animation Manger for each TNT entity
      */
     //-------------------------------------------------------------
-    private AnimationManager getManager(EnemyTNT tnt) {
+    private AnimationManager getManager(IRenderable tnt) {
         // if is not in the map, create a new one
 
         return managerByTNT.computeIfAbsent(tnt, k -> {
@@ -68,9 +68,10 @@ public class TNTRenderer {
      * Change the TNT animation based on his state
      */
     //-------------------------------------------------------------
-    public void update(EnemyTNT tnt, double deltaMs) {
+    public void update(IRenderable tnt, double deltaMs) {
         AnimationManager animationManager = getManager(tnt);
-        switch (tnt.getState()) {
+        TNTState state = TNTState.values()[tnt.getRenderState()];
+        switch (state) {
             case WANDER -> animationManager.playAnimation("wander");
             case TRIGGERED -> animationManager.playAnimation("triggered");
             case EXPLODING -> animationManager.playAnimation("explosion");
@@ -84,27 +85,28 @@ public class TNTRenderer {
      * Draw the TNT on the screen
      */
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
+    public void draw(Graphics2D g2, IRenderable tnt, int screenX, int screenY) {
         AnimationManager animationManager = getManager(tnt);
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
-        if (tnt.getState() == TNTState.EXPLODING) {
+        TNTState state = TNTState.values()[tnt.getRenderState()];
+        if (state == TNTState.EXPLODING) {
             int drawW = EntityConfig.TNT_SPRITE_WIDTH * 3;
             int drawH = EntityConfig.TNT_SPRITE_HEIGHT * 3;
             g2.drawImage(frame, screenX - drawW / 2, screenY - drawH / 2, drawW, drawH, null);
-        } else if (tnt.getState() != TNTState.EXPLODED) {
+        } else if (state != TNTState.EXPLODED) {
             int drawX = screenX - EntityConfig.TNT_SPRITE_WIDTH / 2;
             int drawY = screenY - EntityConfig.TNT_SPRITE_HEIGHT / 2;
             g2.drawImage(frame, drawX, drawY, EntityConfig.TNT_SPRITE_WIDTH, EntityConfig.TNT_SPRITE_HEIGHT, null);
 
             // DYNAMIC HEALTH BAR (Appears only after taking the first hit)
-            if (tnt.getLife() < tnt.getMaxLife()) {
+            if (tnt.getLifeRender() < tnt.getMaxLifeRender()) {
                 int barWidth = EntityConfig.TNT_SPRITE_WIDTH/2;
                 int barHeight = 5;
                 int barX = screenX - barWidth / 2;
                 int barY = screenY - barHeight - 20; // Positions bar safely above the head
 
-                double lifePercent = (double) tnt.getLife() / tnt.getMaxLife();
+                double lifePercent = (double) tnt.getLifeRender() / tnt.getMaxLifeRender();
                 if (lifePercent < 0) lifePercent = 0;
 
                 int currentBarWidth = (int) (barWidth * lifePercent);
@@ -132,7 +134,7 @@ public class TNTRenderer {
      * Use to be sure to remove a tnt from render when it's exploded
      */
     //-------------------------------------------------------------
-    public void removeTNT(EnemyTNT tnt) {
+    public void removeTNT(IRenderable tnt) {
         managerByTNT.remove(tnt);
     }
     //-------------------------------------------------------------
@@ -141,7 +143,7 @@ public class TNTRenderer {
      * Debug method to draw the tnt's solid area and interaction radius.
      */
     //-------------------------------------------------------------
-    public void drawSolidArea(Graphics2D g2, EnemyTNT tnt, int screenX, int screenY) {
+    public void drawSolidArea(Graphics2D g2, IRenderable tnt, int screenX, int screenY) {
         Rectangle solid = tnt.getSolidArea();
         int drawX = screenX - solid.width / 2;
         int drawY = screenY - solid.height / 2;

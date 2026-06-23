@@ -1,6 +1,6 @@
-package tinyswordsisland.config.enu;
+package tinyswordsisland.model.enu;
 
 //-----------------------------------------------------------------------
-// GAME STATE
+// Player State
 //-----------------------------------------------------------------------
-public enum GameState {MENU, PLAYING, PAUSED, GAME_OVER, WIN, SETTINGS}
+public enum PlayerState {IDLE, WALKING, ATTACKING, DYING, DEAD}

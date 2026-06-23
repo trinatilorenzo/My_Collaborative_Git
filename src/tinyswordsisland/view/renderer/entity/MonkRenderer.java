@@ -1,8 +1,8 @@
 package tinyswordsisland.view.renderer.entity;
 
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.MonkState;
-import tinyswordsisland.model.entity.Monk;
+import tinyswordsisland.model.enu.MonkState;
+import tinyswordsisland.model.IRenderable;
 import tinyswordsisland.view.animation.Animation;
 import tinyswordsisland.view.animation.AnimationManager;
 import tinyswordsisland.view.SpriteLoader;
@@ -53,10 +53,11 @@ public class MonkRenderer {
      * Change the monk animation based on his state
      */
     //-------------------------------------------------------------
-    public void update(Monk monk, double deltaMs) {
-        if (monk.getState() == MonkState.DISAPPEARED) return;
+    public void update(IRenderable monk, double deltaMs) {
+        MonkState state = MonkState.values()[monk.getRenderState()];
+        if (state == MonkState.DISAPPEARED) return;
 
-        switch (monk.getState()) {
+        switch (state) {
             case IDLE -> animationManager.playAnimation("monk_idle");
             case TALKING -> animationManager.playAnimation("monk_talking");
             case DISAPPEARING -> animationManager.playAnimation("monk_disappear");
@@ -70,8 +71,8 @@ public class MonkRenderer {
      * Draws the monk on the screen
      */
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2, Monk monk, int screenX, int screenY) {
-        if (monk.getState() == MonkState.DISAPPEARED) return;
+    public void draw(Graphics2D g2, IRenderable monk, int screenX, int screenY) {
+        if (MonkState.values()[monk.getRenderState()] == MonkState.DISAPPEARED) return;
 
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
         int drawX = screenX - EntityConfig.SPRITE_WIDTH / 2;
@@ -84,7 +85,7 @@ public class MonkRenderer {
      * Debug method to draw the monk's solid area and interaction radius.
      */
     //-------------------------------------------------------------
-    public void drawSolidArea(Graphics2D g2, Monk monk, int screenX, int screenY) {
+    public void drawSolidArea(Graphics2D g2, IRenderable monk, int screenX, int screenY) {
 
         Rectangle solid = monk.getSolidArea();
         int drawX = screenX - solid.width / 2;

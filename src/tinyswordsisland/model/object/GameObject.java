@@ -3,6 +3,7 @@ package tinyswordsisland.model.object;
 import tinyswordsisland.config.ObjConfig;
 import tinyswordsisland.config.SpawnPoint;
 import tinyswordsisland.model.IRenderable;
+import tinyswordsisland.model.RenderableType;
 import java.awt.Rectangle;
 import java.io.Serializable;
 
@@ -20,7 +21,7 @@ public class GameObject implements Serializable, IRenderable {
     protected String name;
     protected int worldX, worldY, layer; //position
     protected int width, height; // visual size
-    
+
     protected Rectangle solidArea; // dimension
     protected final Rectangle worldBoundsInstance = new Rectangle();
 
@@ -60,10 +61,10 @@ public class GameObject implements Serializable, IRenderable {
     }
     public Rectangle getSolidWorldArea() {
         worldBoundsInstance.setBounds(
-            worldX + solidArea.x,
-            worldY + solidArea.y,
-            solidArea.width,
-            solidArea.height
+                worldX + solidArea.x,
+                worldY + solidArea.y,
+                solidArea.width,
+                solidArea.height
         );
         return worldBoundsInstance;
     }
@@ -84,6 +85,22 @@ public class GameObject implements Serializable, IRenderable {
     }
     public int getLayer() {
         return layer;
+    }
+    @Override
+    public int getRenderLayer() {
+        return layer;
+    }
+    @Override
+    public RenderableType getRenderableType() {
+        return RenderableType.GAME_OBJECT;
+    }
+    @Override
+    public String getRenderVariant() {
+        return name == null ? "" : name;
+    }
+    @Override
+    public boolean isRemovedRender() {
+        return removed;
     }
     // SETTER
     public void remove() {

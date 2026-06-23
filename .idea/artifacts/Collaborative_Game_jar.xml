@@ -2,7 +2,7 @@
   <artifact type="jar" name="Collaborative_Game:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Collaborative_Game_jar</output-path>
     <root id="archive" name="Collaborative_Game.jar">
-      <element id="module-output" name="Collaborative_Game" />
+      <element id="module-output" name="TinySwordsIsland" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../jlayer-1.0.1.jar" path-in-jar="/" />
     </root>
   </artifact>

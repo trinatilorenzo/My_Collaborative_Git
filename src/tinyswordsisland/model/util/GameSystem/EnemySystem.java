@@ -1,8 +1,10 @@
 package tinyswordsisland.model.util.GameSystem;
 
-import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.GameModel;
 import tinyswordsisland.model.entity.*;
+import tinyswordsisland.model.enu.DynamiteState;
+import tinyswordsisland.model.enu.TNTState;
+import tinyswordsisland.model.enu.TorchState;
 
 
 public final class EnemySystem {

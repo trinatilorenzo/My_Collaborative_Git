@@ -3,7 +3,7 @@ package tinyswordsisland.model.object;
 import java.awt.Rectangle;
 import tinyswordsisland.config.ObjConfig;
 import tinyswordsisland.config.SpawnPoint;
-import tinyswordsisland.config.enu.PowerUpType;
+import tinyswordsisland.model.enu.PowerUpType;
 
 /**
  * Represents collectible power-up items in the game world 
@@ -30,6 +30,10 @@ public class OBJ_PowerUp extends GameObject {
 
     public PowerUpType getType() {
         return type;
+    }
+    @Override
+    public String getRenderVariant() {
+        return type.name();
     }
 
 }

@@ -3,6 +3,7 @@ package tinyswordsisland.model.entity;
 import java.awt.Rectangle;
 
 import tinyswordsisland.config.EntityConfig;
+import tinyswordsisland.model.RenderableType;
 
 /**
  * Projectile launched by EnemyDynamite.
@@ -99,6 +100,10 @@ public class DynamiteProjectile extends Entity {
     public double getAngle() {
         return angle;
     }
+    @Override
+    public RenderableType getRenderableType() { return RenderableType.DYNAMITE_PROJECTILE; }
+    @Override
+    public double getRenderAngle() { return angle; }
     //-------------------------------------------------------------
 
     //SETTER

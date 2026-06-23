@@ -1,6 +1,6 @@
 package tinyswordsisland.view.ui;
 
-import tinyswordsisland.config.enu.ButtonValue;
+import tinyswordsisland.controller.enu.ButtonValue;
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.ScreenConfig;
 import tinyswordsisland.config.UIConfig;
@@ -16,13 +16,11 @@ import javax.imageio.ImageIO;
 
 import tinyswordsisland.controller.IController;
 
-import static tinyswordsisland.config.enu.ButtonValue.MainMenu.*;
-import static tinyswordsisland.config.enu.ButtonValue.PauseMenu.*;
-import static tinyswordsisland.config.enu.ButtonValue.SettingsMenu.*;
-import static tinyswordsisland.config.enu.ButtonValue.GameOverMenu.*;
-import static tinyswordsisland.config.enu.ButtonValue.WinMenu.HOME_WIN;
-import static tinyswordsisland.config.enu.ButtonValue.WinMenu.QUIT_WIN;
-
+import static tinyswordsisland.controller.enu.ButtonValue.SettingsMenu.*;
+import static tinyswordsisland.controller.enu.ButtonValue.MainMenu.*;
+import static tinyswordsisland.controller.enu.ButtonValue.PauseMenu.*;
+import static tinyswordsisland.controller.enu.ButtonValue.WinMenu.*;
+import static tinyswordsisland.controller.enu.ButtonValue.GameOverMenu.*;
 
 /**
  * Draws all in-game UI elements: HUD, menus, dialogue windows, and debug HUD overlays.

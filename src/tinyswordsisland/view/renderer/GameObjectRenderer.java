@@ -1,9 +1,9 @@
 package tinyswordsisland.view.renderer;
 
 import tinyswordsisland.config.ObjConfig;
-import tinyswordsisland.model.object.GameObject;
-import tinyswordsisland.model.object.OBJ_Tree;
-import tinyswordsisland.model.object.OBJ_PowerUp;
+import tinyswordsisland.model.enu.PowerUpType;
+import tinyswordsisland.model.enu.TreeState;
+import tinyswordsisland.model.IRenderable;
 import tinyswordsisland.view.animation.Animation;
 import tinyswordsisland.view.animation.AnimationManager;
 import tinyswordsisland.view.SpriteLoader;
@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static tinyswordsisland.config.ObjConfig.*;
-import static tinyswordsisland.config.enu.TreeState.CHOPPED;
-import static tinyswordsisland.config.enu.TreeState.CHOPPING;
+import static tinyswordsisland.model.enu.TreeState.CHOPPED;
+import static tinyswordsisland.model.enu.TreeState.CHOPPING;
 
 /**
  * Renderer for all map objects: animated trees and static buildings.
@@ -31,7 +31,7 @@ public class GameObjectRenderer {
     private static final double CHOPPING_ANIMATION_SPEED = 2.5;
 
     // One animation manager for each tree in the map.
-    private final Map<OBJ_Tree, AnimationManager> treeAnimations = new HashMap<>();
+    private final Map<IRenderable, AnimationManager> treeAnimations = new HashMap<>();
 
     // Tree sprites
     private BufferedImage[] tree01Frames;
@@ -98,21 +98,21 @@ public class GameObjectRenderer {
      * Updates animated objects.
      */
     //-------------------------------------------------------------
-    public void update(GameObject obj, double deltaMs) {
-        if (obj instanceof OBJ_Tree tree) {
-            updateTree(tree, deltaMs);
+    public void update(IRenderable obj, double deltaMs) {
+        if (isTree(obj)) {
+            updateTree(obj, deltaMs);
         }
     }
     //-------------------------------------------------------------
-    private void updateTree(OBJ_Tree tree, double deltaMs) {
-        if (tree.isRemoved()) {
+    private void updateTree(IRenderable tree, double deltaMs) {
+        if (tree.isRemovedRender()) {
             treeAnimations.remove(tree);
             return;
         }
 
         AnimationManager animation = getTreeAnimation(tree);
 
-        if (tree.getState() == CHOPPING) {
+        if (TreeState.values()[tree.getRenderState()] == CHOPPING) {
             animation.update(deltaMs * CHOPPING_ANIMATION_SPEED);
         } else {
             animation.update(deltaMs);
@@ -124,34 +124,35 @@ public class GameObjectRenderer {
      * Draws a map object.
      */
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2, GameObject obj, int screenX, int screenY) {
-        if (obj instanceof OBJ_Tree tree) {
-            drawTree(g2, tree, screenX, screenY);
-        } else if (obj instanceof OBJ_PowerUp powerUp) {
-            drawPowerUp(g2, powerUp, screenX, screenY);
+    public void draw(Graphics2D g2, IRenderable obj, int screenX, int screenY) {
+        if (isTree(obj)) {
+            drawTree(g2, obj, screenX, screenY);
+        } else if (isPowerUp(obj)) {
+            drawPowerUp(g2, obj, screenX, screenY);
         } else {
             drawBuilding(g2, obj, screenX, screenY);
         }
     }
     //-------------------------------------------------------------
-    private void drawTree(Graphics2D g2, OBJ_Tree tree, int screenX, int screenY) {
+    private void drawTree(Graphics2D g2, IRenderable tree, int screenX, int screenY) {
         int drawX = screenX;
         int drawY = screenY;
 
-        if (tree.getState() == CHOPPING) {
+        TreeState treeState = TreeState.values()[tree.getRenderState()];
+        if (treeState == CHOPPING) {
             drawX += (int) (Math.random() * 5 - 2);
             drawY += (int) (Math.random() * 5 - 2);
         }
 
         BufferedImage sprite;
-        if (tree.getState() == CHOPPED) {
-            sprite = getTreeStump(tree.getName());
+        if (treeState == CHOPPED) {
+            sprite = getTreeStump(tree.getRenderVariant());
         } else {
             sprite = getTreeAnimation(tree).getCurrent().getCurrentFrame();
         }
 
         long time = ObjConfig.POWER_UP_LIGHTING_DURATION;
-        if (tree.isFlashingActive() && tree.getState() != CHOPPED){
+        if (tree.isFlashingRender() && treeState != CHOPPED){
             boolean lighting = (System.currentTimeMillis() / time) % 2 == 0;
             if (lighting){
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
@@ -164,16 +165,16 @@ public class GameObjectRenderer {
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
     }
     //-------------------------------------------------------------
-    private void drawBuilding(Graphics2D g2, GameObject obj, int screenX, int screenY) {
-        BufferedImage sprite = getBuildingSprite(obj.getName());
+    private void drawBuilding(Graphics2D g2, IRenderable obj, int screenX, int screenY) {
+        BufferedImage sprite = getBuildingSprite(obj.getRenderVariant());
         g2.drawImage(sprite, screenX, screenY, obj.getWidth(), obj.getHeight(), null);
     }
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     // Draws power-ups with a simple pulsating effect.
-    private void drawPowerUp(Graphics2D g2, OBJ_PowerUp powerUp, int screenX, int screenY) {
-        BufferedImage sprite = switch (powerUp.getType()) {
+    private void drawPowerUp(Graphics2D g2, IRenderable powerUp, int screenX, int screenY) {
+        BufferedImage sprite = switch (PowerUpType.valueOf(powerUp.getRenderVariant())) {
             case SHIELD -> spriteShield;
             case HEALTH_RESTORE -> spriteHealth;
             case SPEED_BOOST -> spriteSpeed;
@@ -183,7 +184,7 @@ public class GameObjectRenderer {
         double scale = 1.0 + 0.1 * Math.sin(System.currentTimeMillis() / 300.0);
         int width = (int) (powerUp.getWidth() * scale);
         int height = (int) (powerUp.getHeight() * scale);
-        
+
         int drawX = screenX - (width - powerUp.getWidth()) / 2;
         int drawY = screenY - (height - powerUp.getHeight()) / 2;
 
@@ -193,8 +194,8 @@ public class GameObjectRenderer {
      * Draws object hitboxes in debug mode.
      */
     //-------------------------------------------------------------
-    public void drawDebugObject(Graphics2D g2, GameObject object, int screenX, int screenY, int playerCurrentLayer) {
-        if (object == null || object.isRemoved() || object.getSolidArea() == null) {
+    public void drawDebugObject(Graphics2D g2, IRenderable object, int screenX, int screenY, int playerCurrentLayer) {
+        if (object == null || object.isRemovedRender() || object.getSolidArea() == null) {
             return;
         }
 
@@ -209,15 +210,15 @@ public class GameObjectRenderer {
         g2.setStroke(new BasicStroke(2));
 
         // Red for objects on the same layer as the player, orange for others
-        boolean sameLayer = object.getLayer() == playerCurrentLayer;
+        boolean sameLayer = object.getRenderLayer() == playerCurrentLayer;
         g2.setColor(sameLayer ? new Color(255, 40, 40, 90) : new Color(255, 180, 0, 55));
         g2.fillRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);
 
         g2.setColor(sameLayer ? new Color(255, 40, 40, 220) : new Color(255, 180, 0, 160));
-        g2.drawRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);     
-        
+        g2.drawRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);
+
         // Light blue for trees whit power-ups
-        if (object instanceof OBJ_Tree tree && tree.hasPowerUp()) {
+        if (isTree(object) && object.hasPowerUpRender()) {
             g2.setColor(new Color(40, 200, 255, 110));
             g2.fillRect(boxScreenX, boxScreenY, solidArea.width, solidArea.height);
         }
@@ -242,12 +243,12 @@ public class GameObjectRenderer {
 
     //GETTERS
     //-------------------------------------------------------------
-    private AnimationManager getTreeAnimation(OBJ_Tree tree) {
+    private AnimationManager getTreeAnimation(IRenderable tree) {
         AnimationManager animation = treeAnimations.get(tree);
 
         if (animation == null) {
             animation = new AnimationManager();
-            animation.addAnimation("idle", new Animation(getTreeFrames(tree.getName()), TREE_IDLE_FRAME_MS, true));
+            animation.addAnimation("idle", new Animation(getTreeFrames(tree.getRenderVariant()), TREE_IDLE_FRAME_MS, true));
             animation.playAnimation("idle");
             treeAnimations.put(tree, animation);
         }
@@ -255,6 +256,18 @@ public class GameObjectRenderer {
         return animation;
     }
     //-------------------------------------------------------------
+    private boolean isTree(IRenderable renderable) {
+        String name = normalize(renderable.getRenderVariant());
+        return name.startsWith("tree") || name.startsWith("trees");
+    }
+    private boolean isPowerUp(IRenderable renderable) {
+        try {
+            PowerUpType.valueOf(renderable.getRenderVariant());
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
     private BufferedImage[] getTreeFrames(String name) {
         String normalizedName = normalize(name);
 

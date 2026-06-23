@@ -1,11 +1,15 @@
 package tinyswordsisland.view.renderer;
 
 import tinyswordsisland.model.IRenderable;
+import tinyswordsisland.model.RenderableType;
+import tinyswordsisland.view.ViewEvent;
 import tinyswordsisland.view.renderer.entity.*;
 import tinyswordsisland.config.GameConfig;
-import tinyswordsisland.config.enu.PlayerColor;
+import tinyswordsisland.model.enu.PlayerColor;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import tinyswordsisland.controller.IController;
 
@@ -30,64 +34,71 @@ public class RenderDispatcher {
      * Manages the drawing of the entity and, if debugMode is active, automatically draws the Solid Area
      */
     public void draw(Graphics2D g2, IRenderable obj, int screenX, int screenY, boolean debugMode, int playerWorldX, int playerWorldY, int playerCurrentLayer) {
-        if (obj instanceof tinyswordsisland.model.entity.Player p) {
-            playerRender.draw(g2, p, screenX, screenY);
+        RenderableType type = obj.getRenderableType();
+        if (type == RenderableType.PLAYER) {
+            playerRender.draw(g2, obj, screenX, screenY);
             if (debugMode) {
-                playerRender.drawSolidArea(g2, p, screenX, screenY);
+                playerRender.drawSolidArea(g2, obj, screenX, screenY);
             }
-        } 
-        else if (obj instanceof tinyswordsisland.model.entity.Monk m) {
-            monkRenderer.draw(g2, m, screenX, screenY);
+        }
+        else if (type == RenderableType.MONK) {
+            monkRenderer.draw(g2, obj, screenX, screenY);
             if (debugMode) {
-                monkRenderer.drawSolidArea(g2, m, screenX, screenY);
+                monkRenderer.drawSolidArea(g2, obj, screenX, screenY);
             }
-        } 
-        else if (obj instanceof tinyswordsisland.model.entity.EnemyTNT tnt) {
-            tntRenderer.draw(g2, tnt, screenX, screenY);
+        }
+        else if (type == RenderableType.ENEMY_TNT) {
+            tntRenderer.draw(g2, obj, screenX, screenY);
             if (debugMode) {
-                tntRenderer.drawSolidArea(g2, tnt, screenX, screenY);
+                tntRenderer.drawSolidArea(g2, obj, screenX, screenY);
             }
-        } 
-        else if (obj instanceof tinyswordsisland.model.entity.EnemyDynamite dynamite) {
-            dynamiteRender.draw(g2, dynamite, screenX, screenY);
+        }
+        else if (type == RenderableType.ENEMY_DYNAMITE) {
+            dynamiteRender.draw(g2, obj, screenX, screenY);
             if (debugMode) {
-                dynamiteRender.drawSolidArea(g2, dynamite, screenX, screenY);
+                dynamiteRender.drawSolidArea(g2, obj, screenX, screenY);
             }
-        } 
-        else if (obj instanceof tinyswordsisland.model.entity.EnemyTorch torch) {
-            torchRenderer.draw(g2, torch, screenX, screenY);
+        }
+        else if (type == RenderableType.ENEMY_TORCH) {
+            torchRenderer.draw(g2, obj, screenX, screenY);
             if (debugMode) {
-                torchRenderer.drawSolidArea(g2, torch, screenX, screenY);
+                torchRenderer.drawSolidArea(g2, obj, screenX, screenY);
             }
-        } 
-        else if (obj instanceof tinyswordsisland.model.entity.DynamiteProjectile proj) {
-            dynamiteRender.drawProjectile(g2, proj, screenX, screenY);
+        }
+        else if (type == RenderableType.DYNAMITE_PROJECTILE) {
+            dynamiteRender.drawProjectile(g2, obj, screenX, screenY);
             if (debugMode) {
-                dynamiteRender.drawProjectileSolidArea(g2, proj, screenX, screenY);
+                dynamiteRender.drawProjectileSolidArea(g2, obj, screenX, screenY);
             }
-        } 
-        else if (obj instanceof tinyswordsisland.model.object.GameObject o) {
-            objectRenderer.draw(g2, o, screenX, screenY);
+        }
+        else if (type == RenderableType.GAME_OBJECT) {
+            objectRenderer.draw(g2, obj, screenX, screenY);
             if (debugMode) {
-                objectRenderer.drawDebugObject(g2, o, screenX, screenY, playerCurrentLayer);
+                objectRenderer.drawDebugObject(g2, obj, screenX, screenY, playerCurrentLayer);
             }
         }
     }
-    
+
     /**
      * Updates the animations of all entities and game objects in the tinyswordsisland.model.
      */
-    public void update(IController controller, double deltaMs) {
+    public List<ViewEvent> update(IController controller, double deltaMs) {
+        List<ViewEvent> events = new ArrayList<>();
         for (IRenderable obj : controller.getAllRenderables()) {
-            if (obj instanceof tinyswordsisland.model.entity.Player p)          playerRender.update(p, deltaMs);
-            else if (obj instanceof tinyswordsisland.model.entity.Monk m)       monkRenderer.update(m, deltaMs);
-            else if (obj instanceof tinyswordsisland.model.entity.EnemyTNT tnt) tntRenderer.update(tnt, deltaMs);
-            else if (obj instanceof tinyswordsisland.model.entity.EnemyDynamite ed) dynamiteRender.update(ed, deltaMs);
-            else if (obj instanceof tinyswordsisland.model.entity.EnemyTorch et) torchRenderer.update(et, deltaMs);
-            else if (obj instanceof tinyswordsisland.model.object.GameObject o)  objectRenderer.update(o, deltaMs);
+            RenderableType type = obj.getRenderableType();
+            if (type == RenderableType.PLAYER) {
+                playerRender.update(obj, deltaMs);
+                events.addAll(playerRender.consumeViewEvents());
+            }
+            else if (type == RenderableType.MONK) monkRenderer.update(obj, deltaMs);
+            else if (type == RenderableType.ENEMY_TNT) tntRenderer.update(obj, deltaMs);
+            else if (type == RenderableType.ENEMY_DYNAMITE) dynamiteRender.update(obj, deltaMs);
+            else if (type == RenderableType.ENEMY_TORCH) torchRenderer.update(obj, deltaMs);
+            else if (type == RenderableType.GAME_OBJECT) objectRenderer.update(obj, deltaMs);
         }
+        return events;
     }
-    
+
     public void updatePlayerColor(PlayerColor color) {
         playerRender.setPlayerColor(color);
     }

@@ -1,6 +1,6 @@
 package tinyswordsisland.view.audio;
 
-import tinyswordsisland.config.enu.GameState;
+import tinyswordsisland.model.enu.GameState;
 
 public class GameAudioManager {
 

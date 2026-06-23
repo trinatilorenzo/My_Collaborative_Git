@@ -5,7 +5,8 @@ import java.util.Random;
 
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.SpawnPoint;
-import tinyswordsisland.config.enu.TNTState;
+import tinyswordsisland.model.enu.TNTState;
+import tinyswordsisland.model.RenderableType;
 
 /**
  * The EnemyTNT CLASS an NPC that explodes when the player is within a certain radius.
@@ -65,14 +66,14 @@ public class EnemyTNT extends Entity{
         super.update(); // Reset movement and collision states
 
         switch (state) {
-            case WANDER: 
+            case WANDER:
                 wander(deltaMs);
                 checkPlayerProximity(player);
                 break;
-            case HIT: 
+            case HIT:
                 state = TNTState.WANDER;
                 break;
-            case TRIGGERED: 
+            case TRIGGERED:
                 triggerTimer += deltaMs;
                 if (triggerTimer >= EntityConfig.TNT_EXPLOSION_DELAY) {
                     state = TNTState.EXPLODING;
@@ -80,9 +81,9 @@ public class EnemyTNT extends Entity{
                 }
                 break;
 
-            case EXPLODING: 
+            case EXPLODING:
                 explode(player);
-                explosionTimer += deltaMs; 
+                explosionTimer += deltaMs;
                 if (explosionTimer >= EntityConfig.TNT_EXPLOSION_DURATION) {
                     state = TNTState.EXPLODED;
                 }
@@ -105,7 +106,7 @@ public class EnemyTNT extends Entity{
 
         double deltaTime = deltaMs / 1000.0; // Convert ms to seconds for speed calculation
         moveTimer += deltaMs; // Increment the timer by the elapsed time
-        
+
         // Change direction at intervals
         if (moveTimer >= EntityConfig.TNT_MOVEINTERVAL) {
             int dir = random.nextInt(5); //Random direction
@@ -119,7 +120,7 @@ public class EnemyTNT extends Entity{
             }
             moveTimer = 0; // Reset timer after changing direction
         }
- 
+
         dx = (int) Math.round(dirX *speed * deltaTime);
         dy = (int) Math.round(dirY * speed * deltaTime);
 
@@ -160,7 +161,7 @@ public class EnemyTNT extends Entity{
     }
     //-------------------------------------------------------------
     //end update -------------------------------------------------------------
-    
+
     /**
      *  Method to apply damage to the TNT
      */
@@ -182,7 +183,15 @@ public class EnemyTNT extends Entity{
     public boolean isExploded() {
         return state==TNTState.EXPLODED;
     }
+    @Override
+    public RenderableType getRenderableType() { return RenderableType.ENEMY_TNT; }
+    @Override
+    public int getRenderState() { return state.ordinal(); }
+    @Override
+    public int getLifeRender() { return life; }
+    @Override
+    public int getMaxLifeRender() { return maxLife; }
     //-------------------------------------------------------------
-   
+
 }
 //-------------------------------------------------------------------------------------------------------------------

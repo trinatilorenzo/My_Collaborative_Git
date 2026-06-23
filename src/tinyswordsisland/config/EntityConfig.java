@@ -1,6 +1,6 @@
 package tinyswordsisland.config;
 
-import tinyswordsisland.config.enu.*;
+import tinyswordsisland.model.enu.*;
 
 import java.util.ArrayList;
 

@@ -4,8 +4,9 @@ import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.config.MapConfig;
 import tinyswordsisland.config.ScreenConfig;
 import tinyswordsisland.config.UIConfig;
-import tinyswordsisland.config.enu.ButtonValue;
-import tinyswordsisland.config.enu.GameState;
+import tinyswordsisland.controller.enu.ButtonValue;
+import tinyswordsisland.model.enu.GameState;
+import tinyswordsisland.view.ViewEvent;
 import tinyswordsisland.model.IRenderable;
 import tinyswordsisland.view.audio.AudioEffect;
 import tinyswordsisland.view.ui.*;
@@ -87,7 +88,7 @@ public class GameView extends JPanel implements IGameView {
 
         this.renderDispatcher = new RenderDispatcher(GS, controller.getPlayerColor());
 
-        //initialize after 
+        //initialize after
         this.ui_render = new UI(controller, screenCfg, screenWidth, screenHeight);
         setResolution();
 
@@ -167,7 +168,7 @@ public class GameView extends JPanel implements IGameView {
     }
 
     //--------------------------------------------------------------
-   
+
     private void drawEntities(Graphics2D g2){
 
         // Player's coordinates
@@ -184,14 +185,14 @@ public class GameView extends JPanel implements IGameView {
 
         // Render
         for (IRenderable obj : renderList) {
-        
+
             // Screen Coordinates
             int screenX = obj.getWorldX() - playerWorldX + pScreenX;
             int screenY = obj.getWorldY() - playerWorldY + pScreenY;
 
             // Universal culling: If the object is off-screen, we don't waste resources drawing it.
             if (screenX + obj.getWidth() < 0 || screenX > screenWidth ||
-                screenY + obj.getHeight() < 0 || screenY > screenHeight) {
+                    screenY + obj.getHeight() < 0 || screenY > screenHeight) {
                 continue;
             }
 
@@ -200,9 +201,9 @@ public class GameView extends JPanel implements IGameView {
         }
     }
 
-    public void updateAnimations(double deltaMs) {
+    public List<ViewEvent> updateAnimations(double deltaMs) {
         tileSet.updateAnimTile(deltaMs);
-        renderDispatcher.update(controller, deltaMs);
+        return renderDispatcher.update(controller, deltaMs);
     }
     //-------------------------------------------------------------
 
@@ -292,28 +293,23 @@ public class GameView extends JPanel implements IGameView {
             }
 
             case 2 -> {
+
+                screenWidth = gd.getDisplayMode().getWidth();
+                screenHeight = gd.getDisplayMode().getHeight();
+
                 frame.setUndecorated(true);
                 frame.setResizable(false);
+
+                setPreferredSize(new Dimension(screenWidth, screenHeight));
+
                 frame.setContentPane(this);
+                frame.pack();
+                frame.setVisible(true);
 
                 if (gd.isFullScreenSupported()) {
                     gd.setFullScreenWindow(frame);
-
-                    Dimension d = frame.getContentPane().getSize();
-                    screenWidth = d.width;
-                    screenHeight = d.height;
                 } else {
-                    Rectangle r = gd.getDefaultConfiguration().getBounds();
-
-                    frame.setUndecorated(true);
-                    frame.setResizable(false);
-                    frame.setContentPane(this);
-                    frame.setBounds(r);
-                    frame.setVisible(true);
-
-                    Dimension d = frame.getContentPane().getSize();
-                    screenWidth = d.width;
-                    screenHeight = d.height;
+                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 }
             }
         }

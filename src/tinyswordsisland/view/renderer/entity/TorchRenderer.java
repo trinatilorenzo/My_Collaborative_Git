@@ -1,9 +1,9 @@
 package tinyswordsisland.view.renderer.entity;
 
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.Direction;
-import tinyswordsisland.config.enu.TorchState;
-import tinyswordsisland.model.entity.EnemyTorch;
+import tinyswordsisland.model.enu.Direction;
+import tinyswordsisland.model.enu.TorchState;
+import tinyswordsisland.model.IRenderable;
 import tinyswordsisland.view.SpriteLoader;
 import tinyswordsisland.view.animation.Animation;
 import tinyswordsisland.view.animation.AnimationManager;
@@ -21,9 +21,9 @@ public class TorchRenderer {
 
     private final EntityConfig entityConfig;
     // ConcurrentHashMaps to handle multiple instances of EnemyTorch safely
-    private final ConcurrentHashMap<EnemyTorch, AnimationManager> managerByEnemy;
-    private final ConcurrentHashMap<EnemyTorch, TorchState> previousStateByEnemy;
-    private final ConcurrentHashMap<EnemyTorch, AnimationManager> fireManagerByEnemy;
+    private final ConcurrentHashMap<IRenderable, AnimationManager> managerByEnemy;
+    private final ConcurrentHashMap<IRenderable, TorchState> previousStateByEnemy;
+    private final ConcurrentHashMap<IRenderable, AnimationManager> fireManagerByEnemy;
 
     private BufferedImage[] idleFrames;
     private BufferedImage[] walkFrames;
@@ -56,7 +56,7 @@ public class TorchRenderer {
         attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 1, 6, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
         attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 3, 1, 6, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
         attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 1, 6, entityConfig.TORCH_SPRITE_WIDTH, entityConfig.TORCH_SPRITE_HEIGHT);
-    
+
         // Loads the sprite sheet dedicated to the fire
         BufferedImage fireSheet = SpriteLoader.loadSpriteSheet("/res/npc/Enemy_Torch/Fire.png");
         fireFrames = SpriteLoader.getAnimationFrames(fireSheet, 0, 1, 7, entityConfig.FIRE_SPRITE_WIDTH, entityConfig.FIRE_SPRITE_HEIGHT);
@@ -66,7 +66,7 @@ public class TorchRenderer {
      * An animation Manger for each Torch entity
      */
     //--------------------------------------------------------------
-    private AnimationManager getManager(EnemyTorch torch) {
+    private AnimationManager getManager(IRenderable torch) {
         return managerByEnemy.computeIfAbsent(torch, k -> {
             AnimationManager manager = new AnimationManager();
             manager.addAnimation("idle", new Animation(idleFrames, 120, true));
@@ -79,12 +79,12 @@ public class TorchRenderer {
         });
     }
 
-    
+
     /**
      * An animation Manger for each Torch entity
      */
     //--------------------------------------------------------------
-    private AnimationManager getFireManager(EnemyTorch torch) {
+    private AnimationManager getFireManager(IRenderable torch) {
         return fireManagerByEnemy.computeIfAbsent(torch, k -> {
             AnimationManager manager = new AnimationManager();
             manager.addAnimation("fire_effect", new Animation(fireFrames, 120, false));
@@ -97,11 +97,11 @@ public class TorchRenderer {
      * Change the animation based on his state
      */
     //-------------------------------------------------------------
-    public void update(EnemyTorch torch, double deltaMs) {
+    public void update(IRenderable torch, double deltaMs) {
         AnimationManager manager = getManager(torch);
         AnimationManager fireManager = getFireManager(torch);
 
-        TorchState currentState = torch.getState();
+        TorchState currentState = TorchState.values()[torch.getRenderState()];
         TorchState previousState = previousStateByEnemy.getOrDefault(torch, TorchState.APPROACH);
 
         boolean attackJustStarted = (currentState == TorchState.ATTACK_COMBO && previousState != TorchState.ATTACK_COMBO);
@@ -110,15 +110,16 @@ public class TorchRenderer {
         switch (currentState) {
             case GUARD, RECOVERY -> {
                 // Uses idle frames during guard/recovery states (fatigue or blocking stance)
-                manager.playAnimation("idle"); 
+                manager.playAnimation("idle");
             }
             case APPROACH -> manager.playAnimation("walk");
-            
+
             case ATTACK_COMBO-> {
                 // Directional attack rendering based on where the enemy is facing
-                if (torch.getDirection() == Direction.DOWN) {
+                Direction direction = Direction.values()[torch.getRenderDirection()];
+                if (direction == Direction.DOWN) {
                     manager.playAnimation("attack_down");
-                } else if (torch.getDirection() == Direction.UP) {
+                } else if (direction == Direction.UP) {
                     manager.playAnimation("attack_up");
                 } else {
                     manager.playAnimation("attack_right");
@@ -131,10 +132,7 @@ public class TorchRenderer {
 
                 fireManager.update(deltaMs);
 
-                // Notify the tinyswordsisland.model when the attack animation finishes to cycle back states
-                if (manager.getCurrent().isFinished()) {
-                    torch.completeAttackAnimation();
-                }
+                // State transitions are managed in model update logic.
             }
             case DEAD -> {
                 removeEnemy(torch);
@@ -146,7 +144,7 @@ public class TorchRenderer {
     }
 
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2, EnemyTorch torch, int screenX, int screenY) {
+    public void draw(Graphics2D g2, IRenderable torch, int screenX, int screenY) {
         AnimationManager manager = getManager(torch);
         BufferedImage frame = manager.getCurrent().getCurrentFrame();
 
@@ -154,15 +152,16 @@ public class TorchRenderer {
         int height = (int) (entityConfig.TORCH_SPRITE_HEIGHT * entityConfig.TORCH_SCALE);
         int drawX = screenX - width / 2;
         int drawY = screenY - height / 2;
-        
+
         // Effect of recovery
         Composite originalComposite = g2.getComposite();
-        if (torch.getState() == TorchState.RECOVERY) {
+        TorchState currentState = TorchState.values()[torch.getRenderState()];
+        if (currentState == TorchState.RECOVERY) {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
         }
 
         // Flip image horizontally if facing left (assuming base sprite faces right)
-        if (!torch.isFacingRight()) {
+        if (!torch.isFacingRightRender()) {
             g2.drawImage(frame, drawX + width, drawY, -width, height, null);
         } else {
             g2.drawImage(frame, drawX, drawY, width, height, null);
@@ -171,17 +170,16 @@ public class TorchRenderer {
         g2.setComposite(originalComposite);
 
         // Draw the fire
-        TorchState currentState = torch.getState();
         if (currentState == TorchState.ATTACK_COMBO) {
-            
+
             BufferedImage fireFrame = getFireManager(torch).getCurrent().getCurrentFrame();
-            
-            // Calculate position of the fire 
+
+            // Calculate position of the fire
             int fireCenterX = screenX;
             int fireCenterY = screenY;
-            int offset = (int) width / 3; 
+            int offset = (int) width / 3;
 
-            switch (torch.getDirection()) {
+            switch (Direction.values()[torch.getRenderDirection()]) {
                 case RIGHT -> fireCenterX += offset;
                 case LEFT  -> fireCenterX -= offset;
                 case DOWN  -> fireCenterY += offset;
@@ -189,20 +187,20 @@ public class TorchRenderer {
             }
             int fireX = fireCenterX - EntityConfig.FIRE_SPRITE_WIDTH / 2;
             int fireY = fireCenterY - EntityConfig.FIRE_SPRITE_HEIGHT / 2;
-            
+
             g2.drawImage(fireFrame, fireX, fireY, EntityConfig.FIRE_SPRITE_WIDTH, EntityConfig.FIRE_SPRITE_HEIGHT, null);
-            
+
         }
 
 
         // DYNAMIC HEALTH BAR (Appears only after taking the first hit)
-        if (torch.getLife() < torch.getMaxLife() && !torch.isDead()) {
-            int barWidth = 100; 
+        if (torch.getLifeRender() < torch.getMaxLifeRender() && !torch.isDeadRender()) {
+            int barWidth = 100;
             int barHeight = 6;
             int barX = screenX - barWidth / 2;
             int barY = screenY - barHeight - 100; // Positions bar safely above the head
 
-            double lifePercent = (double) torch.getLife() / torch.getMaxLife();
+            double lifePercent = (double) torch.getLifeRender() / torch.getMaxLifeRender();
             if (lifePercent < 0) lifePercent = 0;
 
             int currentBarWidth = (int) (barWidth * lifePercent);
@@ -210,11 +208,11 @@ public class TorchRenderer {
             // Background (Black outline box)
             g2.setColor(Color.gray);
             g2.fillRoundRect(barX, barY, barWidth, barHeight, roundness, roundness);
-            
+
             // Health fill (Fiery Orange/Red color)
-            g2.setColor(new Color(255, 69, 0)); 
+            g2.setColor(new Color(255, 69, 0));
             g2.fillRoundRect(barX, barY, currentBarWidth, barHeight, roundness, roundness);
-            
+
             // Border trim
             g2.setColor(new Color(30, 30, 30));
             g2.drawRoundRect(barX, barY, barWidth, barHeight, roundness, roundness);
@@ -226,7 +224,7 @@ public class TorchRenderer {
      * Debug method to draw the tnt's solid area and interaction radius.
      */
     //-------------------------------------------------------------
-    public void drawSolidArea(Graphics2D g2, EnemyTorch torch, int screenX, int screenY) {
+    public void drawSolidArea(Graphics2D g2, IRenderable torch, int screenX, int screenY) {
         // 1. Body Hitbox (Solid Area)
         Rectangle solid = torch.getSolidArea();
         int drawX = screenX - solid.width / 2;
@@ -238,22 +236,21 @@ public class TorchRenderer {
         g2.drawRect(drawX, drawY, solid.width, solid.height);
 
 
-        if (torch.getState() == TorchState.ATTACK_COMBO) {
-            Rectangle attackArea = torch.getAttackArea();
-            int attackDrawX = attackArea.x - torch.getWorldX() + screenX;
-            int attackDrawY = attackArea.y - torch.getWorldY() + screenY;
+        if (TorchState.values()[torch.getRenderState()] == TorchState.ATTACK_COMBO) {
+            int attackDrawX = torch.getAttackAreaX() - torch.getWorldX() + screenX;
+            int attackDrawY = torch.getAttackAreaY() - torch.getWorldY() + screenY;
 
             g2.setColor(new Color(255, 0, 0, 80));
-            g2.fillRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
+            g2.fillRect(attackDrawX, attackDrawY, torch.getAttackAreaWidth(), torch.getAttackAreaHeight());
             g2.setColor(Color.RED);
-            g2.drawRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
+            g2.drawRect(attackDrawX, attackDrawY, torch.getAttackAreaWidth(), torch.getAttackAreaHeight());
         }
 
     }
     //-------------------------------------------------------------
 
     //-------------------------------------------------------------
-    public void removeEnemy(EnemyTorch torch) {
+    public void removeEnemy(IRenderable torch) {
         managerByEnemy.remove(torch);
         fireManagerByEnemy.remove(torch);
         previousStateByEnemy.remove(torch);

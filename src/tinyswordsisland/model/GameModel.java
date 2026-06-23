@@ -5,8 +5,11 @@ import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.config.ObjConfig;
 import tinyswordsisland.config.UIConfig;
-import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.entity.*;
+import tinyswordsisland.model.enu.GameState;
+import tinyswordsisland.model.enu.PlayerColor;
+import tinyswordsisland.model.enu.PlayerState;
+import tinyswordsisland.model.enu.TNTState;
 import tinyswordsisland.model.event.GameEventDispatcher;
 import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.model.object.*;
@@ -14,7 +17,6 @@ import tinyswordsisland.model.util.GameSettings;
 import tinyswordsisland.model.util.GameSystem.*;
 import tinyswordsisland.model.util.GameSystem.LevelInitializer.InitializedWorld;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
@@ -26,7 +28,7 @@ import java.util.List;
 /**
  * ALL THE GAME MODEL STAFF HERE
  * world map, entity, combat, AI, events ...
-*/
+ */
 //-------------------------------------------------------------------------------------------------------------------
 public class GameModel implements Serializable, IGameModel {
 
@@ -84,7 +86,7 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
     /**
      * CONSTRUCTOR
-      */
+     */
     //-------------------------------------------------------------
     public GameModel(GameConfig GS) {
         gameConfig = GS;
@@ -212,7 +214,7 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
     /**
      * Called when player is dying or dead to update only necessary logic and animations
-      */
+     */
     private void updateDeathSequence(double deltaMs) {
         monk.update(player, deltaMs);
         // Keep only finite transitions running; do not start new gameplay logic.
@@ -289,6 +291,18 @@ public class GameModel implements Serializable, IGameModel {
     @Override
     public void addGameListener(IGameListener listener) {
         eventDispatcher.addListener(listener);
+    }
+    @Override
+    public void completePlayerAttackAnimation() {
+        if (player != null) {
+            player.completeAttackAnimation();
+        }
+    }
+    @Override
+    public void completePlayerDeathAnimation() {
+        if (player != null) {
+            player.completeDeathAnimation();
+        }
     }
 
 

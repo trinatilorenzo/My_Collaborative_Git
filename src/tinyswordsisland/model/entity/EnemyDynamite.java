@@ -3,8 +3,9 @@ import java.awt.Rectangle;
 import java.util.List;
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.SpawnPoint;
-import tinyswordsisland.config.enu.Direction;
-import tinyswordsisland.config.enu.DynamiteState;
+import tinyswordsisland.model.enu.Direction;
+import tinyswordsisland.model.enu.DynamiteState;
+import tinyswordsisland.model.RenderableType;
 
 
 /**
@@ -83,7 +84,7 @@ public class EnemyDynamite extends Entity {
                 chasePlayer(player, deltaMs);
                 facePlayer(player);
                 break;
-            
+
             case ATTACKING:
                 facePlayer(player);
                 if (attackCooldownMs <= 0) {
@@ -125,7 +126,7 @@ public class EnemyDynamite extends Entity {
 
         double attackRadSq = (double) EntityConfig.DYNAMITE_ATTACKING_RADIUS * EntityConfig.DYNAMITE_ATTACKING_RADIUS;
         double detectRadSq = (double) EntityConfig.DYNAMITE_DETECTION_RADIUS * EntityConfig.DYNAMITE_DETECTION_RADIUS;
-        
+
         if (distanceSq < attackRadSq) {
             state = DynamiteState.ATTACKING;
         } else if (distanceSq < detectRadSq){
@@ -195,7 +196,7 @@ public class EnemyDynamite extends Entity {
         attackCount++;
     }
     // end update -------------------------------------------------------------
-    
+
     /**
      *  Method to apply damage to the Entity
      */
@@ -223,6 +224,16 @@ public class EnemyDynamite extends Entity {
     public int getAttackCount() {
         return attackCount;
     }
+    @Override
+    public RenderableType getRenderableType() { return RenderableType.ENEMY_DYNAMITE; }
+    @Override
+    public int getRenderState(){ return state.ordinal(); }
+    @Override
+    public boolean isFacingRightRender(){ return isFacingRight(); }
+    @Override
+    public int getLifeRender() { return life; }
+    @Override
+    public int getMaxLifeRender() { return maxLife; }
     //-------------------------------------------------------------
 
 }

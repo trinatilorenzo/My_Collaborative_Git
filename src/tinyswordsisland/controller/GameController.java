@@ -1,22 +1,23 @@
 package tinyswordsisland.controller;
 
 import tinyswordsisland.config.UIConfig;
-import tinyswordsisland.config.enu.ButtonValue;
-import tinyswordsisland.config.enu.PlayerColor;
+import tinyswordsisland.controller.enu.ButtonValue;
+import tinyswordsisland.model.enu.PlayerColor;
 import tinyswordsisland.model.GameMap;
 import tinyswordsisland.model.IGameModel;
 import tinyswordsisland.model.IRenderable;
 
 import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.view.IGameView;
-import tinyswordsisland.config.enu.GameState;
+import tinyswordsisland.model.enu.GameState;
+import tinyswordsisland.view.ViewEvent;
 import tinyswordsisland.view.audio.AudioEffect;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+
 
 
 /**
@@ -108,7 +109,8 @@ public class GameController implements IController, IGameListener {
         GameState state = model.getGameState();
 
         if (state == GameState.PLAYING || state == GameState.WIN) {
-            view.updateAnimations(deltaMs);
+            List<ViewEvent> viewEvents = view.updateAnimations(deltaMs);
+            handleViewEvents(viewEvents);
         }
 
         if (state != GameState.PLAYING) {
@@ -116,6 +118,15 @@ public class GameController implements IController, IGameListener {
         }
 
         syncViewEvent();
+    }
+    //-------------------------------------------------------------
+    private void handleViewEvents(List<ViewEvent> viewEvents) {
+        for (ViewEvent event : viewEvents) {
+            switch (event) {
+                case PLAYER_ATTACK_ANIMATION_COMPLETED -> model.completePlayerAttackAnimation();
+                case PLAYER_DEATH_ANIMATION_COMPLETED -> model.completePlayerDeathAnimation();
+            }
+        }
     }
     //-------------------------------------------------------------
 
@@ -204,7 +215,7 @@ public class GameController implements IController, IGameListener {
                 keyboardNavigationActive = false;
                 currentMouseSelection = clicked;
                 currentKeyboardSelection = clicked;
-               view.playAudio(AudioEffect.BUTTON_CLICKED);
+                view.playAudio(AudioEffect.BUTTON_CLICKED);
                 performAction(screen, clicked);
                 return;
             }

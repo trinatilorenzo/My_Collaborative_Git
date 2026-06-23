@@ -2,8 +2,8 @@ package tinyswordsisland.model.object;
 
 import tinyswordsisland.config.ObjConfig;
 import tinyswordsisland.config.SpawnPoint;
-import tinyswordsisland.config.enu.PowerUpType;
-import tinyswordsisland.config.enu.TreeState;
+import tinyswordsisland.model.enu.PowerUpType;
+import tinyswordsisland.model.enu.TreeState;
 
 import java.awt.Rectangle;
 
@@ -22,7 +22,7 @@ public class OBJ_Tree extends GameObject {
 
     private PowerUpType hiddenPowerUp = null; // The power-up hidden inside the tree, if any
     private boolean powerUpDropped = false; // To ensure power-up is dropped only once
-    
+
     private boolean flashingActive = false;
 
     /**
@@ -106,7 +106,7 @@ public class OBJ_Tree extends GameObject {
     }
 
     //-------------------------------------------------------------
-    
+
     //GETTER
     //-------------------------------------------------------------
     public TreeState getState() {
@@ -130,6 +130,12 @@ public class OBJ_Tree extends GameObject {
     public boolean isFlashingActive(){
         return flashingActive;
     }
+    @Override
+    public int getRenderState() { return state.ordinal(); }
+    @Override
+    public boolean isFlashingRender(){ return flashingActive; }
+    @Override
+    public boolean hasPowerUpRender(){ return hasPowerUp(); }
     //-------------------------------------------------------------
 
     //SETTER

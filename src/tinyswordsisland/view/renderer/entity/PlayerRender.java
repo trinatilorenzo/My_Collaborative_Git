@@ -1,16 +1,19 @@
 package tinyswordsisland.view.renderer.entity;
 
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.Direction;
-import tinyswordsisland.config.enu.PlayerColor;
-import tinyswordsisland.config.enu.PlayerState;
-import tinyswordsisland.model.entity.Player;
+import tinyswordsisland.model.enu.Direction;
+import tinyswordsisland.model.enu.PlayerColor;
+import tinyswordsisland.model.enu.PlayerState;
+import tinyswordsisland.view.ViewEvent;
+import tinyswordsisland.model.IRenderable;
 import tinyswordsisland.view.SpriteLoader;
 import tinyswordsisland.view.animation.Animation;
 import tinyswordsisland.view.animation.AnimationManager;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The PLAYERRENDER CLASS is responsible for rendering the player entity onto the game screen.
@@ -25,6 +28,7 @@ public class PlayerRender {
 
     private long speedEffectStart = -1;
     private long healthEffectStart = -1;
+    private final List<ViewEvent> pendingViewEvents = new ArrayList<>();
 
 
     /**
@@ -144,20 +148,20 @@ public class PlayerRender {
      * Change the player animation based on his state and direction
      */
     //-------------------------------------------------------------
-    public void update(Player player, double deltaMs) {
+    public void update(IRenderable player, double deltaMs) {
 
-        if (player.isSpeedBoosted() && speedEffectStart==-1){
+        if (player.isSpeedBoostedRender() && speedEffectStart==-1){
             speedEffectStart = System.currentTimeMillis();
         }
 
-        if (player.isHealthRestored() && healthEffectStart == -1) {
+        if (player.isHealthRestoredRender() && healthEffectStart == -1) {
             healthEffectStart = System.currentTimeMillis();
         }
-    
-        PlayerState currentState = player.getState();
+
+        PlayerState currentState = PlayerState.values()[player.getRenderState()];
         boolean attackJustStarted = currentState == PlayerState.ATTACKING && previousState != PlayerState.ATTACKING;
 
-        if (!player.isShielded()) {
+        if (!player.isShieldedRender()) {
             switch (currentState) {
 
                 case IDLE -> animationManager.playAnimation("idle");
@@ -168,22 +172,23 @@ public class PlayerRender {
                         animationManager.getCurrent().reset();
                     }
 
-                    if (player.getDirection() == Direction.DOWN) {
+                    Direction direction = Direction.values()[player.getRenderDirection()];
+                    if (direction == Direction.DOWN) {
                         animationManager.playAnimation("attack_down");
-                    } else if (player.getDirection() == Direction.UP) {
+                    } else if (direction == Direction.UP) {
                         animationManager.playAnimation("attack_up");
                     } else {
                         animationManager.playAnimation("attack_right");
                     }
 
                     if (animationManager.getCurrent().isFinished()) {
-                        player.completeAttackAnimation(); //to know when the attack is ended
+                        pendingViewEvents.add(ViewEvent.PLAYER_ATTACK_ANIMATION_COMPLETED);
                     }
                 }
                 case DYING -> {
                     animationManager.playAnimation("death");
                     if (animationManager.getCurrent().isFinished()) {
-                        player.completeDeathAnimation();
+                        pendingViewEvents.add(ViewEvent.PLAYER_DEATH_ANIMATION_COMPLETED);
                     }
                 }
 
@@ -200,16 +205,17 @@ public class PlayerRender {
                         animationManager.getCurrent().reset();
                     }
 
-                    if (player.getDirection() == Direction.DOWN) {
+                    Direction direction = Direction.values()[player.getRenderDirection()];
+                    if (direction == Direction.DOWN) {
                         animationManager.playAnimation("attack_down_shield");
-                    } else if (player.getDirection() == Direction.UP) {
+                    } else if (direction == Direction.UP) {
                         animationManager.playAnimation("attack_up_shield");
                     } else {
                         animationManager.playAnimation("attack_right_shield");
                     }
 
                     if (animationManager.getCurrent().isFinished()) {
-                        player.completeAttackAnimation(); //to know when the attack is ended
+                        pendingViewEvents.add(ViewEvent.PLAYER_ATTACK_ANIMATION_COMPLETED);
                     }
                 }
             }
@@ -217,7 +223,12 @@ public class PlayerRender {
 
 
         animationManager.update(deltaMs);
-        previousState = player.getState();
+        previousState = currentState;
+    }
+    public List<ViewEvent> consumeViewEvents() {
+        List<ViewEvent> events = new ArrayList<>(pendingViewEvents);
+        pendingViewEvents.clear();
+        return events;
     }
     //-------------------------------------------------------------
 
@@ -225,7 +236,7 @@ public class PlayerRender {
      * Draws the player on the screen
      */
     //-------------------------------------------------------------
-    public void draw(Graphics2D g2, Player player, int screenX, int screenY) {
+    public void draw(Graphics2D g2, IRenderable player, int screenX, int screenY) {
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
         int width = EntityConfig.PLAYER_RENDER_WIDTH;
@@ -233,7 +244,8 @@ public class PlayerRender {
         int drawX = screenX - width / 2;
         int drawY = screenY - height / 2;
 
-        if (player.getState() == PlayerState.DYING || player.getState() == PlayerState.DEAD) {
+        PlayerState state = PlayerState.values()[player.getRenderState()];
+        if (state == PlayerState.DYING || state == PlayerState.DEAD) {
             g2.drawImage(frame, drawX, drawY, width, height, null);
             return;
         }
@@ -242,17 +254,17 @@ public class PlayerRender {
         Composite originalComposite = g2.getComposite();
         Stroke originalStroke = g2.getStroke();
 
-        if (player.isSpeedBoosted()) {
+        if (player.isSpeedBoostedRender()) {
             if (System.currentTimeMillis() - speedEffectStart < EntityConfig.VISUAL_EFFECT_DURATION_MS){
                 long blinkTime = System.currentTimeMillis() / 200; // Change color every 200ms
                 if (blinkTime%2==0) {
                     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f)); // Semi-transparent
                 }
             }
-            
+
         }
 
-        if (player.isHealthRestored()){
+        if (player.isHealthRestoredRender()){
             if (System.currentTimeMillis() - healthEffectStart < EntityConfig.VISUAL_EFFECT_DURATION_MS){
                 long blinkTime = System.currentTimeMillis() / 200; // Change color every 200ms
                 if (blinkTime%2==0) {
@@ -261,8 +273,8 @@ public class PlayerRender {
             }
         }
 
-        // Draw the player sprite 
-        if (player.getFacing() != Direction.RIGHT) {
+        // Draw the player sprite
+        if (!player.isFacingRightRender()) {
             g2.drawImage(frame, drawX + width, drawY, -width, height, null);
         } else {
             g2.drawImage(frame, drawX, drawY, width, height, null);
@@ -283,25 +295,24 @@ public class PlayerRender {
      * Debug method to draw the player's solid area.
      */
     //-------------------------------------------------------------
-    public void drawSolidArea(Graphics2D g2, Player player, int screenX, int screenY) {
-        Rectangle worldSolid = player.getSolidWorldArea();
-        int drawX = worldSolid.x - player.getWorldX() + screenX;
-        int drawY = worldSolid.y - player.getWorldY() + screenY;
+    public void drawSolidArea(Graphics2D g2, IRenderable player, int screenX, int screenY) {
+        Rectangle solid = player.getSolidArea();
+        int drawX = screenX - solid.width / 2;
+        int drawY = screenY - solid.height / 2;
 
         g2.setColor(new Color(255, 0, 0, 80));
-        g2.fillRect(drawX, drawY, worldSolid.width, worldSolid.height);
+        g2.fillRect(drawX, drawY, solid.width, solid.height);
         g2.setColor(Color.RED);
-        g2.drawRect(drawX, drawY, worldSolid.width, worldSolid.height);
+        g2.drawRect(drawX, drawY, solid.width, solid.height);
 
-        if (player.getState() == PlayerState.ATTACKING) {
-            Rectangle attackArea = player.getAttackArea();
-            int attackDrawX = attackArea.x - player.getWorldX() + screenX;
-            int attackDrawY = attackArea.y - player.getWorldY() + screenY;
+        if (PlayerState.values()[player.getRenderState()] == PlayerState.ATTACKING) {
+            int attackDrawX = player.getAttackAreaX() - player.getWorldX() + screenX;
+            int attackDrawY = player.getAttackAreaY() - player.getWorldY() + screenY;
 
             g2.setColor(new Color(255, 0, 0, 80));
-            g2.fillRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
+            g2.fillRect(attackDrawX, attackDrawY, player.getAttackAreaWidth(), player.getAttackAreaHeight());
             g2.setColor(Color.RED);
-            g2.drawRect(attackDrawX, attackDrawY, attackArea.width, attackArea.height);
+            g2.drawRect(attackDrawX, attackDrawY, player.getAttackAreaWidth(), player.getAttackAreaHeight());
         }
     }
     //-------------------------------------------------------------

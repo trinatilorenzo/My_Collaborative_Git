@@ -1,6 +1,6 @@
-package tinyswordsisland.config.enu;
+package tinyswordsisland.model.enu;
 
 //-----------------------------------------------------------------------
-// Direction
+// GAME STATE
 //-----------------------------------------------------------------------
-public enum Direction {UP, DOWN, LEFT, RIGHT}
+public enum GameState {MENU, PLAYING, PAUSED, GAME_OVER, WIN, SETTINGS}

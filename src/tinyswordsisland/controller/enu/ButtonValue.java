@@ -1,4 +1,4 @@
-package tinyswordsisland.config.enu;
+package tinyswordsisland.controller.enu;
 
 public final class ButtonValue {
 

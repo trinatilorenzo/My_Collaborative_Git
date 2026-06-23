@@ -4,8 +4,9 @@ import java.awt.Rectangle;
 
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.SpawnPoint;
-import tinyswordsisland.config.enu.Direction;
-import tinyswordsisland.config.enu.TorchState;
+import tinyswordsisland.model.enu.Direction;
+import tinyswordsisland.model.enu.TorchState;
+import tinyswordsisland.model.RenderableType;
 
 /**
  * The EnemyTorch CLASS represents a melee enemy that chases the player
@@ -58,10 +59,10 @@ public class EnemyTorch extends Entity {
         this.attackDamageApplied = false;
 
         this.solidArea = new Rectangle(
-            0,
-            0,
-            EntityConfig.TORCH_HITBOX_WIDTH,
-            EntityConfig.TORCH_HITBOX_HEIGHT
+                0,
+                0,
+                EntityConfig.TORCH_HITBOX_WIDTH,
+                EntityConfig.TORCH_HITBOX_HEIGHT
         );
 
         this.direction = Direction.DOWN;
@@ -151,7 +152,7 @@ public class EnemyTorch extends Entity {
     //-------------------------------------------------------------
     private void updateRecoveryState() {
         dx = 0;
-        dy = 0; 
+        dy = 0;
         if (stateTimer >= EntityConfig.TORCH_COOLDOWN_TIME) {
             state = TorchState.APPROACH;
             stateTimer = 0;
@@ -308,5 +309,27 @@ public class EnemyTorch extends Entity {
     public boolean isDead() {
         return state == TorchState.DEAD;
     }
+    @Override
+    public RenderableType getRenderableType() { return RenderableType.ENEMY_TORCH; }
+    @Override
+    public int getRenderState() { return state.ordinal(); }
+    @Override
+    public int getRenderDirection() { return direction.ordinal(); }
+    @Override
+    public boolean isFacingRightRender() { return isFacingRight(); }
+    @Override
+    public int getLifeRender() { return life; }
+    @Override
+    public int getMaxLifeRender() { return maxLife; }
+    @Override
+    public boolean isDeadRender() { return isDead(); }
+    @Override
+    public int getAttackAreaX() { return getAttackArea().x; }
+    @Override
+    public int getAttackAreaY() { return getAttackArea().y; }
+    @Override
+    public int getAttackAreaWidth() { return getAttackArea().width; }
+    @Override
+    public int getAttackAreaHeight() { return getAttackArea().height; }
     //-------------------------------------------------------------
 }

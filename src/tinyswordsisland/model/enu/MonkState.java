@@ -1,6 +1,5 @@
-package tinyswordsisland.config.enu;
-
+package tinyswordsisland.model.enu;
 //-----------------------------------------------------------------------
-// Player State
+// MonkState
 //-----------------------------------------------------------------------
-public enum PlayerState {IDLE, WALKING, ATTACKING, DYING, DEAD}
+public enum MonkState { IDLE, TALKING, DISAPPEARING, DISAPPEARED }

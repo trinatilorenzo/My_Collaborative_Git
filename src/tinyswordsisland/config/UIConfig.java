@@ -1,6 +1,6 @@
 package tinyswordsisland.config;
 
-import tinyswordsisland.config.enu.ButtonValue;
+import tinyswordsisland.controller.enu.ButtonValue;
 
 /**
  * UI SETTINGS

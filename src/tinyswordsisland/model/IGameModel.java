@@ -4,8 +4,8 @@ import java.util.List;
 
 import tinyswordsisland.controller.InputState;
 import tinyswordsisland.config.GameConfig;
-import tinyswordsisland.config.enu.GameState;
-import tinyswordsisland.config.enu.PlayerColor;
+import tinyswordsisland.model.enu.GameState;
+import tinyswordsisland.model.enu.PlayerColor;
 import tinyswordsisland.model.entity.Player;
 import tinyswordsisland.model.event.IGameListener;
 
@@ -44,6 +44,8 @@ public interface IGameModel {
     //List<GameEvent> consumeGameEvents();
 
     void addGameListener(IGameListener listener);
+    void completePlayerAttackAnimation();
+    void completePlayerDeathAnimation();
 
     // config (for load)
     GameConfig getGameConfig();

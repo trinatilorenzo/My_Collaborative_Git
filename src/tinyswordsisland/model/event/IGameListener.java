@@ -1,7 +1,5 @@
 package tinyswordsisland.model.event;
 
-import tinyswordsisland.config.enu.GameState;
-
 public interface IGameListener {
     // Eventi di movimento e combattimento Player
     void onPlayerWalkStart();

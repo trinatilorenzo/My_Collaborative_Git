@@ -1,5 +1,6 @@
-package tinyswordsisland.config.enu;
+package tinyswordsisland.model.enu;
+
 //-----------------------------------------------------------------------
-// MonkState
+// Direction
 //-----------------------------------------------------------------------
-public enum MonkState { IDLE, TALKING, DISAPPEARING, DISAPPEARED }
+public enum Direction {UP, DOWN, LEFT, RIGHT}

@@ -2,10 +2,11 @@ package tinyswordsisland.model.entity;
 
 import tinyswordsisland.controller.InputState;
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.Direction;
-import tinyswordsisland.config.enu.PlayerColor;
-import tinyswordsisland.config.enu.PlayerState;
-import tinyswordsisland.config.enu.PowerUpType;
+import tinyswordsisland.model.enu.Direction;
+import tinyswordsisland.model.enu.PlayerColor;
+import tinyswordsisland.model.enu.PlayerState;
+import tinyswordsisland.model.enu.PowerUpType;
+import tinyswordsisland.model.RenderableType;
 
 import java.awt.Rectangle;
 
@@ -248,7 +249,7 @@ public class Player extends Entity {
                 break;
             case HEALTH_RESTORE:
                 this.life = this.maxLife;
-                this.isHealthRestored = true; 
+                this.isHealthRestored = true;
                 break;
             case SPEED_BOOST:
                 this.isSpeedBoosted = true;
@@ -298,13 +299,35 @@ public class Player extends Entity {
     @Override
     public Rectangle getSolidWorldArea() {
         worldBoundsInstance.setBounds(
-            worldX - solidArea.width / 2,
-            worldY - solidArea.height / 2 + EntityConfig.PLAYER_OFFSET_HEIGHT,
-            solidArea.width,
-            solidArea.height
+                worldX - solidArea.width / 2,
+                worldY - solidArea.height / 2 + EntityConfig.PLAYER_OFFSET_HEIGHT,
+                solidArea.width,
+                solidArea.height
         );
         return worldBoundsInstance;
     }
+    @Override
+    public RenderableType getRenderableType() { return RenderableType.PLAYER; }
+    @Override
+    public int getRenderState() { return state.ordinal(); }
+    @Override
+    public int getRenderDirection() { return direction.ordinal(); }
+    @Override
+    public boolean isFacingRightRender() { return facingDirection == Direction.RIGHT; }
+    @Override
+    public boolean isShieldedRender() { return isShielded(); }
+    @Override
+    public boolean isSpeedBoostedRender() { return isSpeedBoosted(); }
+    @Override
+    public boolean isHealthRestoredRender() { return isHealthRestored(); }
+    @Override
+    public int getAttackAreaX() { return getAttackArea().x; }
+    @Override
+    public int getAttackAreaY() { return getAttackArea().y; }
+    @Override
+    public int getAttackAreaWidth() { return getAttackArea().width; }
+    @Override
+    public int getAttackAreaHeight() { return getAttackArea().height; }
     //---------------------------------
 
     // SETTER ----------------------
@@ -319,8 +342,8 @@ public class Player extends Entity {
             attackAnimationCompleted = true;
         }
     }
-    public void setAttackDamageApplied(boolean applied) { 
-        this.attackDamageApplied = applied; 
+    public void setAttackDamageApplied(boolean applied) {
+        this.attackDamageApplied = applied;
     }
     public void setColor(PlayerColor color) {this.color = color;    }
     //---------------------------------

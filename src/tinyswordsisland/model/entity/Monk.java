@@ -1,7 +1,8 @@
 package tinyswordsisland.model.entity;
 
 import tinyswordsisland.config.EntityConfig;
-import tinyswordsisland.config.enu.MonkState;
+import tinyswordsisland.model.enu.MonkState;
+import tinyswordsisland.model.RenderableType;
 
 import java.awt.Rectangle;
 
@@ -81,7 +82,7 @@ public class Monk extends Entity {
         this.dialogues = nextDialogues;
         this.dialogueIndex = 0;
         this.disappearElapsedMs = 0.0;
-        this.state = MonkState.IDLE; 
+        this.state = MonkState.IDLE;
     }
 
 
@@ -183,6 +184,10 @@ public class Monk extends Entity {
     }
     //-------------------------------------------------------------
     public MonkState getState() { return state; }
+    @Override
+    public RenderableType getRenderableType() { return RenderableType.MONK; }
+    @Override
+    public int getRenderState() { return state.ordinal(); }
     // end getter ---------------------------------------------------------------
 
 

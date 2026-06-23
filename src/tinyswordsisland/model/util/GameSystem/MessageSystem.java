@@ -2,7 +2,7 @@ package tinyswordsisland.model.util.GameSystem;
 
 import tinyswordsisland.controller.InputState;
 import tinyswordsisland.config.UIConfig;
-import tinyswordsisland.config.enu.MonkState;
+import tinyswordsisland.model.enu.MonkState;
 import tinyswordsisland.model.GameModel;
 
 

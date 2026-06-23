@@ -1,4 +1,4 @@
-package tinyswordsisland.config.enu;
+package tinyswordsisland.model.enu;
 
 public enum TreeState {
     IDLE,
