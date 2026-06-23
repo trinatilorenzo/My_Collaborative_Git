@@ -72,9 +72,6 @@ public class Player extends Entity {
     }
     //-------------------------------------------------------------
 
-    /**
-     * Riceve l'input dal controller PRIMA dell'aggiornamento logico
-     */
     public void handleInput(InputState input) {
         this.input = input;
     }

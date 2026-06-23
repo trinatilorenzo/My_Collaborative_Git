@@ -2,6 +2,7 @@ package tinyswordsisland.model;
 import java.awt.Rectangle;
 
 public interface IRenderable {
+
     RenderableType getRenderableType();
 
     int getWorldX();

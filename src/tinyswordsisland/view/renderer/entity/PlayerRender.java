@@ -30,6 +30,7 @@ public class PlayerRender {
     private long healthEffectStart = -1;
     private final List<ViewEvent> pendingViewEvents = new ArrayList<>();
 
+    private boolean firstAttackHalf = true;
 
     /**
      * COSTRUCTOR
@@ -57,31 +58,46 @@ public class PlayerRender {
         // Select the frames from the sheet image
         BufferedImage[] idleFrames = SpriteLoader.getAnimationFrames(sheetImage, 0, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
         BufferedImage[] walkFrames = SpriteLoader.getAnimationFrames(sheetImage, 1, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackRightFrames = SpriteLoader.getAnimationFrames(sheetImage, 2, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackDownFrames = SpriteLoader.getAnimationFrames(sheetImage, 4, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackUpFrames = SpriteLoader.getAnimationFrames(sheetImage, 6, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+
+        BufferedImage[] attackRightFrames1 = SpriteLoader.getAnimationFrames(sheetImage, 2, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFrames1 = SpriteLoader.getAnimationFrames(sheetImage, 4, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFrames1 = SpriteLoader.getAnimationFrames(sheetImage, 6, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+
+        BufferedImage[] attackRightFrames2 = SpriteLoader.getAnimationFrames(sheetImage, 3, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFrames2 = SpriteLoader.getAnimationFrames(sheetImage, 5, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFrames2 = SpriteLoader.getAnimationFrames(sheetImage, 7, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
         BufferedImage[] deathFrames = loadDeathFrames();
 
         BufferedImage[] idleFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 0, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
         BufferedImage[] walkFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 1, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackRightFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 2, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackDownFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 4, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
-        BufferedImage[] attackUpFramesShield = SpriteLoader.getAnimationFrames(shieldSheetImage, 6, 2, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackRightFramesShield1 = SpriteLoader.getAnimationFrames(shieldSheetImage, 2, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFramesShield1 = SpriteLoader.getAnimationFrames(shieldSheetImage, 4, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFramesShield1 = SpriteLoader.getAnimationFrames(shieldSheetImage, 6, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+
+        BufferedImage[] attackRightFramesShield2 = SpriteLoader.getAnimationFrames(shieldSheetImage, 3, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackDownFramesShield2 = SpriteLoader.getAnimationFrames(shieldSheetImage, 5, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
+        BufferedImage[] attackUpFramesShield2 = SpriteLoader.getAnimationFrames(shieldSheetImage, 7, 1, 6, EntityConfig.SPRITE_WIDTH, EntityConfig.SPRITE_HEIGHT);
 
         animationManager = new AnimationManager();
         // frame duration in milliseconds
         animationManager.addAnimation("idle", new Animation(idleFrames, 120, true));
         animationManager.addAnimation("walk", new Animation(walkFrames, 90, true));
-        animationManager.addAnimation("attack_right", new Animation(attackRightFrames, 60, false));
-        animationManager.addAnimation("attack_down", new Animation(attackDownFrames, 60, false));
-        animationManager.addAnimation("attack_up", new Animation(attackUpFrames, 60, false));
+        animationManager.addAnimation("attack_right1", new Animation(attackRightFrames1, 60, false));
+        animationManager.addAnimation("attack_down1", new Animation(attackDownFrames1, 60, false));
+        animationManager.addAnimation("attack_up1", new Animation(attackUpFrames1, 60, false));
+        animationManager.addAnimation("attack_right2", new Animation(attackRightFrames2, 60, false));
+        animationManager.addAnimation("attack_down2", new Animation(attackDownFrames2, 60, false));
+        animationManager.addAnimation("attack_up2", new Animation(attackUpFrames2, 60, false));
         animationManager.addAnimation("death", new Animation(deathFrames, 80, false));
 
         animationManager.addAnimation("idle_shield", new Animation(idleFramesShield, 120, true));
         animationManager.addAnimation("walk_shield", new Animation(walkFramesShield, 90, true));
-        animationManager.addAnimation("attack_right_shield", new Animation(attackRightFramesShield, 60, false));
-        animationManager.addAnimation("attack_down_shield", new Animation(attackDownFramesShield, 60, false));
-        animationManager.addAnimation("attack_up_shield", new Animation(attackUpFramesShield, 60, false));
+        animationManager.addAnimation("attack_right1_shield", new Animation(attackRightFramesShield1, 60, false));
+        animationManager.addAnimation("attack_down1_shield", new Animation(attackDownFramesShield1, 60, false));
+        animationManager.addAnimation("attack_up1_shield", new Animation(attackUpFramesShield1, 60, false));
+        animationManager.addAnimation("attack_right2_shield", new Animation(attackRightFramesShield1, 60, false));
+        animationManager.addAnimation("attack_down2_shield", new Animation(attackDownFramesShield1, 60, false));
+        animationManager.addAnimation("attack_up2_shield", new Animation(attackUpFramesShield1, 60, false));
 
     }
     //-------------------------------------------------------------
@@ -167,18 +183,23 @@ public class PlayerRender {
                 case IDLE -> animationManager.playAnimation("idle");
                 case WALKING -> animationManager.playAnimation("walk");
                 case ATTACKING -> {
-                    //restart the animation
-                    if (attackJustStarted) {
-                        animationManager.getCurrent().reset();
-                    }
-
                     Direction direction = Direction.values()[player.getRenderDirection()];
-                    if (direction == Direction.DOWN) {
-                        animationManager.playAnimation("attack_down");
-                    } else if (direction == Direction.UP) {
-                        animationManager.playAnimation("attack_up");
-                    } else {
-                        animationManager.playAnimation("attack_right");
+
+                    if (attackJustStarted) {
+                        String attackName;
+
+                        if (direction == Direction.DOWN) {
+                            attackName = firstAttackHalf ? "attack_down1" : "attack_down2";
+                        } else if (direction == Direction.UP) {
+                            attackName = firstAttackHalf ? "attack_up1" : "attack_up2";
+                        } else {
+                            attackName = firstAttackHalf ? "attack_right1" : "attack_right2";
+                        }
+
+                        animationManager.playAnimation(attackName);
+                        animationManager.getCurrent().reset();
+
+                        firstAttackHalf = !firstAttackHalf;
                     }
 
                     if (animationManager.getCurrent().isFinished()) {
@@ -200,18 +221,23 @@ public class PlayerRender {
                 case IDLE -> animationManager.playAnimation("idle_shield");
                 case WALKING -> animationManager.playAnimation("walk_shield");
                 case ATTACKING -> {
-                    //restart the animation
-                    if (attackJustStarted) {
-                        animationManager.getCurrent().reset();
-                    }
-
                     Direction direction = Direction.values()[player.getRenderDirection()];
-                    if (direction == Direction.DOWN) {
-                        animationManager.playAnimation("attack_down_shield");
-                    } else if (direction == Direction.UP) {
-                        animationManager.playAnimation("attack_up_shield");
-                    } else {
-                        animationManager.playAnimation("attack_right_shield");
+
+                    if (attackJustStarted) {
+                        String attackName;
+
+                        if (direction == Direction.DOWN) {
+                            attackName = firstAttackHalf ? "attack_down1_shield" : "attack_down2_shield";
+                        } else if (direction == Direction.UP) {
+                            attackName = firstAttackHalf ? "attack_up1_shield" : "attack_up2_shield";
+                        } else {
+                            attackName = firstAttackHalf ? "attack_right1_shield" : "attack_right2_shield";
+                        }
+
+                        animationManager.playAnimation(attackName);
+                        animationManager.getCurrent().reset();
+
+                        firstAttackHalf = !firstAttackHalf;
                     }
 
                     if (animationManager.getCurrent().isFinished()) {

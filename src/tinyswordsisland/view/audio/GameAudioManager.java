@@ -73,8 +73,8 @@ public class GameAudioManager {
             case PLAYER_WALK_STOP ->  movementLoopPlayer.stopMusic();
             case PLAYER_ATTACK -> {
                 nextSfxPlayer().playSequence(new String[]{
-                        SWORD_SWOOSH_SFX,
-                        SWORD_SFX
+                        SWORD_SWOOSH_SFX
+                        //SWORD_SFX
                 });
             }
             case PLAYER_ATTACK_STOP -> currentSfxPlayer().stopAll();
