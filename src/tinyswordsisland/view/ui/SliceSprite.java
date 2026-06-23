@@ -7,6 +7,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 
@@ -190,8 +191,12 @@ public class SliceSprite {
     //-------------------------------------------------------------
     private static BufferedImage loadImage(String filePath) {
         Objects.requireNonNull(filePath, "filePath");
-        try {
-            return ImageIO.read(new File(filePath));
+
+        try (InputStream is = SliceSprite.class.getResourceAsStream(filePath)) {
+            if (is == null) {
+                throw new IllegalArgumentException("Image not found in classpath: " + filePath);
+            }
+            return ImageIO.read(is);
         } catch (IOException e) {
             throw new IllegalArgumentException("Unable to load image: " + filePath, e);
         }

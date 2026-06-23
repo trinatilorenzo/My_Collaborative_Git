@@ -4,16 +4,15 @@ import tinyswordsisland.controller.InputState;
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.config.ObjConfig;
-import tinyswordsisland.config.SpawnPoint;
 import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.entity.*;
-import tinyswordsisland.model.event.AudioEventType;
+import tinyswordsisland.model.event.GameEventDispatcher;
+import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.model.object.*;
 import tinyswordsisland.model.util.GameSettings;
-import tinyswordsisland.model.util.InteractionSystem;
-import tinyswordsisland.model.util.LevelInitializer;
-import tinyswordsisland.model.util.LevelInitializer.InitializedWorld;
+import tinyswordsisland.model.util.GameSystem.*;
+import tinyswordsisland.model.util.GameSystem.LevelInitializer.InitializedWorld;
 
 import java.awt.*;
 import java.io.IOException;
@@ -22,6 +21,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * ALL THE GAME MODEL STAFF HERE
@@ -36,6 +36,9 @@ public class GameModel implements Serializable, IGameModel {
     private transient GameConfig gameConfig;
     private transient CollisionChecker collisionChecker;
     private transient InteractionSystem interactionSystem;
+    private transient EnemySystem enemySystem;
+    private transient WorldObjectSystem worldObjectSystem;
+    private transient GameEventDispatcher eventDispatcher;
     //-------------------------------------------------------------
 
     // Game status
@@ -67,16 +70,14 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
 
     // Dialogue
-    private String currentDialogue; // dialogue currently displayed to the player
-    private String currentMessage;
-    private double messageTimer; //TODO forse da rimuovere
+    private MessageSystem messageSystem;
     //-------------------------------------------------------------
 
     // Death sequence
     private double deadStateElapsedMs; // TODO da spostare in view ?
 
     //Audio events
-    private transient List<AudioEventType> pendingAudioEvents = new ArrayList<>(); // TODO da spostare in view
+    private transient List<IGameListener> listeners = new ArrayList<>();
 
 
 
@@ -89,12 +90,17 @@ public class GameModel implements Serializable, IGameModel {
         gameConfig = GS;
         collisionChecker = new CollisionChecker(this);
         interactionSystem = new InteractionSystem();
+        enemySystem = new EnemySystem();
+        worldObjectSystem = new WorldObjectSystem();
+        eventDispatcher = new GameEventDispatcher();
 
         gameState = GameState.MENU; // Default game state is the menu state
 
         settingsMenuOpen = false;
         settingsPauseOpen = false;
         settings = new GameSettings();
+
+        messageSystem = new MessageSystem();
 
     }
     //-------------------------------------------------------------
@@ -118,9 +124,7 @@ public class GameModel implements Serializable, IGameModel {
         currentLevel = 0;
         levelCompleted = false;
 
-        currentDialogue = "";
-        currentMessage = "";
-        messageTimer = 0.0;
+        messageSystem.clearAll();
         deadStateElapsedMs = 0.0;
 
         gameState = GameState.PLAYING;
@@ -146,42 +150,23 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
     //-------------------------------------------------------------
     private void updatePlayingState(InputState input, double deltaMs) {
-
         int lifeBeforeUpdate = player.getLife();
+
         updatePlayer(input, deltaMs);
-        updateEnemies(deltaMs);
-        updateMonk(input);
+        enemySystem.update(this, deltaMs);
 
         if (player.getState() == PlayerState.WALKING) {
             player.move();
         }
 
-        List<GameObject> toSpawn = new ArrayList<>();
-        for (GameObject obj : objects) {
-            if (!obj.isRemoved()) {
-                obj.update(deltaMs);
+        worldObjectSystem.update(this, deltaMs);
 
-                // if the tree has been chopped and has a hidden power-up, spawn the power-up object
-                if (obj instanceof OBJ_Tree tree && tree.shouldDropPowerUp()){
-                    Rectangle treeHitbox = tree.getSolidArea();
-                    int powerUpX = tree.getWorldX() + treeHitbox.x + (treeHitbox.width - gameConfig.ObjConfig().POWER_UP_SIZE) / 2;
-                    int powerUpY = tree.getWorldY() + treeHitbox.y + (treeHitbox.height - gameConfig.ObjConfig().POWER_UP_SIZE) / 2;
-                    toSpawn.add(new OBJ_PowerUp(gameConfig.ObjConfig(), tree.getHiddenPowerUp(), powerUpX, powerUpY, tree.getLayer()));
-                }
-            }
-        }
-        if (!toSpawn.isEmpty()) {
-            objects.addAll(toSpawn);
-        }
-        objects.removeIf(GameObject::isRemoved);
-
-        monk.update(deltaMs);
+        monk.update(player, deltaMs);
+        messageSystem.update(this, input, deltaMs);
         interactionSystem.update(this);
-        updateMessage(deltaMs);
 
         updateEvents(lifeBeforeUpdate);
         updateState(input);
-
     }
     //-------------------------------------------------------------
     private void updatePlayer(InputState input, double deltaMs) {
@@ -202,157 +187,26 @@ public class GameModel implements Serializable, IGameModel {
 
         //Audio ----------------------
         if (playerStateBeforeUpdate != PlayerState.ATTACKING && player.getState() == PlayerState.ATTACKING) {
-            emitAudioEvent(AudioEventType.PLAYER_ATTACK);
+            eventDispatcher.notifyPlayerAttackStart();
         }
         if (playerStateBeforeUpdate == PlayerState.ATTACKING && player.getState() != PlayerState.ATTACKING) {
-            emitAudioEvent(AudioEventType.PLAYER_ATTACK_STOP);
+            eventDispatcher.notifyPlayerAttackStop();
         }
         if (playerStateBeforeUpdate != PlayerState.WALKING && player.getState() == PlayerState.WALKING) {
-            emitAudioEvent(AudioEventType.PLAYER_WALK_START);
+            eventDispatcher.notifyPlayerWalkStart();
         }
         if (playerStateBeforeUpdate == PlayerState.WALKING && player.getState() != PlayerState.WALKING) {
-            emitAudioEvent(AudioEventType.PLAYER_WALK_STOP);
+            eventDispatcher.notifyPlayerWalkStop();
         }
         //----------------------------
     }
     //-------------------------------------------------------------
-    private void updateEnemies(double deltaMs) {
-        // Update TNT
-        for (EnemyTNT tnt : tntEnemies) {
-            TNTState previousState = tnt.getState();
-            if (tnt.getState() != TNTState.EXPLODED) {
-
-                tnt.update(deltaMs);
-                collisionChecker.checkEntity(player, tnt);
-                collisionChecker.checkTile(tnt);
-                collisionChecker.checkObjects(tnt);
-                tnt.move();
-            }
-
-            //Audio ----------------------
-            if (previousState != tnt.getState() && tnt.getState() == TNTState.EXPLODING) {
-                emitAudioEvent(AudioEventType.TNT_EXPLOSION);
-            }
-            if (previousState != tnt.getState() && tnt.getState() == TNTState.TRIGGERED) {
-                emitAudioEvent(AudioEventType.TNT_TRIGGERED);
-            }
-            //----------------------------
-        }
-        tntEnemies.removeIf(EnemyTNT::isExploded);
-
-        // Update Dynamite
-        for (EnemyDynamite dynamite : dynamiteEnemies) {
-            DynamiteState previousState = dynamite.getState();
-            if (dynamite.getState() != DynamiteState.DEAD){
-
-                dynamite.update(deltaMs);
-                collisionChecker.checkEntity(player, dynamite);
-                collisionChecker.checkTile(dynamite);
-                collisionChecker.checkObjects(dynamite);
-                dynamite.move();
-
-                //Audio ----------------------
-                if (previousState != DynamiteState.ATTACKING && dynamite.getState() == DynamiteState.ATTACKING) {
-                    emitAudioEvent(AudioEventType.PROJECTILE_LAUNCHED);
-                }
-                //----------------------------
-            }
-
-        }
-        dynamiteEnemies.removeIf(EnemyDynamite::isDead);
-
-        // Dynamite projectiles
-        for (DynamiteProjectile proj : projectiles) {
-            proj.update(deltaMs);
-            collisionChecker.checkTile(proj);
-
-            if (collisionChecker.intersects(player, proj)) {
-                player.takeDamage();
-                proj.explode();
-            }
-
-            //Audio ----------------------
-            if (proj.isExploded()) {
-                emitAudioEvent(AudioEventType.PROJECTILE_EXPLODED);
-            }
-            //----------------------------
-        }
-        projectiles.removeIf(DynamiteProjectile::isExploded);
-
-        // Update Torch
-        for (EnemyTorch torch : torchEnemies) {
-            TorchState previousState = torch.getState();
-            if (torch.getState() != TorchState.DEAD){
-
-                torch.update(deltaMs);
-                collisionChecker.checkEntity(torch, player);
-                collisionChecker.checkEntity(player, torch);
-                collisionChecker.checkTile(torch);
-                collisionChecker.checkObjects(torch);
-                torch.move();
-
-                //Audio ----------------------
-
-                //----------------------------
-            }
-
-        }
-        torchEnemies.removeIf(EnemyTorch::isDead);
-    }
-    //-------------------------------------------------------------
-
-    private void updateMessage(double deltaMS){
-
-        if (currentMessage.isEmpty()) return;
-
-        messageTimer += deltaMS;
-        if (messageTimer >= UIConfig.MESSAGE_TIMER_MS){
-            currentMessage="";
-            messageTimer = 0;
-        }
-
-    }
-    //----------------------------------------------------------------------
 
 
-    //-------------------------------------------------------
-    private void updateMonk(InputState input) {
-        // Monk Talking ----------------------
-
-        if (monk.getState() == MonkState.IDLE) {
-            currentDialogue = "";
-        }
-
-        if (monk.getState() == MonkState.TALKING && currentDialogue.isEmpty()) {
-            currentDialogue = monk.getCurrentDialogue();
-            // Audio ----------
-            emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
-        }
-
-        if (monk.getState() == MonkState.TALKING && input.interact()) {
-            monk.nextDialogue();
-
-            if (!monk.hasFinishedDialogue()) {
-                currentDialogue = monk.getCurrentDialogue();
-                // Audio ----------
-                emitAudioEvent(AudioEventType.DIALOGUE_ADVANCE);
-            } else {
-                currentDialogue = "";
-                monk.setState(MonkState.DISAPPEARING);
-                // Audio ----------
-                emitAudioEvent(AudioEventType.DIALOGUE_CLOSE);
-            }
-        }
-        // ----------------------------------
-    }
-    //-------------------------------------------------------------
-    private void updateMonkPositionForEndLevel(){
-        //TODO
-    }
     //-------------------------------------------------------------
     private void updateEvents(int lifeBeforeUpdate) {
         if (player.getLife() < lifeBeforeUpdate) {
-            emitAudioEvent(AudioEventType.PLAYER_DAMAGED);
+            eventDispatcher.notifyPlayerDamaged(player.getLife(), player.getMaxLife());
         }
     }
     //-------------------------------------------------------------
@@ -432,43 +286,26 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
 
 
+    @Override
+    public void addGameListener(IGameListener listener) {
+        eventDispatcher.addListener(listener);
+    }
 
 
-    /**
-     * Audio event emitter
-      */
-    //-------------------------------------------------------------
-    private void emitAudioEvent(AudioEventType audioEventType) {
-        pendingAudioEvents.add(audioEventType);
-    }
-    public List<AudioEventType> consumeAudioEvents() {
-        if (pendingAudioEvents.isEmpty()) {
-            return List.of();
-        }
-        List<AudioEventType> snapshot = List.copyOf(pendingAudioEvents);
-        pendingAudioEvents.clear();
-        return snapshot;
-    }
+
+
     //-------------------------------------------------------------
 
 
     //save and load
 
-    public void beforeSave() {
-        if (pendingAudioEvents != null) {
-            pendingAudioEvents.clear();
-        }
-    }
 
     public void restoreTransientState(GameConfig config) {
         this.gameConfig = config;
         this.collisionChecker = new CollisionChecker(this);
-
-        if (this.pendingAudioEvents == null) {
-            this.pendingAudioEvents = new ArrayList<>();
-        } else {
-            this.pendingAudioEvents.clear();
-        }
+        this.interactionSystem = new InteractionSystem();
+        this.enemySystem = new EnemySystem();
+        this.worldObjectSystem = new WorldObjectSystem();
 
         ObjConfig objC = config.ObjConfig();
         EntityConfig entC = config.entityConfig();
@@ -508,20 +345,21 @@ public class GameModel implements Serializable, IGameModel {
 
     public void afterLoad() {
         this.collisionChecker = new CollisionChecker(this);
-
-        if (this.pendingAudioEvents == null) {
-            this.pendingAudioEvents = new ArrayList<>();
-        } else {
-            this.pendingAudioEvents.clear();
-        }
+        this.interactionSystem = new InteractionSystem();
+        this.enemySystem = new EnemySystem();
+        this.worldObjectSystem = new WorldObjectSystem();
+        this.eventDispatcher = new GameEventDispatcher();
 
         if (this.objects == null) this.objects = new ArrayList<>();
         if (this.tntEnemies == null) this.tntEnemies = new ArrayList<>();
         if (this.dynamiteEnemies == null) this.dynamiteEnemies = new ArrayList<>();
         if (this.projectiles == null) this.projectiles = new ArrayList<>();
         if (this.torchEnemies == null) this.torchEnemies = new ArrayList<>();
-        if (this.currentDialogue == null) this.currentDialogue = "";
-        if (this.currentMessage == null) this.currentMessage = "";
+        if (this.messageSystem == null) {
+            this.messageSystem = new MessageSystem();
+        } else {
+            this.messageSystem.afterLoad();
+        }
     }
 
     @Serial
@@ -540,6 +378,9 @@ public class GameModel implements Serializable, IGameModel {
 
     public int getCurrentLevel() { return currentLevel; }
     public boolean isLevelCompleted() { return levelCompleted; }
+    public GameEventDispatcher getEventDispatcher() {
+        return eventDispatcher;
+    }
 
     public List<IRenderable> getAllRenderables(){
         List<IRenderable> allRenderables = new ArrayList<>();
@@ -568,11 +409,20 @@ public class GameModel implements Serializable, IGameModel {
     public Monk getMonk() { return monk; }
     public List<EnemyTNT> getTntEnemies() { return tntEnemies; }
     public List<EnemyDynamite> getDynamiteEnemies() { return dynamiteEnemies; }
-    public String getCurrentDialogue() { return currentDialogue; }
-    public String getCurrentMessage() { return currentMessage; }
+    public String getCurrentDialogue() {
+        return messageSystem.getCurrentDialogue();
+    }
+
+    public String getCurrentMessage() {
+        return messageSystem.getCurrentMessage();
+    }
     public List<DynamiteProjectile> getProjectiles(){ return projectiles; }
     public List<EnemyTorch> getTorchEnemies() { return torchEnemies; }
     public GameConfig getGameConfig() { return gameConfig; }
+    public boolean isCurrentLevelPowerUpCollected() {
+        return currentLevelPowerUpCollected;
+    }
+
     //---------------------------------
 
     // SETTER ----------------------
@@ -586,8 +436,8 @@ public class GameModel implements Serializable, IGameModel {
     public void setCurrentLevel(int currentLevel){
         this.currentLevel = currentLevel;
     }
-    public void setCurrentMessage(String currentMessage) {
-        this.currentMessage = currentMessage;
+    public void showMessage(String message) {
+        messageSystem.showMessage(message);
     }
     public void setLevelCompleted(boolean levelCompleted) {
         this.levelCompleted = levelCompleted;
@@ -630,9 +480,7 @@ public class GameModel implements Serializable, IGameModel {
     public void returnToMenu() {
         gameState = GameState.MENU;
     }
-    public void addAudioEvent(AudioEventType event){
-        pendingAudioEvents.add(event);
-    }
+
     //---------------------------------
 
     //UI SETTERS

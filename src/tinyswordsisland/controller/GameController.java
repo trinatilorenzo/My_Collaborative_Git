@@ -6,13 +6,16 @@ import tinyswordsisland.config.enu.PlayerColor;
 import tinyswordsisland.model.GameMap;
 import tinyswordsisland.model.IGameModel;
 import tinyswordsisland.model.IRenderable;
-import tinyswordsisland.model.event.AudioEventType;
+
+import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.view.IGameView;
 import tinyswordsisland.config.enu.GameState;
+import tinyswordsisland.view.audio.AudioEffect;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,7 +24,7 @@ import java.util.List;
  * input, game loop, system ...
  */
 //-------------------------------------------------------------------------------------------------------------------
-public class GameController implements IController{
+public class GameController implements IController, IGameListener {
 
     private IGameModel model;
     private IGameView view;
@@ -33,6 +36,8 @@ public class GameController implements IController{
 
     private Enum<?> currentKeyboardSelection;
     private Enum<?> currentMouseSelection;
+
+    private boolean keyboardNavigationActive = false;
 
     /**
      * CONSTRUCTOR
@@ -46,11 +51,17 @@ public class GameController implements IController{
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
 
+        try {
+            System.out.println("Save dir: " + SaveManager.getSaveDirectoryPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         resetSelection();
     }
     //-------------------------------------------------------------
     public void setView(IGameView view) {
-        this.view = view; 
+        this.view = view;
         view.addKeyListener(keyHandler);
         view.addMouseListener(mouseHandler);
         view.addMouseMotionListener(mouseHandler);
@@ -59,7 +70,7 @@ public class GameController implements IController{
     //-------------------------------------------------------------
     private void resetSelection(){
         currentKeyboardSelection = UIConfig.MENU_DEFAULT_SELECTION;
-        currentMouseSelection    = UIConfig.MENU_DEFAULT_SELECTION;  
+        currentMouseSelection    = UIConfig.MENU_DEFAULT_SELECTION;
     };
     //-------------------------------------------------------------
 
@@ -83,44 +94,55 @@ public class GameController implements IController{
     //-------------------------------------------------------------
 
     /**
-     * Update the tinyswordsisland.model status and tinyswordsisland.view rendering
+     * Update the model status and view rendering
      * called by the game loop every frame with a fixed delta time
      */
     //------------------------------------------------------------
     public void update(double deltaMs) {
 
         InputState input = keyHandler.getInputState();
-        GameState state = model.getGameState();
 
         model.setDebugMode(input.debug());
         model.update(input, deltaMs);
 
+        GameState state = model.getGameState();
+
         if (state == GameState.PLAYING || state == GameState.WIN) {
             view.updateAnimations(deltaMs);
         }
-        if (state != GameState.PLAYING) {
 
-            if (input.menuPrevious()) {
-                currentKeyboardSelection = previousItem(state, currentKeyboardSelection);
-                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
-                view.applyMenuState(state, currentKeyboardSelection, null);
-            } else if (input.menuNext()) {
-                currentKeyboardSelection = nextItem(state, currentKeyboardSelection);
-                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
-                view.applyMenuState(state, currentKeyboardSelection, null);
-            } else if (input.menuConfirm()) {
-                model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
-                view.applyMenuState(state, currentKeyboardSelection, null);
-                performAction(state, currentKeyboardSelection);
-            } else {
-                updateMenuMouse(state);
-            } 
+        if (state != GameState.PLAYING) {
+            handelUiNavigation(state, input);
         }
 
-        syncAudio();
-
+        syncViewEvent();
     }
     //-------------------------------------------------------------
+
+    private void handelUiNavigation(GameState state, InputState input){
+        if (input.menuPrevious()) {
+            keyboardNavigationActive = true;
+            currentKeyboardSelection = previousItem(state, currentKeyboardSelection);
+            view.playAudio(AudioEffect.BUTTON_HOVER);
+            view.applyMenuState(state, currentKeyboardSelection, null);
+
+        } else if (input.menuNext()) {
+            keyboardNavigationActive = true;
+            currentKeyboardSelection = nextItem(state, currentKeyboardSelection);
+            view.playAudio(AudioEffect.BUTTON_HOVER);
+            view.applyMenuState(state, currentKeyboardSelection, null);
+
+        } else if (input.menuConfirm()) {
+            keyboardNavigationActive = true;
+            view.playAudio(AudioEffect.BUTTON_CLICKED);
+            view.applyMenuState(state, currentKeyboardSelection, null);
+            performAction(state, currentKeyboardSelection);
+
+        } else {
+            updateMenuMouse(state);
+        }
+    }
+
     private Enum<?> previousItem(GameState screen, Enum<?> current) {
         Enum<?>[] items = itemsForScreen(screen);
         if (items == null || current == null) return defaultForScreen(screen);
@@ -150,45 +172,52 @@ public class GameController implements IController{
 
     private Enum<?> defaultForScreen(GameState screen) {
         return switch (screen) {
-            case MENU      -> UIConfig.MENU_DEFAULT_SELECTION;
-            case PAUSED    -> UIConfig.PAUSE_MENU_DEFAULT_SELECTION;
-            case SETTINGS  -> UIConfig.SETTINGS_MENU_DEFAULT_SELECTION;
-            case GAME_OVER -> UIConfig.GAME_OVER_DEFAULT_SELECTION;
-            case WIN       -> UIConfig.WIN_DEFAULT_SELECTION;
+            case MENU      -> ButtonValue.MainMenu.NEW_GAME;
+            case PAUSED    -> ButtonValue.PauseMenu.RESUME;
+            case SETTINGS  -> ButtonValue.SettingsMenu.SETTINGS_ICON;
+            case GAME_OVER -> ButtonValue.GameOverMenu.HOME_OVER;
+            case WIN       -> ButtonValue.WinMenu.HOME_WIN;
             default        -> null;
         };
     }
-    
+
     //-------------------------------------------------------------
-    
+
     private void updateMenuMouse(GameState screen) {
         Point mouse = mouseHandler.getMousePosition();
         Enum<?> hovered = view.getButtonAtPoint(screen, mouse);
 
-        // update hover only if changed
-        Enum<?> previousMouse = currentMouseSelection;
-        if (hovered != previousMouse) {
+        if (hovered != currentMouseSelection) {
             currentMouseSelection = hovered;
+
             if (hovered != null) {
+                keyboardNavigationActive = false;
                 currentKeyboardSelection = hovered;
-                model.addAudioEvent(AudioEventType.BUTTON_HOVER);
+                view.playAudio(AudioEffect.BUTTON_HOVER);
             }
-        } 
-     
-        if (hovered == null) {
-            view.applyMenuState(screen, null, null);
-        } else {
-            view.applyMenuState(screen, currentKeyboardSelection, null);
         }
-        // click
+
         Point click = mouseHandler.consumeLeftClick();
-        Enum<?> clicked = view.getButtonAtPoint(screen, click);
-        if (clicked != null) {
-            currentMouseSelection = clicked;
-            currentKeyboardSelection = clicked;
-            model.addAudioEvent(AudioEventType.BUTTON_CLICKED);
-            performAction(screen, clicked);
+        if (click != null) {
+            Enum<?> clicked = view.getButtonAtPoint(screen, click);
+            if (clicked != null) {
+                keyboardNavigationActive = false;
+                currentMouseSelection = clicked;
+                currentKeyboardSelection = clicked;
+               view.playAudio(AudioEffect.BUTTON_CLICKED);
+                performAction(screen, clicked);
+                return;
+            }
         }
+
+        Enum<?> visualSelection;
+        if (keyboardNavigationActive) {
+            visualSelection = currentKeyboardSelection;
+        } else {
+            visualSelection = currentMouseSelection; // può essere null ed è giusto così
+        }
+
+        view.applyMenuState(screen, visualSelection, null);
     }
 
     private void performAction(GameState screen, Enum<?> selection) {
@@ -208,7 +237,8 @@ public class GameController implements IController{
 
         switch (selection) {
             case NEW_GAME:
-                model.initializeNewGame();
+                this.model.initializeNewGame();
+                this.model.addGameListener(this);
                 break;
 
             case LOAD_GAME:
@@ -216,7 +246,9 @@ public class GameController implements IController{
                     IGameModel loaded = SaveManager.loadLatestGame();
                     loaded.restoreTransientState(model.getGameConfig());
                     loaded.forcePlayingState();
-                    this.model = loaded;  // sostituisci il tinyswordsisland.model
+                    this.model = loaded;  // sostituisci il model
+
+                    this.model.addGameListener(this);
                     keyHandler.resetPauseToggle();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -256,7 +288,7 @@ public class GameController implements IController{
      * HELPERS METHOD — pause
      */
     //-------------------------------------------------------------
-    
+
     //-------------------------------------------------------------
     private void performPauseMenuAction(ButtonValue.PauseMenu selection) {
         if (selection == null) return;
@@ -337,7 +369,7 @@ public class GameController implements IController{
         }
     }
     //-------------------------------------------------------------
- 
+
     //-------------------------------------------------------------
     private void performWinAction(ButtonValue.WinMenu selection) {
         switch (selection) {
@@ -351,21 +383,19 @@ public class GameController implements IController{
      * Sync the audio with the game state
      */
     //-------------------------------------------------------------
-    private void syncAudio() {
+    private void syncViewEvent() {
         GameState currentState = model.getGameState();
         if (currentState != lastKnownState) {
             view.onGameStateChanged(currentState);
             lastKnownState = currentState;
-            
             resetSelection();
         }
-        view.processGameEvents(model.consumeAudioEvents());
     }
     //-------------------------------------------------------------
 
     /**
-     * Control the tinyswordsisland.view rendering
-     * called by the game loop every frame to render the tinyswordsisland.view
+     * Control the view rendering
+     * called by the game loop every frame to render the view
      */
     //-------------------------------------------------------------
     public void render() {
@@ -392,7 +422,105 @@ public class GameController implements IController{
     @Override public boolean isMusicEnabled()                  { return model.isMusicEnabled(); }
     @Override public int getResolutionValue()                  { return model.getResolutionValue(); }
     @Override public PlayerColor getPlayerColor()              { return model.getPlayerColor(); }
-    @Override public List<AudioEventType> consumeAudioEvents() { return model.consumeAudioEvents(); }
+
+
+
+    @Override
+    public void onPlayerWalkStart() {
+        System.out.println("player walk start");
+        view.playAudio(AudioEffect.PLAYER_WALK_START);
+    }
+
+    @Override
+    public void onPlayerWalkStop() {
+        view.playAudio(AudioEffect.PLAYER_WALK_STOP);
+    }
+
+    @Override
+    public void onPlayerAttackStart() {
+        view.playAudio(AudioEffect.PLAYER_ATTACK);
+    }
+
+    @Override
+    public void onPlayerAttackStop() {
+        view.playAudio(AudioEffect.PLAYER_ATTACK_STOP);
+    }
+
+    @Override
+    public void onPlayerDamaged(int currentLife, int maxLife) {
+        view.playAudio(AudioEffect.PLAYER_DAMAGED);
+        view.triggerDamageFlash();
+    }
+
+    @Override
+    public void onEnemyHit() {
+        view.playAudio(AudioEffect.ENEMY_HIT);
+    }
+
+    @Override
+    public void onEnemyDefeated() {
+        view.playAudio(AudioEffect.ENEMY_DEFEATED);
+    }
+
+    @Override
+    public void onTreeHit() {
+        view.playAudio(AudioEffect.TREE_HIT);
+    }
+
+    @Override
+    public void onTreeDestroyed() {
+        view.playAudio(AudioEffect.TREE_FINAL);
+    }
+
+    @Override
+    public void onStairsUnlocked() {
+        view.playAudio(AudioEffect.STAIRS_UNLOCKED);
+    }
+
+    @Override
+    public void onStairsLocked() {
+        view.playAudio(AudioEffect.STAIRS_LOCKED);
+    }
+
+    @Override
+    public void onTntTriggered() {
+        view.playAudio(AudioEffect.TNT_TRIGGERED);
+    }
+
+    @Override
+    public void onTntExploded() {
+        view.playAudio(AudioEffect.TNT_EXPLOSION);
+    }
+
+    @Override
+    public void onProjectileLaunched() {
+        view.playAudio(AudioEffect.PROJECTILE_LAUNCHED);
+    }
+
+    @Override
+    public void onProjectileExploded() {
+        view.playAudio(AudioEffect.PROJECTILE_EXPLODED);
+    }
+
+    @Override
+    public void onLevelUp() {
+        view.playAudio(AudioEffect.LEVEL_UP);
+    }
+
+    @Override
+    public void onPowerUpCollected() {
+        view.playAudio(AudioEffect.POWERUP_COLLECTED);
+    }
+
+    @Override
+    public void onDialogueAdvanced() {
+        view.playAudio(AudioEffect.DIALOGUE_ADVANCE);
+    }
+
+    @Override
+    public void onDialogueClosed() {
+        view.playAudio(AudioEffect.DIALOGUE_CLOSE);
+    }
 }
 
-//-------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------          case SETTINGS  -> performSettingsAction((ButtonValue.SettingsMenu) selection);

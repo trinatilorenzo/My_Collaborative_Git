@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="Collaborative_Game:jar">
+  <artifact type="jar" name="Collaborative_Game:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Collaborative_Game_jar</output-path>
     <root id="archive" name="Collaborative_Game.jar">
       <element id="module-output" name="Collaborative_Game" />

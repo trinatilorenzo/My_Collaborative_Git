@@ -1,9 +1,8 @@
-package tinyswordsisland.model.util;
+package tinyswordsisland.model.util.GameSystem;
 
 import tinyswordsisland.config.enu.*;
 import tinyswordsisland.model.GameModel;
 import tinyswordsisland.model.entity.*;
-import tinyswordsisland.model.event.AudioEventType;
 import tinyswordsisland.model.object.GameObject;
 import tinyswordsisland.model.object.OBJ_PowerUp;
 import tinyswordsisland.model.object.OBJ_Tree;
@@ -32,7 +31,7 @@ public final class InteractionSystem {
             if (!player.isAttackDamageApplied() && attackArea.intersects(tnt.getSolidWorldArea())) {
                 tnt.takeDamage();
                 player.setAttackDamageApplied(true);
-                model.addAudioEvent(AudioEventType.ENEMY_HIT);
+                model.getEventDispatcher().notifyEnemyHit();
             }
         }
 
@@ -40,9 +39,10 @@ public final class InteractionSystem {
             if (!player.isAttackDamageApplied() && attackArea.intersects(dynamite.getSolidWorldArea())) {
                 dynamite.takeDamage();
                 player.setAttackDamageApplied(true);
-                model.addAudioEvent(AudioEventType.ENEMY_HIT);
+                model.getEventDispatcher().notifyEnemyHit();
+
                 if (dynamite.getState() == DynamiteState.DEAD) {
-                    model.addAudioEvent(AudioEventType.ENEMY_DEFEATED);
+                    model.getEventDispatcher().notifyEnemyDefeated();
                 }
             }
         }
@@ -51,7 +51,7 @@ public final class InteractionSystem {
             if (!player.isAttackDamageApplied() && attackArea.intersects(torch.getSolidWorldArea())) {
                 torch.takeDamage();
                 player.setAttackDamageApplied(true);
-                model.addAudioEvent(AudioEventType.ENEMY_HIT);
+                model.getEventDispatcher().notifyEnemyHit();
             }
         }
 
@@ -65,10 +65,10 @@ public final class InteractionSystem {
 
                 player.setAttackDamageApplied(true);
                 tree.interact();
-                model.addAudioEvent(AudioEventType.TREE_HIT);
 
+                model.getEventDispatcher().notifyTreeHit();
                 if (tree.isLastHit()) {
-                    model.addAudioEvent(AudioEventType.TREE_FINAL);
+                    model.getEventDispatcher().notifyTreeDestroyed();
                 }
             }
         }
@@ -76,6 +76,7 @@ public final class InteractionSystem {
 
     private void handleObjectInteractions(GameModel model, Player player) {
         for (GameObject obj : model.getObjects()) {
+
             if (obj.getName().equals(model.getGameConfig().ObjConfig().GOLDMINE_TAG())) {
                 if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
                     if (model.getCurrentLevel() == model.getGameConfig().getMaxLevel() && model.isLevelCompleted()) {
@@ -86,17 +87,22 @@ public final class InteractionSystem {
             }
 
             if (obj instanceof OBJ_PowerUp powerUp && player.getSolidWorldArea().intersects(powerUp.getSolidWorldArea())) {
-                if (!powerUp.isCollectible()) continue;
+                if (!powerUp.isCollectible()) {
+                    continue;
+                }
 
                 player.applyPowerUpEffect(powerUp.getType());
                 powerUp.remove();
 
                 if (levelManager.isPowerUpForCurrentLevel(model, powerUp.getType())) {
                     model.setCurrentLevelPowerUpCollected(true);
+
                     if (powerUp.getType() == PowerUpType.SHIELD) {
-                        model.setCurrentMessage("Premi (R) per attivare lo scudo");
+                        model.showMessage("Premi (R) per attivare lo scudo");
                     }
                 }
+
+                model.getEventDispatcher().notifyPowerUpCollected();
             }
         }
     }

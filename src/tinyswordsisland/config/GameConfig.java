@@ -66,8 +66,8 @@ public final class GameConfig {
     //-------------------------------------------------------------
     public GameConfig(String mapFileName, String tilesetFileName) {
 
-        MAP_PATH = "res/maps/" + mapFileName;
-        TILESET_PATH = "res/tiles/" + tilesetFileName;
+        MAP_PATH = "/res/maps/" + mapFileName;
+        TILESET_PATH = "/res/tiles/" + tilesetFileName;
 
         //load the xml file as a document to fetch the data
         this.mapDoc = loadXMLDoc(MAP_PATH);
@@ -125,6 +125,8 @@ public final class GameConfig {
                 goblinHomeSpawns
         );
         this.UIConfig = new UIConfig();
+
+        maxLevel = 3;
     }//end constructor
     //-------------------------------------------------------------
 
@@ -134,7 +136,7 @@ public final class GameConfig {
      */
     //-------------------------------------------------------------
     private Document loadXMLDoc(String path) {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
+        try (InputStream is = getClass().getResourceAsStream(path)) {
             if (is == null) {
                 throw new IllegalArgumentException("Resource not found: " + path);
             }

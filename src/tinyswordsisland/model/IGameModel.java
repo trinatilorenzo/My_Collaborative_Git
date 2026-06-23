@@ -7,7 +7,7 @@ import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.config.enu.GameState;
 import tinyswordsisland.config.enu.PlayerColor;
 import tinyswordsisland.model.entity.Player;
-import tinyswordsisland.model.event.AudioEventType;
+import tinyswordsisland.model.event.IGameListener;
 
 public interface IGameModel {
 
@@ -41,10 +41,9 @@ public interface IGameModel {
     boolean isMusicEnabled();
     int getResolutionValue();
     PlayerColor getPlayerColor();
-    List<AudioEventType> consumeAudioEvents();
+    //List<GameEvent> consumeGameEvents();
 
-    // audio
-    void addAudioEvent(AudioEventType event);
+    void addGameListener(IGameListener listener);
 
     // config (for load)
     GameConfig getGameConfig();

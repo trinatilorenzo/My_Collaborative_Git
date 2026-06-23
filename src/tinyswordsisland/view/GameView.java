@@ -7,7 +7,7 @@ import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.config.enu.ButtonValue;
 import tinyswordsisland.config.enu.GameState;
 import tinyswordsisland.model.IRenderable;
-import tinyswordsisland.model.event.AudioEventType;
+import tinyswordsisland.view.audio.AudioEffect;
 import tinyswordsisland.view.ui.*;
 import tinyswordsisland.view.audio.GameAudioManager;
 import tinyswordsisland.view.renderer.map.MapRender;
@@ -292,23 +292,28 @@ public class GameView extends JPanel implements IGameView {
             }
 
             case 2 -> {
-
-                screenWidth = gd.getDisplayMode().getWidth();
-                screenHeight = gd.getDisplayMode().getHeight();
-
                 frame.setUndecorated(true);
                 frame.setResizable(false);
-
-                setPreferredSize(new Dimension(screenWidth, screenHeight));
-
                 frame.setContentPane(this);
-                frame.pack();
-                frame.setVisible(true);
 
                 if (gd.isFullScreenSupported()) {
                     gd.setFullScreenWindow(frame);
+
+                    Dimension d = frame.getContentPane().getSize();
+                    screenWidth = d.width;
+                    screenHeight = d.height;
                 } else {
-                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                    Rectangle r = gd.getDefaultConfiguration().getBounds();
+
+                    frame.setUndecorated(true);
+                    frame.setResizable(false);
+                    frame.setContentPane(this);
+                    frame.setBounds(r);
+                    frame.setVisible(true);
+
+                    Dimension d = frame.getContentPane().getSize();
+                    screenWidth = d.width;
+                    screenHeight = d.height;
                 }
             }
         }
@@ -330,18 +335,6 @@ public class GameView extends JPanel implements IGameView {
         audioManager.syncBackgroundMusic(gameState);
     }
 
-    public void processGameEvents(List<AudioEventType> events) {
-        if (events.isEmpty()) {
-            return;
-        }
-        for (AudioEventType event : events) {
-            if (event == AudioEventType.PLAYER_DAMAGED) {
-                ui_render.triggerDamageFlash();
-                break;
-            }
-        }
-        audioManager.playEvents(events);
-    }
 
     public void shutdownAudio() {
         audioManager.stopAll();
@@ -427,6 +420,16 @@ public class GameView extends JPanel implements IGameView {
      */
     private boolean contains(Rectangle bounds, Point p) {
         return bounds != null && p != null && bounds.contains(p);
+    }
+
+    @Override
+    public void playAudio(AudioEffect effectName) {
+        audioManager.playEvents(effectName);
+    }
+
+    @Override
+    public void triggerDamageFlash() {
+        ui_render.triggerDamageFlash();
     }
 
     @Override
