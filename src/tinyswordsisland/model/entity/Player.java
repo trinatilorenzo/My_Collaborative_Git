@@ -1,5 +1,6 @@
 package tinyswordsisland.model.entity;
 
+import tinyswordsisland.controller.IGameListener;
 import tinyswordsisland.controller.InputState;
 import tinyswordsisland.config.EntityConfig;
 import tinyswordsisland.model.enu.Direction;
@@ -19,7 +20,7 @@ public class Player extends Entity {
     private PlayerState state;
     private Direction facingDirection;
     private PlayerColor color;
-    private InputState input; // current input
+    private transient InputState input; // current input
 
     private boolean deathAnimationCompleted;
     private boolean attackAnimationCompleted;
@@ -322,6 +323,7 @@ public class Player extends Entity {
     public boolean isFacingRightRender() { return facingDirection == Direction.RIGHT; }
     @Override
     public boolean isShieldedRender() { return isShielded(); }
+
     @Override
     public boolean isSpeedBoostedRender() { return isSpeedBoosted(); }
     @Override

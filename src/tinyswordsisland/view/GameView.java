@@ -75,7 +75,6 @@ public class GameView extends JPanel implements IGameView {
         applyCustomCursor(UIConfig.CURSOR_PATH);
 
         //  import the tileset Asset
-        System.out.println("tileset path: " + GS.TILESET_IMG_PATH());
         this.tileSet = new TileSet(GS.TILESET_IMG_PATH(), GS.mapConfig().ORIGINAL_TILESIZE(), MapConfig.MAX_TILESET_ROW, MapConfig.MAX_TILESET_COL, GS.tilesetDoc());
 
         //import the map Render

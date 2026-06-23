@@ -197,7 +197,6 @@ public class GameMap implements Serializable {
 
         for (Point p : stairs) {
             setCollisionTile(level, p.y, p.x, false);
-            System.out.println("unlock stairs"+ level + " " + p.x + " " + p.y);
         }
     }
     //---------------------------------

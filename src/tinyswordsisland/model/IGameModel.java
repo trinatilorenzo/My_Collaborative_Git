@@ -7,7 +7,7 @@ import tinyswordsisland.config.GameConfig;
 import tinyswordsisland.model.enu.GameState;
 import tinyswordsisland.model.enu.PlayerColor;
 import tinyswordsisland.model.entity.Player;
-import tinyswordsisland.model.event.IGameListener;
+import tinyswordsisland.controller.IGameListener;
 
 public interface IGameModel {
 
@@ -57,3 +57,4 @@ public interface IGameModel {
     String getCurrentMessage();
     Player getPlayer();
 }
+

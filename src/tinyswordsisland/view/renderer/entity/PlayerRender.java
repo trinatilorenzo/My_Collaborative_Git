@@ -31,6 +31,7 @@ public class PlayerRender {
     private final List<ViewEvent> pendingViewEvents = new ArrayList<>();
 
     private boolean firstAttackHalf = true;
+    private boolean playerRender = true;
 
     /**
      * COSTRUCTOR
@@ -214,6 +215,7 @@ public class PlayerRender {
                 }
 
                 case DEAD -> animationManager.playAnimation("death");
+                case WIN -> playerRender = false;
             }
         }else {
             switch (currentState) {
@@ -263,6 +265,7 @@ public class PlayerRender {
      */
     //-------------------------------------------------------------
     public void draw(Graphics2D g2, IRenderable player, int screenX, int screenY) {
+        if (!playerRender) return;
         BufferedImage frame = animationManager.getCurrent().getCurrentFrame();
 
         int width = EntityConfig.PLAYER_RENDER_WIDTH;

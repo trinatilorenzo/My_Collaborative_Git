@@ -11,7 +11,7 @@ import tinyswordsisland.model.enu.PlayerColor;
 import tinyswordsisland.model.enu.PlayerState;
 import tinyswordsisland.model.enu.TNTState;
 import tinyswordsisland.model.event.GameEventDispatcher;
-import tinyswordsisland.model.event.IGameListener;
+import tinyswordsisland.controller.IGameListener;
 import tinyswordsisland.model.object.*;
 import tinyswordsisland.model.util.GameSettings;
 import tinyswordsisland.model.util.GameSystem.*;
@@ -68,7 +68,7 @@ public class GameModel implements Serializable, IGameModel {
 
     //UI State
     private boolean settingsMenuOpen, settingsPauseOpen;
-    private GameSettings settings;
+    private final GameSettings settings;
     //-------------------------------------------------------------
 
     // Dialogue
@@ -76,7 +76,7 @@ public class GameModel implements Serializable, IGameModel {
     //-------------------------------------------------------------
 
     // Death sequence
-    private double deadStateElapsedMs; // TODO da spostare in view ?
+    private double deadStateElapsedMs;
 
     //Audio events
     private transient List<IGameListener> listeners = new ArrayList<>();
@@ -103,6 +103,7 @@ public class GameModel implements Serializable, IGameModel {
         settings = new GameSettings();
 
         messageSystem = new MessageSystem();
+
 
     }
     //-------------------------------------------------------------
@@ -244,11 +245,11 @@ public class GameModel implements Serializable, IGameModel {
             deadStateElapsedMs = 0.0;
         }
         if (deadStateElapsedMs >= UIConfig.GAME_OVER_DELAY_MS) {
-            System.out.println("GAME OVER");
             gameState = GameState.GAME_OVER;
             deadStateElapsedMs = 0.0;
         }
     }
+
     //-------------------------------------------------------------
     private void updateState(InputState input) {
         if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) return;
@@ -279,11 +280,7 @@ public class GameModel implements Serializable, IGameModel {
             }
         }
 
-        if (!projectiles.isEmpty()) {
-            return true;
-        }
-
-        return false;
+        return !projectiles.isEmpty();
     }
     //-------------------------------------------------------------
 

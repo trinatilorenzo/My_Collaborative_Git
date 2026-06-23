@@ -1,4 +1,4 @@
-package tinyswordsisland.model.event;
+package tinyswordsisland.controller;
 
 public interface IGameListener {
     // Eventi di movimento e combattimento Player

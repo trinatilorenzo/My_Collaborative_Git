@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="72" nextobjectid="511">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="100" height="80" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#47aba9" nextlayerid="72" nextobjectid="518">
  <tileset firstgid="1" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/TILE_SET.tsx"/>
  <tileset firstgid="801" source="../../../../../../../../Volumes/My Passport/ALTRO/UNI/II_Anno/05_Interfacce_Grafiche/IDE/RISORSE GIOCO/MAP_PROJECT/tilset_obj.tsx"/>
  <layer id="45" name="wawew" width="100" height="80">
@@ -1355,27 +1355,63 @@
    </properties>
    <point/>
   </object>
-  <object id="250" name="Player" x="1983.3" y="1472.06">
+  <object id="250" name="Player" x="1984.45" y="1471.3">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
    <point/>
   </object>
-  <object id="263" name="TNT_spawnPoint" x="2844.56" y="1376.32">
+  <object id="263" name="TNT_spawnPoint" x="3083.64" y="1388.69">
    <properties>
     <property name="StartLayer" type="int" value="3"/>
    </properties>
    <point/>
   </object>
-  <object id="358" name="Dynamite_spawnPoint" x="3552.64" y="2589.45">
+  <object id="358" name="Dynamite_spawnPoint" x="964.017" y="2614.18">
    <properties>
     <property name="StartLayer" type="int" value="2"/>
    </properties>
    <point/>
   </object>
-  <object id="489" name="Torch_spawnPoint" x="3143.54" y="3766.4">
+  <object id="489" name="Torch_spawnPoint" x="1927.55" y="3741.67">
    <properties>
     <property name="StartLayer" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="511" name="Torch_spawnPoint" x="3499.59" y="3771.64">
+   <properties>
+    <property name="StartLayer" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="513" name="Dynamite_spawnPoint" x="2374.28" y="2568.01">
+   <properties>
+    <property name="StartLayer" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="514" name="Dynamite_spawnPoint" x="4402.31" y="2580.38">
+   <properties>
+    <property name="StartLayer" type="int" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="515" name="TNT_spawnPoint" x="4913.44" y="1360.26">
+   <properties>
+    <property name="StartLayer" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="516" name="TNT_spawnPoint" x="4051.94" y="1512.78">
+   <properties>
+    <property name="StartLayer" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="517" name="TNT_spawnPoint" x="5465.79" y="1450.95">
+   <properties>
+    <property name="StartLayer" type="int" value="3"/>
    </properties>
    <point/>
   </object>

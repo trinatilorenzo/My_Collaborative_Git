@@ -885,11 +885,6 @@ public class UI {
         g.drawRect(0, 0, w, h);
 
         g.dispose();
-        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000L;
-        if (controller.isDebugMode() && elapsedMs >= 4) {
-            System.out.println("[UI] damage overlay cache rebuilt in " + elapsedMs + "ms (alphaStep="
-                    + damageOverlayAlphaStep + ", " + w + "x" + h + ")");
-        }
     }
     //-------------------------------------------------------------
 

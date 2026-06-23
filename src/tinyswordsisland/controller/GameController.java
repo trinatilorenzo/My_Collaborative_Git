@@ -7,7 +7,6 @@ import tinyswordsisland.model.GameMap;
 import tinyswordsisland.model.IGameModel;
 import tinyswordsisland.model.IRenderable;
 
-import tinyswordsisland.model.event.IGameListener;
 import tinyswordsisland.view.IGameView;
 import tinyswordsisland.model.enu.GameState;
 import tinyswordsisland.view.ViewEvent;
@@ -51,12 +50,6 @@ public class GameController implements IController, IGameListener {
         this.mouseHandler = new MouseHandler();
         this.loop = new GameLoop(this);
         this.lastKnownState = model.getGameState();
-
-        try {
-            System.out.println("Save dir: " + SaveManager.getSaveDirectoryPath());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         resetSelection();
     }
@@ -313,7 +306,6 @@ public class GameController implements IController, IGameListener {
             case SAVE:
                 try {
                     SaveManager.saveGame(model);
-                    System.out.println("Partita salvata.");
                     model.returnToMenu();
                     keyHandler.resetPauseToggle();
 
@@ -338,30 +330,24 @@ public class GameController implements IController, IGameListener {
         switch (selection) {
             case SETTINGS_ICON -> {
                 model.closeSettings();
-                System.out.println("settings");
             }
             case MUSIC    -> {
                 model.toggleMusic();
-                System.out.println("music");
             }
             case SOUND    -> {
                 model.toggleSound();
-                System.out.println("sound");
             }
             case RES_FULL -> {
                 model.setMaxResolution();
                 view.setResolution();
-                System.out.println("full");
             }
             case RES_MID  -> {
                 model.setMidResolution();
                 view.setResolution();
-                System.out.println("mid");
             }
             case RES_MIN  -> {
                 model.setMinResolution();
                 view.setResolution();
-                System.out.println("small");
             }
             case QUIT ->{
                 System.exit(0);
@@ -438,7 +424,6 @@ public class GameController implements IController, IGameListener {
 
     @Override
     public void onPlayerWalkStart() {
-        System.out.println("player walk start");
         view.playAudio(AudioEffect.PLAYER_WALK_START);
     }
 

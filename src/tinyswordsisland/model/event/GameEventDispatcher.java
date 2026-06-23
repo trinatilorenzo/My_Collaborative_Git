@@ -1,5 +1,7 @@
 package tinyswordsisland.model.event;
 
+import tinyswordsisland.controller.IGameListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +33,6 @@ public class GameEventDispatcher {
         if (listeners != null) for (IGameListener l : listeners) l.onPlayerAttackStop();
     }
     public void notifyPlayerWalkStart() {
-        System.out.println("Notifica WalkStart - Numero di ascoltatori: " + (listeners != null ? listeners.size() : "NULL"));
-
         if (listeners != null) for (IGameListener l : listeners) l.onPlayerWalkStart();
     }
     public void notifyPlayerWalkStop() {

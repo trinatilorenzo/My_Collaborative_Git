@@ -1,5 +1,6 @@
 package tinyswordsisland.model.util.GameSystem;
 
+import tinyswordsisland.config.UIConfig;
 import tinyswordsisland.model.GameModel;
 import tinyswordsisland.model.entity.*;
 import tinyswordsisland.model.enu.DynamiteState;
@@ -13,6 +14,8 @@ import tinyswordsisland.model.object.OBJ_Tree;
 import java.awt.Rectangle;
 
 public final class InteractionSystem {
+
+    private long winStartTime = -1;
 
     private final LevelManager levelManager = new LevelManager();
 
@@ -83,7 +86,15 @@ public final class InteractionSystem {
             if (obj.getName().equals(model.getGameConfig().ObjConfig().GOLDMINE_TAG())) {
                 if (player.getSolidWorldArea().intersects(obj.getSolidWorldArea())) {
                     if (model.getCurrentLevel() == model.getGameConfig().getMaxLevel() && model.isLevelCompleted()) {
-                        model.setGameState(GameState.WIN);
+                        if (winStartTime == -1) {
+                            winStartTime = (System.currentTimeMillis());
+                        }
+                        player.setState(PlayerState.WIN);
+                        model.getEventDispatcher().notifyPlayerWalkStop();
+                        if (System.currentTimeMillis() - winStartTime >= UIConfig.WIN_DELAY_MS) {
+                            model.setGameState(GameState.WIN);
+
+                        }
                         return;
                     }
                 }
