@@ -14,7 +14,6 @@ import tinyswordsisland.model.util.GameSettings;
 import tinyswordsisland.model.util.GameSystem.*;
 import tinyswordsisland.model.util.GameSystem.LevelInitializer.InitializedWorld;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
@@ -161,7 +160,7 @@ public class GameModel implements Serializable, IGameModel {
 
         worldObjectSystem.update(this, deltaMs);
 
-        monk.update(player, deltaMs);
+        monk.update(deltaMs);
         messageSystem.update(this, input, deltaMs);
         interactionSystem.update(this);
 
