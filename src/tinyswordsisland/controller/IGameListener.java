@@ -27,5 +27,12 @@ public interface IGameListener {
     void onPowerUpCollected();
     void onDialogueAdvanced();
     void onDialogueClosed();
-;
+
+    void onTorchAttack();
+
+    void onTorchApproach();
+
+    void onTorchRecovery();
+
+    ;
 }

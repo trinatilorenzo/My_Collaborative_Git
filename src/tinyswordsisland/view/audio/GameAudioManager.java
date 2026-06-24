@@ -28,6 +28,10 @@ public class GameAudioManager {
     private static final String PROJECTILE_EXPLOSION= "/res/Sound/SFX/dynamite_explosion.mp3";
     private static final String BUTTON_CLICKED = "/res/Sound/SFX/button_click.mp3";
     private static final String BUTTON_HOVER = "/res/Sound/SFX/button_hover.mp3";
+    private static final String FIER_ATTACK = "/res/Sound/SFX/fier-magic.mp3";
+    private static final String ENEMY_SOUND = "/res/Sound/SFX/mob_sound.mp3";
+    private static final String ENEMY_SNORT = "/res/Sound/SFX/snort.mp3";
+
 
     private final AudioPlayer musicPlayer = new AudioPlayer();
     private final AudioPlayer movementLoopPlayer = new AudioPlayer();
@@ -81,6 +85,11 @@ public class GameAudioManager {
 
             case PROJECTILE_LAUNCHED -> nextSfxPlayer().playOnce(PROJECTILE_LAUNCHED);
             case PROJECTILE_EXPLODED -> nextSfxPlayer().playOnce(PROJECTILE_EXPLOSION);
+
+            case TORCH_RECOVERY -> nextSfxPlayer().playOnce(ENEMY_SNORT);
+            case TORCH_ATTACK -> nextSfxPlayer().playOnce(FIER_ATTACK);
+            case TORCH_APPROACH -> nextSfxPlayer().playOnce(ENEMY_SOUND);
+
         }
     }
 

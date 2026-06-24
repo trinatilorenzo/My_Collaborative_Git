@@ -99,10 +99,6 @@ public class EnemyTorch extends Entity {
                 updateRecoveryState();
                 break;
 
-            case GUARD:
-                updateGuardState();
-                break;
-
             case DEAD:
                 break;
         }
@@ -145,7 +141,7 @@ public class EnemyTorch extends Entity {
         }
 
         // TODO Temporary timer until attack animation callbacks are implemented
-        if (stateTimer >= 600) {
+        if (stateTimer >= EntityConfig.TORCH_ATTACK_DURATION) {
             completeAttackAnimation();
         }
     }
@@ -164,18 +160,6 @@ public class EnemyTorch extends Entity {
     }
     //-------------------------------------------------------------
 
-    /**
-     * Defensive state.
-     */
-    //-------------------------------------------------------------
-    private void updateGuardState() {
-
-        if (stateTimer >= EntityConfig.TORCH_GUARD_TIME) {
-            state = TorchState.APPROACH;
-            stateTimer = 0;
-        }
-    }
-    //-------------------------------------------------------------
 
     /**
      * Moves the enemy towards the player.
@@ -260,7 +244,7 @@ public class EnemyTorch extends Entity {
     //-------------------------------------------------------------
     public void takeDamage() {
 
-        if (state == TorchState.DEAD || state == TorchState.GUARD) {
+        if (state == TorchState.DEAD) {
             return;
         }
         super.takeDamage();

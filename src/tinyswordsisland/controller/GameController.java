@@ -517,6 +517,21 @@ public class GameController implements IController, IGameListener {
     public void onDialogueClosed() {
         view.playAudio(AudioEffect.DIALOGUE_CLOSE);
     }
+
+    @Override
+    public void onTorchAttack() {
+        view.playAudio(AudioEffect.TORCH_ATTACK);
+    }
+
+    @Override
+    public void onTorchApproach() {
+        view.playAudio(AudioEffect.TORCH_APPROACH);
+    }
+
+    @Override
+    public void onTorchRecovery() {
+        view.playAudio(AudioEffect.TORCH_RECOVERY);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------          case SETTINGS  -> performSettingsAction((ButtonValue.SettingsMenu) selection);

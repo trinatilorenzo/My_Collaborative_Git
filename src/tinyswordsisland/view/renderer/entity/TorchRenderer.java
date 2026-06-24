@@ -108,7 +108,7 @@ public class TorchRenderer {
 
         // Map logical AI duel states to visual animations
         switch (currentState) {
-            case GUARD, RECOVERY -> {
+            case RECOVERY -> {
                 // Uses idle frames during guard/recovery states (fatigue or blocking stance)
                 manager.playAnimation("idle");
             }

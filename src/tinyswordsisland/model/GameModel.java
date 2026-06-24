@@ -179,6 +179,7 @@ public class GameModel implements Serializable, IGameModel {
         if (player.isDying() || player.isDead()) {
             updateGameOverCountdown(deltaMs);
             updateDeathSequence(deltaMs);
+            eventDispatcher.notifyPlayerWalkStop();
             return;
         }
 

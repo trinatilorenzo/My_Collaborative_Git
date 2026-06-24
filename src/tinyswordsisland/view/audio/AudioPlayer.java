@@ -47,7 +47,6 @@ public class AudioPlayer {
     public synchronized void playOnce(String path) {
         if (path == null || path.isBlank()) return;
 
-        stopSfx();
         int session = ++sfxSession;
 
         sfxThread = new Thread(() -> play(path, false, session), "sfx-once");

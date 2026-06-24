@@ -371,25 +371,25 @@ public class GameView extends JPanel implements IGameView {
         switch (screen) {
             case MENU -> {
                 MainMenuLayout l = ui_render.getMainMenuLayout();
-                if (contains(l.newGameBounds(),     point)) return ButtonValue.MainMenu.NEW_GAME;
-                if (contains(l.continueBounds(),    point)) return ButtonValue.MainMenu.LOAD_GAME;
-                if (contains(l.settingsBounds(),    point)) return ButtonValue.MainMenu.SETTINGS;
-                if (contains(l.toggleBlueBounds(),  point)) return ButtonValue.MainMenu.TOGGLE_BLUE;
+                if (contains(l.newGameBounds(), point)) return ButtonValue.MainMenu.NEW_GAME;
+                if (contains(l.continueBounds(), point)) return ButtonValue.MainMenu.LOAD_GAME;
+                if (contains(l.settingsBounds(), point)) return ButtonValue.MainMenu.SETTINGS;
+                if (contains(l.toggleBlueBounds(),point)) return ButtonValue.MainMenu.TOGGLE_BLUE;
                 if (contains(l.toggleYellowBounds(),point)) return ButtonValue.MainMenu.TOGGLE_YELLOW;
-                if (contains(l.toggleRedBounds(),   point)) return ButtonValue.MainMenu.TOGGLE_RED;
+                if (contains(l.toggleRedBounds(), point)) return ButtonValue.MainMenu.TOGGLE_RED;
                 if (contains(l.togglePurpleBounds(),point)) return ButtonValue.MainMenu.TOGGLE_PURPLE;
             }
             case PAUSED -> {
                 PauseMenuLayout l = ui_render.getPauseMenuLayout();
-                if (contains(l.resumeBounds(),   point)) return ButtonValue.PauseMenu.RESUME;
+                if (contains(l.resumeBounds(), point)) return ButtonValue.PauseMenu.RESUME;
                 if (contains(l.settingsBounds(), point)) return ButtonValue.PauseMenu.PAUSE_SETTINGS;
-                if (contains(l.saveBounds(),     point)) return ButtonValue.PauseMenu.SAVE;
+                if (contains(l.saveBounds(), point)) return ButtonValue.PauseMenu.SAVE;
             }
             case SETTINGS -> {
                 SettingsLayout l = ui_render.getSettingsLayout();
                 if (contains(l.settingsIconBounds(), point)) return ButtonValue.SettingsMenu.SETTINGS_ICON;
-                if (contains(l.musicBounds(),        point)) return ButtonValue.SettingsMenu.MUSIC;
-                if (contains(l.soundBounds(),        point)) return ButtonValue.SettingsMenu.SOUND;
+                if (contains(l.musicBounds(), point)) return ButtonValue.SettingsMenu.MUSIC;
+                if (contains(l.soundBounds(), point)) return ButtonValue.SettingsMenu.SOUND;
                 if (contains(l.resFullBounds(),      point)) return ButtonValue.SettingsMenu.RES_FULL;
                 if (contains(l.resHalfBounds(),      point)) return ButtonValue.SettingsMenu.RES_MID;
                 if (contains(l.resMinBounds(),       point)) return ButtonValue.SettingsMenu.RES_MIN;

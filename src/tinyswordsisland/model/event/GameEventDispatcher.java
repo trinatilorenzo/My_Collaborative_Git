@@ -1,6 +1,7 @@
 package tinyswordsisland.model.event;
 
 import tinyswordsisland.controller.IGameListener;
+import tinyswordsisland.model.enu.TorchState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,16 @@ public class GameEventDispatcher {
     }
     public void notifyDialogueClosed() {
         if (listeners != null) for (IGameListener l : listeners) l.onDialogueClosed();
+    }
+
+    public void notifyTorchAttack() {
+        if (listeners != null) for (IGameListener l : listeners) l.onTorchAttack();
+    }
+    public void notifyTorchApproach() {
+        if (listeners != null) for (IGameListener l : listeners) l.onTorchApproach();
+    }
+    public void notifyTorchRecovery() {
+        if (listeners != null) for (IGameListener l : listeners) l.onTorchRecovery();
     }
 
 

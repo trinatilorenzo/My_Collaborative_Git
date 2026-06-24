@@ -25,7 +25,7 @@ public record ObjConfig(String TREE_TAG_03,
     //-------------------------------------------------------------
     public static final Boolean TREE_SOLID = true;
 
-    public static final int TREE_HEALTH = 1;
+    public static final int TREE_HEALTH = 2;
     public static final double TREE_IDLE_FRAME_MS = 100.0;
     public static final double CHOP_ANIMATION_DURATION_MS = 500;
     //-------------------------------------------------------------

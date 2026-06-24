@@ -42,7 +42,7 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int PLAYER_HITBOX_HEIGHT = 35 * PLAYER_SCALE;
         public static final int PLAYER_OFFSET_HEIGHT = 15;
 
-        public static final double SHIELD_DURATION_MS = 20000.0; // 20 seconds
+        public static final double SHIELD_DURATION_MS = 25000.0; // 20 seconds
         public static final int SPEED_BOOST_AMOUNT = 128; 
         public static final double VISUAL_EFFECT_DURATION_MS = 3000.0; // 3 seconds
 
@@ -51,9 +51,7 @@ public record EntityConfig(ScreenConfig screenConfig,
         public int START_WORLD_Y(){return playerSpawnPoint().y();}
         public int START_WORLD_LAYER(){return playerSpawnPoint().layer();}
 
-        //TODO vedere
-        //public int SCREEN_POSX(){ return screenConfig.SCREEN_WIDTH() / 2;}
-        //public int SCREEN_POSY(){ return screenConfig.SCREEN_HEIGHT() / 2;}
+
         //-------------------------------------------------------------
 
         //NPCConfig
@@ -74,7 +72,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
         public static final double  MONK_DISAPPEAR_DURATION_MS = 1650.0;
         public static final int MONK_ACTIVATION_RADIUS = 160;
-        public static final double MONK_RESPAWN_DURATION_MS = 10000.0;
+
 
         //-------------------------------------------------------------
         //TNTConfig
@@ -101,11 +99,11 @@ public record EntityConfig(ScreenConfig screenConfig,
         //EnemyDynamiteConfig
         public static final DynamiteState DYNAMITE_DEFAULT_STATE = DynamiteState.WANDER;
         public static final int START_DYNAMITE_SPEED = 128; // pixels per second
-        public static final int DYNAMITE_MAX_LIFE = 3;
+        public static final int DYNAMITE_MAX_LIFE = 5;
 
         public static final int DYNAMITE_DETECTION_RADIUS = 400;
         public static final int DYNAMITE_ATTACKING_RADIUS = 150;
-        public static final int DYNAMITE_ATTACK_INTERVAL = 500; // time between attacks
+        public static final int DYNAMITE_ATTACK_INTERVAL = 800; // time between attacks
         public static final double DYNAMITE_MOVEINTERVAL = 1000; // Change random direction every 1 second
 
         public static final int DYNAMITE_SPRITE_WIDTH = 192;
@@ -130,7 +128,7 @@ public record EntityConfig(ScreenConfig screenConfig,
 
 
         // Enemy Torch Config
-        public static final int TORCH_MAX_LIFE = 6;
+        public static final int TORCH_MAX_LIFE = 10;
         public static final int TORCH_START_SPEED = 128;      // px/s
         public static final double TORCH_SCALE = 1.5;       
         public static final int TORCH_HITBOX_WIDTH = (int) (45 * TORCH_SCALE);       
@@ -138,10 +136,10 @@ public record EntityConfig(ScreenConfig screenConfig,
         public static final int TORCH_SPRITE_WIDTH = 192;      
         public static final int TORCH_SPRITE_HEIGHT = 192;
         public static final int TORCH_FOR_SPAWNPOINT = 1;
-        public static final int TORCH_RECOVERY_TIME = 3000;
-        public static final int TORCH_GUARD_TIME = 1500;
-        public static final int TORCH_APPROACH_TIME = 1500;
-        public static final int TORCH_COOLDOWN_TIME = 1500;
+
+        public static final int TORCH_ATTACK_DURATION = 400;
+        public static final int TORCH_APPROACH_TIME = 500;
+        public static final int TORCH_COOLDOWN_TIME = 2000;
         public static final int FIRE_SPRITE_WIDTH = 128;
         public static final int FIRE_SPRITE_HEIGHT = 128;
         public ArrayList<SpawnPoint> TORCH_SPAWNPOINT() {return TorchSpawnPoint;}

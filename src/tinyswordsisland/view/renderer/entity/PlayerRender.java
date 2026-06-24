@@ -181,7 +181,10 @@ public class PlayerRender {
         if (!player.isShieldedRender()) {
             switch (currentState) {
 
-                case IDLE -> animationManager.playAnimation("idle");
+                case IDLE ->{
+                    playerRender = true;
+                    animationManager.playAnimation("idle");
+                }
                 case WALKING -> animationManager.playAnimation("walk");
                 case ATTACKING -> {
                     Direction direction = Direction.values()[player.getRenderDirection()];

@@ -79,14 +79,28 @@ public final class EnemySystem {
 
     private void updateTorch(GameModel model, double deltaMs) {
         for (EnemyTorch torch : model.getTorchEnemies()) {
-            if (torch.getState() != TorchState.DEAD) {
+            TorchState previousState = torch.getState();
+
+            if (torch.getState() != TorchState.DEAD && model.getCurrentLevel()>=2) {
                 torch.update(deltaMs);
                 model.getCollisionChecker().checkEntity(torch, model.getPlayer());
                 model.getCollisionChecker().checkEntity(model.getPlayer(), torch);
                 model.getCollisionChecker().checkTile(torch);
-                model.getCollisionChecker().checkObjects(torch);
+                //model.getCollisionChecker().checkObjects(torch);
                 torch.move();
+
+                if (previousState != TorchState.ATTACK_COMBO && torch.getState() == TorchState.ATTACK_COMBO) {
+                    model.getEventDispatcher().notifyTorchAttack();
+                }
+                if (previousState != TorchState.APPROACH && torch.getState() == TorchState.APPROACH){
+                    model.getEventDispatcher().notifyTorchApproach();
+                }
+                if (previousState != TorchState.RECOVERY && torch.getState() == TorchState.RECOVERY){
+                    model.getEventDispatcher().notifyTorchRecovery();
+                }
+
             }
+
         }
 
         model.getTorchEnemies().removeIf(EnemyTorch::isDead);

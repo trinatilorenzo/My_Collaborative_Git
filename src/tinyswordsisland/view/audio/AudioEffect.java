@@ -30,4 +30,8 @@ public enum AudioEffect {
     PROJECTILE_LAUNCHED,
     PROJECTILE_EXPLODED,
 
+    TORCH_ATTACK,
+    TORCH_APPROACH,
+    TORCH_RECOVERY,
+
 }
