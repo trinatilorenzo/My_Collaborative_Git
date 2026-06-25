@@ -87,6 +87,7 @@ public class GameController implements IController, IGameListener {
     }
     //-------------------------------------------------------------
 
+
     /**
      * Update the model status and view rendering
      * called by the game loop every frame with a fixed delta time
@@ -123,6 +124,7 @@ public class GameController implements IController, IGameListener {
     }
     //-------------------------------------------------------------
 
+    //-------------------------------------------------------------
     private void handelUiNavigation(GameState state, InputState input){
         if (input.menuPrevious()) {
             keyboardNavigationActive = true;
@@ -146,7 +148,7 @@ public class GameController implements IController, IGameListener {
             updateMenuMouse(state);
         }
     }
-
+    //-------------------------------------------------------------
     private Enum<?> previousItem(GameState screen, Enum<?> current) {
         Enum<?>[] items = itemsForScreen(screen);
         if (items == null || current == null) return defaultForScreen(screen);
@@ -154,7 +156,7 @@ public class GameController implements IController, IGameListener {
             if (items[i] == current) return items[(i - 1 + items.length) % items.length];
         return defaultForScreen(screen);
     }
-
+    //-------------------------------------------------------------
     private Enum<?> nextItem(GameState screen, Enum<?> current) {
         Enum<?>[] items = itemsForScreen(screen);
         if (items == null || current == null) return defaultForScreen(screen);
@@ -162,7 +164,7 @@ public class GameController implements IController, IGameListener {
             if (items[i] == current) return items[(i + 1) % items.length];
         return defaultForScreen(screen);
     }
-
+    //-------------------------------------------------------------
     private Enum<?>[] itemsForScreen(GameState screen) {
         return switch (screen) {
             case MENU      -> ButtonValue.MainMenu.values();
@@ -173,7 +175,7 @@ public class GameController implements IController, IGameListener {
             default        -> null;
         };
     }
-
+    //-------------------------------------------------------------
     private Enum<?> defaultForScreen(GameState screen) {
         return switch (screen) {
             case MENU      -> ButtonValue.MainMenu.NEW_GAME;
@@ -184,9 +186,7 @@ public class GameController implements IController, IGameListener {
             default        -> null;
         };
     }
-
     //-------------------------------------------------------------
-
     private void updateMenuMouse(GameState screen) {
         Point mouse = mouseHandler.getMousePosition();
         Enum<?> hovered = view.getButtonAtPoint(screen, mouse);
@@ -223,7 +223,8 @@ public class GameController implements IController, IGameListener {
 
         view.applyMenuState(screen, visualSelection, null);
     }
-
+    //-------------------------------------------------------------
+    //-------------------------------------------------------------
     private void performAction(GameState screen, Enum<?> selection) {
         if (selection == null) return;
         switch (screen) {
@@ -234,6 +235,7 @@ public class GameController implements IController, IGameListener {
             case WIN       -> performWinAction((ButtonValue.WinMenu) selection);
         }
     }
+    //-------------------------------------------------------------
 
     //-------------------------------------------------------------
     private void performMainMenuAction(ButtonValue.MainMenu selection) {
@@ -284,16 +286,6 @@ public class GameController implements IController, IGameListener {
         }
     }
     //-------------------------------------------------------------
-    //end helpers -------------------------------------------------------------
-
-
-    //-------------------------------------------------------------
-    /**
-     * HELPERS METHOD — pause
-     */
-    //-------------------------------------------------------------
-
-    //-------------------------------------------------------------
     private void performPauseMenuAction(ButtonValue.PauseMenu selection) {
         if (selection == null) return;
 
@@ -321,9 +313,6 @@ public class GameController implements IController, IGameListener {
                 break;
         }
     }
-    //-------------------------------------------------------------
-    //end helpers -------------------------------------------------------------
-
     //-------------------------------------------------------------
     private void performSettingsAction(ButtonValue.SettingsMenu selection) {
 
@@ -355,9 +344,6 @@ public class GameController implements IController, IGameListener {
         }
     }
     //-------------------------------------------------------------
-    // end helpers -----------------------------------------------------
-
-
     //-------------------------------------------------------------
     private void performGameOverAction(ButtonValue.GameOverMenu selection) {
         switch (selection) {
@@ -365,8 +351,6 @@ public class GameController implements IController, IGameListener {
             case QUIT_OVER    -> System.exit(1);
         }
     }
-    //-------------------------------------------------------------
-
     //-------------------------------------------------------------
     private void performWinAction(ButtonValue.WinMenu selection) {
         switch (selection) {
@@ -377,7 +361,7 @@ public class GameController implements IController, IGameListener {
     //-------------------------------------------------------------
 
     /**
-     * Sync the audio with the game state
+     * Sync the game state
      */
     //-------------------------------------------------------------
     private void syncViewEvent() {
@@ -420,114 +404,91 @@ public class GameController implements IController, IGameListener {
     @Override public int getResolutionValue()                  { return model.getResolutionValue(); }
     @Override public PlayerColor getPlayerColor()              { return model.getPlayerColor(); }
 
-
-
     @Override
     public void onPlayerWalkStart() {
         view.playAudio(AudioEffect.PLAYER_WALK_START);
     }
-
     @Override
     public void onPlayerWalkStop() {
         view.playAudio(AudioEffect.PLAYER_WALK_STOP);
     }
-
     @Override
     public void onPlayerAttackStart() {
         view.playAudio(AudioEffect.PLAYER_ATTACK);
     }
-
     @Override
     public void onPlayerAttackStop() {
         view.playAudio(AudioEffect.PLAYER_ATTACK_STOP);
     }
-
     @Override
     public void onPlayerDamaged(int currentLife, int maxLife) {
         view.playAudio(AudioEffect.PLAYER_DAMAGED);
         view.triggerDamageFlash();
     }
-
     @Override
     public void onEnemyHit() {
         view.playAudio(AudioEffect.ENEMY_HIT);
     }
-
     @Override
     public void onEnemyDefeated() {
         view.playAudio(AudioEffect.ENEMY_DEFEATED);
     }
-
     @Override
     public void onTreeHit() {
         view.playAudio(AudioEffect.TREE_HIT);
     }
-
     @Override
     public void onTreeDestroyed() {
         view.playAudio(AudioEffect.TREE_FINAL);
     }
-
     @Override
     public void onStairsUnlocked() {
         view.playAudio(AudioEffect.STAIRS_UNLOCKED);
     }
-
     @Override
     public void onStairsLocked() {
         view.playAudio(AudioEffect.STAIRS_LOCKED);
     }
-
     @Override
     public void onTntTriggered() {
         view.playAudio(AudioEffect.TNT_TRIGGERED);
     }
-
     @Override
     public void onTntExploded() {
         view.playAudio(AudioEffect.TNT_EXPLOSION);
     }
-
     @Override
     public void onProjectileLaunched() {
         view.playAudio(AudioEffect.PROJECTILE_LAUNCHED);
     }
-
     @Override
     public void onProjectileExploded() {
         view.playAudio(AudioEffect.PROJECTILE_EXPLODED);
     }
-
     @Override
     public void onLevelUp() {
         view.playAudio(AudioEffect.LEVEL_UP);
     }
-
     @Override
     public void onPowerUpCollected() {
         view.playAudio(AudioEffect.POWERUP_COLLECTED);
     }
-
     @Override
     public void onDialogueAdvanced() {
         view.playAudio(AudioEffect.DIALOGUE_ADVANCE);
     }
-
     @Override
     public void onDialogueClosed() {
         view.playAudio(AudioEffect.DIALOGUE_CLOSE);
     }
-
     @Override
     public void onTorchAttack() {
         view.playAudio(AudioEffect.TORCH_ATTACK);
     }
-
     @Override
     public void onTorchApproach() {
         view.playAudio(AudioEffect.TORCH_APPROACH);
     }
-
     @Override
     public void onTorchRecovery() {
         view.playAudio(AudioEffect.TORCH_RECOVERY);

@@ -77,13 +77,10 @@ public class GameModel implements Serializable, IGameModel {
 
     // Death sequence
     private double deadStateElapsedMs;
-
-    //Audio events
-    private transient List<IGameListener> listeners = new ArrayList<>();
-
-
-
     //-------------------------------------------------------------
+
+
+
     /**
      * CONSTRUCTOR
      */
@@ -250,7 +247,6 @@ public class GameModel implements Serializable, IGameModel {
             deadStateElapsedMs = 0.0;
         }
     }
-
     //-------------------------------------------------------------
     private void updateState(InputState input) {
         if (gameState == GameState.GAME_OVER || gameState == GameState.WIN) return;
@@ -302,16 +298,16 @@ public class GameModel implements Serializable, IGameModel {
             player.completeDeathAnimation();
         }
     }
-
-
-
-
+    public void forcePlayingState() {
+        this.gameState = GameState.PLAYING;
+        this.settingsPauseOpen = false;
+        this.settingsMenuOpen = false;
+    }
     //-------------------------------------------------------------
 
 
     //save and load
-
-
+    //-------------------------------------------------------------
     public void restoreTransientState(GameConfig config) {
         this.gameConfig = config;
         this.collisionChecker = new CollisionChecker(this);
@@ -354,7 +350,6 @@ public class GameModel implements Serializable, IGameModel {
             this.worldGameMap.mConf(config.mapConfig());
         }
     }
-
     public void afterLoad() {
         this.collisionChecker = new CollisionChecker(this);
         this.interactionSystem = new InteractionSystem();
@@ -373,19 +368,11 @@ public class GameModel implements Serializable, IGameModel {
             this.messageSystem.afterLoad();
         }
     }
-
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         afterLoad();
     }
-
-    public void forcePlayingState() {
-        this.gameState = GameState.PLAYING;
-        this.settingsPauseOpen = false;
-        this.settingsMenuOpen = false;
-    }
-
     // GETTER ----------------------
 
     public int getCurrentLevel() { return currentLevel; }
@@ -424,7 +411,6 @@ public class GameModel implements Serializable, IGameModel {
     public String getCurrentDialogue() {
         return messageSystem.getCurrentDialogue();
     }
-
     public String getCurrentMessage() {
         return messageSystem.getCurrentMessage();
     }
@@ -434,7 +420,6 @@ public class GameModel implements Serializable, IGameModel {
     public boolean isCurrentLevelPowerUpCollected() {
         return currentLevelPowerUpCollected;
     }
-
     //---------------------------------
 
     // SETTER ----------------------
